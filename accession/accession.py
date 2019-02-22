@@ -56,16 +56,6 @@ class Accession(object):
             json_obj = json.load(json_file)
         return json_obj
 
-    def file_to_json(self, file):
-        with open(file) as json_file:
-            json_obj = json.load(json_file)
-        return json_obj
-
-    def file_to_json(self, file):
-        with open(file) as json_file:
-            json_obj = json.load(json_file)
-        return json_obj
-
     def accession_fastqs(self):
         pass
 
