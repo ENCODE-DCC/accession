@@ -5,10 +5,7 @@ import pdb
 myPath = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, myPath + '/../')
 import json
-from encode_utils.connection import Connection
-from accession.backends import GCBackend
-from accession.accession import Accession, COMMON_METADATA
-from accession.analysis import Analysis
+from accession.accession import Accession
 from accession.helpers import write_json
 
 
@@ -57,11 +54,3 @@ def gcbackend(accession):
 def dcc_server(accession):
     conn = accession.conn
     return conn
-
-
-def test_dcc_server(dcc_server):
-    assert dcc_server.dcc_host == 'test.encodedcc.org'
-
-
-def test_gcbackend(gcbackend):
-    assert gcbackend.bucket
