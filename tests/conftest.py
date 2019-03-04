@@ -1,11 +1,11 @@
 import pytest
 import sys
 import os
-import pdb
 myPath = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, myPath + '/../')
 import json
 from accession.accession import Accession
+from accession.analysis import Analysis
 from accession.helpers import write_json
 
 
@@ -54,3 +54,11 @@ def gcbackend(accession):
 def dcc_server(accession):
     conn = accession.conn
     return conn
+
+
+@pytest.fixture
+def empty_analysis(metadata_json):
+    accession_metadata = write_json(metadata_json)
+    analysis = Analysis(accession_metadata,
+                        auto_populate=False)
+    return analysis

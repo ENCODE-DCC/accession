@@ -8,16 +8,18 @@ from accession.task import Task
 
 class Analysis(object):
     """docstring for Analysis"""
-    def __init__(self, metadata_json):
+    def __init__(self, metadata_json, auto_populate=True):
         self.files = []
+        self.tasks = []
         with open(metadata_json) as json_file:
             self.metadata = json.load(json_file)
         if self.metadata:
             bucket = self.metadata['workflowRoot'].split('gs://')[1].split('/')[0]
             self.backend = GCBackend(bucket)
-            self.tasks = self.make_tasks()
         else:
             raise Exception('Valid metadata json output must be supplied')
+        if auto_populate:
+            self.tasks = self.make_tasks()
 
     # Makes instances of Task
     def make_tasks(self):
