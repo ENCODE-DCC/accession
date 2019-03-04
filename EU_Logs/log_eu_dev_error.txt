@@ -1,4 +1,0 @@
-2019-03-03 16:28:55,596:eu_error:	Connecting to test.encodedcc.org
-2019-03-03 16:33:33,765:eu_error:	Connecting to test.encodedcc.org
-2019-03-03 16:35:34,607:eu_error:	Connecting to test.encodedcc.org
-2019-03-03 16:48:36,936:eu_error:	Connecting to test.encodedcc.org
