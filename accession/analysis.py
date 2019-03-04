@@ -2,7 +2,7 @@ import json
 import operator
 from functools import reduce
 from accession.backends import GCBackend
-from accession.file import File
+from accession.file import GSFile
 from accession.task import Task
 
 

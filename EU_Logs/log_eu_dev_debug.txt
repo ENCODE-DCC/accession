@@ -1,0 +1,9 @@
+2019-03-03 16:28:55,596:eu_debug:	Connecting to test.encodedcc.org
+2019-03-03 16:28:55,597:eu_debug:	submission=False: In non-submission mode.
+2019-03-03 16:33:33,764:eu_debug:	Connecting to test.encodedcc.org
+2019-03-03 16:33:33,766:eu_debug:	submission=False: In non-submission mode.
+2019-03-03 16:35:34,607:eu_debug:	Connecting to test.encodedcc.org
+2019-03-03 16:35:34,608:eu_debug:	submission=False: In non-submission mode.
+2019-03-03 16:36:17,606:eu_debug:	Searching DCC with query https://test.encodedcc.org/search/?limit=all.
+2019-03-03 16:48:36,936:eu_debug:	Connecting to test.encodedcc.org
+2019-03-03 16:48:36,936:eu_debug:	submission=False: In non-submission mode.

@@ -1,3 +1,5 @@
+import tempfile
+import json
 from accession.backends import GCBackend
 
 
@@ -14,3 +16,12 @@ def filter_outputs_by_path(path):
 
     for file in filtered:
         file.download_to_filename(file.public_url.split('/')[-1])
+
+
+# Python equivalent of WDL's write_json
+# for testing purposes
+def write_json(json_data):
+    temp_file = tempfile.NamedTemporaryFile(delete=False)
+    with open(temp_file.name, 'a') as file:
+        json.dump(json_data, file)
+    return temp_file.name

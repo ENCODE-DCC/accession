@@ -44,7 +44,7 @@ if __name__ == '__main__':
                         help='path to an accessioning steps, json file')
     parser.add_argument('--server',
                         default='dev',
-                        help='Server files will be accessioned to')
+                        help='Server the files will be accessioned to')
     parser.add_argument('--lab',
                         type=str,
                         default=None,

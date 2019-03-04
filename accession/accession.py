@@ -5,6 +5,7 @@ import requests
 from base64 import b64encode
 from encode_utils.connection import Connection
 from requests.exceptions import HTTPError
+from accession.analysis import Analysis
 
 
 COMMON_METADATA = {
