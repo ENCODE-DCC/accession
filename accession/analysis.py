@@ -123,31 +123,51 @@ class Analysis(object):
                 fastqs.append(file)
         return fastqs
 
+    def search_up(self, start_task, task_name, filekey, inputs=False):
+        return list(set(list(self._search_up(start_task,
+                                             task_name,
+                                             filekey,
+                                             inputs))))
+
+    def search_down(self, start_task, task_name, filekey):
+        return list(set(list(self._search_down(start_task,
+                                               task_name,
+                                               filekey))))
+
     # Search the Analysis hirearchy up for a file matching filekey
     # Returns generator object, access with next() or list()
-    def search_up(self, task, task_name, filekey, inputs=False):
-        if task_name == task.task_name:
+    # task parameter specifies the starting point
+    # task_name is target task in which filekey exists
+    def _search_up(self, start_task, task_name, filekey, inputs=False):
+        if task_name == start_task.task_name:
             if inputs:
-                for file in task.input_files:
+                for file in start_task.input_files:
                     if filekey in file.filekeys:
                         yield file
             else:
-                for file in task.output_files:
+                for file in start_task.output_files:
                     if filekey in file.filekeys:
                         yield file
-        for task_item in set(map(lambda x: x.task, task.input_files)):
+        for task_item in set(map(lambda x: x.task, start_task.input_files)):
             if task_item:
-                yield from self.search_up(task_item, task_name, filekey, inputs)
+                yield from self._search_up(task_item,
+                                           task_name,
+                                           filekey,
+                                           inputs)
 
     # Search the Analysis hirearchy down for a file matching filekey
     # Returns generator object, access with next()
-    def search_down(self, task, task_name, filekey):
-        if task_name == task.task_name:
-            for file in task.output_files:
+    # task parameter specifies the starting point
+    # task_name is target task in which filekey exists
+    def _search_down(self, start_task, task_name, filekey):
+        if task_name == start_task.task_name:
+            for file in start_task.output_files:
                 if filekey in file.filekeys:
                     yield file
         for task_item in set(reduce(operator.concat,
                                     map(lambda x: x.used_by_tasks,
-                                        task.output_files))):
+                                        start_task.output_files))):
             if task_item:
-                yield from self.search_down(task_item, task_name, filekey)
+                yield from self._search_down(task_item,
+                                             task_name,
+                                             filekey)
