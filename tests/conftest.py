@@ -1,13 +1,10 @@
 import pytest
 import sys
 import os
-import pdb
 myPath = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, myPath + '/../')
 import json
-from encode_utils.connection import Connection
-from accession.backends import GCBackend
-from accession.accession import Accession, COMMON_METADATA
+from accession.accession import Accession
 from accession.analysis import Analysis
 from accession.helpers import write_json
 
@@ -59,9 +56,9 @@ def dcc_server(accession):
     return conn
 
 
-def test_dcc_server(dcc_server):
-    assert dcc_server.dcc_host == 'test.encodedcc.org'
-
-
-def test_gcbackend(gcbackend):
-    assert gcbackend.bucket
+@pytest.fixture
+def empty_analysis(metadata_json):
+    accession_metadata = write_json(metadata_json)
+    analysis = Analysis(accession_metadata,
+                        auto_populate=False)
+    return analysis

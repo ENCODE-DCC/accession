@@ -42,7 +42,8 @@ class Accession(object):
         COMMON_METADATA['award'] = award
 
     def get_current_user(self):
-        response = requests.get(self.conn.dcc_url + '/session-properties',
+        path = '/session-properties' + '?format=json'
+        response = requests.get(self.conn.dcc_url + path,
                                 auth=self.conn.auth)
         if response.ok:
             user = response.json().get('user')
@@ -186,11 +187,12 @@ class Accession(object):
                 yield from self.flatten(item)
 
     # Returns list of accession ids of files on portal or recently accessioned
-    def get_derived_from(self, file, task_name, filekey, output_type=None, inputs=False):
-        derived_from_files = list(set(list(self.analysis.search_up(file.task,
-                                                                   task_name,
-                                                                   filekey,
-                                                                   inputs))))
+    def get_derived_from(self, file, task_name, filekey,
+                         output_type=None, inputs=False):
+        derived_from_files = self.analysis.search_up(file.task,
+                                                     task_name,
+                                                     filekey,
+                                                     inputs)
         encode_files = [self.file_at_portal(gs_file.filename)
                         for gs_file
                         in derived_from_files]
@@ -259,9 +261,9 @@ class Accession(object):
         qc_object['N1'] = idr_peaks
         idr_cutoff = self.analysis.metadata['inputs']['atac.idr_thresh']
         # Strongly expects that plot exists
-        plot_png = next(self.analysis.search_up(gs_file.task,
-                                                'idr_pr',
-                                                'idr_plot'))
+        plot_png = self.analysis.search_up(gs_file.task,
+                                           'idr_pr',
+                                           'idr_plot')[0]
         qc_object.update({
             'step_run':                             step_run_id,
             'quality_metric_of':                    [encode_file.get('@id')],
@@ -307,12 +309,12 @@ class Accession(object):
             return
 
         qc = self.backend.read_json(self.analysis.get_files('qc_json')[0])
-        plot_pdf = next(self.analysis.search_down(gs_file.task,
-                                                  'xcor',
-                                                  'plot_pdf'))
-        read_length_file = next(self.analysis.search_up(gs_file.task,
-                                                        'bowtie2',
-                                                        'read_len_log'))
+        plot_pdf = self.analysis.search_down(gs_file.task,
+                                             'xcor',
+                                             'plot_pdf')[0]
+        read_length_file = self.analysis.search_up(gs_file.task,
+                                                   'bowtie2',
+                                                   'read_len_log')[0]
         read_length = int(self.backend.read_file(read_length_file.filename).decode())
         replicate = self.get_bio_replicate(encode_bam_file)
         xcor_qc = qc['xcor_score']['rep' + replicate]
