@@ -124,15 +124,15 @@ class Analysis(object):
         return fastqs
 
     def search_up(self, start_task, task_name, filekey, inputs=False):
-        return list(set(list(self._search_up(start_task,
-                                             task_name,
-                                             filekey,
-                                             inputs))))
+        return list(set(self._search_up(start_task,
+                                        task_name,
+                                        filekey,
+                                        inputs)))
 
     def search_down(self, start_task, task_name, filekey):
-        return list(set(list(self._search_down(start_task,
-                                               task_name,
-                                               filekey))))
+        return list(set(self._search_down(start_task,
+                                          task_name,
+                                          filekey)))
 
     # Search the Analysis hirearchy up for a file matching filekey
     # Returns generator object, access with next() or list()
