@@ -33,7 +33,7 @@ def test_dataset(accession):
     assert accession.dataset.get('title')
 
 
-def test_derived_from(accession, input_json):
+def test_get_derived_from(accession, input_json):
     bowtie_step = accession.steps_and_params_json[0]
     analysis = accession.analysis
     task = analysis.get_tasks(bowtie_step['wdl_task_name'])[0]
@@ -52,3 +52,14 @@ def test_derived_from(accession, input_json):
     assert len(ancestor_accessions) == 2
     assert len(accession_ids) == len(ancestor_accessions)
     assert set(accession_ids) == set(ancestor_accessions)
+
+
+def test_get_derived_from_all(accession, input_json):
+    macs2_step = accession.steps_and_params_json[2]
+    derived_from_files = macs2_step['wdl_files'][0]['derived_from_files']
+    # Incomplete, a file needs to have accessioned ancestors
+
+
+
+
+
