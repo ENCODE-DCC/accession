@@ -9,8 +9,8 @@ from accession.analysis import Analysis
 
 
 COMMON_METADATA = {
-    'lab': '/labs/encode-processing-pipeline/',
-    'award': 'U41HG007000'
+    'lab': '',
+    'award': ''
 }
 
 QC_MAP = {
@@ -119,7 +119,6 @@ class Accession(object):
                    'status': 'released',
                    'analysis_step_version': step_version}
         payload[Connection.PROFILE_KEY] = 'analysis_step_runs'
-        print(payload)
         return self.conn.post(payload)
 
     @property
