@@ -34,6 +34,7 @@ class Accession(object):
         self.backend = self.analysis.backend
         self.conn = Connection(server)
         self.new_files = []
+        self.new_qcs = []
         self.current_user = self.get_current_user()
 
     def set_lab_award(self, lab, award):
@@ -167,7 +168,7 @@ class Accession(object):
         obj.update(COMMON_METADATA)
         return obj
 
-    def get_derived_from_all(self, file, files, inputs=False):
+    def get_derived_from_all(self, file, files):
         ancestors = []
         for ancestor in files:
             ancestors.append(
@@ -218,13 +219,10 @@ class Accession(object):
                 for accession_id in derived_from_accession_ids]
 
     # File object to be accessioned
-    # inputs=True will search for input fastqs in derived_from
-
     def make_file_obj(self, file, file_format, output_type, step_run,
-                      derived_from_files, file_format_type=None, inputs=False):
+                      derived_from_files, file_format_type=None):
         derived_from = self.get_derived_from_all(file,
-                                                 derived_from_files,
-                                                 inputs)
+                                                 derived_from_files)
         return self.file_from_template(file,
                                        file_format,
                                        output_type,
@@ -405,8 +403,8 @@ class Accession(object):
                         qc_method = getattr(self, QC_MAP[qc])
                         # Pass encode file with
                         # calculated properties
-                        qc_method(self.conn.get(encode_file.get('accession')),
-                                  wdl_file)
+                        self.new_qcs.append(qc_method(self.conn.get(encode_file.get('accession')),
+                                            wdl_file))
                     accessioned_files.append(encode_file)
         return accessioned_files
 
