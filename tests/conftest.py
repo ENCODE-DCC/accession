@@ -26,7 +26,7 @@ def input_json(request):
 
 @pytest.fixture(scope='session')
 def accession(metadata_json, input_json):
-    accession_steps = write_json(input_json.get('accession.steps'))
+    accession_steps = write_json(input_json)
     accession_metadata = write_json(metadata_json)
     server = input_json.get('accession.dcc_server')
     lab = input_json.get('accession.lab')
