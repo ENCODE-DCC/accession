@@ -1,10 +1,4 @@
 {
-    "accession.metadata_outputs_path":  "gs://atac-seq-accessioning-metadata/two_replicates_metadata",
-    "accession.google_credentials":     "gs://atac-seq-accessioning-samples/credentials/atac-seq-pipeline-bb9ab8561cc3.json",
-    "accession.dcc_credentials":        "gs://atac-seq-accessioning-samples/credentials/dcc_creds.txt",
-    "accession.dcc_server":             "dev",
-    "accession.lab":                    "/labs/encode-processing-pipeline/",
-    "accession.award":                  "U41HG007000",
     "accession.steps": [
         {
             "dcc_step_version":     "/analysis-step-versions/kundaje-lab-atac-seq-trim-align-filter-step-v-1-0/",

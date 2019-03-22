@@ -28,9 +28,9 @@ def input_json(request):
 def accession(metadata_json, input_json):
     accession_steps = write_json(input_json)
     accession_metadata = write_json(metadata_json)
-    server = input_json.get('accession.dcc_server')
-    lab = input_json.get('accession.lab')
-    award = input_json.get('accession.award')
+    server = input_json.get('accession.dcc_server', 'dev')
+    lab = input_json.get('accession.lab', '/labs/encode-processing-pipeline/')
+    award = input_json.get('accession.award', 'U41HG007000')
     accessioner = Accession(accession_steps,
                             accession_metadata,
                             server,
