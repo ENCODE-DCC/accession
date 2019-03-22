@@ -30,7 +30,7 @@ class Accession(object):
         super(Accession, self).__init__()
         self.set_lab_award(lab, award)
         self.analysis = Analysis(metadata_json)
-        self.steps_and_params_json = self.file_to_json(steps)
+        self.steps_and_params_json = self.file_to_json(steps).get('accession.steps')
         self.backend = self.analysis.backend
         self.conn = Connection(server)
         self.new_files = []
