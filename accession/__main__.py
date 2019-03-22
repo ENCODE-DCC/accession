@@ -3,31 +3,7 @@ from accession.accession import Accession
 from accession.helpers import filter_outputs_by_path
 
 
-def main(args):
-    if args.get('filter_from_path'):
-        filter_outputs_by_path(args.get('filter_from_path'))
-        return
-    accession_steps = args.get('accession_steps')
-    accession_metadata = args.get('accession_metadata')
-    lab = args.get('lab')
-    award = args.get('award')
-    server = args.get('server')
-    if all([accession_steps,
-            accession_metadata,
-            lab,
-            award,
-            server]):
-        accessioner = Accession(accession_steps,
-                                accession_metadata,
-                                server,
-                                lab,
-                                award)
-        accessioner.accession_steps()
-        return
-    print("Module called without proper arguments")
-
-
-if __name__ == '__main__':
+def get_parser():
     parser = argparse.ArgumentParser(description="Accession pipeline outputs, \
                                                  download output metadata for scattering")
     parser.add_argument('--filter-from-path',
@@ -53,5 +29,35 @@ if __name__ == '__main__':
                         type=str,
                         default=None,
                         help='Award')
-    args = parser.parse_args()
-    main(vars(args))
+    return parser
+
+
+def main(args=None):
+    parser = get_parser()
+    args = parser.parse_args(args)
+
+    if args.get('filter_from_path'):
+        filter_outputs_by_path(args.get('filter_from_path'))
+        return
+    accession_steps = args.get('accession_steps')
+    accession_metadata = args.get('accession_metadata')
+    lab = args.get('lab')
+    award = args.get('award')
+    server = args.get('server')
+    if all([accession_steps,
+            accession_metadata,
+            lab,
+            award,
+            server]):
+        accessioner = Accession(accession_steps,
+                                accession_metadata,
+                                server,
+                                lab,
+                                award)
+        accessioner.accession_steps()
+        return
+    print("Module called without proper arguments")
+
+
+if __name__ == '__main__':
+    main()
