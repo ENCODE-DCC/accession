@@ -1,9 +1,15 @@
 import setuptools
 from setuptools import setup
 
+
+def readme():
+    with open('README.md') as f:
+        return f.read()
+
 setup(name='accession',
       version='0.0.6',
       description='Accessioning tool to submit genomics pipeline outputs to the ENCODE Portal',
+      long_description=readme(),
       url='http://github.com/ENCODE-DCC/accession',
       author='Ulugbek Baymuradov',
       author_email='ulugbekbk@gmail.com',
@@ -22,4 +28,6 @@ setup(name='accession',
           "Programming Language :: Python :: 3",
           "License :: OSI Approved :: MIT License",
           "Operating System :: OS Independent",
-      ])
+      ],
+      include_package_data=True
+      )
