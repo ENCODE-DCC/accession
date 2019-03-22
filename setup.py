@@ -7,7 +7,7 @@ def readme():
         return f.read()
 
 setup(name='accession',
-      version='0.0.6',
+      version='0.0.7',
       description='Accessioning tool to submit genomics pipeline outputs to the ENCODE Portal',
       long_description=readme(),
       url='http://github.com/ENCODE-DCC/accession',
