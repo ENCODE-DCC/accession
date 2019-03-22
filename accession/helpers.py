@@ -28,10 +28,14 @@ def write_json(json_data):
     return temp_file.name
 
 
-def mutate_md5sum(md5sum_string):
-    for i in range(len(md5sum_string)):
-        if isinstance(md5sum_string[i], int):
+def mutate_digits(md5sum_string):
+    md5sum_list = list(md5sum_string)
+    for i, character in enumerate(md5sum_list):
+        print(i)
+        print(character)
+        if character.isdigit():
             if random.choice([True, False]):
                 continue
-            md5sum_string[i] = (md5sum_string[i] + 1) % 10
-    return md5sum_string
+            md5sum_list[i] = str((int(character) + 1) % 10)
+        print(md5sum_list)
+    return ''.join(md5sum_list)

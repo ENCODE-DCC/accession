@@ -7,7 +7,7 @@ import json
 from accession.accession import Accession
 from accession.analysis import Analysis
 from accession.helpers import write_json
-from accession.helpers import mutate_md5sum
+from accession.helpers import mutate_digits
 
 
 @pytest.fixture(scope='session',
@@ -41,7 +41,8 @@ def accession(metadata_json, input_json):
         if 'TSTFF' in original_file:
             original_file = accessioner.conn.get(original_file)
             accessioner.patch_file(original_file,
-                                   {'md5sum': mutate_md5sum(original_file.get('md5sum')),
+                                   {'md5sum': mutate_digits(original_file.get('md5sum')),
+                                    'aliases': [mutate_digits(original_file.get('aliases')[0])],
                                     'status': 'deleted'})
 
     yield accessioner
@@ -49,7 +50,8 @@ def accession(metadata_json, input_json):
     # Cleaning up so the same files can be accessioned again
     for file in accessioner.new_files:
         accessioner.patch_file(file,
-                               {'md5sum': mutate_md5sum(file.get('md5sum')),
+                               {'md5sum': mutate_digits(file.get('md5sum')),
+                                'aliases': [mutate_digits(original_file.get('aliases')[0])],
                                 'status': 'deleted'})
 
 

@@ -28,7 +28,7 @@ You will also need [Google Application Credentials](https://cloud.google.com/vid
 
     $ accession --accession-metadata metadata.json \
                 --accession-steps steps.json \
-                --server dev
+                --server dev \
                 --lab /labs/encode-processing-pipeline/ \
                 --award U41HG007000
                 
