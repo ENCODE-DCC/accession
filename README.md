@@ -34,9 +34,9 @@ You will also need [Google Application Credentials](https://cloud.google.com/vid
                 
 # Arguments
 ### Metadata JSON
-This file is an output of pipeline analysis run. [The example file](https://github.com/ENCODE-DCC/accession/blob/master/tests/data/ENCSR609OHJ_metadata_2reps.json) has metadata on all of the tasks and produced files.
+This file is an output of a pipeline analysis run. [The example file](https://github.com/ENCODE-DCC/accession/blob/master/tests/data/ENCSR609OHJ_metadata_2reps.json) has all of the tasks and produced files.
 ### Accession Steps
-The accessioning steps [configuration file](https://github.com/ENCODE-DCC/accession/blob/master/tests/data/atac_input.json) specifies the task and file names in the output metadata JSON. Accessioning code will selectively submit the specified file keys to the ENCODE DCC Portal. Single step is configured in the following way:
+The accessioning steps [configuration file](https://github.com/ENCODE-DCC/accession/blob/master/tests/data/atac_input.json) specifies the task and file names in the output metadata JSON and the order in which the files and metadata will be submitted. Accessioning code will selectively submit the specified files to the ENCODE Portal. A single step is configured in the following way:
 
     {
             "dcc_step_version":     "/analysis-step-versions/kundaje-lab-atac-seq-trim-align-filter-step-v-1-0/",
@@ -63,17 +63,17 @@ The accessioning steps [configuration file](https://github.com/ENCODE-DCC/access
 
 `wdl_files` specifies the set of files to be accessioned.
 
-`filekey` is the variable that stores the file path in the metadata file.
+`filekey` is a variable that stores the file path in the metadata file.
 
-`output_type`, `file_format`, and `file_format_type` are the ENCODE specific metadata that are required by the Portal
+`output_type`, `file_format`, and `file_format_type` are ENCODE specific metadata that are required by the Portal
 
-`quality_metrics` is a list of methods that will be called in the code to attach quality metrics to a file
+`quality_metrics` is a list of methods that will be called in during the accessioning to attach quality metrics to the file
 
-`possible_duplicate` specifies that there could be, in the case of optimal IDR peaks and conservative IDR peaks, files can have an identical content. If the possible duplicate flag is set, file is not accessioned.
+`possible_duplicate` indicates that there could be files that have an identical content. If the `possible_duplicate` flag is set and the current file being accessioned has md5sum that's identical to another file in the same task, the current file will not be accessioned. Optimal IDR peaks and conservative IDR peaks are an example set of files that can have an identical md5sum.
 
-`derived_from_files` specifies the list of files the current file being accessioned derives from. These files need to have been accessioned before the current file can be submitted. 
+`derived_from_files` specifies the list of files the current file being accessioned derives from. The parent files must have been accessioned before the current file can be submitted. 
 
-`derived_from_inputs` is used when indicating that parent files were not produced during the task execution. Raw fastqs and genome references are examples of such files.
+`derived_from_inputs` is used when indicating that the parent files were not produced during the pipeline analysis. Instead, these files are initial inputs to the pipeline. Raw fastqs and genome references are examples of such files.
 
 `derived_from_output_type` is required in the case the parent file has a possible duplicate.
 
