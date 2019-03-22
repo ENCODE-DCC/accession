@@ -36,14 +36,14 @@ def main(args=None):
     parser = get_parser()
     args = parser.parse_args(args)
 
-    if args.get('filter_from_path'):
-        filter_outputs_by_path(args.get('filter_from_path'))
+    if args.filter_from_path:
+        filter_outputs_by_path(args.filter_from_path)
         return
-    accession_steps = args.get('accession_steps')
-    accession_metadata = args.get('accession_metadata')
-    lab = args.get('lab')
-    award = args.get('award')
-    server = args.get('server')
+    accession_steps = args.accession_steps
+    accession_metadata = args.accession_metadata
+    lab = args.lab
+    award = args.award
+    server = args.server
     if all([accession_steps,
             accession_metadata,
             lab,
