@@ -30,7 +30,7 @@ You will also need [Google Application Credentials](https://cloud.google.com/vid
                 --accession-steps steps.json \
                 --server dev \
                 --lab /labs/encode-processing-pipeline/ \
-                --award U41HG007000
+                --award U24HG009397
                 
 # Arguments
 ### Metadata JSON
