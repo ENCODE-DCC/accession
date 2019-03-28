@@ -124,13 +124,20 @@ class Accession(object):
 
     @property
     def assembly(self):
-        assembly = [reference
-                    for reference
-                    in ASSEMBLIES
-                    if reference
-                    in self.analysis.get_tasks('read_genome_tsv')[0].outputs.get(
-                        'genome', {}).get('ref_fa', '')]
-        return assembly[0] if len(assembly) > 0 else ''
+        pipeline_name = self.analysis.metadata.get('workflowName')
+        if pipeline_name == 'mirna_seq_pipeline':
+            files = self.analysis.get_files(filekey='mirna_annotation')
+            if files:
+                annotation = self.file_at_portal(files[0].filename)
+            return annotation.get('assembly', '')
+        elif pipeline_name == 'atac':
+            assembly = [reference
+                        for reference
+                        in ASSEMBLIES
+                        if reference
+                        in self.analysis.get_tasks('read_genome_tsv')[0].outputs.get(
+                            'genome', {}).get('ref_fa', '')]
+            return assembly[0] if len(assembly) > 0 else ''
 
     @property
     def lab_pi(self):
