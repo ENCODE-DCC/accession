@@ -218,9 +218,15 @@ class Accession(object):
 
         # Raise exception when some or all of the derived_from files
         # are missing from the portal
+
+        missing = '\n'.join(['{}: {}'.format(filekey, filename)
+                             for filename
+                             in map(lambda x: x.filename, derived_from_files)])
         if not derived_from_accession_ids:
+            print(missing)
             raise Exception('Missing all of the derived_from files on the portal')
         if len(derived_from_accession_ids) != len(derived_from_files):
+            print(missing)
             raise Exception('Missing some of the derived_from files on the portal')
         return ['/files/{}/'.format(accession_id)
                 for accession_id in derived_from_accession_ids]
@@ -398,8 +404,8 @@ class Accession(object):
                     except Exception as e:
                         if 'Conflict' in str(e) and file_params.get('possible_duplicate'):
                             continue
-                        elif 'Missing all of the derived_from' in str(e):
-                            continue
+                        elif 'Missing' in str(e):
+                            raise
                         else:
                             raise
 
