@@ -119,7 +119,8 @@ class Analysis(object):
     def raw_fastqs(self):
         fastqs = []
         for file in self.files:
-            if 'fastqs' in file.filekeys and file.task is None:
+            if (('fastqs' in file.filekeys or 'fastq' in file.filekeys)
+               and file.task is None):
                 fastqs.append(file)
         return fastqs
 
