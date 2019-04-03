@@ -126,7 +126,7 @@ class Accession(object):
     def assembly(self):
         pipeline_name = self.analysis.metadata.get('workflowName')
         if pipeline_name == 'mirna_seq_pipeline':
-            files = self.analysis.get_files(filekey='mirna_annotation')
+            files = self.analysis.get_files(filekey='annotation')
             if files:
                 annotation = self.file_at_portal(files[0].filename)
             return annotation.get('assembly', '')
