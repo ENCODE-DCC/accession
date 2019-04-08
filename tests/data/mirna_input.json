@@ -53,8 +53,7 @@
           "derived_from_files": [
             {
               "derived_from_task": "star",
-              "derived_from_filekey": "bam",
-              "derived_from_inputs": "false"
+              "derived_from_filekey": "bam"
             }
           ]
         },
@@ -65,8 +64,7 @@
           "derived_from_files": [
             {
               "derived_from_task": "star",
-              "derived_from_filekey": "bam",
-              "derived_from_inputs": "false"
+              "derived_from_filekey": "bam"
             }
           ]
         },
@@ -77,8 +75,7 @@
           "derived_from_files": [
             {
               "derived_from_task": "star",
-              "derived_from_filekey": "bam",
-              "derived_from_inputs": "false"
+              "derived_from_filekey": "bam"
             }
           ]
         },
@@ -89,8 +86,7 @@
           "derived_from_files": [
             {
               "derived_from_task": "star",
-              "derived_from_filekey": "bam",
-              "derived_from_inputs": "false"
+              "derived_from_filekey": "bam"
             }
           ]
         }

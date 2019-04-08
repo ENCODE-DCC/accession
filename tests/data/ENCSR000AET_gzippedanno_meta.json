@@ -1,0 +1,979 @@
+{
+  "workflowName": "mirna_seq_pipeline",
+  "actualWorkflowLanguageVersion": "draft-2",
+  "submittedFiles": {
+    "workflow": "# ENCODE micro rna seq pipeline: main pipeline\n# Maintainer: Otto Jolanki\n\nworkflow mirna_seq_pipeline {\n    #File inputs\n\n    #cutadapt\n    #Array containing the input fastq files\n    Array[File] fastqs\n    #Array containing Fasta files with 5' adapter sequence(s), in the same order as the fastqs\n    Array[File] five_prime_adapters \n    #Fasta file with 3' adapter sequence(s)\n    File three_prime_adapters\n    \n    #star\n    #tar.gz archive that contains star index\n    File star_index\n    #micro-rna annotations\n    File mirna_annotation\n\n    #wigtobigwig\n    #tsv with chromosome sizes\n    File chrom_sizes\n\n    #common\n    #Prefix for outputs (additionally replicate number will be added)\n    String experiment_prefix\n\n    #Resources\n\n    #cutadapt\n    Int cutadapt_ncpus\n    Int cutadapt_ramGB\n    String cutadapt_disk\n\n    #star\n    Int star_ncpus\n    Int star_ramGB\n    String star_disk\n\n    #wigtobigwig\n    Int wigtobigwig_ncpus\n    Int wigtobigwig_ramGB\n    String wigtobigwig_disk\n\n    #Pipeline starts here\n\n    scatter (i in range(length(fastqs))) {\n        call cutadapt { input:\n            fastq = fastqs[i],\n            five_prime_adapters = five_prime_adapters[i],\n            three_prime_adapters = three_prime_adapters,\n            output_prefix = \"rep\"+(i+1)+experiment_prefix,\n            ncpus = cutadapt_ncpus,\n            ramGB = cutadapt_ramGB,\n            disk = cutadapt_disk,\n        }\n\n        call star { input:\n            fastq = cutadapt.trimmed_fastq,\n            index = star_index,\n            annotation = mirna_annotation,\n            output_prefix = \"rep\"+(i+1)+experiment_prefix,\n            ncpus = star_ncpus,\n            ramGB = star_ramGB,\n            disk = star_disk,\n            }\n\n        call wigtobigwig { input:\n            plus_strand_all_wig = star.plus_strand_all_wig,\n            minus_strand_all_wig = star.minus_strand_all_wig,\n            plus_strand_unique_wig = star.plus_strand_unique_wig,\n            minus_strand_unique_wig = star.minus_strand_unique_wig,\n            chrom_sizes = chrom_sizes,\n            output_prefix = \"rep\"+(i+1)+experiment_prefix,\n            ncpus = wigtobigwig_ncpus,\n            ramGB = wigtobigwig_ramGB,\n            disk = wigtobigwig_disk,\n        }\n    }\n\n    #If there are exactly two replicates, calculate spearman correlation between quants in replicates\n    if (length(fastqs) == 2) {\n        call spearman_correlation { input:\n            quants = star.tsv,\n            output_filename = experiment_prefix+\"_spearman.json\",\n            }\n    }\n}\n\n#Task definitions\n\ntask cutadapt {\n    File fastq\n    File five_prime_adapters\n    File three_prime_adapters\n    String output_prefix\n    Int ncpus\n    Int ramGB\n    String disk\n\n    command {\n        cutadapt \\\n            -a file:${three_prime_adapters} \\\n            -e 0.25 \\\n            --match-read-wildcards \\\n            --untrimmed-output=${output_prefix + \"_NO3AD.fastq\"} \\\n            ${fastq} \\\n            | cutadapt \\\n            -e 0.34 \\\n            --match-read-wildcards \\\n            --no-indels \\\n            -m 15 \\\n            -O 6 \\\n            -n 1 \\\n            -g file:${five_prime_adapters} \\\n            --untrimmed-output=${output_prefix + \"_NO5AD.fastq\"} \\\n            --too-short-output=${output_prefix + \"_SHORT_FAIL.fastq\"} \\\n            - > ${output_prefix + \"_trim.fastq\"}\n    }\n\n    output {\n        File no3ad_untrimmed_fastq = glob(\"*_NO3AD.fastq\")[0]\n        File no5ad_untrimmed_fastq = glob(\"*_NO5AD.fastq\")[0]\n        File too_short_fastq = glob(\"*_SHORT_FAIL.fastq\")[0]\n        File trimmed_fastq = glob(\"*_trim.fastq\")[0]\n    }\n\n    runtime {\n        cpu: ncpus\n        memory: \"${ramGB} GB\"\n        disks: disk\n    }\n}\n\ntask star {\n    File fastq\n    File index\n    File annotation\n    String output_prefix\n    Int ncpus\n    Int ramGB\n    String disk\n\n    command {\n        tar -xzvf ${index}\n        gzip -cd ${annotation} > anno.gtf\n        STAR \\\n            --genomeDir out \\\n            --readFilesIn ${fastq} \\\n            --sjdbGTFfile anno.gtf \\\n            --runThreadN ${ncpus} \\\n            --alignEndsType EndToEnd \\\n            --outFilterMismatchNmax 1 \\\n            --outFilterMultimapScoreRange 0 \\\n            --quantMode TranscriptomeSAM GeneCounts \\\n            --outReadsUnmapped Fastx \\\n            --outSAMtype BAM SortedByCoordinate \\\n            --outFilterMultimapNmax 10 \\\n            --outSAMunmapped Within \\\n            --outFilterScoreMinOverLread 0 \\\n            --outFilterMatchNminOverLread 0 \\\n            --outFilterMatchNmin 16 \\\n            --alignSJDBoverhangMin 1000 \\\n            --alignIntronMax 1 \\\n            --outWigType wiggle \\\n            --outWigStrand Stranded \\\n            --outWigNorm RPM\n        mv Aligned.sortedByCoord.out.bam ${output_prefix}.bam\n        mv ReadsPerGene.out.tab ${output_prefix}.tsv\n        mv Log.final.out ${output_prefix}.Log.final.out\n        python3  $(which make_star_qc.py) --quants ${output_prefix}.tsv \\\n                                          --star_log ${output_prefix}.Log.final.out \\\n                                          --output_filename ${output_prefix}_star_qc.json\n    }\n\n    output {\n        File bam = glob(\"${output_prefix}.bam\")[0]\n        File tsv = glob(\"*.tsv\")[0]\n        File plus_strand_all_wig = glob(\"Signal.UniqueMultiple.str1.out.wig\")[0]\n        File minus_strand_all_wig = glob(\"Signal.UniqueMultiple.str2.out.wig\")[0]\n        File plus_strand_unique_wig = glob(\"Signal.Unique.str1.out.wig\")[0]\n        File minus_strand_unique_wig = glob(\"Signal.Unique.str2.out.wig\")[0]\n        File star_qc_json = glob(\"*_star_qc.json\")[0]\n        File star_qc_log = glob(\"star_qc.log\")[0]\n    }\n\n    runtime {\n        cpu: ncpus\n        memory: \"${ramGB} GB\"\n        disks: disk\n    }\n}\n\ntask wigtobigwig {\n    File plus_strand_all_wig\n    File minus_strand_all_wig\n    File plus_strand_unique_wig\n    File minus_strand_unique_wig\n    File chrom_sizes\n    String output_prefix\n    Int ncpus\n    Int ramGB\n    String disk\n\n    command {\n        wigToBigWig ${plus_strand_all_wig} ${chrom_sizes} ${output_prefix}.signal.all.plus.bigWig\n        wigToBigWig ${minus_strand_all_wig} ${chrom_sizes} ${output_prefix}.signal.all.minus.bigWig\n        wigToBigWig ${plus_strand_unique_wig} ${chrom_sizes} ${output_prefix}.signal.unique.plus.bigWig\n        wigToBigWig ${minus_strand_unique_wig} ${chrom_sizes} ${output_prefix}.signal.unique.minus.bigWig\n    }\n\n    output {\n        File plus_strand_all_bigwig = glob(\"*.signal.all.plus.bigWig\")[0]\n        File minus_strand_all_bigwig = glob(\"*.signal.all.minus.bigWig\")[0]\n        File plus_strand_unique_bigwig = glob(\"*.signal.unique.plus.bigWig\")[0]\n        File minus_strand_unique_bigwig = glob(\"*.signal.unique.minus.bigWig\")[0]\n    }\n\n    runtime {\n        cpu: ncpus\n        memory: \"${ramGB} GB\"\n        disks: disk\n    }\n}\n\ntask spearman_correlation {\n    Array[File] quants\n    String output_filename\n\n    command {\n        python3 $(which calculate_correlation.py) --quants ${sep=' ' quants} --output_filename ${output_filename}\n    }\n\n    output {\n        File spearman_json = glob(\"*spearman.json\")[0]\n    }\n\n    runtime {\n        cpu: 1\n        memory: \"2 GB\"\n        disks: \"local-disk 20 SSD\"\n    }\n}\n\ntask bamtosam {\n    File bamfile\n    String output_sam\n    Int ncpus\n    Int ramGB\n    String disk\n\n    command {\n        samtools view ${bamfile} > ${output_sam}\n    }\n\n    output {\n        File samfile = glob(\"${output_sam}\")[0]\n    }\n\n    runtime {\n        cpu: ncpus\n        memory: \"${ramGB} GB\"\n        disks: disk\n    }\n}",
+    "root": "",
+    "options": "{\n  \"default_runtime_attributes\": {\n    \"preemptible\": \"0\",\n    \"failOnStderr\": false,\n    \"bootDiskSizeGb\": \"10\",\n    \"continueOnReturnCode\": 0,\n    \"docker\": \"quay.io/encode-dcc/mirna-seq-pipeline:template\",\n    \"noAddress\": \"false\",\n    \"zones\": \"us-west1-a us-west1-b us-west1-c us-central1-c us-central1-b\"\n  }\n}",
+    "inputs": "{\n\t\"mirna_seq_pipeline.fastqs\" : [\"gs://mirna-seq-pipeline/inputs/ENCSR000AET/ENCFF001RDL_rep1.fastq.gz\",\"gs://mirna-seq-pipeline/inputs/ENCSR000AET/ENCFF001RDM_rep2.fastq.gz\"],\n\t\"mirna_seq_pipeline.five_prime_adapters\" : [\"gs://mirna-seq-pipeline/full_sized_reference_files/adapters/five_prime_adapter_set3.fasta\",\"gs://mirna-seq-pipeline/full_sized_reference_files/adapters/five_prime_adapter_set4.fasta\"],\n\t\"mirna_seq_pipeline.three_prime_adapters\" : \"gs://mirna-seq-pipeline/full_sized_reference_files/adapters/three_prime_adapter.fasta\",\n\t\"mirna_seq_pipeline.star_index\" : \"gs://mirna-seq-pipeline/Index_to_portal/generate_STAR_index/0884713c-c91d-4a48-a899-599a518548f6/call-generate_index/glob-bafd57f6d53786e3cd6ef2ca2d804565/Star_index_GRCh38_from_primary_anno_to_portal.tar.gz\",\n\t\"mirna_seq_pipeline.mirna_annotation\" : \"gs://mirna-seq-pipeline/full_sized_reference_files/ENCFF628BVT_mirna_anno.gtf.gz\",\n\t\"mirna_seq_pipeline.chrom_sizes\" : \"gs://mirna-seq-pipeline/full_sized_reference_files/GRCh38_EBV.chrom.sizes.tsv\",\n\t\"mirna_seq_pipeline.experiment_prefix\" : \"ENCSR000AET\",\n        \"mirna_seq_pipeline.cutadapt_ncpus\" : \"2\",\n\t\"mirna_seq_pipeline.cutadapt_ramGB\" : \"7\",\n\t\"mirna_seq_pipeline.cutadapt_disk\" : \"local-disk 200 SSD\",\n\t\"mirna_seq_pipeline.star_ncpus\" : \"16\",\n\t\"mirna_seq_pipeline.star_ramGB\" : \"60\",\n\t\"mirna_seq_pipeline.star_disk\" : \"local-disk 200 SSD\",\n\t\"mirna_seq_pipeline.wigtobigwig_ncpus\" : \"4\",\n\t\"mirna_seq_pipeline.wigtobigwig_ramGB\" : \"26\",\n\t\"mirna_seq_pipeline.wigtobigwig_disk\" : \"local-disk 200 SSD\"\n}\n",
+    "workflowUrl": "mirna_seq_pipeline.wdl",
+    "labels": "{}"
+  },
+  "calls": {
+    "mirna_seq_pipeline.wigtobigwig": [{
+      "preemptible": false,
+      "executionStatus": "Done",
+      "stdout": "gs://mirna-seq-pipeline/ENCSR000AET_gzippedanno/mirna_seq_pipeline/d0b4de05-e5e0-483a-96ca-82bb0cb98796/call-wigtobigwig/shard-0/stdout",
+      "backendStatus": "Success",
+      "commandLine": "wigToBigWig /cromwell_root/mirna-seq-pipeline/ENCSR000AET_gzippedanno/mirna_seq_pipeline/d0b4de05-e5e0-483a-96ca-82bb0cb98796/call-star/shard-0/glob-41773c7ab111b23d6eb594bba78fa1d9/Signal.UniqueMultiple.str1.out.wig /cromwell_root/mirna-seq-pipeline/full_sized_reference_files/GRCh38_EBV.chrom.sizes.tsv rep1ENCSR000AET.signal.all.plus.bigWig\nwigToBigWig /cromwell_root/mirna-seq-pipeline/ENCSR000AET_gzippedanno/mirna_seq_pipeline/d0b4de05-e5e0-483a-96ca-82bb0cb98796/call-star/shard-0/glob-95ad94f4655a5da1faa51c905e436322/Signal.UniqueMultiple.str2.out.wig /cromwell_root/mirna-seq-pipeline/full_sized_reference_files/GRCh38_EBV.chrom.sizes.tsv rep1ENCSR000AET.signal.all.minus.bigWig\nwigToBigWig /cromwell_root/mirna-seq-pipeline/ENCSR000AET_gzippedanno/mirna_seq_pipeline/d0b4de05-e5e0-483a-96ca-82bb0cb98796/call-star/shard-0/glob-34e0341cc922c3159cacc690d41b117b/Signal.Unique.str1.out.wig /cromwell_root/mirna-seq-pipeline/full_sized_reference_files/GRCh38_EBV.chrom.sizes.tsv rep1ENCSR000AET.signal.unique.plus.bigWig\nwigToBigWig /cromwell_root/mirna-seq-pipeline/ENCSR000AET_gzippedanno/mirna_seq_pipeline/d0b4de05-e5e0-483a-96ca-82bb0cb98796/call-star/shard-0/glob-581651af3e8d85ac9aecfba9cf6eaea5/Signal.Unique.str2.out.wig /cromwell_root/mirna-seq-pipeline/full_sized_reference_files/GRCh38_EBV.chrom.sizes.tsv rep1ENCSR000AET.signal.unique.minus.bigWig",
+      "shardIndex": 0,
+      "jes": {
+        "endpointUrl": "https://genomics.googleapis.com/",
+        "machineType": "us-central1-c/n1-highmem-4",
+        "googleProject": "rna-seq-pipeline-204900",
+        "executionBucket": "gs://mirna-seq-pipeline/ENCSR000AET_gzippedanno",
+        "zone": "us-central1-c",
+        "instanceName": "ggp-13706996120694017585"
+      },
+      "outputs": {
+        "minus_strand_all_bigwig": "gs://mirna-seq-pipeline/ENCSR000AET_gzippedanno/mirna_seq_pipeline/d0b4de05-e5e0-483a-96ca-82bb0cb98796/call-wigtobigwig/shard-0/glob-f2920e4cd5a28e8c120bd92e7ba31ecf/rep1ENCSR000AET.signal.all.minus.bigWig",
+        "plus_strand_all_bigwig": "gs://mirna-seq-pipeline/ENCSR000AET_gzippedanno/mirna_seq_pipeline/d0b4de05-e5e0-483a-96ca-82bb0cb98796/call-wigtobigwig/shard-0/glob-ecf13a1f988469a7767bed84843bd510/rep1ENCSR000AET.signal.all.plus.bigWig",
+        "minus_strand_unique_bigwig": "gs://mirna-seq-pipeline/ENCSR000AET_gzippedanno/mirna_seq_pipeline/d0b4de05-e5e0-483a-96ca-82bb0cb98796/call-wigtobigwig/shard-0/glob-e26cce3d0ca522acfdb935f7efeb3e0f/rep1ENCSR000AET.signal.unique.minus.bigWig",
+        "plus_strand_unique_bigwig": "gs://mirna-seq-pipeline/ENCSR000AET_gzippedanno/mirna_seq_pipeline/d0b4de05-e5e0-483a-96ca-82bb0cb98796/call-wigtobigwig/shard-0/glob-5d1de83c72d3b961f02eb173e9f6d5a2/rep1ENCSR000AET.signal.unique.plus.bigWig"
+      },
+      "runtimeAttributes": {
+        "preemptible": "0",
+        "failOnStderr": "false",
+        "bootDiskSizeGb": "10",
+        "disks": "local-disk 200 SSD",
+        "continueOnReturnCode": "0",
+        "docker": "quay.io/encode-dcc/mirna-seq-pipeline:template",
+        "maxRetries": "0",
+        "cpu": "4",
+        "cpuMin": "1",
+        "noAddress": "false",
+        "zones": "us-west1-a,us-west1-b,us-west1-c,us-central1-c,us-central1-b",
+        "memoryMin": "2.048 GB",
+        "memory": "26 GB"
+      },
+      "callCaching": {
+        "effectiveCallCachingMode": "CallCachingOff",
+        "allowResultReuse": false
+      },
+      "inputs": {
+        "ncpus": 4,
+        "minus_strand_unique_wig": "gs://mirna-seq-pipeline/ENCSR000AET_gzippedanno/mirna_seq_pipeline/d0b4de05-e5e0-483a-96ca-82bb0cb98796/call-star/shard-0/glob-581651af3e8d85ac9aecfba9cf6eaea5/Signal.Unique.str2.out.wig",
+        "disk": "local-disk 200 SSD",
+        "output_prefix": "rep1ENCSR000AET",
+        "plus_strand_unique_wig": "gs://mirna-seq-pipeline/ENCSR000AET_gzippedanno/mirna_seq_pipeline/d0b4de05-e5e0-483a-96ca-82bb0cb98796/call-star/shard-0/glob-34e0341cc922c3159cacc690d41b117b/Signal.Unique.str1.out.wig",
+        "chrom_sizes": "gs://mirna-seq-pipeline/full_sized_reference_files/GRCh38_EBV.chrom.sizes.tsv",
+        "minus_strand_all_wig": "gs://mirna-seq-pipeline/ENCSR000AET_gzippedanno/mirna_seq_pipeline/d0b4de05-e5e0-483a-96ca-82bb0cb98796/call-star/shard-0/glob-95ad94f4655a5da1faa51c905e436322/Signal.UniqueMultiple.str2.out.wig",
+        "ramGB": 26,
+        "plus_strand_all_wig": "gs://mirna-seq-pipeline/ENCSR000AET_gzippedanno/mirna_seq_pipeline/d0b4de05-e5e0-483a-96ca-82bb0cb98796/call-star/shard-0/glob-41773c7ab111b23d6eb594bba78fa1d9/Signal.UniqueMultiple.str1.out.wig"
+      },
+      "backendLabels": {
+        "wdl-task-name": "wigtobigwig",
+        "cromwell-workflow-id": "cromwell-d0b4de05-e5e0-483a-96ca-82bb0cb98796"
+      },
+      "returnCode": 0,
+      "labels": {
+        "cromwell-workflow-id": "cromwell-d0b4de05-e5e0-483a-96ca-82bb0cb98796",
+        "wdl-task-name": "wigtobigwig"
+      },
+      "jobId": "operations/EOT1ndWeLRixnP-8lYvCnL4BIIH-t6n9GyoPcHJvZHVjdGlvblF1ZXVl",
+      "backend": "google",
+      "end": "2019-04-04T23:22:53.587Z",
+      "dockerImageUsed": "quay.io/encode-dcc/mirna-seq-pipeline@sha256:764edfa231dab50bda6d9d57ff67f84da5d57e0f1d5e49b327a7c3815393068a",
+      "stderr": "gs://mirna-seq-pipeline/ENCSR000AET_gzippedanno/mirna_seq_pipeline/d0b4de05-e5e0-483a-96ca-82bb0cb98796/call-wigtobigwig/shard-0/stderr",
+      "callRoot": "gs://mirna-seq-pipeline/ENCSR000AET_gzippedanno/mirna_seq_pipeline/d0b4de05-e5e0-483a-96ca-82bb0cb98796/call-wigtobigwig/shard-0",
+      "attempt": 1,
+      "executionEvents": [{
+        "startTime": "2019-04-04T23:20:08.440Z",
+        "description": "PreparingJob",
+        "endTime": "2019-04-04T23:20:08.447Z"
+      }, {
+        "endTime": "2019-04-04T23:22:20.787094591Z",
+        "startTime": "2019-04-04T23:22:11.877045711Z",
+        "description": "running-docker"
+      }, {
+        "endTime": "2019-04-04T23:22:04.514559199Z",
+        "description": "pulling-image",
+        "startTime": "2019-04-04T23:21:28.136261632Z"
+      }, {
+        "endTime": "2019-04-04T23:21:28.136261632Z",
+        "startTime": "2019-04-04T23:21:28.136180695Z",
+        "description": "start"
+      }, {
+        "endTime": "2019-04-04T23:22:53.587Z",
+        "startTime": "2019-04-04T23:22:53.587Z",
+        "description": "UpdatingJobStore"
+      }, {
+        "endTime": "2019-04-04T23:22:53.587Z",
+        "startTime": "2019-04-04T23:22:37.194410416Z",
+        "description": "cromwell poll interval"
+      }, {
+        "endTime": "2019-04-04T23:20:08.440Z",
+        "description": "RequestingExecutionToken",
+        "startTime": "2019-04-04T23:20:07.976Z"
+      }, {
+        "endTime": "2019-04-04T23:22:37.194410416Z",
+        "description": "delocalizing-files",
+        "startTime": "2019-04-04T23:22:20.787094591Z"
+      }, {
+        "endTime": "2019-04-04T23:21:28.136180695Z",
+        "startTime": "2019-04-04T23:20:47Z",
+        "description": "initializing VM"
+      }, {
+        "startTime": "2019-04-04T23:22:04.514559199Z",
+        "endTime": "2019-04-04T23:22:11.877045711Z",
+        "description": "localizing-files"
+      }, {
+        "description": "waiting for quota",
+        "startTime": "2019-04-04T23:20:38Z",
+        "endTime": "2019-04-04T23:20:47Z"
+      }, {
+        "description": "ok",
+        "endTime": "2019-04-04T23:22:37.194410416Z",
+        "startTime": "2019-04-04T23:22:37.194410416Z"
+      }, {
+        "startTime": "2019-04-04T23:20:08.440Z",
+        "endTime": "2019-04-04T23:20:08.440Z",
+        "description": "WaitingForValueStore"
+      }, {
+        "endTime": "2019-04-04T23:20:07.976Z",
+        "startTime": "2019-04-04T23:20:07.974Z",
+        "description": "Pending"
+      }, {
+        "description": "RunningJob",
+        "startTime": "2019-04-04T23:20:08.447Z",
+        "endTime": "2019-04-04T23:20:38Z"
+      }],
+      "backendLogs": {
+        "log": "gs://mirna-seq-pipeline/ENCSR000AET_gzippedanno/mirna_seq_pipeline/d0b4de05-e5e0-483a-96ca-82bb0cb98796/call-wigtobigwig/shard-0/wigtobigwig-0.log"
+      },
+      "start": "2019-04-04T23:20:07.974Z"
+    }, {
+      "preemptible": false,
+      "executionStatus": "Done",
+      "stdout": "gs://mirna-seq-pipeline/ENCSR000AET_gzippedanno/mirna_seq_pipeline/d0b4de05-e5e0-483a-96ca-82bb0cb98796/call-wigtobigwig/shard-1/stdout",
+      "backendStatus": "Success",
+      "commandLine": "wigToBigWig /cromwell_root/mirna-seq-pipeline/ENCSR000AET_gzippedanno/mirna_seq_pipeline/d0b4de05-e5e0-483a-96ca-82bb0cb98796/call-star/shard-1/glob-41773c7ab111b23d6eb594bba78fa1d9/Signal.UniqueMultiple.str1.out.wig /cromwell_root/mirna-seq-pipeline/full_sized_reference_files/GRCh38_EBV.chrom.sizes.tsv rep2ENCSR000AET.signal.all.plus.bigWig\nwigToBigWig /cromwell_root/mirna-seq-pipeline/ENCSR000AET_gzippedanno/mirna_seq_pipeline/d0b4de05-e5e0-483a-96ca-82bb0cb98796/call-star/shard-1/glob-95ad94f4655a5da1faa51c905e436322/Signal.UniqueMultiple.str2.out.wig /cromwell_root/mirna-seq-pipeline/full_sized_reference_files/GRCh38_EBV.chrom.sizes.tsv rep2ENCSR000AET.signal.all.minus.bigWig\nwigToBigWig /cromwell_root/mirna-seq-pipeline/ENCSR000AET_gzippedanno/mirna_seq_pipeline/d0b4de05-e5e0-483a-96ca-82bb0cb98796/call-star/shard-1/glob-34e0341cc922c3159cacc690d41b117b/Signal.Unique.str1.out.wig /cromwell_root/mirna-seq-pipeline/full_sized_reference_files/GRCh38_EBV.chrom.sizes.tsv rep2ENCSR000AET.signal.unique.plus.bigWig\nwigToBigWig /cromwell_root/mirna-seq-pipeline/ENCSR000AET_gzippedanno/mirna_seq_pipeline/d0b4de05-e5e0-483a-96ca-82bb0cb98796/call-star/shard-1/glob-581651af3e8d85ac9aecfba9cf6eaea5/Signal.Unique.str2.out.wig /cromwell_root/mirna-seq-pipeline/full_sized_reference_files/GRCh38_EBV.chrom.sizes.tsv rep2ENCSR000AET.signal.unique.minus.bigWig",
+      "shardIndex": 1,
+      "jes": {
+        "endpointUrl": "https://genomics.googleapis.com/",
+        "machineType": "us-central1-b/n1-highmem-4",
+        "googleProject": "rna-seq-pipeline-204900",
+        "executionBucket": "gs://mirna-seq-pipeline/ENCSR000AET_gzippedanno",
+        "zone": "us-central1-b",
+        "instanceName": "ggp-4047032273143336379"
+      },
+      "outputs": {
+        "minus_strand_unique_bigwig": "gs://mirna-seq-pipeline/ENCSR000AET_gzippedanno/mirna_seq_pipeline/d0b4de05-e5e0-483a-96ca-82bb0cb98796/call-wigtobigwig/shard-1/glob-e26cce3d0ca522acfdb935f7efeb3e0f/rep2ENCSR000AET.signal.unique.minus.bigWig",
+        "plus_strand_all_bigwig": "gs://mirna-seq-pipeline/ENCSR000AET_gzippedanno/mirna_seq_pipeline/d0b4de05-e5e0-483a-96ca-82bb0cb98796/call-wigtobigwig/shard-1/glob-ecf13a1f988469a7767bed84843bd510/rep2ENCSR000AET.signal.all.plus.bigWig",
+        "plus_strand_unique_bigwig": "gs://mirna-seq-pipeline/ENCSR000AET_gzippedanno/mirna_seq_pipeline/d0b4de05-e5e0-483a-96ca-82bb0cb98796/call-wigtobigwig/shard-1/glob-5d1de83c72d3b961f02eb173e9f6d5a2/rep2ENCSR000AET.signal.unique.plus.bigWig",
+        "minus_strand_all_bigwig": "gs://mirna-seq-pipeline/ENCSR000AET_gzippedanno/mirna_seq_pipeline/d0b4de05-e5e0-483a-96ca-82bb0cb98796/call-wigtobigwig/shard-1/glob-f2920e4cd5a28e8c120bd92e7ba31ecf/rep2ENCSR000AET.signal.all.minus.bigWig"
+      },
+      "runtimeAttributes": {
+        "preemptible": "0",
+        "failOnStderr": "false",
+        "bootDiskSizeGb": "10",
+        "disks": "local-disk 200 SSD",
+        "continueOnReturnCode": "0",
+        "docker": "quay.io/encode-dcc/mirna-seq-pipeline:template",
+        "maxRetries": "0",
+        "cpu": "4",
+        "cpuMin": "1",
+        "noAddress": "false",
+        "zones": "us-west1-a,us-west1-b,us-west1-c,us-central1-c,us-central1-b",
+        "memoryMin": "2.048 GB",
+        "memory": "26 GB"
+      },
+      "callCaching": {
+        "effectiveCallCachingMode": "CallCachingOff",
+        "allowResultReuse": false
+      },
+      "inputs": {
+        "ncpus": 4,
+        "minus_strand_unique_wig": "gs://mirna-seq-pipeline/ENCSR000AET_gzippedanno/mirna_seq_pipeline/d0b4de05-e5e0-483a-96ca-82bb0cb98796/call-star/shard-1/glob-581651af3e8d85ac9aecfba9cf6eaea5/Signal.Unique.str2.out.wig",
+        "disk": "local-disk 200 SSD",
+        "output_prefix": "rep2ENCSR000AET",
+        "plus_strand_unique_wig": "gs://mirna-seq-pipeline/ENCSR000AET_gzippedanno/mirna_seq_pipeline/d0b4de05-e5e0-483a-96ca-82bb0cb98796/call-star/shard-1/glob-34e0341cc922c3159cacc690d41b117b/Signal.Unique.str1.out.wig",
+        "chrom_sizes": "gs://mirna-seq-pipeline/full_sized_reference_files/GRCh38_EBV.chrom.sizes.tsv",
+        "minus_strand_all_wig": "gs://mirna-seq-pipeline/ENCSR000AET_gzippedanno/mirna_seq_pipeline/d0b4de05-e5e0-483a-96ca-82bb0cb98796/call-star/shard-1/glob-95ad94f4655a5da1faa51c905e436322/Signal.UniqueMultiple.str2.out.wig",
+        "ramGB": 26,
+        "plus_strand_all_wig": "gs://mirna-seq-pipeline/ENCSR000AET_gzippedanno/mirna_seq_pipeline/d0b4de05-e5e0-483a-96ca-82bb0cb98796/call-star/shard-1/glob-41773c7ab111b23d6eb594bba78fa1d9/Signal.UniqueMultiple.str1.out.wig"
+      },
+      "backendLabels": {
+        "cromwell-workflow-id": "cromwell-d0b4de05-e5e0-483a-96ca-82bb0cb98796",
+        "wdl-task-name": "wigtobigwig"
+      },
+      "returnCode": 0,
+      "labels": {
+        "wdl-task-name": "wigtobigwig",
+        "cromwell-workflow-id": "cromwell-d0b4de05-e5e0-483a-96ca-82bb0cb98796"
+      },
+      "jobId": "operations/EP7um9WeLRi7m4DakM38lDgggf63qf0bKg9wcm9kdWN0aW9uUXVldWU",
+      "backend": "google",
+      "end": "2019-04-04T23:22:53.519Z",
+      "dockerImageUsed": "quay.io/encode-dcc/mirna-seq-pipeline@sha256:764edfa231dab50bda6d9d57ff67f84da5d57e0f1d5e49b327a7c3815393068a",
+      "stderr": "gs://mirna-seq-pipeline/ENCSR000AET_gzippedanno/mirna_seq_pipeline/d0b4de05-e5e0-483a-96ca-82bb0cb98796/call-wigtobigwig/shard-1/stderr",
+      "callRoot": "gs://mirna-seq-pipeline/ENCSR000AET_gzippedanno/mirna_seq_pipeline/d0b4de05-e5e0-483a-96ca-82bb0cb98796/call-wigtobigwig/shard-1",
+      "attempt": 1,
+      "executionEvents": [{
+        "endTime": "2019-04-04T23:19:34.447Z",
+        "startTime": "2019-04-04T23:19:34.441Z",
+        "description": "PreparingJob"
+      }, {
+        "startTime": "2019-04-04T23:20:53.702713175Z",
+        "endTime": "2019-04-04T23:21:17.045764587Z",
+        "description": "pulling-image"
+      }, {
+        "endTime": "2019-04-04T23:21:24.910790934Z",
+        "description": "localizing-files",
+        "startTime": "2019-04-04T23:21:17.045764587Z"
+      }, {
+        "endTime": "2019-04-04T23:19:34.326Z",
+        "startTime": "2019-04-04T23:19:34.325Z",
+        "description": "Pending"
+      }, {
+        "description": "RunningJob",
+        "startTime": "2019-04-04T23:19:34.447Z",
+        "endTime": "2019-04-04T23:20:04Z"
+      }, {
+        "description": "RequestingExecutionToken",
+        "startTime": "2019-04-04T23:19:34.326Z",
+        "endTime": "2019-04-04T23:19:34.439Z"
+      }, {
+        "description": "initializing VM",
+        "startTime": "2019-04-04T23:20:14Z",
+        "endTime": "2019-04-04T23:20:53.702583376Z"
+      }, {
+        "endTime": "2019-04-04T23:20:53.702713175Z",
+        "startTime": "2019-04-04T23:20:53.702583376Z",
+        "description": "start"
+      }, {
+        "startTime": "2019-04-04T23:21:53.708749546Z",
+        "endTime": "2019-04-04T23:21:53.708749546Z",
+        "description": "ok"
+      }, {
+        "startTime": "2019-04-04T23:20:04Z",
+        "description": "waiting for quota",
+        "endTime": "2019-04-04T23:20:14Z"
+      }, {
+        "description": "UpdatingJobStore",
+        "endTime": "2019-04-04T23:22:53.519Z",
+        "startTime": "2019-04-04T23:22:53.519Z"
+      }, {
+        "description": "WaitingForValueStore",
+        "endTime": "2019-04-04T23:19:34.441Z",
+        "startTime": "2019-04-04T23:19:34.439Z"
+      }, {
+        "startTime": "2019-04-04T23:21:35.957933733Z",
+        "endTime": "2019-04-04T23:21:53.708749546Z",
+        "description": "delocalizing-files"
+      }, {
+        "endTime": "2019-04-04T23:22:53.519Z",
+        "startTime": "2019-04-04T23:21:53.708749546Z",
+        "description": "cromwell poll interval"
+      }, {
+        "startTime": "2019-04-04T23:21:24.910790934Z",
+        "endTime": "2019-04-04T23:21:35.957933733Z",
+        "description": "running-docker"
+      }],
+      "backendLogs": {
+        "log": "gs://mirna-seq-pipeline/ENCSR000AET_gzippedanno/mirna_seq_pipeline/d0b4de05-e5e0-483a-96ca-82bb0cb98796/call-wigtobigwig/shard-1/wigtobigwig-1.log"
+      },
+      "start": "2019-04-04T23:19:34.321Z"
+    }],
+    "mirna_seq_pipeline.spearman_correlation": [{
+      "preemptible": false,
+      "executionStatus": "Done",
+      "stdout": "gs://mirna-seq-pipeline/ENCSR000AET_gzippedanno/mirna_seq_pipeline/d0b4de05-e5e0-483a-96ca-82bb0cb98796/call-spearman_correlation/stdout",
+      "backendStatus": "Success",
+      "commandLine": "python3 $(which calculate_correlation.py) --quants /cromwell_root/mirna-seq-pipeline/ENCSR000AET_gzippedanno/mirna_seq_pipeline/d0b4de05-e5e0-483a-96ca-82bb0cb98796/call-star/shard-0/glob-ee3cac44669b7460fea102fa893f1b06/rep1ENCSR000AET.tsv /cromwell_root/mirna-seq-pipeline/ENCSR000AET_gzippedanno/mirna_seq_pipeline/d0b4de05-e5e0-483a-96ca-82bb0cb98796/call-star/shard-1/glob-ee3cac44669b7460fea102fa893f1b06/rep2ENCSR000AET.tsv --output_filename ENCSR000AET_spearman.json",
+      "shardIndex": -1,
+      "jes": {
+        "endpointUrl": "https://genomics.googleapis.com/",
+        "machineType": "us-west1-c/n1-standard-1",
+        "googleProject": "rna-seq-pipeline-204900",
+        "executionBucket": "gs://mirna-seq-pipeline/ENCSR000AET_gzippedanno",
+        "zone": "us-west1-c",
+        "instanceName": "ggp-7602088298712682340"
+      },
+      "outputs": {
+        "spearman_json": "gs://mirna-seq-pipeline/ENCSR000AET_gzippedanno/mirna_seq_pipeline/d0b4de05-e5e0-483a-96ca-82bb0cb98796/call-spearman_correlation/glob-a561370dd84a477b9f6b00e9824fbde0/ENCSR000AET_spearman.json"
+      },
+      "runtimeAttributes": {
+        "preemptible": "0",
+        "failOnStderr": "false",
+        "bootDiskSizeGb": "10",
+        "disks": "local-disk 20 SSD",
+        "continueOnReturnCode": "0",
+        "docker": "quay.io/encode-dcc/mirna-seq-pipeline:template",
+        "maxRetries": "0",
+        "cpu": "1",
+        "cpuMin": "1",
+        "noAddress": "false",
+        "zones": "us-west1-a,us-west1-b,us-west1-c,us-central1-c,us-central1-b",
+        "memoryMin": "2.048 GB",
+        "memory": "2 GB"
+      },
+      "callCaching": {
+        "effectiveCallCachingMode": "CallCachingOff",
+        "allowResultReuse": false
+      },
+      "inputs": {
+        "output_filename": "ENCSR000AET_spearman.json",
+        "quants": ["gs://mirna-seq-pipeline/ENCSR000AET_gzippedanno/mirna_seq_pipeline/d0b4de05-e5e0-483a-96ca-82bb0cb98796/call-star/shard-0/glob-ee3cac44669b7460fea102fa893f1b06/rep1ENCSR000AET.tsv", "gs://mirna-seq-pipeline/ENCSR000AET_gzippedanno/mirna_seq_pipeline/d0b4de05-e5e0-483a-96ca-82bb0cb98796/call-star/shard-1/glob-ee3cac44669b7460fea102fa893f1b06/rep2ENCSR000AET.tsv"]
+      },
+      "backendLabels": {
+        "wdl-task-name": "spearman-correlation",
+        "cromwell-workflow-id": "cromwell-d0b4de05-e5e0-483a-96ca-82bb0cb98796"
+      },
+      "returnCode": 0,
+      "labels": {
+        "wdl-task-name": "spearman_correlation",
+        "cromwell-workflow-id": "cromwell-d0b4de05-e5e0-483a-96ca-82bb0cb98796"
+      },
+      "jobId": "operations/EPz1ndWeLRjknrGf--CCwGkggf63qf0bKg9wcm9kdWN0aW9uUXVldWU",
+      "backend": "google",
+      "end": "2019-04-04T23:22:19.295Z",
+      "dockerImageUsed": "quay.io/encode-dcc/mirna-seq-pipeline@sha256:764edfa231dab50bda6d9d57ff67f84da5d57e0f1d5e49b327a7c3815393068a",
+      "stderr": "gs://mirna-seq-pipeline/ENCSR000AET_gzippedanno/mirna_seq_pipeline/d0b4de05-e5e0-483a-96ca-82bb0cb98796/call-spearman_correlation/stderr",
+      "callRoot": "gs://mirna-seq-pipeline/ENCSR000AET_gzippedanno/mirna_seq_pipeline/d0b4de05-e5e0-483a-96ca-82bb0cb98796/call-spearman_correlation",
+      "attempt": 1,
+      "executionEvents": [{
+        "endTime": "2019-04-04T23:20:09.448Z",
+        "description": "PreparingJob",
+        "startTime": "2019-04-04T23:20:09.440Z"
+      }, {
+        "endTime": "2019-04-04T23:21:40.640694285Z",
+        "startTime": "2019-04-04T23:21:36.252199180Z",
+        "description": "localizing-files"
+      }, {
+        "startTime": "2019-04-04T23:20:08.991Z",
+        "description": "Pending",
+        "endTime": "2019-04-04T23:20:08.991Z"
+      }, {
+        "endTime": "2019-04-04T23:21:06.704841431Z",
+        "description": "initializing VM",
+        "startTime": "2019-04-04T23:20:47Z"
+      }, {
+        "description": "pulling-image",
+        "startTime": "2019-04-04T23:21:06.706053733Z",
+        "endTime": "2019-04-04T23:21:36.252199180Z"
+      }, {
+        "endTime": "2019-04-04T23:21:54.532962740Z",
+        "startTime": "2019-04-04T23:21:46.445032636Z",
+        "description": "delocalizing-files"
+      }, {
+        "description": "cromwell poll interval",
+        "endTime": "2019-04-04T23:22:19.294Z",
+        "startTime": "2019-04-04T23:21:54.532962740Z"
+      }, {
+        "description": "WaitingForValueStore",
+        "endTime": "2019-04-04T23:20:09.440Z",
+        "startTime": "2019-04-04T23:20:09.440Z"
+      }, {
+        "description": "start",
+        "startTime": "2019-04-04T23:21:06.704841431Z",
+        "endTime": "2019-04-04T23:21:06.706053733Z"
+      }, {
+        "endTime": "2019-04-04T23:20:09.440Z",
+        "description": "RequestingExecutionToken",
+        "startTime": "2019-04-04T23:20:08.991Z"
+      }, {
+        "description": "running-docker",
+        "startTime": "2019-04-04T23:21:40.640694285Z",
+        "endTime": "2019-04-04T23:21:46.445032636Z"
+      }, {
+        "startTime": "2019-04-04T23:20:38Z",
+        "endTime": "2019-04-04T23:20:47Z",
+        "description": "waiting for quota"
+      }, {
+        "startTime": "2019-04-04T23:22:19.294Z",
+        "description": "UpdatingJobStore",
+        "endTime": "2019-04-04T23:22:19.294Z"
+      }, {
+        "startTime": "2019-04-04T23:20:09.448Z",
+        "endTime": "2019-04-04T23:20:38Z",
+        "description": "RunningJob"
+      }, {
+        "startTime": "2019-04-04T23:21:54.532962740Z",
+        "description": "ok",
+        "endTime": "2019-04-04T23:21:54.532962740Z"
+      }],
+      "backendLogs": {
+        "log": "gs://mirna-seq-pipeline/ENCSR000AET_gzippedanno/mirna_seq_pipeline/d0b4de05-e5e0-483a-96ca-82bb0cb98796/call-spearman_correlation/spearman_correlation.log"
+      },
+      "start": "2019-04-04T23:20:08.991Z"
+    }],
+    "mirna_seq_pipeline.star": [{
+      "preemptible": false,
+      "executionStatus": "Done",
+      "stdout": "gs://mirna-seq-pipeline/ENCSR000AET_gzippedanno/mirna_seq_pipeline/d0b4de05-e5e0-483a-96ca-82bb0cb98796/call-star/shard-0/stdout",
+      "backendStatus": "Success",
+      "commandLine": "tar -xzvf /cromwell_root/mirna-seq-pipeline/Index_to_portal/generate_STAR_index/0884713c-c91d-4a48-a899-599a518548f6/call-generate_index/glob-bafd57f6d53786e3cd6ef2ca2d804565/Star_index_GRCh38_from_primary_anno_to_portal.tar.gz\ngzip -cd /cromwell_root/mirna-seq-pipeline/full_sized_reference_files/ENCFF628BVT_mirna_anno.gtf.gz > anno.gtf\nSTAR \\\n    --genomeDir out \\\n    --readFilesIn /cromwell_root/mirna-seq-pipeline/ENCSR000AET_gzippedanno/mirna_seq_pipeline/d0b4de05-e5e0-483a-96ca-82bb0cb98796/call-cutadapt/shard-0/glob-13510a96631ebcd33b0389553a698adf/rep1ENCSR000AET_trim.fastq \\\n    --sjdbGTFfile anno.gtf \\\n    --runThreadN 16 \\\n    --alignEndsType EndToEnd \\\n    --outFilterMismatchNmax 1 \\\n    --outFilterMultimapScoreRange 0 \\\n    --quantMode TranscriptomeSAM GeneCounts \\\n    --outReadsUnmapped Fastx \\\n    --outSAMtype BAM SortedByCoordinate \\\n    --outFilterMultimapNmax 10 \\\n    --outSAMunmapped Within \\\n    --outFilterScoreMinOverLread 0 \\\n    --outFilterMatchNminOverLread 0 \\\n    --outFilterMatchNmin 16 \\\n    --alignSJDBoverhangMin 1000 \\\n    --alignIntronMax 1 \\\n    --outWigType wiggle \\\n    --outWigStrand Stranded \\\n    --outWigNorm RPM\nmv Aligned.sortedByCoord.out.bam rep1ENCSR000AET.bam\nmv ReadsPerGene.out.tab rep1ENCSR000AET.tsv\nmv Log.final.out rep1ENCSR000AET.Log.final.out\npython3  $(which make_star_qc.py) --quants rep1ENCSR000AET.tsv \\\n                                  --star_log rep1ENCSR000AET.Log.final.out \\\n                                  --output_filename rep1ENCSR000AET_star_qc.json",
+      "shardIndex": 0,
+      "jes": {
+        "endpointUrl": "https://genomics.googleapis.com/",
+        "machineType": "us-central1-c/n1-standard-16",
+        "googleProject": "rna-seq-pipeline-204900",
+        "executionBucket": "gs://mirna-seq-pipeline/ENCSR000AET_gzippedanno",
+        "zone": "us-central1-c",
+        "instanceName": "ggp-11422699363779759922"
+      },
+      "outputs": {
+        "minus_strand_unique_wig": "gs://mirna-seq-pipeline/ENCSR000AET_gzippedanno/mirna_seq_pipeline/d0b4de05-e5e0-483a-96ca-82bb0cb98796/call-star/shard-0/glob-581651af3e8d85ac9aecfba9cf6eaea5/Signal.Unique.str2.out.wig",
+        "plus_strand_unique_wig": "gs://mirna-seq-pipeline/ENCSR000AET_gzippedanno/mirna_seq_pipeline/d0b4de05-e5e0-483a-96ca-82bb0cb98796/call-star/shard-0/glob-34e0341cc922c3159cacc690d41b117b/Signal.Unique.str1.out.wig",
+        "tsv": "gs://mirna-seq-pipeline/ENCSR000AET_gzippedanno/mirna_seq_pipeline/d0b4de05-e5e0-483a-96ca-82bb0cb98796/call-star/shard-0/glob-ee3cac44669b7460fea102fa893f1b06/rep1ENCSR000AET.tsv",
+        "minus_strand_all_wig": "gs://mirna-seq-pipeline/ENCSR000AET_gzippedanno/mirna_seq_pipeline/d0b4de05-e5e0-483a-96ca-82bb0cb98796/call-star/shard-0/glob-95ad94f4655a5da1faa51c905e436322/Signal.UniqueMultiple.str2.out.wig",
+        "star_qc_json": "gs://mirna-seq-pipeline/ENCSR000AET_gzippedanno/mirna_seq_pipeline/d0b4de05-e5e0-483a-96ca-82bb0cb98796/call-star/shard-0/glob-4c4d21ad2cdbd65d478f6b4b36f6c20a/rep1ENCSR000AET_star_qc.json",
+        "plus_strand_all_wig": "gs://mirna-seq-pipeline/ENCSR000AET_gzippedanno/mirna_seq_pipeline/d0b4de05-e5e0-483a-96ca-82bb0cb98796/call-star/shard-0/glob-41773c7ab111b23d6eb594bba78fa1d9/Signal.UniqueMultiple.str1.out.wig",
+        "star_qc_log": "gs://mirna-seq-pipeline/ENCSR000AET_gzippedanno/mirna_seq_pipeline/d0b4de05-e5e0-483a-96ca-82bb0cb98796/call-star/shard-0/glob-fdee3fa8e419c9ae7368882e11dc0027/star_qc.log",
+        "bam": "gs://mirna-seq-pipeline/ENCSR000AET_gzippedanno/mirna_seq_pipeline/d0b4de05-e5e0-483a-96ca-82bb0cb98796/call-star/shard-0/glob-41e68ec83f25cd81fd19adf17b56e22e/rep1ENCSR000AET.bam"
+      },
+      "runtimeAttributes": {
+        "preemptible": "0",
+        "failOnStderr": "false",
+        "bootDiskSizeGb": "10",
+        "disks": "local-disk 200 SSD",
+        "continueOnReturnCode": "0",
+        "docker": "quay.io/encode-dcc/mirna-seq-pipeline:template",
+        "maxRetries": "0",
+        "cpu": "16",
+        "cpuMin": "1",
+        "noAddress": "false",
+        "zones": "us-west1-a,us-west1-b,us-west1-c,us-central1-c,us-central1-b",
+        "memoryMin": "2.048 GB",
+        "memory": "60 GB"
+      },
+      "callCaching": {
+        "effectiveCallCachingMode": "CallCachingOff",
+        "allowResultReuse": false
+      },
+      "inputs": {
+        "ncpus": 16,
+        "disk": "local-disk 200 SSD",
+        "output_prefix": "rep1ENCSR000AET",
+        "annotation": "gs://mirna-seq-pipeline/full_sized_reference_files/ENCFF628BVT_mirna_anno.gtf.gz",
+        "ramGB": 60,
+        "fastq": "gs://mirna-seq-pipeline/ENCSR000AET_gzippedanno/mirna_seq_pipeline/d0b4de05-e5e0-483a-96ca-82bb0cb98796/call-cutadapt/shard-0/glob-13510a96631ebcd33b0389553a698adf/rep1ENCSR000AET_trim.fastq",
+        "index": "gs://mirna-seq-pipeline/Index_to_portal/generate_STAR_index/0884713c-c91d-4a48-a899-599a518548f6/call-generate_index/glob-bafd57f6d53786e3cd6ef2ca2d804565/Star_index_GRCh38_from_primary_anno_to_portal.tar.gz"
+      },
+      "backendLabels": {
+        "cromwell-workflow-id": "cromwell-d0b4de05-e5e0-483a-96ca-82bb0cb98796",
+        "wdl-task-name": "star"
+      },
+      "returnCode": 0,
+      "labels": {
+        "wdl-task-name": "star",
+        "cromwell-workflow-id": "cromwell-d0b4de05-e5e0-483a-96ca-82bb0cb98796"
+      },
+      "jobId": "operations/EJXO3NSeLRiynrGR0pHlwp4BIIH-t6n9GyoPcHJvZHVjdGlvblF1ZXVl",
+      "backend": "google",
+      "end": "2019-04-04T23:20:06.849Z",
+      "dockerImageUsed": "quay.io/encode-dcc/mirna-seq-pipeline@sha256:764edfa231dab50bda6d9d57ff67f84da5d57e0f1d5e49b327a7c3815393068a",
+      "stderr": "gs://mirna-seq-pipeline/ENCSR000AET_gzippedanno/mirna_seq_pipeline/d0b4de05-e5e0-483a-96ca-82bb0cb98796/call-star/shard-0/stderr",
+      "callRoot": "gs://mirna-seq-pipeline/ENCSR000AET_gzippedanno/mirna_seq_pipeline/d0b4de05-e5e0-483a-96ca-82bb0cb98796/call-star/shard-0",
+      "attempt": 1,
+      "executionEvents": [{
+        "startTime": "2019-04-04T23:17:38.438539451Z",
+        "endTime": "2019-04-04T23:20:06.848Z",
+        "description": "cromwell poll interval"
+      }, {
+        "endTime": "2019-04-04T23:03:37.402695343Z",
+        "description": "start",
+        "startTime": "2019-04-04T23:03:37.402612235Z"
+      }, {
+        "endTime": "2019-04-04T23:17:38.438539451Z",
+        "description": "ok",
+        "startTime": "2019-04-04T23:17:38.438539451Z"
+      }, {
+        "endTime": "2019-04-04T23:02:17.445Z",
+        "description": "WaitingForValueStore",
+        "startTime": "2019-04-04T23:02:17.442Z"
+      }, {
+        "description": "localizing-files",
+        "startTime": "2019-04-04T23:03:57.942864637Z",
+        "endTime": "2019-04-04T23:08:59.378342651Z"
+      }, {
+        "endTime": "2019-04-04T23:17:38.438539451Z",
+        "description": "delocalizing-files",
+        "startTime": "2019-04-04T23:17:07.358946877Z"
+      }, {
+        "endTime": "2019-04-04T23:02:48Z",
+        "startTime": "2019-04-04T23:02:17.452Z",
+        "description": "RunningJob"
+      }, {
+        "endTime": "2019-04-04T23:02:17.405Z",
+        "startTime": "2019-04-04T23:02:17.405Z",
+        "description": "Pending"
+      }, {
+        "endTime": "2019-04-04T23:02:17.452Z",
+        "description": "PreparingJob",
+        "startTime": "2019-04-04T23:02:17.445Z"
+      }, {
+        "description": "pulling-image",
+        "endTime": "2019-04-04T23:03:57.942864637Z",
+        "startTime": "2019-04-04T23:03:37.402695343Z"
+      }, {
+        "endTime": "2019-04-04T23:02:17.442Z",
+        "startTime": "2019-04-04T23:02:17.405Z",
+        "description": "RequestingExecutionToken"
+      }, {
+        "description": "running-docker",
+        "startTime": "2019-04-04T23:08:59.378342651Z",
+        "endTime": "2019-04-04T23:17:07.358946877Z"
+      }, {
+        "startTime": "2019-04-04T23:20:06.848Z",
+        "description": "UpdatingJobStore",
+        "endTime": "2019-04-04T23:20:06.848Z"
+      }, {
+        "endTime": "2019-04-04T23:03:37.402612235Z",
+        "startTime": "2019-04-04T23:02:57Z",
+        "description": "initializing VM"
+      }, {
+        "startTime": "2019-04-04T23:02:48Z",
+        "description": "waiting for quota",
+        "endTime": "2019-04-04T23:02:57Z"
+      }],
+      "backendLogs": {
+        "log": "gs://mirna-seq-pipeline/ENCSR000AET_gzippedanno/mirna_seq_pipeline/d0b4de05-e5e0-483a-96ca-82bb0cb98796/call-star/shard-0/star-0.log"
+      },
+      "start": "2019-04-04T23:02:17.404Z"
+    }, {
+      "preemptible": false,
+      "executionStatus": "Done",
+      "stdout": "gs://mirna-seq-pipeline/ENCSR000AET_gzippedanno/mirna_seq_pipeline/d0b4de05-e5e0-483a-96ca-82bb0cb98796/call-star/shard-1/stdout",
+      "backendStatus": "Success",
+      "commandLine": "tar -xzvf /cromwell_root/mirna-seq-pipeline/Index_to_portal/generate_STAR_index/0884713c-c91d-4a48-a899-599a518548f6/call-generate_index/glob-bafd57f6d53786e3cd6ef2ca2d804565/Star_index_GRCh38_from_primary_anno_to_portal.tar.gz\ngzip -cd /cromwell_root/mirna-seq-pipeline/full_sized_reference_files/ENCFF628BVT_mirna_anno.gtf.gz > anno.gtf\nSTAR \\\n    --genomeDir out \\\n    --readFilesIn /cromwell_root/mirna-seq-pipeline/ENCSR000AET_gzippedanno/mirna_seq_pipeline/d0b4de05-e5e0-483a-96ca-82bb0cb98796/call-cutadapt/shard-1/glob-13510a96631ebcd33b0389553a698adf/rep2ENCSR000AET_trim.fastq \\\n    --sjdbGTFfile anno.gtf \\\n    --runThreadN 16 \\\n    --alignEndsType EndToEnd \\\n    --outFilterMismatchNmax 1 \\\n    --outFilterMultimapScoreRange 0 \\\n    --quantMode TranscriptomeSAM GeneCounts \\\n    --outReadsUnmapped Fastx \\\n    --outSAMtype BAM SortedByCoordinate \\\n    --outFilterMultimapNmax 10 \\\n    --outSAMunmapped Within \\\n    --outFilterScoreMinOverLread 0 \\\n    --outFilterMatchNminOverLread 0 \\\n    --outFilterMatchNmin 16 \\\n    --alignSJDBoverhangMin 1000 \\\n    --alignIntronMax 1 \\\n    --outWigType wiggle \\\n    --outWigStrand Stranded \\\n    --outWigNorm RPM\nmv Aligned.sortedByCoord.out.bam rep2ENCSR000AET.bam\nmv ReadsPerGene.out.tab rep2ENCSR000AET.tsv\nmv Log.final.out rep2ENCSR000AET.Log.final.out\npython3  $(which make_star_qc.py) --quants rep2ENCSR000AET.tsv \\\n                                  --star_log rep2ENCSR000AET.Log.final.out \\\n                                  --output_filename rep2ENCSR000AET_star_qc.json",
+      "shardIndex": 1,
+      "jes": {
+        "endpointUrl": "https://genomics.googleapis.com/",
+        "machineType": "us-central1-b/n1-standard-16",
+        "googleProject": "rna-seq-pipeline-204900",
+        "executionBucket": "gs://mirna-seq-pipeline/ENCSR000AET_gzippedanno",
+        "zone": "us-central1-b",
+        "instanceName": "ggp-8708212899031623961"
+      },
+      "outputs": {
+        "minus_strand_unique_wig": "gs://mirna-seq-pipeline/ENCSR000AET_gzippedanno/mirna_seq_pipeline/d0b4de05-e5e0-483a-96ca-82bb0cb98796/call-star/shard-1/glob-581651af3e8d85ac9aecfba9cf6eaea5/Signal.Unique.str2.out.wig",
+        "plus_strand_unique_wig": "gs://mirna-seq-pipeline/ENCSR000AET_gzippedanno/mirna_seq_pipeline/d0b4de05-e5e0-483a-96ca-82bb0cb98796/call-star/shard-1/glob-34e0341cc922c3159cacc690d41b117b/Signal.Unique.str1.out.wig",
+        "tsv": "gs://mirna-seq-pipeline/ENCSR000AET_gzippedanno/mirna_seq_pipeline/d0b4de05-e5e0-483a-96ca-82bb0cb98796/call-star/shard-1/glob-ee3cac44669b7460fea102fa893f1b06/rep2ENCSR000AET.tsv",
+        "minus_strand_all_wig": "gs://mirna-seq-pipeline/ENCSR000AET_gzippedanno/mirna_seq_pipeline/d0b4de05-e5e0-483a-96ca-82bb0cb98796/call-star/shard-1/glob-95ad94f4655a5da1faa51c905e436322/Signal.UniqueMultiple.str2.out.wig",
+        "star_qc_json": "gs://mirna-seq-pipeline/ENCSR000AET_gzippedanno/mirna_seq_pipeline/d0b4de05-e5e0-483a-96ca-82bb0cb98796/call-star/shard-1/glob-4c4d21ad2cdbd65d478f6b4b36f6c20a/rep2ENCSR000AET_star_qc.json",
+        "plus_strand_all_wig": "gs://mirna-seq-pipeline/ENCSR000AET_gzippedanno/mirna_seq_pipeline/d0b4de05-e5e0-483a-96ca-82bb0cb98796/call-star/shard-1/glob-41773c7ab111b23d6eb594bba78fa1d9/Signal.UniqueMultiple.str1.out.wig",
+        "star_qc_log": "gs://mirna-seq-pipeline/ENCSR000AET_gzippedanno/mirna_seq_pipeline/d0b4de05-e5e0-483a-96ca-82bb0cb98796/call-star/shard-1/glob-fdee3fa8e419c9ae7368882e11dc0027/star_qc.log",
+        "bam": "gs://mirna-seq-pipeline/ENCSR000AET_gzippedanno/mirna_seq_pipeline/d0b4de05-e5e0-483a-96ca-82bb0cb98796/call-star/shard-1/glob-24e3697fb78e1597584a055014c29da2/rep2ENCSR000AET.bam"
+      },
+      "runtimeAttributes": {
+        "preemptible": "0",
+        "failOnStderr": "false",
+        "bootDiskSizeGb": "10",
+        "disks": "local-disk 200 SSD",
+        "continueOnReturnCode": "0",
+        "docker": "quay.io/encode-dcc/mirna-seq-pipeline:template",
+        "maxRetries": "0",
+        "cpu": "16",
+        "cpuMin": "1",
+        "noAddress": "false",
+        "zones": "us-west1-a,us-west1-b,us-west1-c,us-central1-c,us-central1-b",
+        "memoryMin": "2.048 GB",
+        "memory": "60 GB"
+      },
+      "callCaching": {
+        "effectiveCallCachingMode": "CallCachingOff",
+        "allowResultReuse": false
+      },
+      "inputs": {
+        "ncpus": 16,
+        "disk": "local-disk 200 SSD",
+        "output_prefix": "rep2ENCSR000AET",
+        "annotation": "gs://mirna-seq-pipeline/full_sized_reference_files/ENCFF628BVT_mirna_anno.gtf.gz",
+        "ramGB": 60,
+        "fastq": "gs://mirna-seq-pipeline/ENCSR000AET_gzippedanno/mirna_seq_pipeline/d0b4de05-e5e0-483a-96ca-82bb0cb98796/call-cutadapt/shard-1/glob-13510a96631ebcd33b0389553a698adf/rep2ENCSR000AET_trim.fastq",
+        "index": "gs://mirna-seq-pipeline/Index_to_portal/generate_STAR_index/0884713c-c91d-4a48-a899-599a518548f6/call-generate_index/glob-bafd57f6d53786e3cd6ef2ca2d804565/Star_index_GRCh38_from_primary_anno_to_portal.tar.gz"
+      },
+      "backendLabels": {
+        "cromwell-workflow-id": "cromwell-d0b4de05-e5e0-483a-96ca-82bb0cb98796",
+        "wdl-task-name": "star"
+      },
+      "returnCode": 0,
+      "labels": {
+        "wdl-task-name": "star",
+        "cromwell-workflow-id": "cromwell-d0b4de05-e5e0-483a-96ca-82bb0cb98796"
+      },
+      "jobId": "operations/EPLN3NSeLRiZ0oTa5a_y7Hgggf63qf0bKg9wcm9kdWN0aW9uUXVldWU",
+      "backend": "google",
+      "end": "2019-04-04T23:19:33.288Z",
+      "dockerImageUsed": "quay.io/encode-dcc/mirna-seq-pipeline@sha256:764edfa231dab50bda6d9d57ff67f84da5d57e0f1d5e49b327a7c3815393068a",
+      "stderr": "gs://mirna-seq-pipeline/ENCSR000AET_gzippedanno/mirna_seq_pipeline/d0b4de05-e5e0-483a-96ca-82bb0cb98796/call-star/shard-1/stderr",
+      "callRoot": "gs://mirna-seq-pipeline/ENCSR000AET_gzippedanno/mirna_seq_pipeline/d0b4de05-e5e0-483a-96ca-82bb0cb98796/call-star/shard-1",
+      "attempt": 1,
+      "executionEvents": [{
+        "endTime": "2019-04-04T23:02:17.471Z",
+        "startTime": "2019-04-04T23:02:17.441Z",
+        "description": "PreparingJob"
+      }, {
+        "endTime": "2019-04-04T23:18:35.859037068Z",
+        "startTime": "2019-04-04T23:18:02.755642396Z",
+        "description": "delocalizing-files"
+      }, {
+        "description": "RunningJob",
+        "startTime": "2019-04-04T23:02:17.471Z",
+        "endTime": "2019-04-04T23:02:48Z"
+      }, {
+        "endTime": "2019-04-04T23:19:33.287Z",
+        "startTime": "2019-04-04T23:19:33.287Z",
+        "description": "UpdatingJobStore"
+      }, {
+        "description": "WaitingForValueStore",
+        "startTime": "2019-04-04T23:02:17.440Z",
+        "endTime": "2019-04-04T23:02:17.441Z"
+      }, {
+        "description": "waiting for quota",
+        "startTime": "2019-04-04T23:02:48Z",
+        "endTime": "2019-04-04T23:02:57Z"
+      }, {
+        "endTime": "2019-04-04T23:02:17.440Z",
+        "startTime": "2019-04-04T23:02:17.407Z",
+        "description": "RequestingExecutionToken"
+      }, {
+        "startTime": "2019-04-04T23:03:45.701873571Z",
+        "description": "pulling-image",
+        "endTime": "2019-04-04T23:04:34.950831218Z"
+      }, {
+        "endTime": "2019-04-04T23:03:45.701873571Z",
+        "startTime": "2019-04-04T23:03:45.701779278Z",
+        "description": "start"
+      }, {
+        "endTime": "2019-04-04T23:02:17.407Z",
+        "startTime": "2019-04-04T23:02:17.406Z",
+        "description": "Pending"
+      }, {
+        "endTime": "2019-04-04T23:18:02.755642396Z",
+        "startTime": "2019-04-04T23:09:55.338686416Z",
+        "description": "running-docker"
+      }, {
+        "description": "cromwell poll interval",
+        "startTime": "2019-04-04T23:18:36Z",
+        "endTime": "2019-04-04T23:19:33.287Z"
+      }, {
+        "endTime": "2019-04-04T23:18:36Z",
+        "startTime": "2019-04-04T23:18:35.859037068Z",
+        "description": "ok"
+      }, {
+        "startTime": "2019-04-04T23:02:57Z",
+        "description": "initializing VM",
+        "endTime": "2019-04-04T23:03:45.701779278Z"
+      }, {
+        "startTime": "2019-04-04T23:04:34.950831218Z",
+        "description": "localizing-files",
+        "endTime": "2019-04-04T23:09:55.338686416Z"
+      }],
+      "backendLogs": {
+        "log": "gs://mirna-seq-pipeline/ENCSR000AET_gzippedanno/mirna_seq_pipeline/d0b4de05-e5e0-483a-96ca-82bb0cb98796/call-star/shard-1/star-1.log"
+      },
+      "start": "2019-04-04T23:02:17.406Z"
+    }],
+    "mirna_seq_pipeline.cutadapt": [{
+      "preemptible": false,
+      "executionStatus": "Done",
+      "stdout": "gs://mirna-seq-pipeline/ENCSR000AET_gzippedanno/mirna_seq_pipeline/d0b4de05-e5e0-483a-96ca-82bb0cb98796/call-cutadapt/shard-0/stdout",
+      "backendStatus": "Success",
+      "commandLine": "cutadapt \\\n    -a file:/cromwell_root/mirna-seq-pipeline/full_sized_reference_files/adapters/three_prime_adapter.fasta \\\n    -e 0.25 \\\n    --match-read-wildcards \\\n    --untrimmed-output=rep1ENCSR000AET_NO3AD.fastq \\\n    /cromwell_root/mirna-seq-pipeline/inputs/ENCSR000AET/ENCFF001RDL_rep1.fastq.gz \\\n    | cutadapt \\\n    -e 0.34 \\\n    --match-read-wildcards \\\n    --no-indels \\\n    -m 15 \\\n    -O 6 \\\n    -n 1 \\\n    -g file:/cromwell_root/mirna-seq-pipeline/full_sized_reference_files/adapters/five_prime_adapter_set3.fasta \\\n    --untrimmed-output=rep1ENCSR000AET_NO5AD.fastq \\\n    --too-short-output=rep1ENCSR000AET_SHORT_FAIL.fastq \\\n    - > rep1ENCSR000AET_trim.fastq",
+      "shardIndex": 0,
+      "jes": {
+        "endpointUrl": "https://genomics.googleapis.com/",
+        "machineType": "us-west1-c/n1-standard-2",
+        "googleProject": "rna-seq-pipeline-204900",
+        "executionBucket": "gs://mirna-seq-pipeline/ENCSR000AET_gzippedanno",
+        "zone": "us-west1-c",
+        "instanceName": "ggp-487985610796985094"
+      },
+      "outputs": {
+        "no5ad_untrimmed_fastq": "gs://mirna-seq-pipeline/ENCSR000AET_gzippedanno/mirna_seq_pipeline/d0b4de05-e5e0-483a-96ca-82bb0cb98796/call-cutadapt/shard-0/glob-572b7543d93f95b496a2056e7f497e36/rep1ENCSR000AET_NO5AD.fastq",
+        "trimmed_fastq": "gs://mirna-seq-pipeline/ENCSR000AET_gzippedanno/mirna_seq_pipeline/d0b4de05-e5e0-483a-96ca-82bb0cb98796/call-cutadapt/shard-0/glob-13510a96631ebcd33b0389553a698adf/rep1ENCSR000AET_trim.fastq",
+        "no3ad_untrimmed_fastq": "gs://mirna-seq-pipeline/ENCSR000AET_gzippedanno/mirna_seq_pipeline/d0b4de05-e5e0-483a-96ca-82bb0cb98796/call-cutadapt/shard-0/glob-98d26fbed0c2af6137e088cfa3d900ec/rep1ENCSR000AET_NO3AD.fastq",
+        "too_short_fastq": "gs://mirna-seq-pipeline/ENCSR000AET_gzippedanno/mirna_seq_pipeline/d0b4de05-e5e0-483a-96ca-82bb0cb98796/call-cutadapt/shard-0/glob-5d1a0338bc17768917cfb246a1d2fd6c/rep1ENCSR000AET_SHORT_FAIL.fastq"
+      },
+      "runtimeAttributes": {
+        "preemptible": "0",
+        "failOnStderr": "false",
+        "bootDiskSizeGb": "10",
+        "disks": "local-disk 200 SSD",
+        "continueOnReturnCode": "0",
+        "docker": "quay.io/encode-dcc/mirna-seq-pipeline:template",
+        "maxRetries": "0",
+        "cpu": "2",
+        "cpuMin": "1",
+        "noAddress": "false",
+        "zones": "us-west1-a,us-west1-b,us-west1-c,us-central1-c,us-central1-b",
+        "memoryMin": "2.048 GB",
+        "memory": "7 GB"
+      },
+      "callCaching": {
+        "effectiveCallCachingMode": "CallCachingOff",
+        "allowResultReuse": false
+      },
+      "inputs": {
+        "ncpus": 2,
+        "disk": "local-disk 200 SSD",
+        "output_prefix": "rep1ENCSR000AET",
+        "five_prime_adapters": "gs://mirna-seq-pipeline/full_sized_reference_files/adapters/five_prime_adapter_set3.fasta",
+        "ramGB": 7,
+        "three_prime_adapters": "gs://mirna-seq-pipeline/full_sized_reference_files/adapters/three_prime_adapter.fasta",
+        "fastq": "gs://mirna-seq-pipeline/inputs/ENCSR000AET/ENCFF001RDL_rep1.fastq.gz"
+      },
+      "backendLabels": {
+        "cromwell-workflow-id": "cromwell-d0b4de05-e5e0-483a-96ca-82bb0cb98796",
+        "wdl-task-name": "cutadapt"
+      },
+      "returnCode": 0,
+      "labels": {
+        "cromwell-workflow-id": "cromwell-d0b4de05-e5e0-483a-96ca-82bb0cb98796",
+        "wdl-task-name": "cutadapt"
+      },
+      "jobId": "operations/EO6SxtSeLRiG1rnYvYrr4gYggf63qf0bKg9wcm9kdWN0aW9uUXVldWU",
+      "backend": "google",
+      "end": "2019-04-04T23:02:15.704Z",
+      "dockerImageUsed": "quay.io/encode-dcc/mirna-seq-pipeline@sha256:764edfa231dab50bda6d9d57ff67f84da5d57e0f1d5e49b327a7c3815393068a",
+      "stderr": "gs://mirna-seq-pipeline/ENCSR000AET_gzippedanno/mirna_seq_pipeline/d0b4de05-e5e0-483a-96ca-82bb0cb98796/call-cutadapt/shard-0/stderr",
+      "callRoot": "gs://mirna-seq-pipeline/ENCSR000AET_gzippedanno/mirna_seq_pipeline/d0b4de05-e5e0-483a-96ca-82bb0cb98796/call-cutadapt/shard-0",
+      "attempt": 1,
+      "executionEvents": [{
+        "endTime": "2019-04-04T23:00:45.693846554Z",
+        "startTime": "2019-04-04T22:58:10.012971617Z",
+        "description": "running-docker"
+      }, {
+        "description": "RunningJob",
+        "startTime": "2019-04-04T22:56:15.041Z",
+        "endTime": "2019-04-04T22:56:40Z"
+      }, {
+        "startTime": "2019-04-04T23:01:09.632222802Z",
+        "description": "ok",
+        "endTime": "2019-04-04T23:01:10Z"
+      }, {
+        "description": "UpdatingJobStore",
+        "endTime": "2019-04-04T23:02:15.710Z",
+        "startTime": "2019-04-04T23:02:15.703Z"
+      }, {
+        "endTime": "2019-04-04T22:56:45Z",
+        "description": "waiting for quota",
+        "startTime": "2019-04-04T22:56:40Z"
+      }, {
+        "endTime": "2019-04-04T22:57:22.618109673Z",
+        "startTime": "2019-04-04T22:56:45Z",
+        "description": "initializing VM"
+      }, {
+        "description": "Pending",
+        "startTime": "2019-04-04T22:56:14.399Z",
+        "endTime": "2019-04-04T22:56:14.429Z"
+      }, {
+        "endTime": "2019-04-04T22:57:22.618168201Z",
+        "startTime": "2019-04-04T22:57:22.618109673Z",
+        "description": "start"
+      }, {
+        "endTime": "2019-04-04T23:01:09.632222802Z",
+        "description": "delocalizing-files",
+        "startTime": "2019-04-04T23:00:45.693846554Z"
+      }, {
+        "startTime": "2019-04-04T23:01:10Z",
+        "endTime": "2019-04-04T23:02:15.703Z",
+        "description": "cromwell poll interval"
+      }, {
+        "startTime": "2019-04-04T22:57:22.618168201Z",
+        "description": "pulling-image",
+        "endTime": "2019-04-04T22:58:02.224266359Z"
+      }, {
+        "startTime": "2019-04-04T22:58:02.224266359Z",
+        "description": "localizing-files",
+        "endTime": "2019-04-04T22:58:10.012971617Z"
+      }, {
+        "startTime": "2019-04-04T22:56:14.482Z",
+        "description": "PreparingJob",
+        "endTime": "2019-04-04T22:56:15.041Z"
+      }, {
+        "endTime": "2019-04-04T22:56:14.482Z",
+        "startTime": "2019-04-04T22:56:14.457Z",
+        "description": "WaitingForValueStore"
+      }, {
+        "endTime": "2019-04-04T22:56:14.457Z",
+        "startTime": "2019-04-04T22:56:14.429Z",
+        "description": "RequestingExecutionToken"
+      }],
+      "backendLogs": {
+        "log": "gs://mirna-seq-pipeline/ENCSR000AET_gzippedanno/mirna_seq_pipeline/d0b4de05-e5e0-483a-96ca-82bb0cb98796/call-cutadapt/shard-0/cutadapt-0.log"
+      },
+      "start": "2019-04-04T22:56:14.378Z"
+    }, {
+      "preemptible": false,
+      "executionStatus": "Done",
+      "stdout": "gs://mirna-seq-pipeline/ENCSR000AET_gzippedanno/mirna_seq_pipeline/d0b4de05-e5e0-483a-96ca-82bb0cb98796/call-cutadapt/shard-1/stdout",
+      "backendStatus": "Success",
+      "commandLine": "cutadapt \\\n    -a file:/cromwell_root/mirna-seq-pipeline/full_sized_reference_files/adapters/three_prime_adapter.fasta \\\n    -e 0.25 \\\n    --match-read-wildcards \\\n    --untrimmed-output=rep2ENCSR000AET_NO3AD.fastq \\\n    /cromwell_root/mirna-seq-pipeline/inputs/ENCSR000AET/ENCFF001RDM_rep2.fastq.gz \\\n    | cutadapt \\\n    -e 0.34 \\\n    --match-read-wildcards \\\n    --no-indels \\\n    -m 15 \\\n    -O 6 \\\n    -n 1 \\\n    -g file:/cromwell_root/mirna-seq-pipeline/full_sized_reference_files/adapters/five_prime_adapter_set4.fasta \\\n    --untrimmed-output=rep2ENCSR000AET_NO5AD.fastq \\\n    --too-short-output=rep2ENCSR000AET_SHORT_FAIL.fastq \\\n    - > rep2ENCSR000AET_trim.fastq",
+      "shardIndex": 1,
+      "jes": {
+        "endpointUrl": "https://genomics.googleapis.com/",
+        "machineType": "us-central1-b/n1-standard-2",
+        "googleProject": "rna-seq-pipeline-204900",
+        "executionBucket": "gs://mirna-seq-pipeline/ENCSR000AET_gzippedanno",
+        "zone": "us-central1-b",
+        "instanceName": "ggp-8518446888116062630"
+      },
+      "outputs": {
+        "too_short_fastq": "gs://mirna-seq-pipeline/ENCSR000AET_gzippedanno/mirna_seq_pipeline/d0b4de05-e5e0-483a-96ca-82bb0cb98796/call-cutadapt/shard-1/glob-5d1a0338bc17768917cfb246a1d2fd6c/rep2ENCSR000AET_SHORT_FAIL.fastq",
+        "trimmed_fastq": "gs://mirna-seq-pipeline/ENCSR000AET_gzippedanno/mirna_seq_pipeline/d0b4de05-e5e0-483a-96ca-82bb0cb98796/call-cutadapt/shard-1/glob-13510a96631ebcd33b0389553a698adf/rep2ENCSR000AET_trim.fastq",
+        "no5ad_untrimmed_fastq": "gs://mirna-seq-pipeline/ENCSR000AET_gzippedanno/mirna_seq_pipeline/d0b4de05-e5e0-483a-96ca-82bb0cb98796/call-cutadapt/shard-1/glob-572b7543d93f95b496a2056e7f497e36/rep2ENCSR000AET_NO5AD.fastq",
+        "no3ad_untrimmed_fastq": "gs://mirna-seq-pipeline/ENCSR000AET_gzippedanno/mirna_seq_pipeline/d0b4de05-e5e0-483a-96ca-82bb0cb98796/call-cutadapt/shard-1/glob-98d26fbed0c2af6137e088cfa3d900ec/rep2ENCSR000AET_NO3AD.fastq"
+      },
+      "runtimeAttributes": {
+        "preemptible": "0",
+        "failOnStderr": "false",
+        "bootDiskSizeGb": "10",
+        "disks": "local-disk 200 SSD",
+        "continueOnReturnCode": "0",
+        "docker": "quay.io/encode-dcc/mirna-seq-pipeline:template",
+        "maxRetries": "0",
+        "cpu": "2",
+        "cpuMin": "1",
+        "noAddress": "false",
+        "zones": "us-west1-a,us-west1-b,us-west1-c,us-central1-c,us-central1-b",
+        "memoryMin": "2.048 GB",
+        "memory": "7 GB"
+      },
+      "callCaching": {
+        "allowResultReuse": false,
+        "effectiveCallCachingMode": "CallCachingOff"
+      },
+      "inputs": {
+        "ncpus": 2,
+        "disk": "local-disk 200 SSD",
+        "output_prefix": "rep2ENCSR000AET",
+        "five_prime_adapters": "gs://mirna-seq-pipeline/full_sized_reference_files/adapters/five_prime_adapter_set4.fasta",
+        "ramGB": 7,
+        "three_prime_adapters": "gs://mirna-seq-pipeline/full_sized_reference_files/adapters/three_prime_adapter.fasta",
+        "fastq": "gs://mirna-seq-pipeline/inputs/ENCSR000AET/ENCFF001RDM_rep2.fastq.gz"
+      },
+      "backendLabels": {
+        "cromwell-workflow-id": "cromwell-d0b4de05-e5e0-483a-96ca-82bb0cb98796",
+        "wdl-task-name": "cutadapt"
+      },
+      "returnCode": 0,
+      "labels": {
+        "wdl-task-name": "cutadapt",
+        "cromwell-workflow-id": "cromwell-d0b4de05-e5e0-483a-96ca-82bb0cb98796"
+      },
+      "jobId": "operations/EPaSxtSeLRimk8Kh_snmm3Yggf63qf0bKg9wcm9kdWN0aW9uUXVldWU",
+      "backend": "google",
+      "end": "2019-04-04T23:02:15.741Z",
+      "dockerImageUsed": "quay.io/encode-dcc/mirna-seq-pipeline@sha256:764edfa231dab50bda6d9d57ff67f84da5d57e0f1d5e49b327a7c3815393068a",
+      "stderr": "gs://mirna-seq-pipeline/ENCSR000AET_gzippedanno/mirna_seq_pipeline/d0b4de05-e5e0-483a-96ca-82bb0cb98796/call-cutadapt/shard-1/stderr",
+      "callRoot": "gs://mirna-seq-pipeline/ENCSR000AET_gzippedanno/mirna_seq_pipeline/d0b4de05-e5e0-483a-96ca-82bb0cb98796/call-cutadapt/shard-1",
+      "attempt": 1,
+      "executionEvents": [{
+        "startTime": "2019-04-04T22:58:15.272227036Z",
+        "description": "localizing-files",
+        "endTime": "2019-04-04T22:58:22.298629554Z"
+      }, {
+        "endTime": "2019-04-04T22:56:40Z",
+        "description": "RunningJob",
+        "startTime": "2019-04-04T22:56:15.050Z"
+      }, {
+        "description": "ok",
+        "endTime": "2019-04-04T23:01:50Z",
+        "startTime": "2019-04-04T23:01:49.929875639Z"
+      }, {
+        "endTime": "2019-04-04T22:57:37.065159431Z",
+        "description": "start",
+        "startTime": "2019-04-04T22:57:37.064487386Z"
+      }, {
+        "description": "RequestingExecutionToken",
+        "endTime": "2019-04-04T22:56:14.462Z",
+        "startTime": "2019-04-04T22:56:14.424Z"
+      }, {
+        "description": "pulling-image",
+        "endTime": "2019-04-04T22:58:15.272227036Z",
+        "startTime": "2019-04-04T22:57:37.065159431Z"
+      }, {
+        "description": "WaitingForValueStore",
+        "endTime": "2019-04-04T22:56:14.481Z",
+        "startTime": "2019-04-04T22:56:14.462Z"
+      }, {
+        "endTime": "2019-04-04T22:56:15.050Z",
+        "startTime": "2019-04-04T22:56:14.481Z",
+        "description": "PreparingJob"
+      }, {
+        "endTime": "2019-04-04T22:57:37.064487386Z",
+        "startTime": "2019-04-04T22:56:50Z",
+        "description": "initializing VM"
+      }, {
+        "startTime": "2019-04-04T22:58:22.298629554Z",
+        "endTime": "2019-04-04T23:01:27.066414137Z",
+        "description": "running-docker"
+      }, {
+        "startTime": "2019-04-04T22:56:40Z",
+        "endTime": "2019-04-04T22:56:50Z",
+        "description": "waiting for quota"
+      }, {
+        "endTime": "2019-04-04T22:56:14.424Z",
+        "startTime": "2019-04-04T22:56:14.399Z",
+        "description": "Pending"
+      }, {
+        "endTime": "2019-04-04T23:01:49.929875639Z",
+        "description": "delocalizing-files",
+        "startTime": "2019-04-04T23:01:27.066414137Z"
+      }, {
+        "description": "cromwell poll interval",
+        "startTime": "2019-04-04T23:01:50Z",
+        "endTime": "2019-04-04T23:02:15.740Z"
+      }, {
+        "description": "UpdatingJobStore",
+        "endTime": "2019-04-04T23:02:15.742Z",
+        "startTime": "2019-04-04T23:02:15.740Z"
+      }],
+      "backendLogs": {
+        "log": "gs://mirna-seq-pipeline/ENCSR000AET_gzippedanno/mirna_seq_pipeline/d0b4de05-e5e0-483a-96ca-82bb0cb98796/call-cutadapt/shard-1/cutadapt-1.log"
+      },
+      "start": "2019-04-04T22:56:14.381Z"
+    }]
+  },
+  "outputs": {
+    "mirna_seq_pipeline.star.plus_strand_unique_wig": ["gs://mirna-seq-pipeline/ENCSR000AET_gzippedanno/mirna_seq_pipeline/d0b4de05-e5e0-483a-96ca-82bb0cb98796/call-star/shard-0/glob-34e0341cc922c3159cacc690d41b117b/Signal.Unique.str1.out.wig", "gs://mirna-seq-pipeline/ENCSR000AET_gzippedanno/mirna_seq_pipeline/d0b4de05-e5e0-483a-96ca-82bb0cb98796/call-star/shard-1/glob-34e0341cc922c3159cacc690d41b117b/Signal.Unique.str1.out.wig"],
+    "mirna_seq_pipeline.star.minus_strand_unique_wig": ["gs://mirna-seq-pipeline/ENCSR000AET_gzippedanno/mirna_seq_pipeline/d0b4de05-e5e0-483a-96ca-82bb0cb98796/call-star/shard-0/glob-581651af3e8d85ac9aecfba9cf6eaea5/Signal.Unique.str2.out.wig", "gs://mirna-seq-pipeline/ENCSR000AET_gzippedanno/mirna_seq_pipeline/d0b4de05-e5e0-483a-96ca-82bb0cb98796/call-star/shard-1/glob-581651af3e8d85ac9aecfba9cf6eaea5/Signal.Unique.str2.out.wig"],
+    "mirna_seq_pipeline.wigtobigwig.minus_strand_all_bigwig": ["gs://mirna-seq-pipeline/ENCSR000AET_gzippedanno/mirna_seq_pipeline/d0b4de05-e5e0-483a-96ca-82bb0cb98796/call-wigtobigwig/shard-0/glob-f2920e4cd5a28e8c120bd92e7ba31ecf/rep1ENCSR000AET.signal.all.minus.bigWig", "gs://mirna-seq-pipeline/ENCSR000AET_gzippedanno/mirna_seq_pipeline/d0b4de05-e5e0-483a-96ca-82bb0cb98796/call-wigtobigwig/shard-1/glob-f2920e4cd5a28e8c120bd92e7ba31ecf/rep2ENCSR000AET.signal.all.minus.bigWig"],
+    "mirna_seq_pipeline.cutadapt.trimmed_fastq": ["gs://mirna-seq-pipeline/ENCSR000AET_gzippedanno/mirna_seq_pipeline/d0b4de05-e5e0-483a-96ca-82bb0cb98796/call-cutadapt/shard-0/glob-13510a96631ebcd33b0389553a698adf/rep1ENCSR000AET_trim.fastq", "gs://mirna-seq-pipeline/ENCSR000AET_gzippedanno/mirna_seq_pipeline/d0b4de05-e5e0-483a-96ca-82bb0cb98796/call-cutadapt/shard-1/glob-13510a96631ebcd33b0389553a698adf/rep2ENCSR000AET_trim.fastq"],
+    "mirna_seq_pipeline.star.tsv": ["gs://mirna-seq-pipeline/ENCSR000AET_gzippedanno/mirna_seq_pipeline/d0b4de05-e5e0-483a-96ca-82bb0cb98796/call-star/shard-0/glob-ee3cac44669b7460fea102fa893f1b06/rep1ENCSR000AET.tsv", "gs://mirna-seq-pipeline/ENCSR000AET_gzippedanno/mirna_seq_pipeline/d0b4de05-e5e0-483a-96ca-82bb0cb98796/call-star/shard-1/glob-ee3cac44669b7460fea102fa893f1b06/rep2ENCSR000AET.tsv"],
+    "mirna_seq_pipeline.cutadapt.no5ad_untrimmed_fastq": ["gs://mirna-seq-pipeline/ENCSR000AET_gzippedanno/mirna_seq_pipeline/d0b4de05-e5e0-483a-96ca-82bb0cb98796/call-cutadapt/shard-0/glob-572b7543d93f95b496a2056e7f497e36/rep1ENCSR000AET_NO5AD.fastq", "gs://mirna-seq-pipeline/ENCSR000AET_gzippedanno/mirna_seq_pipeline/d0b4de05-e5e0-483a-96ca-82bb0cb98796/call-cutadapt/shard-1/glob-572b7543d93f95b496a2056e7f497e36/rep2ENCSR000AET_NO5AD.fastq"],
+    "mirna_seq_pipeline.star.star_qc_json": ["gs://mirna-seq-pipeline/ENCSR000AET_gzippedanno/mirna_seq_pipeline/d0b4de05-e5e0-483a-96ca-82bb0cb98796/call-star/shard-0/glob-4c4d21ad2cdbd65d478f6b4b36f6c20a/rep1ENCSR000AET_star_qc.json", "gs://mirna-seq-pipeline/ENCSR000AET_gzippedanno/mirna_seq_pipeline/d0b4de05-e5e0-483a-96ca-82bb0cb98796/call-star/shard-1/glob-4c4d21ad2cdbd65d478f6b4b36f6c20a/rep2ENCSR000AET_star_qc.json"],
+    "mirna_seq_pipeline.spearman_correlation.spearman_json": "gs://mirna-seq-pipeline/ENCSR000AET_gzippedanno/mirna_seq_pipeline/d0b4de05-e5e0-483a-96ca-82bb0cb98796/call-spearman_correlation/glob-a561370dd84a477b9f6b00e9824fbde0/ENCSR000AET_spearman.json",
+    "mirna_seq_pipeline.wigtobigwig.plus_strand_unique_bigwig": ["gs://mirna-seq-pipeline/ENCSR000AET_gzippedanno/mirna_seq_pipeline/d0b4de05-e5e0-483a-96ca-82bb0cb98796/call-wigtobigwig/shard-0/glob-5d1de83c72d3b961f02eb173e9f6d5a2/rep1ENCSR000AET.signal.unique.plus.bigWig", "gs://mirna-seq-pipeline/ENCSR000AET_gzippedanno/mirna_seq_pipeline/d0b4de05-e5e0-483a-96ca-82bb0cb98796/call-wigtobigwig/shard-1/glob-5d1de83c72d3b961f02eb173e9f6d5a2/rep2ENCSR000AET.signal.unique.plus.bigWig"],
+    "mirna_seq_pipeline.star.minus_strand_all_wig": ["gs://mirna-seq-pipeline/ENCSR000AET_gzippedanno/mirna_seq_pipeline/d0b4de05-e5e0-483a-96ca-82bb0cb98796/call-star/shard-0/glob-95ad94f4655a5da1faa51c905e436322/Signal.UniqueMultiple.str2.out.wig", "gs://mirna-seq-pipeline/ENCSR000AET_gzippedanno/mirna_seq_pipeline/d0b4de05-e5e0-483a-96ca-82bb0cb98796/call-star/shard-1/glob-95ad94f4655a5da1faa51c905e436322/Signal.UniqueMultiple.str2.out.wig"],
+    "mirna_seq_pipeline.cutadapt.no3ad_untrimmed_fastq": ["gs://mirna-seq-pipeline/ENCSR000AET_gzippedanno/mirna_seq_pipeline/d0b4de05-e5e0-483a-96ca-82bb0cb98796/call-cutadapt/shard-0/glob-98d26fbed0c2af6137e088cfa3d900ec/rep1ENCSR000AET_NO3AD.fastq", "gs://mirna-seq-pipeline/ENCSR000AET_gzippedanno/mirna_seq_pipeline/d0b4de05-e5e0-483a-96ca-82bb0cb98796/call-cutadapt/shard-1/glob-98d26fbed0c2af6137e088cfa3d900ec/rep2ENCSR000AET_NO3AD.fastq"],
+    "mirna_seq_pipeline.star.bam": ["gs://mirna-seq-pipeline/ENCSR000AET_gzippedanno/mirna_seq_pipeline/d0b4de05-e5e0-483a-96ca-82bb0cb98796/call-star/shard-0/glob-41e68ec83f25cd81fd19adf17b56e22e/rep1ENCSR000AET.bam", "gs://mirna-seq-pipeline/ENCSR000AET_gzippedanno/mirna_seq_pipeline/d0b4de05-e5e0-483a-96ca-82bb0cb98796/call-star/shard-1/glob-24e3697fb78e1597584a055014c29da2/rep2ENCSR000AET.bam"],
+    "mirna_seq_pipeline.star.star_qc_log": ["gs://mirna-seq-pipeline/ENCSR000AET_gzippedanno/mirna_seq_pipeline/d0b4de05-e5e0-483a-96ca-82bb0cb98796/call-star/shard-0/glob-fdee3fa8e419c9ae7368882e11dc0027/star_qc.log", "gs://mirna-seq-pipeline/ENCSR000AET_gzippedanno/mirna_seq_pipeline/d0b4de05-e5e0-483a-96ca-82bb0cb98796/call-star/shard-1/glob-fdee3fa8e419c9ae7368882e11dc0027/star_qc.log"],
+    "mirna_seq_pipeline.wigtobigwig.minus_strand_unique_bigwig": ["gs://mirna-seq-pipeline/ENCSR000AET_gzippedanno/mirna_seq_pipeline/d0b4de05-e5e0-483a-96ca-82bb0cb98796/call-wigtobigwig/shard-0/glob-e26cce3d0ca522acfdb935f7efeb3e0f/rep1ENCSR000AET.signal.unique.minus.bigWig", "gs://mirna-seq-pipeline/ENCSR000AET_gzippedanno/mirna_seq_pipeline/d0b4de05-e5e0-483a-96ca-82bb0cb98796/call-wigtobigwig/shard-1/glob-e26cce3d0ca522acfdb935f7efeb3e0f/rep2ENCSR000AET.signal.unique.minus.bigWig"],
+    "mirna_seq_pipeline.wigtobigwig.plus_strand_all_bigwig": ["gs://mirna-seq-pipeline/ENCSR000AET_gzippedanno/mirna_seq_pipeline/d0b4de05-e5e0-483a-96ca-82bb0cb98796/call-wigtobigwig/shard-0/glob-ecf13a1f988469a7767bed84843bd510/rep1ENCSR000AET.signal.all.plus.bigWig", "gs://mirna-seq-pipeline/ENCSR000AET_gzippedanno/mirna_seq_pipeline/d0b4de05-e5e0-483a-96ca-82bb0cb98796/call-wigtobigwig/shard-1/glob-ecf13a1f988469a7767bed84843bd510/rep2ENCSR000AET.signal.all.plus.bigWig"],
+    "mirna_seq_pipeline.cutadapt.too_short_fastq": ["gs://mirna-seq-pipeline/ENCSR000AET_gzippedanno/mirna_seq_pipeline/d0b4de05-e5e0-483a-96ca-82bb0cb98796/call-cutadapt/shard-0/glob-5d1a0338bc17768917cfb246a1d2fd6c/rep1ENCSR000AET_SHORT_FAIL.fastq", "gs://mirna-seq-pipeline/ENCSR000AET_gzippedanno/mirna_seq_pipeline/d0b4de05-e5e0-483a-96ca-82bb0cb98796/call-cutadapt/shard-1/glob-5d1a0338bc17768917cfb246a1d2fd6c/rep2ENCSR000AET_SHORT_FAIL.fastq"],
+    "mirna_seq_pipeline.star.plus_strand_all_wig": ["gs://mirna-seq-pipeline/ENCSR000AET_gzippedanno/mirna_seq_pipeline/d0b4de05-e5e0-483a-96ca-82bb0cb98796/call-star/shard-0/glob-41773c7ab111b23d6eb594bba78fa1d9/Signal.UniqueMultiple.str1.out.wig", "gs://mirna-seq-pipeline/ENCSR000AET_gzippedanno/mirna_seq_pipeline/d0b4de05-e5e0-483a-96ca-82bb0cb98796/call-star/shard-1/glob-41773c7ab111b23d6eb594bba78fa1d9/Signal.UniqueMultiple.str1.out.wig"]
+  },
+  "workflowRoot": "gs://mirna-seq-pipeline/ENCSR000AET_gzippedanno/mirna_seq_pipeline/d0b4de05-e5e0-483a-96ca-82bb0cb98796/",
+  "actualWorkflowLanguage": "WDL",
+  "id": "d0b4de05-e5e0-483a-96ca-82bb0cb98796",
+  "inputs": {
+    "mirna_seq_pipeline.mirna_annotation": "gs://mirna-seq-pipeline/full_sized_reference_files/ENCFF628BVT_mirna_anno.gtf.gz",
+    "mirna_seq_pipeline.cutadapt_ramGB": 7,
+    "mirna_seq_pipeline.chrom_sizes": "gs://mirna-seq-pipeline/full_sized_reference_files/GRCh38_EBV.chrom.sizes.tsv",
+    "mirna_seq_pipeline.cutadapt_ncpus": 2,
+    "mirna_seq_pipeline.three_prime_adapters": "gs://mirna-seq-pipeline/full_sized_reference_files/adapters/three_prime_adapter.fasta",
+    "mirna_seq_pipeline.wigtobigwig_ramGB": 26,
+    "mirna_seq_pipeline.star_ramGB": 60,
+    "mirna_seq_pipeline.experiment_prefix": "ENCSR000AET",
+    "mirna_seq_pipeline.star_ncpus": 16,
+    "mirna_seq_pipeline.five_prime_adapters": ["gs://mirna-seq-pipeline/full_sized_reference_files/adapters/five_prime_adapter_set3.fasta", "gs://mirna-seq-pipeline/full_sized_reference_files/adapters/five_prime_adapter_set4.fasta"],
+    "mirna_seq_pipeline.star_index": "gs://mirna-seq-pipeline/Index_to_portal/generate_STAR_index/0884713c-c91d-4a48-a899-599a518548f6/call-generate_index/glob-bafd57f6d53786e3cd6ef2ca2d804565/Star_index_GRCh38_from_primary_anno_to_portal.tar.gz",
+    "mirna_seq_pipeline.wigtobigwig_ncpus": 4,
+    "mirna_seq_pipeline.star_disk": "local-disk 200 SSD",
+    "mirna_seq_pipeline.cutadapt_disk": "local-disk 200 SSD",
+    "mirna_seq_pipeline.wigtobigwig_disk": "local-disk 200 SSD",
+    "mirna_seq_pipeline.fastqs": ["gs://mirna-seq-pipeline/inputs/ENCSR000AET/ENCFF001RDL_rep1.fastq.gz", "gs://mirna-seq-pipeline/inputs/ENCSR000AET/ENCFF001RDM_rep2.fastq.gz"]
+  },
+  "labels": {
+    "cromwell-workflow-id": "cromwell-d0b4de05-e5e0-483a-96ca-82bb0cb98796"
+  },
+  "submission": "2019-04-04T22:56:06.649Z",
+  "status": "Succeeded",
+  "end": "2019-04-04T23:22:56.261Z",
+  "start": "2019-04-04T22:56:06.816Z"
+}
