@@ -223,9 +223,11 @@ class Accession(object):
                              for filename
                              in map(lambda x: x.filename, derived_from_files)])
         if not derived_from_accession_ids:
+            print(derived_from_files)
             print(missing)
             raise Exception('Missing all of the derived_from files on the portal')
         if len(derived_from_accession_ids) != len(derived_from_files):
+            print(derived_from_files)
             print(missing)
             raise Exception('Missing some of the derived_from files on the portal')
         return ['/files/{}/'.format(accession_id)
