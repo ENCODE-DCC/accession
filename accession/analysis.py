@@ -141,7 +141,7 @@ class Analysis(object):
     # task_name is target task in which filekey exists
     def _search_up(self, start_task, task_name, filekey, inputs=False):
         if task_name == start_task.task_name:
-            if inputs && inputs == "true":
+            if inputs and inputs == "true":
                 for file in start_task.input_files:
                     if filekey in file.filekeys:
                         yield file
