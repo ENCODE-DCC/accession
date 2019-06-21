@@ -352,7 +352,8 @@ class Accession(object):
     def attach_star_qc_metric_to(self, encode_bam_file, gs_file):
         if self.file_has_qc(encode_bam_file, 'StarQualityMetric'):
             return
-        qc = self.backend.read_json(gs_file.task.outputs['star_qc_json'])
+        qc_file = self.analysis.get_files(gs_file.task.outputs['star_qc_json'])
+        qc = self.backend.read_json(qc_file)
         step_run_id = self.get_step_run_id(encode_bam_file)
         star_qc_metric = qc.get('star_qc_metric')
         del star_qc_metric['Started job on']
