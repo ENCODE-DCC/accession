@@ -16,7 +16,8 @@ COMMON_METADATA = {
 QC_MAP = {
     'cross_correlation': 'attach_cross_correlation_qc_to',
     'samtools_flagstat': 'attach_flagstat_qc_to',
-    'idr':               'attach_idr_qc_to'
+    'idr':               'attach_idr_qc_to',
+    'star':              'attach_star_qc_metric_to'
 }
 
 
@@ -58,6 +59,14 @@ class Accession(object):
         with open(file) as json_file:
             json_obj = json.load(json_file)
         return json_obj
+
+    def get_step_run_id(self, encode_file):
+        step_run = encode_file.get('step_run')
+        if isinstance(step_run, str):
+            step_run_id = step_run
+        elif isinstance(step_run, dict):
+            step_run_id = step_run.get('@id')
+        return step_run_id
 
     def accession_fastqs(self):
         pass
@@ -255,9 +264,7 @@ class Accession(object):
         return int(replicate)
 
     def attach_idr_qc_to(self, encode_file, gs_file):
-        if list(filter(lambda x: 'IDRQualityMetric'
-                                 in x['@type'],
-                       encode_file['quality_metrics'])):
+        if self.file_has_qc(encode_file, 'IDRQualityMetric'):
             return
         qc = self.backend.read_json(self.analysis.get_files('qc_json')[0])
         idr_qc = qc['idr_frip_qc']
@@ -265,11 +272,7 @@ class Accession(object):
         rep_pr = idr_qc['rep' + replicate + '-pr']
         frip_score = rep_pr['FRiP']
         idr_peaks = qc['ataqc']['rep' + replicate]['IDR peaks'][0]
-        step_run = encode_file.get('step_run')
-        if isinstance(step_run, str):
-            step_run_id = step_run
-        elif isinstance(step_run, dict):
-            step_run_id = step_run.get('@id')
+        step_run_id = self.get_step_run_id(encode_file)
         qc_object = {}
         qc_object['F1'] = frip_score
         qc_object['N1'] = idr_peaks
@@ -291,9 +294,7 @@ class Accession(object):
 
     def attach_flagstat_qc_to(self, encode_bam_file, gs_file):
         # Return early if qc metric exists
-        if list(filter(lambda x: 'SamtoolsFlagstatsQualityMetric'
-                                 in x['@type'],
-                       encode_bam_file['quality_metrics'])):
+        if self.file_has_qc(encode_bam_file, 'SamtoolsFlagstatsQualityMetric'):
             return
         qc = self.backend.read_json(self.analysis.get_files('qc_json')[0])
         replicate = self.get_bio_replicate(encode_bam_file)
@@ -301,11 +302,7 @@ class Accession(object):
         for key, value in flagstat_qc.items():
             if '_pct' in key:
                 flagstat_qc[key] = '{}%'.format(value)
-        step_run = encode_bam_file.get('step_run')
-        if isinstance(step_run, str):
-            step_run_id = step_run
-        elif isinstance(step_run, dict):
-            step_run_id = step_run.get('@id')
+        step_run_id = self.get_step_run_id(encode_bam_file)
         flagstat_qc.update({
             'step_run':             step_run_id,
             'quality_metric_of':    [encode_bam_file.get('@id')],
@@ -317,11 +314,8 @@ class Accession(object):
 
     def attach_cross_correlation_qc_to(self, encode_bam_file, gs_file):
         # Return early if qc metric exists
-        if list(filter(lambda x: 'ComplexityXcorrQualityMetric'
-                                 in x['@type'],
-                       encode_bam_file['quality_metrics'])):
+        if self.file_has_qc(encode_bam_file, 'ComplexityXcorrQualityMetric'):
             return
-
         qc = self.backend.read_json(self.analysis.get_files('qc_json')[0])
         plot_pdf = self.analysis.search_down(gs_file.task,
                                              'xcor',
@@ -333,12 +327,7 @@ class Accession(object):
         replicate = self.get_bio_replicate(encode_bam_file)
         xcor_qc = qc['xcor_score']['rep' + replicate]
         pbc_qc = qc['pbc_qc']['rep' + replicate]
-        step_run = encode_bam_file.get('step_run')
-        if isinstance(step_run, str):
-            step_run_id = step_run
-        elif isinstance(step_run, dict):
-            step_run_id = step_run.get('@id')
-
+        step_run_id = self.get_step_run_id(encode_bam_file)
         xcor_object = {
             'NRF':                  pbc_qc['NRF'],
             'PBC1':                 pbc_qc['PBC1'],
@@ -360,10 +349,28 @@ class Accession(object):
         posted_qc = self.conn.post(xcor_object, require_aliases=False)
         return posted_qc
 
-    def file_has_qc(self, bam, qc):
-        for item in bam['quality_metrics']:
-            if item['@type'][0] == qc['@type'][0]:
-                return True
+    def attach_star_qc_metric_to(self, encode_bam_file, gs_file):
+        if self.file_has_qc(encode_bam_file, 'StarQualityMetric'):
+            return
+        qc = self.backend.read_json(gs_file.task.outputs['star_qc_json'])
+        step_run_id = self.get_step_run_id(encode_bam_file)
+        star_qc_metric = qc.get('star_qc_metric')
+        del star_qc_metric['Started job on']
+        del star_qc_metric['Started mapping on']
+        del star_qc_metric['Finished on']
+        star_qc_metric.update({
+            'step_run':             step_run_id,
+            'quality_metric_of':    encode_bam_file.get('@id'),
+            'status':               "released"})
+        star_qc_metric.update(COMMON_METADATA)
+        star_qc_metric[Connection.PROFILE_KEY] = 'star-quality-metric'
+        posted_qc = self.conn.post(star_qc_metric, require_aliases=False)
+        return posted_qc
+
+    def file_has_qc(self, encode_file, qc_name):
+        if list(filter(lambda x: qc_name in x['@type'],
+                       encode_file['quality_metrics'])):
+            return True
         return False
 
     def get_attachment(self, gs_file, mime_type):
