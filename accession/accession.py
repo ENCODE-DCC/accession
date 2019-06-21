@@ -6,6 +6,7 @@ from base64 import b64encode
 from encode_utils.connection import Connection
 from requests.exceptions import HTTPError
 from accession.analysis import Analysis
+from accession.helpers import string_to_number
 
 
 COMMON_METADATA = {
@@ -352,16 +353,18 @@ class Accession(object):
     def attach_star_qc_metric_to(self, encode_bam_file, gs_file):
         if self.file_has_qc(encode_bam_file, 'StarQualityMetric'):
             return
-        qc_file = self.analysis.get_files(gs_file.task.outputs['star_qc_json'])
+        qc_file = self.analysis.get_files(filename=gs_file.task.outputs['star_qc_json'])[0]
         qc = self.backend.read_json(qc_file)
         step_run_id = self.get_step_run_id(encode_bam_file)
         star_qc_metric = qc.get('star_qc_metric')
         del star_qc_metric['Started job on']
         del star_qc_metric['Started mapping on']
         del star_qc_metric['Finished on']
+        for key, value in star_qc_metric.items():
+            star_qc_metric[key] = string_to_number(value)
         star_qc_metric.update({
             'step_run':             step_run_id,
-            'quality_metric_of':    encode_bam_file.get('@id'),
+            'quality_metric_of':    [encode_bam_file.get('@id')],
             'status':               "released"})
         star_qc_metric.update(COMMON_METADATA)
         star_qc_metric[Connection.PROFILE_KEY] = 'star-quality-metric'

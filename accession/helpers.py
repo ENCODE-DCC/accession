@@ -39,3 +39,15 @@ def mutate_digits(md5sum_string):
             md5sum_list[i] = str((int(character) + 1) % 10)
         print(md5sum_list)
     return ''.join(md5sum_list)
+
+
+def string_to_number(string):
+    if not isinstance(string, str):
+        return string
+    try:
+        return int(string)
+    except:
+        try:
+            return float(string)
+        except:
+            return string
