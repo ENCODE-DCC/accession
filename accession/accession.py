@@ -6,7 +6,7 @@ from base64 import b64encode
 from encode_utils.connection import Connection
 from requests.exceptions import HTTPError
 from accession.analysis import Analysis
-from accession.helpers import string_to_number
+from accession.helpers import string_to_number, mutate_digits
 
 
 COMMON_METADATA = {
@@ -439,3 +439,30 @@ class Accession(object):
     def accession_steps(self):
         for step in self.steps_and_params_json:
             self.accession_step(step)
+
+    def undo_steps(self):
+        metadata = self.analysis.metadata
+        files = {}
+        prefix = metadata["workflowName"]
+        for step in self.steps_and_params_json:
+            task = prefix + "." + step["wdl_task_name"]
+            call = metadata["calls"][task]
+            wdl_files = step["wdl_files"]
+            for c in call:
+                outputs = c['outputs']
+                for f in wdl_files:
+                    key = f["filekey"]
+                    path = outputs[key]
+                    encode_file = self.file_at_portal(path)
+                    if encode_file:
+                        old_sum = self.backend.md5sum(path)
+                        new_sum = mutate_digits(old_sum)
+                        self.patch_file(encode_file,
+                                        {'md5sum': new_sum,
+                                         'aliases': [mutate_digits(encode_file.get('aliases')[0])],
+                                         'status': 'deleted'})
+                        files[old_sum] = new_sum
+                    else:
+                        pass
+                        # files[old_sum] = None
+        return files

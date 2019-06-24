@@ -29,6 +29,10 @@ def get_parser():
                         type=str,
                         default=None,
                         help='Award')
+    parser.add_argument('--undo',
+                        type=bool,
+                        default=False,
+                        help='Do not accession, undo accession from provided files')
     return parser
 
 
@@ -44,6 +48,7 @@ def main(args=None):
     lab = args.lab
     award = args.award
     server = args.server
+    undo = args.undo
     if all([accession_steps,
             accession_metadata,
             lab,
@@ -54,7 +59,10 @@ def main(args=None):
                                 server,
                                 lab,
                                 award)
-        accessioner.accession_steps()
+        if undo:
+            accessioner.undo_steps()
+        else:
+            accessioner.accession_steps()
         return
     print("Module called without proper arguments")
 
