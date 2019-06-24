@@ -286,7 +286,7 @@ class Accession(object):
         qc_object.update({
             'IDR_cutoff':                           idr_cutoff,
             'IDR_plot_rep{}_pr'.format(replicate):  self.get_attachment(plot_png, 'image/png')})
-        return post_qc(qc_object, encode_file, 'idr-quality-metrics')
+        return self.post_qc(qc_object, encode_file, 'idr-quality-metrics')
 
     def attach_flagstat_qc_to(self, encode_bam_file, gs_file):
         # Return early if qc metric exists
@@ -298,7 +298,7 @@ class Accession(object):
         for key, value in flagstat_qc.items():
             if '_pct' in key:
                 flagstat_qc[key] = '{}%'.format(value)
-        return post_qc(flagstat_qc, encode_bam_file, 'samtools-flagstats-quality-metric')
+        return self.post_qc(flagstat_qc, encode_bam_file, 'samtools-flagstats-quality-metric')
 
     def attach_cross_correlation_qc_to(self, encode_bam_file, gs_file):
         # Return early if qc metric exists
@@ -327,7 +327,7 @@ class Accession(object):
             "read length":          read_length,
             "cross_correlation_plot": self.get_attachment(plot_pdf, 'application/pdf')
         }
-        return post_qc(xcor_object, encode_bam_file, 'complexity-xcorr-quality-metrics')
+        return self.post_qc(xcor_object, encode_bam_file, 'complexity-xcorr-quality-metrics')
 
     def attach_star_qc_metric_to(self, encode_bam_file, gs_file):
         if self.file_has_qc(encode_bam_file, 'StarQualityMetric'):
@@ -340,7 +340,7 @@ class Accession(object):
         del star_qc_metric['Finished on']
         for key, value in star_qc_metric.items():
             star_qc_metric[key] = string_to_number(value)
-        return post_qc(star_qc_metric, encode_bam_file, 'star-quality-metric')
+        return self.post_qc(star_qc_metric, encode_bam_file, 'star-quality-metric')
 
     def attach_microrna_quantification_qc_to(self, encode_file, gs_file):
         if self.file_has_qc(encode_file, 'MicroRnaQuantificationQualityMetric'):
@@ -348,7 +348,7 @@ class Accession(object):
         qc_file = self.analysis.get_files(filename=gs_file.task.outputs['star_qc_json'])[0]
         qc = self.backend.read_json(qc_file)
         expressed_mirnas_qc = qc['expressed_mirnas']
-        return post_qc(expressed_mirnas, encode_file, 'micro-rna-quantification-quality-metric')
+        return self.post_qc(expressed_mirnas, encode_file, 'micro-rna-quantification-quality-metric')
 
     def attach_microrna_mapping_qc_to(self, encode_file, gs_file):
         if self.file_has_qc(encode_file, 'MicroRnaMappingQualityMetric'):
@@ -356,7 +356,7 @@ class Accession(object):
         qc_file = self.analysis.get_files(filename=gs_file.task.outputs['star_qc_json'])[0]
         qc = self.backend.read_json(qc_file)
         aligned_reads_qc = qc['aligned_reads']
-        return post_qc(aligned_reads_qc, encode_file, 'micro-rna-mapping-quality-metric')
+        return self.post_qc(aligned_reads_qc, encode_file, 'micro-rna-mapping-quality-metric')
 
     def post_qc(self, qc, encode_file, profile_key):
         step_run_id = self.get_step_run_id(encode_file)
