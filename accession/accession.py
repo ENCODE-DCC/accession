@@ -358,7 +358,7 @@ class Accession(object):
         aligned_reads_qc = qc['aligned_reads']
         return self.post_qc(aligned_reads_qc, encode_file, 'micro-rna-mapping-quality-metric')
 
-    def post_qc(self, qc, encode_file, profile_key):
+    def post_qc(self, qc, encode_file, profile):
         step_run_id = self.get_step_run_id(encode_file)
         qc.update({
             'step_run':             step_run_id,
