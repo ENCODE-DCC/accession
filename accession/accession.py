@@ -348,7 +348,7 @@ class Accession(object):
         qc_file = self.analysis.get_files(filename=gs_file.task.outputs['star_qc_json'])[0]
         qc = self.backend.read_json(qc_file)
         expressed_mirnas_qc = qc['expressed_mirnas']
-        return self.post_qc(expressed_mirnas, encode_file, 'micro-rna-quantification-quality-metric')
+        return self.post_qc(expressed_mirnas_qc, encode_file, 'micro-rna-quantification-quality-metric')
 
     def attach_microrna_mapping_qc_to(self, encode_file, gs_file):
         if self.file_has_qc(encode_file, 'MicroRnaMappingQualityMetric'):
