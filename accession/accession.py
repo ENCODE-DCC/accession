@@ -15,10 +15,12 @@ COMMON_METADATA = {
 }
 
 QC_MAP = {
-    'cross_correlation': 'attach_cross_correlation_qc_to',
-    'samtools_flagstat': 'attach_flagstat_qc_to',
-    'idr':               'attach_idr_qc_to',
-    'star':              'attach_star_qc_metric_to'
+    'cross_correlation':    'attach_cross_correlation_qc_to',
+    'samtools_flagstat':    'attach_flagstat_qc_to',
+    'idr':                  'attach_idr_qc_to',
+    'star':                 'attach_star_qc_metric_to',
+    'mirna_mapping':        'attach_microrna_mapping_qc_to',
+    'mirna_quantification': 'attach_microrna_quantification_qc_to'
 }
 
 
@@ -273,7 +275,6 @@ class Accession(object):
         rep_pr = idr_qc['rep' + replicate + '-pr']
         frip_score = rep_pr['FRiP']
         idr_peaks = qc['ataqc']['rep' + replicate]['IDR peaks'][0]
-        step_run_id = self.get_step_run_id(encode_file)
         qc_object = {}
         qc_object['F1'] = frip_score
         qc_object['N1'] = idr_peaks
@@ -283,15 +284,9 @@ class Accession(object):
                                            'idr_pr',
                                            'idr_plot')[0]
         qc_object.update({
-            'step_run':                             step_run_id,
-            'quality_metric_of':                    [encode_file.get('@id')],
             'IDR_cutoff':                           idr_cutoff,
-            'status':                               'released',
             'IDR_plot_rep{}_pr'.format(replicate):  self.get_attachment(plot_png, 'image/png')})
-        qc_object.update(COMMON_METADATA)
-        qc_object[Connection.PROFILE_KEY] = 'idr-quality-metrics'
-        posted_qc = self.conn.post(qc_object, require_aliases=False)
-        return posted_qc
+        return post_qc(qc_object, encode_file, 'idr-quality-metrics')
 
     def attach_flagstat_qc_to(self, encode_bam_file, gs_file):
         # Return early if qc metric exists
@@ -303,15 +298,7 @@ class Accession(object):
         for key, value in flagstat_qc.items():
             if '_pct' in key:
                 flagstat_qc[key] = '{}%'.format(value)
-        step_run_id = self.get_step_run_id(encode_bam_file)
-        flagstat_qc.update({
-            'step_run':             step_run_id,
-            'quality_metric_of':    [encode_bam_file.get('@id')],
-            'status':               'released'})
-        flagstat_qc.update(COMMON_METADATA)
-        flagstat_qc[Connection.PROFILE_KEY] = 'samtools-flagstats-quality-metric'
-        posted_qc = self.conn.post(flagstat_qc, require_aliases=False)
-        return posted_qc
+        return post_qc(flagstat_qc, encode_bam_file, 'samtools-flagstats-quality-metric')
 
     def attach_cross_correlation_qc_to(self, encode_bam_file, gs_file):
         # Return early if qc metric exists
@@ -328,7 +315,6 @@ class Accession(object):
         replicate = self.get_bio_replicate(encode_bam_file)
         xcor_qc = qc['xcor_score']['rep' + replicate]
         pbc_qc = qc['pbc_qc']['rep' + replicate]
-        step_run_id = self.get_step_run_id(encode_bam_file)
         xcor_object = {
             'NRF':                  pbc_qc['NRF'],
             'PBC1':                 pbc_qc['PBC1'],
@@ -337,39 +323,50 @@ class Accession(object):
             'RSC':                  xcor_qc['RSC'],
             'sample size':          xcor_qc['num_reads'],
             "fragment length":      xcor_qc['est_frag_len'],
-            "quality_metric_of":    [encode_bam_file.get('@id')],
-            "step_run":             step_run_id,
             "paired-end":           self.analysis.metadata['inputs']['atac.paired_end'],
             "read length":          read_length,
-            "status":               "released",
             "cross_correlation_plot": self.get_attachment(plot_pdf, 'application/pdf')
         }
-
-        xcor_object.update(COMMON_METADATA)
-        xcor_object[Connection.PROFILE_KEY] = 'complexity-xcorr-quality-metrics'
-        posted_qc = self.conn.post(xcor_object, require_aliases=False)
-        return posted_qc
+        return post_qc(xcor_object, encode_bam_file, 'complexity-xcorr-quality-metrics')
 
     def attach_star_qc_metric_to(self, encode_bam_file, gs_file):
         if self.file_has_qc(encode_bam_file, 'StarQualityMetric'):
             return
         qc_file = self.analysis.get_files(filename=gs_file.task.outputs['star_qc_json'])[0]
         qc = self.backend.read_json(qc_file)
-        step_run_id = self.get_step_run_id(encode_bam_file)
         star_qc_metric = qc.get('star_qc_metric')
         del star_qc_metric['Started job on']
         del star_qc_metric['Started mapping on']
         del star_qc_metric['Finished on']
         for key, value in star_qc_metric.items():
             star_qc_metric[key] = string_to_number(value)
-        star_qc_metric.update({
+        return post_qc(star_qc_metric, encode_bam_file, 'star-quality-metric')
+
+    def attach_microrna_quantification_qc_to(self, encode_file, gs_file):
+        if self.file_has_qc(encode_file, 'MicroRnaQuantificationQualityMetric'):
+            return
+        qc_file = self.analysis.get_files(filename=gs_file.task.outputs['star_qc_json'])[0]
+        qc = self.backend.read_json(qc_file)
+        expressed_mirnas_qc = qc['expressed_mirnas']
+        return post_qc(expressed_mirnas, encode_file, 'micro-rna-quantification-quality-metric')
+
+    def attach_microrna_mapping_qc_to(self, encode_file, gs_file):
+        if self.file_has_qc(encode_file, 'MicroRnaMappingQualityMetric'):
+            return
+        qc_file = self.analysis.get_files(filename=gs_file.task.outputs['star_qc_json'])[0]
+        qc = self.backend.read_json(qc_file)
+        aligned_reads_qc = qc['aligned_reads']
+        return post_qc(aligned_reads_qc, encode_file, 'micro-rna-mapping-quality-metric')
+
+    def post_qc(self, qc, encode_file, profile_key):
+        step_run_id = self.get_step_run_id(encode_file)
+        qc.update({
             'step_run':             step_run_id,
-            'quality_metric_of':    [encode_bam_file.get('@id')],
+            'quality_metric_of':    [encode_file.get('@id')],
             'status':               "released"})
-        star_qc_metric.update(COMMON_METADATA)
-        star_qc_metric[Connection.PROFILE_KEY] = 'star-quality-metric'
-        posted_qc = self.conn.post(star_qc_metric, require_aliases=False)
-        return posted_qc
+        qc.update(COMMON_METADATA)
+        qc[Connection.PROFILE_KEY] = profile
+        return self.conn.post(qc, require_aliases=False)
 
     def file_has_qc(self, encode_file, qc_name):
         if list(filter(lambda x: qc_name in x['@type'],
