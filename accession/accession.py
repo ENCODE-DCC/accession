@@ -6,6 +6,7 @@ from base64 import b64encode
 from encode_utils.connection import Connection
 from requests.exceptions import HTTPError
 from accession.analysis import Analysis
+from accession.quality_metric import QualityMetric
 from accession.helpers import string_to_number
 
 
@@ -15,12 +16,13 @@ COMMON_METADATA = {
 }
 
 QC_MAP = {
-    'cross_correlation':    'attach_cross_correlation_qc_to',
-    'samtools_flagstat':    'attach_flagstat_qc_to',
-    'idr':                  'attach_idr_qc_to',
-    'star':                 'attach_star_qc_metric_to',
-    'mirna_mapping':        'attach_microrna_mapping_qc_to',
-    'mirna_quantification': 'attach_microrna_quantification_qc_to'
+    'cross_correlation':    'make_cross_correlation_qc',
+    'samtools_flagstat':    'make_flagstat_qc',
+    'idr':                  'make_idr_qc',
+    'star':                 'make_star_qc_metric',
+    'mirna_mapping':        'make_microrna_mapping_qc',
+    'mirna_quantification': 'make_microrna_quantification_qc',
+    'mirna_correlation':    'make_microrna_correlation_qc'
 }
 
 
@@ -39,6 +41,7 @@ class Accession(object):
         self.conn = Connection(server)
         self.new_files = []
         self.new_qcs = []
+        self.raw_qcs = {}
         self.current_user = self.get_current_user()
 
     def set_lab_award(self, lab, award):
@@ -235,14 +238,8 @@ class Accession(object):
                              for filename
                              in map(lambda x: x.filename, derived_from_files)])
         if not derived_from_accession_ids:
-            print(derived_from_files)
-            print(task_name)
-            print(filekey)
-            print(missing)
             raise Exception('Missing all of the derived_from files on the portal')
         if len(derived_from_accession_ids) != len(derived_from_files):
-            print(derived_from_files)
-            print(missing)
             raise Exception('Missing some of the derived_from files on the portal')
         return ['/files/{}/'.format(accession_id)
                 for accession_id in derived_from_accession_ids]
@@ -266,7 +263,13 @@ class Accession(object):
             return str(replicate)
         return int(replicate)
 
-    def attach_idr_qc_to(self, encode_file, gs_file):
+    def post_qcs(self):
+        for qc in self.raw_qcs:
+            qc.payload.update({"quality_metric_of": qc.files})
+            self.new_qcs.append(self.conn.post(qc.payload,
+                                               require_aliases=False))
+
+    def make_idr_qc(self, encode_file, gs_file):
         if self.file_has_qc(encode_file, 'IDRQualityMetric'):
             return
         qc = self.backend.read_json(self.analysis.get_files('qc_json')[0])
@@ -286,9 +289,11 @@ class Accession(object):
         qc_object.update({
             'IDR_cutoff':                           idr_cutoff,
             'IDR_plot_rep{}_pr'.format(replicate):  self.get_attachment(plot_png, 'image/png')})
-        return self.post_qc(qc_object, encode_file, 'idr-quality-metrics')
+        return self.queue_qc(qc_object,
+                             encode_file,
+                             'idr-quality-metrics')
 
-    def attach_flagstat_qc_to(self, encode_bam_file, gs_file):
+    def make_flagstat_qc(self, encode_bam_file, gs_file):
         # Return early if qc metric exists
         if self.file_has_qc(encode_bam_file, 'SamtoolsFlagstatsQualityMetric'):
             return
@@ -298,9 +303,11 @@ class Accession(object):
         for key, value in flagstat_qc.items():
             if '_pct' in key:
                 flagstat_qc[key] = '{}%'.format(value)
-        return self.post_qc(flagstat_qc, encode_bam_file, 'samtools-flagstats-quality-metric')
+        return self.queue_qc(flagstat_qc,
+                             encode_bam_file,
+                             'samtools-flagstats-quality-metric')
 
-    def attach_cross_correlation_qc_to(self, encode_bam_file, gs_file):
+    def make_cross_correlation_qc(self, encode_bam_file, gs_file):
         # Return early if qc metric exists
         if self.file_has_qc(encode_bam_file, 'ComplexityXcorrQualityMetric'):
             return
@@ -327,9 +334,11 @@ class Accession(object):
             "read length":          read_length,
             "cross_correlation_plot": self.get_attachment(plot_pdf, 'application/pdf')
         }
-        return self.post_qc(xcor_object, encode_bam_file, 'complexity-xcorr-quality-metrics')
+        return self.queue_qc(xcor_object,
+                             encode_bam_file,
+                             'complexity-xcorr-quality-metrics')
 
-    def attach_star_qc_metric_to(self, encode_bam_file, gs_file):
+    def make_star_qc_metric(self, encode_bam_file, gs_file):
         if self.file_has_qc(encode_bam_file, 'StarQualityMetric'):
             return
         qc_file = self.analysis.get_files(filename=gs_file.task.outputs['star_qc_json'])[0]
@@ -340,33 +349,59 @@ class Accession(object):
         del star_qc_metric['Finished on']
         for key, value in star_qc_metric.items():
             star_qc_metric[key] = string_to_number(value)
-        return self.post_qc(star_qc_metric, encode_bam_file, 'star-quality-metric')
+        return self.queue_qc(star_qc_metric,
+                             encode_bam_file,
+                             'star-quality-metric')
 
-    def attach_microrna_quantification_qc_to(self, encode_file, gs_file):
+    def make_microrna_quantification_qc(self, encode_file, gs_file):
         if self.file_has_qc(encode_file, 'MicroRnaQuantificationQualityMetric'):
             return
         qc_file = self.analysis.get_files(filename=gs_file.task.outputs['star_qc_json'])[0]
         qc = self.backend.read_json(qc_file)
         expressed_mirnas_qc = qc['expressed_mirnas']
-        return self.post_qc(expressed_mirnas_qc, encode_file, 'micro-rna-quantification-quality-metric')
+        return self.queue_qc(expressed_mirnas_qc,
+                             encode_file,
+                             'micro-rna-quantification-quality-metric')
 
-    def attach_microrna_mapping_qc_to(self, encode_file, gs_file):
+    def make_microrna_mapping_qc(self, encode_file, gs_file):
         if self.file_has_qc(encode_file, 'MicroRnaMappingQualityMetric'):
             return
         qc_file = self.analysis.get_files(filename=gs_file.task.outputs['star_qc_json'])[0]
         qc = self.backend.read_json(qc_file)
         aligned_reads_qc = qc['aligned_reads']
-        return self.post_qc(aligned_reads_qc, encode_file, 'micro-rna-mapping-quality-metric')
+        return self.queue_qc(aligned_reads_qc,
+                             encode_file,
+                             'micro-rna-mapping-quality-metric')
 
-    def post_qc(self, qc, encode_file, profile):
+    def make_microrna_correlation_qc(self, encode_file, gs_file):
+        if self.file_has_qc(encode_file, 'CorrelationQualityMetric'):
+            return
+        qc_file = self.analysis.search_down(gs_file.task,
+                                            'spearman_correlation',
+                                            'spearman_json')[0]
+        qc = self.backend.read_json(qc_file)
+        spearman_correlation_qc = qc['spearman_correlation']
+        return self.queue_qc(spearman_correlation_qc,
+                             encode_file,
+                             'correlation-quality-metric',
+                             shared=True)
+
+    def queue_qc(self, qc, encode_file, profile, shared=False):
         step_run_id = self.get_step_run_id(encode_file)
         qc.update({
             'step_run':             step_run_id,
-            'quality_metric_of':    [encode_file.get('@id')],
             'status':               "released"})
         qc.update(COMMON_METADATA)
         qc[Connection.PROFILE_KEY] = profile
-        return self.conn.post(qc, require_aliases=False)
+        # Shared QCs will have two or more file ids
+        # under the 'quality_metric_of' property
+        # and payload must be the same for all
+        if shared:
+            for item in self.raw_qcs:
+                if item.payload == qc:
+                    item.files.append(encode_file.get('@id'))
+                    return
+        self.raw_qcs.append(QualityMetric(qc, encode_file.get('@id')))
 
     def file_has_qc(self, encode_file, qc_name):
         if list(filter(lambda x: qc_name in x['@type'],
@@ -428,9 +463,9 @@ class Accession(object):
                         qc_method = getattr(self, QC_MAP[qc])
                         # Pass encode file with
                         # calculated properties
-                        self.new_qcs.append(qc_method(self.conn.get(encode_file.get('accession')),
-                                            wdl_file))
+                        qc_method(self.conn.get(encode_file.get('accession')), wdl_file)
                     accessioned_files.append(encode_file)
+        self.post_qcs()
         return accessioned_files
 
     def accession_steps(self):
