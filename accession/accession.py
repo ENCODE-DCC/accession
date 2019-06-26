@@ -380,7 +380,8 @@ class Accession(object):
                                             'spearman_correlation',
                                             'spearman_json')[0]
         qc = self.backend.read_json(qc_file)
-        spearman_correlation_qc = qc['spearman_correlation']
+        spearman_value = qc['spearman_correlation']['spearman_correlation']
+        spearman_correlation_qc = {'Spearman correlation': spearman_value}
         return self.queue_qc(spearman_correlation_qc,
                              encode_file,
                              'correlation-quality-metric',
