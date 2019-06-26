@@ -41,7 +41,7 @@ class Accession(object):
         self.conn = Connection(server)
         self.new_files = []
         self.new_qcs = []
-        self.raw_qcs = {}
+        self.raw_qcs = []
         self.current_user = self.get_current_user()
 
     def set_lab_award(self, lab, award):
