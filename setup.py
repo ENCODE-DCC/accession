@@ -7,7 +7,7 @@ def readme():
         return f.read()
 
 setup(name='accession',
-      version='0.0.29',
+      version='0.0.30',
       description='Accessioning tool to submit genomics pipeline outputs to the ENCODE Portal',
       long_description=readme(),
       long_description_content_type='text/markdown',

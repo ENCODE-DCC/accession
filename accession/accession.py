@@ -467,9 +467,9 @@ class Accession(object):
                         qc_method(self.conn.get(encode_file.get('accession'), database=True),
                                   wdl_file)
                     accessioned_files.append(encode_file)
-        self.post_qcs()
         return accessioned_files
 
     def accession_steps(self):
         for step in self.steps_and_params_json:
             self.accession_step(step)
+        self.post_qcs()
