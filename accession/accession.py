@@ -464,7 +464,8 @@ class Accession(object):
                         qc_method = getattr(self, QC_MAP[qc])
                         # Pass encode file with
                         # calculated properties
-                        qc_method(self.conn.get(encode_file.get('accession')), wdl_file)
+                        qc_method(self.conn.get(encode_file.get('accession'), database=True),
+                                  wdl_file)
                     accessioned_files.append(encode_file)
         self.post_qcs()
         return accessioned_files
