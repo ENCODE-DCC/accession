@@ -113,9 +113,7 @@ class Accession(object):
                                                  submitted_file_path)
             self.new_files.append(encode_posted_file)
             return encode_posted_file
-        elif (file_exists
-              and file_exists.get('status')
-              in ['deleted', 'revoked']):
+        elif file_exists.get('status') in ['deleted', 'revoked']):
             encode_file.update(submitted_file_path)
             # Update the file to current user
             # TODO: Reverse this when duplicate md5sums are enabled
