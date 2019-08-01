@@ -111,7 +111,7 @@ class Accession(object):
     def accession_file(self, encode_file, gs_file):
         file_exists = self.file_at_portal(gs_file.filename)
         submitted_file_path = {'submitted_file_name': gs_file.filename}
-        if not file_exists:
+        if file_exists:
             self.logger.warning(
                 'Attempting to post duplicate file of %s with md5sum %s',
                 file_exists,
