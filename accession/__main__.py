@@ -77,7 +77,7 @@ def main(args=None):
         return
     metadata = MetaData(args.accession_metadata)
     accession_steps = AccessionSteps(args.accession_steps)
-    analysis = Analysis(metadata)
+    analysis = Analysis(metadata, raw_fastqs_keys=accession_steps.raw_fastqs_keys)
     connection = Connection(args.server)
     if all([accession_steps, analysis, lab, award, connection]):
         accessioner = Accession(accession_steps, analysis, connection, lab, award)

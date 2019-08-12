@@ -18,3 +18,6 @@ class Task(object):
             "runtimeAttributes", {}
         ).get("docker")
         self.analysis = analysis
+
+    def __repr__(self):
+        return f"{self.task_name} with inputs {self.inputs} and outputs {self.outputs}"

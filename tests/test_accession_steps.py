@@ -33,6 +33,14 @@ def test_accession_steps_content(steps):
     assert all(isinstance(x, dict) for x in steps.content)
 
 
+def test_accession_steps_raw_fastqs_keys(mocker):
+    mocker.patch(
+        "builtins.open", mocker.mock_open(read_data='{"raw_fastqs_keys": ["foo"]}')
+    )
+    steps = AccessionSteps("path")
+    assert steps.raw_fastqs_keys == ["foo"]
+
+
 @pytest.fixture(scope="module")
 def steps():
     current_dir = Path(__file__).resolve()

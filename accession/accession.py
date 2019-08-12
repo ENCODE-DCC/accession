@@ -2,7 +2,9 @@ import json
 import logging
 import os
 from base64 import b64encode
+from typing import Any, Dict, List, Optional
 
+from accession.file import GSFile
 from accession.helpers import string_to_number
 from accession.quality_metric import QualityMetric
 
@@ -17,13 +19,21 @@ class AccessionSteps:
         return self._path_to_accession_step_json
 
     @property
-    def content(self):
+    def steps(self):
         if self._steps:
-            return self._steps["accession.steps"]
+            return self._steps
         else:
             with open(self.path_to_json) as fp:
                 self._steps = json.load(fp)
-        return self._steps["accession.steps"]
+                return self._steps
+
+    @property
+    def content(self):
+        return self.steps["accession.steps"]
+
+    @property
+    def raw_fastqs_keys(self) -> Optional[List]:
+        return self.steps.get("raw_fastqs_keys")
 
 
 class Accession(object):
@@ -48,6 +58,11 @@ class Accession(object):
         "long_read_rna_mapping": "make_long_read_rna_mapping_qc",
         "long_read_rna_quantification": "make_long_read_rna_quantification_qc",
         "long_read_rna_correlation": "make_long_read_rna_correlation_qc",
+        "chip_alignment": "make_chip_alignment_qc",
+        "chip_align_enrich": "make_chip_align_enrich_qc",
+        "chip_library": "make_chip_library_qc",
+        "chip_replication": "make_chip_replication_qc",
+        "chip_peak_enrichment": "make_chip_peak_enrichment_qc",
     }
 
     def __init__(self, steps, analysis, connection, lab, award):
@@ -224,6 +239,11 @@ class Accession(object):
                 .get("ref_fa", "")
             ]
             return assembly[0] if len(assembly) > 0 else ""
+        elif pipeline_name == "chip":
+            files = self.analysis.get_files(filekey="ref_fa")
+            if files:
+                portal_index = self.file_at_portal(files[0].filename)
+            return portal_index["assembly"]
 
     @property
     def genome_annotation(self):
@@ -284,6 +304,7 @@ class Accession(object):
         derived_from,
         dataset,
         file_format_type=None,
+        extras: Optional[Dict[str, Any]] = None,
     ):
         file_name = file.filename.split("gs://")[-1].replace("/", "-")
         obj = {
@@ -302,6 +323,8 @@ class Accession(object):
             obj["file_format_type"] = file_format_type
         if self.genome_annotation:
             obj["genome_annotation"] = self.genome_annotation
+        if extras is not None:
+            obj.update(extras)
         obj[type(self).PROFILE_KEY] = "file"
         obj.update(self.COMMON_METADATA)
         return obj
@@ -328,7 +351,6 @@ class Accession(object):
             for item in nested_list:
                 yield from self.flatten(item)
 
-    # Returns list of accession ids of files on portal or recently accessioned
     def get_derived_from(
         self,
         file,
@@ -338,6 +360,10 @@ class Accession(object):
         inputs=False,
         allow_empty=False,
     ):
+        """
+        Returns list of accession ids of files on portal or recently accessioned. An exception will
+        be raised if no files are found unless allow_empty is passed as True.
+        """
         derived_from_files = self.analysis.search_up(
             file.task, task_name, filekey, inputs
         )
@@ -369,7 +395,9 @@ class Accession(object):
         )
         if not derived_from_accession_ids and not allow_empty:
             raise Exception(
-                f"Missing all of the derived_from files on the portal: {missing}"
+                "Missing all of the derived_from files on the portal: {}".format(
+                    missing
+                )
             )
         if len(derived_from_accession_ids) != len(derived_from_files):
             raise Exception(
@@ -386,8 +414,20 @@ class Accession(object):
         step_run,
         derived_from_files,
         file_format_type=None,
+        callbacks: Optional[List[str]] = None,
     ):
+        """
+        Callbacks is a list of handles to functions bound to the Accession instance. We
+        need these to be able to do things like add conditional properties to the file
+        depending on the workflow results, for instance in the case of handling
+        `preferred_default` for ChIP-seq peaks files.
+        """
         derived_from = self.get_derived_from_all(file, derived_from_files)
+        extras: Dict[str, Any] = {}
+        if callbacks:
+            for callback in callbacks:
+                result: Dict[str, Any] = getattr(self, callback)(file)
+                extras.update(result)
         return self.file_from_template(
             file,
             file_format,
@@ -396,6 +436,7 @@ class Accession(object):
             derived_from,
             self.dataset,
             file_format_type,
+            extras=extras,
         )
 
     def get_bio_replicate(self, encode_file, string=True):
@@ -610,6 +651,286 @@ class Accession(object):
             output_qc, encode_file, "long-read-rna-quantification-quality-metric"
         )
 
+    def get_chip_pipeline_replicate(self, gs_file):
+        """
+        Searches for the input fastq array corresponding to the ancestor input fastqs of the current
+        file and returns the pipeline replicate number. We only need to check R1, since it will
+        always be there in both the single and paired ended runs of the ChIP pipeline. We need this
+        in order to be able to identify the correct QC in the QC JSON.
+        """
+        parent_fastqs = [
+            file.filename
+            for file in self.analysis.search_up(
+                gs_file.task, "align", "fastqs_R1", inputs="true"
+            )
+        ]
+        pipeline_rep = None
+        for k, v in self.analysis.metadata["inputs"].items():
+            if "fastqs" in k and "ctl" not in k:
+                if sorted(v) == sorted(parent_fastqs):
+                    pipeline_rep = k.split("_")[1]
+                    break
+        if not pipeline_rep:
+            raise ValueError(
+                "Could not determine pipeline replicate number for file {}".format(
+                    gs_file
+                )
+            )
+        return pipeline_rep
+
+    def maybe_preferred_default(self, gs_file: GSFile) -> Dict[str, bool]:
+        """
+        For replicated ChIP-seq experiment, the exact file that is to be labeled with
+        preferred_default=true may vary. As such, this callback is registered for any
+        file that might need to have this value set in the steps JSON, and called at
+        file object generation time (make_file_obj) to fill in (or not) the missing
+        value.
+        """
+        qc = self.backend.read_json(self.analysis.get_files("qc_json")[0])[
+            "replication"
+        ]["reproducibility"]["idr"]
+
+        optimal_set = qc["opt_set"]
+        current_set = gs_file.task.inputs["prefix"]
+        if current_set == optimal_set:
+            return {"preferred_default": True}
+        return {}
+
+    def add_mapped_read_length(self, gs_file: GSFile) -> Dict[str, int]:
+        """
+        Obtains the value of mapped_read_length to post for bam files from the read
+        length log in the ancestor align task in the ChIP-seq pipeline.
+        """
+        read_len_log = self.analysis.search_up(gs_file.task, "align", "read_len_log")[0]
+        log_contents = self.backend.read_file(read_len_log.filename)
+        try:
+            mapped_read_length = int(log_contents)
+        except ValueError as e:
+            raise RuntimeError(
+                f"Could not parse read length log into integer: tried to parse {log_contents}"
+            ) from e
+        return {"mapped_read_length": mapped_read_length}
+
+    def make_chip_alignment_qc(self, encode_file, gs_file):
+        """
+        This function typecasts to match the ENCODE schema. Trucated zero values could
+        potentially be deserialized from the qc json as integers instead of floats.
+        """
+        if self.file_has_qc(encode_file, "ChipAlignmentQualityMetric"):
+            return
+        qc = self.backend.read_json(self.analysis.get_files("qc_json")[0])
+        replicate = self.get_chip_pipeline_replicate(gs_file)
+        file_output_type = encode_file.get("output_type")
+        if "unfiltered" in file_output_type:
+            qc_key, processing_stage = "samstat", "unfiltered"
+        else:
+            qc_key, processing_stage = "nodup_samstat", "filtered"
+        output_qc = qc["align"][qc_key][replicate]
+        for k, v in output_qc.items():
+            if k.startswith("pct"):
+                output_qc[k] = float(v)
+            else:
+                output_qc[k] = int(v)
+        # Add after to avoid trying to cast
+        output_qc["processing_stage"] = processing_stage
+        return self.queue_qc(
+            output_qc, encode_file, "chip-alignment-samstat-quality-metric"
+        )
+
+    def make_chip_align_enrich_qc(self, encode_file, gs_file):
+        """
+        The xcor plots are not downstream of encode_file, in fact, they don't even share
+        a common parent task with encode_file. Instead, we search up to find the parent
+        align task of the current filtered bam, find the corresponding align_R1 task
+        with the same fastq input, and search downstream from there for the xcor plot.
+        """
+        if self.file_has_qc(encode_file, "ChipAlignmentEnrichmentQualityMetric"):
+            return
+        qc = self.backend.read_json(self.analysis.get_files("qc_json")[0])
+        replicate = self.get_chip_pipeline_replicate(gs_file)
+        key_to_match = "fastqs_R1"
+        parent_fastqs = [
+            file.filename
+            for file in self.analysis.search_up(
+                gs_file.task, "align", key_to_match, inputs="true"
+            )
+        ]
+        align_r1_tasks = self.analysis.get_tasks("align_R1")
+        start_task = [
+            i for i in align_r1_tasks if i.inputs[key_to_match] == parent_fastqs
+        ]
+        if len(start_task) != 1:
+            raise ValueError(
+                (
+                    f"Incorrect number of candidate start tasks with {key_to_match}: "
+                    f"expected 1 but found {start_task}"
+                )
+            )
+        cross_corr_plot_pdf = self.analysis.search_down(
+            start_task[0], "xcor", "plot_pdf"
+        )[0]
+        fingerprint_plot_png = self.analysis.search_down(gs_file.task, "jsd", "plot")[0]
+        gc_bias_plot_png = self.analysis.search_down(
+            gs_file.task, "gc_bias", "gc_plot"
+        )[0]
+        output_qc = {
+            **qc["align_enrich"]["xcor_score"][replicate],
+            **qc["align_enrich"]["jsd"][replicate],
+        }
+        # Typecasting to match ENCODE schema
+        for k, v in output_qc.items():
+            if k in [
+                "argmin_corr",
+                "estimated_fragment_len",
+                "phantom_peak",
+                "subsampled_reads",
+            ]:
+                output_qc[k] = int(v)
+            else:
+                output_qc[k] = float(v)
+        output_qc.update(
+            {
+                "cross_correlation_plot": self.get_attachment(
+                    cross_corr_plot_pdf, "application/pdf"
+                ),
+                "jsd_plot": self.get_attachment(fingerprint_plot_png, "image/png"),
+                "gc_bias_plot": self.get_attachment(gc_bias_plot_png, "image/png"),
+            }
+        )
+        return self.queue_qc(
+            output_qc, encode_file, "chip-alignment-enrichment-quality-metric"
+        )
+
+    def make_chip_library_qc(self, encode_file, gs_file):
+        if self.file_has_qc(encode_file, "ChipLibraryQualityMetric"):
+            return
+        qc = self.backend.read_json(self.analysis.get_files("qc_json")[0])
+        replicate = self.get_chip_pipeline_replicate(gs_file)
+        output_qc = {
+            **qc["align"]["dup"][replicate],
+            **qc["lib_complexity"]["lib_complexity"][replicate],
+        }
+        # Typecasting to match ENCODE schema
+        for k, v in output_qc.items():
+            if k in ["NRF", "PBC1", "PBC2", "pct_duplicate_reads"]:
+                output_qc[k] = float(v)
+            else:
+                output_qc[k] = int(v)
+        return self.queue_qc(output_qc, encode_file, "chip-library-quality-metric")
+
+    @staticmethod
+    def get_chip_pipeline_replication_method(qc: Dict[str, Any]) -> str:
+        """
+        Checks the qc report for the pipeline type and returns the appropriate
+        reproducibility criteria, `idr` for TF ChIP-seq and (naive) `overlap` for
+        histone ChIP-seq.
+        """
+        pipeline_type = qc["general"]["pipeline_type"]
+        if pipeline_type == "histone":
+            return "overlap"
+        return "idr"
+
+    def make_chip_replication_qc(self, encode_file, gs_file):
+        """
+        Rescue ratio and self-consistency ratio are only reported for optimal set. This
+        set is determined by checking the QC JSON, and comparing to the prefix in the
+        IDR task input in the WDL.
+
+        The value of the QC's `reproducible_peaks` depends on the replicates or
+        psuedo-replicates being compared.
+
+        IDR cutoff, plot, and log are always reported for all IDR thresholded peaks
+        files. They are not reported for the histone pipeline, which uses overlap.
+        The IDR log file attachment is fudged with a .txt extension so that the portal
+        can guess the mime type correctly and accept the file as valid.
+        """
+        if self.file_has_qc(encode_file, "ChipReplicationQualityMetric"):
+            return
+        raw_qc = self.backend.read_json(self.analysis.get_files("qc_json")[0])
+        method = self.get_chip_pipeline_replication_method(raw_qc)
+        qc = raw_qc["replication"]["reproducibility"][method]
+
+        optimal_set = qc["opt_set"]
+        current_set = gs_file.task.inputs["prefix"]
+        output_qc = {}
+
+        if current_set == optimal_set:
+            output_qc.update(
+                {
+                    k: v
+                    for k, v in qc.items()
+                    if k
+                    in ["rescue_ratio", "self_consistency_ratio", "reproducibility"]
+                }
+            )
+
+        task_name = gs_file.task.task_name
+        num_peaks = None
+        if task_name == f"{method}_ppr":
+            num_peaks = qc["Np"]
+        elif task_name in ["idr", "overlap"]:
+            num_peaks = qc["Nt"]
+        elif task_name == f"{method}_pr":
+            if "rep1" in current_set:
+                num_peaks = qc["N1"]
+            elif "rep2" in current_set:
+                num_peaks = qc["N2"]
+        if num_peaks is not None:
+            output_qc["reproducible_peaks"] = int(num_peaks)
+
+        if method == "idr":
+            output_qc["idr_cutoff"] = float(gs_file.task.inputs["idr_thresh"])
+            idr_plot_png = self.analysis.get_files(
+                filename=gs_file.task.outputs["idr_plot"]
+            )[0]
+            idr_log = self.analysis.get_files(filename=gs_file.task.outputs["idr_log"])[
+                0
+            ]
+            output_qc.update(
+                {"idr_dispersion_plot": self.get_attachment(idr_plot_png, "image/png")}
+            )
+            output_qc.update(
+                {
+                    "idr_parameters": self.get_attachment(
+                        idr_log, "text/plain", add_ext=".txt"
+                    )
+                }
+            )
+        return self.queue_qc(output_qc, encode_file, "chip-replication-quality-metric")
+
+    def make_chip_peak_enrichment_qc(self, encode_file, gs_file):
+        """
+        The peak region stats are only useful for the optimal set, since the ones for
+        rep1 and rep2 are applicable to files that are not posted by to the portal.
+
+        IDR frip scores are applicable to any pair undergoing IDR, so they are always
+        looked for.
+        """
+        if self.file_has_qc(encode_file, "ChipPeakEnrichmentQualityMetric"):
+            return
+
+        qc = self.backend.read_json(self.analysis.get_files("qc_json")[0])
+        method = self.get_chip_pipeline_replication_method(qc)
+
+        optimal_set = qc["replication"]["reproducibility"][method]["opt_set"]
+        current_set = gs_file.task.inputs["prefix"]
+
+        output_qc = {
+            "frip": qc["peak_enrich"]["frac_reads_in_peaks"][method][current_set][
+                "frip"
+            ]
+        }
+        if current_set == optimal_set:
+            output_qc.update({**qc["peak_stat"]["peak_region_size"][f"{method}_opt"]})
+        for k, v in output_qc.items():
+            if k in ["mean", "frip"]:
+                output_qc[k] = float(v)
+            else:
+                output_qc[k] = int(v)
+        return self.queue_qc(
+            output_qc, encode_file, "chip-peak-enrichment-quality-metric"
+        )
+
     def queue_qc(self, qc, encode_file, profile, shared=False):
         step_run_id = self.get_step_run_id(encode_file)
         qc.update({"step_run": step_run_id, "status": "in progress"})
@@ -634,7 +955,14 @@ class Accession(object):
             return True
         return False
 
-    def get_attachment(self, gs_file, mime_type):
+    def get_attachment(self, gs_file, mime_type, add_ext=""):
+        """
+        Files with certain extensions will fail portal validation since it can't guess
+        the mime type correctly, e.g. a `.log` file with mime type `text/plain` will
+        cause a schema validation error. We can trick the portal by appending a dummy
+        extension that will cause the portal to correctly guess the mime type, for
+        instance in the above case appending a `.txt` extension will validate properly.
+        """
         contents = self.backend.read_file(gs_file.filename)
         contents = b64encode(contents)
         if type(contents) is bytes:
@@ -642,12 +970,25 @@ class Accession(object):
             contents = str(contents).replace("b", "", 1).replace("'", "")
         obj = {
             "type": mime_type,
-            "download": gs_file.filename.split("/")[-1],
+            "download": gs_file.filename.split("/")[-1] + add_ext,
             "href": "data:{};base64,{}".format(mime_type, contents),
         }
         return obj
 
     def accession_step(self, single_step_params):
+        """
+        Note that this method will attempt a getattr() when converting the qc method defined in the
+        accessioning template to a function name. This will raise a NotImplementedError if the
+        method is not defined, wrapping the AttributeError raised by getattr(). Quality metric
+        helper functions should be implemented by derived classes.
+
+        The optional parameter "requries_replication" is used to denote wdl tasks that
+        will not be present in the metadata if the pipeline is ran on unreplicated data,
+        for example pooled IDR in the ChIP-seq pipeline.
+        """
+        if single_step_params.get("requires_replication") is True:
+            if not self.is_replicated:
+                return
         step_run = self.get_or_make_step_run(
             self.lab_pi,
             single_step_params["dcc_step_run"],
@@ -673,16 +1014,19 @@ class Accession(object):
                             step_run,
                             file_params["derived_from_files"],
                             file_format_type=file_params.get("file_format_type"),
+                            callbacks=file_params.get("callbacks"),
                         )
                         encode_file = self.accession_file(obj, wdl_file)
                     except Exception as e:
-                        if "Conflict" in str(e) and file_params.get(
-                            "possible_duplicate"
-                        ):
+                        tb = str(e)
+                        if "Conflict" in tb and file_params.get("possible_duplicate"):
                             continue
-                        elif "Missing" in str(e):
+                        elif "Missing" in tb:
                             raise
                         else:
+                            self.logger.critical(
+                                "An error occurred accessioning a file: %s", tb
+                            )
                             raise
 
                     # Parameter file inputted assumes Accession implements

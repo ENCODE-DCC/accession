@@ -12,7 +12,7 @@ from requests import Response
 from accession.accession import Accession, AccessionSteps
 from accession.analysis import Analysis, MetaData
 
-from .fixtures import MockGCBackend
+from .fixtures import MockGCBackend, MockMetaData
 
 
 @attr.s(auto_attribs=True)
@@ -277,7 +277,7 @@ def test_file_from_template(
         "dataset": "qux",
         "file_format_type": file_format_type,
     }
-    file = mock_accession.file_from_template(**kwargs)
+    file = mock_accession.file_from_template(**kwargs)  # type: ignore
     expected = {
         "status": "uploading",
         "aliases": ["encode-processing-pipeline:foo-bar"],
@@ -426,57 +426,6 @@ def mirna_replicated_analysis(
 @pytest.fixture
 def mock_encode_file() -> Dict[str, List[int]]:
     return {"biological_replicates": [1, 2]}
-
-
-class MockMetaData:
-    content = {"workflowRoot": "gs://foo/bar", "calls": {}}
-
-
-@pytest.fixture
-def mock_metadata():
-    return MockMetaData()
-
-
-class MockAccessionSteps:
-    path_to_json = "/dev/null"
-    content = {"accession.steps": [{"a": "b"}]}
-
-
-@pytest.fixture
-def mock_accession_steps():
-    return MockAccessionSteps()
-
-
-@pytest.fixture
-def mock_accession(
-    mocker: MockFixture,
-    mock_accession_gc_backend: MockGCBackend,
-    mock_metadata: MockMetaData,
-    mock_accession_steps: MockAccessionSteps,
-    lab: str,
-    award: str,
-) -> Accession:
-    """
-    Mocked accession instance with dummy __init__ that doesn't do anything and pre-baked
-    assembly property. @properties must be patched before instantiation
-    """
-    mocker.patch.object(
-        Accession, "assembly", new_callable=PropertyMock(return_value="hg19")
-    )
-    mocker.patch.object(
-        Accession, "genome_annotation", new_callable=PropertyMock(return_value="V19")
-    )
-    mocker.patch.object(
-        Accession, "is_replicated", new_callable=PropertyMock(return_value=True)
-    )
-    mocked_accession = Accession(
-        mock_accession_steps,
-        Analysis(mock_metadata, backend=mock_accession_gc_backend),
-        "mock_server.biz",
-        lab,
-        award,
-    )
-    return mocked_accession
 
 
 @pytest.fixture

@@ -4,6 +4,7 @@ import shutil
 from pathlib import Path
 from time import sleep
 from typing import Callable, Dict, Iterator, Tuple
+from unittest.mock import PropertyMock
 from urllib.parse import urljoin
 
 import attr
@@ -291,3 +292,54 @@ def accessioner_factory(
         os.remove(current_dir.parents[1] / "accession.log")
 
     return _accessioner_factory
+
+
+class MockMetaData:
+    content = {"workflowRoot": "gs://foo/bar", "calls": {}}
+
+
+@pytest.fixture
+def mock_metadata():
+    return MockMetaData()
+
+
+class MockAccessionSteps:
+    path_to_json = "/dev/null"
+    content = {"accession.steps": [{"a": "b"}]}
+
+
+@pytest.fixture
+def mock_accession_steps():
+    return MockAccessionSteps()
+
+
+@pytest.fixture
+def mock_accession(
+    mocker: MockFixture,
+    mock_accession_gc_backend: MockGCBackend,
+    mock_metadata: MockMetaData,
+    mock_accession_steps: MockAccessionSteps,
+    lab: str,
+    award: str,
+) -> Accession:
+    """
+    Mocked accession instance with dummy __init__ that doesn't do anything and pre-baked
+    assembly property. @properties must be patched before instantiation
+    """
+    mocker.patch.object(
+        Accession, "assembly", new_callable=PropertyMock(return_value="hg19")
+    )
+    mocker.patch.object(
+        Accession, "genome_annotation", new_callable=PropertyMock(return_value="V19")
+    )
+    mocker.patch.object(
+        Accession, "is_replicated", new_callable=PropertyMock(return_value=True)
+    )
+    mocked_accession = Accession(
+        mock_accession_steps,
+        Analysis(mock_metadata, backend=mock_accession_gc_backend),
+        "mock_server.biz",
+        lab,
+        award,
+    )
+    return mocked_accession
