@@ -155,6 +155,15 @@ class Accession(object):
             return assembly[0] if len(assembly) > 0 else ''
 
     @property
+    def genome_annotation(self):
+        pipeline_name = self.analysis.metadata.get('workflowName')
+        if pipeline_name == 'mirna_seq_pipeline':
+            files = self.analysis.get_files(filekey='annotation')
+            if files:
+                annotation = self.file_at_portal(files[0].filename)
+            return annotation.get('genome_annotation', '')
+
+    @property
     def lab_pi(self):
         return COMMON_METADATA['lab'].split('/labs/')[1].split('/')[0]
 
@@ -186,6 +195,8 @@ class Accession(object):
         }
         if file_format_type:
             obj['file_format_type'] = file_format_type
+        if self.genome_annotation:
+            obj['genome_annotation'] = self.genome_annotation
         obj[Connection.PROFILE_KEY] = 'file'
         obj.update(COMMON_METADATA)
         return obj
