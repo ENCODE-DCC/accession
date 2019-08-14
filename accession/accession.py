@@ -176,6 +176,10 @@ class Accession(object):
         return self.file_at_portal(
             self.analysis.raw_fastqs[0].filename).get('dataset')
 
+    @property
+    def assay_term_name(self):
+        return self.conn.get(self.dataset).get('assay_term_name')
+
     def file_from_template(self,
                            file,
                            file_format,
@@ -406,7 +410,10 @@ class Accession(object):
         step_run_id = self.get_step_run_id(encode_file)
         qc.update({
             'step_run':             step_run_id,
-            'status':               "released"})
+            'status':               "released",
+        })
+        if self.assay_term_name:
+            qc['assay_term_name'] = self.assay_term_name
         qc.update(COMMON_METADATA)
         qc[Connection.PROFILE_KEY] = profile
         # Shared QCs will have two or more file ids
