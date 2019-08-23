@@ -180,6 +180,15 @@ class Accession(object):
     def assay_term_name(self):
         return self.conn.get(self.dataset).get('assay_term_name')
 
+    @property
+    def is_replicated(self):
+        bio_reps = set([
+            rep.get('biological_replicate_number')
+            for rep
+            in self.conn.get(self.dataset).get('replicates')
+        ])
+        return True if len(bio_reps) > 1 else False
+
     def file_from_template(self,
                            file,
                            file_format,
@@ -393,7 +402,11 @@ class Accession(object):
                              'micro-rna-mapping-quality-metric')
 
     def make_microrna_correlation_qc(self, encode_file, gs_file):
-        if self.file_has_qc(encode_file, 'CorrelationQualityMetric'):
+        """
+        Returns without queueing this QC for posting if the experiment is not replicated, since
+        correlation is computed between pairs of replicates.
+        """
+        if self.file_has_qc(encode_file, 'CorrelationQualityMetric') or not self.is_replicated:
             return
         qc_file = self.analysis.search_down(gs_file.task,
                                             'spearman_correlation',
