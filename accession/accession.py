@@ -48,7 +48,7 @@ class Accession(object):
         self.logger = logging.getLogger(__name__)
         logging.basicConfig(
             filename='accession.log',
-            format='%(asctime)s %(message)s',
+            format='%(asctime)s %(levelname)s %(message)s',
             level=logging.DEBUG
         )
 
@@ -146,7 +146,7 @@ class Accession(object):
         aliases = payload.get('aliases')
         if aliases:
             if self.conn.get(aliases, database=True):
-                self.logger.warning(
+                self.logger.error(
                     '%s %s with aliases %s already exists, will not post it',
                     profile_key.capitalize().replace('_', ' '),
                     ACCESSION_LOG_KEY,
