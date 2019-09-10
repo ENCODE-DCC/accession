@@ -28,6 +28,7 @@ QC_MAP = {
 
 
 ASSEMBLIES = ['GRCh38', 'mm10']
+ACCESSION_LOG_KEY = 'ACC_MSG'
 
 
 class Accession(object):
@@ -47,7 +48,7 @@ class Accession(object):
         self.logger = logging.getLogger(__name__)
         logging.basicConfig(
             filename='accession.log',
-            format='%(asctime)s %(message)s',
+            format='%(asctime)s %(levelname)s %(message)s',
             level=logging.DEBUG
         )
 
@@ -113,8 +114,9 @@ class Accession(object):
         submitted_file_path = {'submitted_file_name': gs_file.filename}
         if file_exists:
             self.logger.warning(
-                'Attempting to post duplicate file of %s with md5sum %s',
-                file_exists,
+                '%s Attempting to post duplicate file of %s with md5sum %s',
+                ACCESSION_LOG_KEY,
+                file_exists.get('accession'),
                 encode_file.get('md5sum')
             )
         local_file = self.backend.download(gs_file.filename)[0]
@@ -133,12 +135,47 @@ class Accession(object):
         new_properties[self.conn.ENCID_KEY] = encode_file.get('accession')
         return self.conn.patch(new_properties, extend_array_values=False)
 
+    def log_if_exists(self, payload, profile_key):
+        """
+        If an object with given aliases already exists, as determined by an additional GET request,
+        then log a warning before attempting to POST the payload. Truthiness of the dict returned by
+        encode_utils.connection.Connection.get() is sufficient to check the object's existence on
+        the portal, since it returns an empty dict when no matching record is found.
+        """
+
+        aliases = payload.get('aliases')
+        if aliases:
+            if self.conn.get(aliases, database=True):
+                self.logger.error(
+                    '%s %s with aliases %s already exists, will not post it',
+                    profile_key.capitalize().replace('_', ' '),
+                    ACCESSION_LOG_KEY,
+                    aliases,
+                )
+
     def get_or_make_step_run(self, lab_prefix, run_name, step_version, task_name):
+        """
+        encode_utils.connection.Connection.post() does not fail on alias conflict, and does not
+        expose the response status code, so we need to check for the existence of the object first
+        before attempting to POST it with Accession.log_if_exists().
+        """
         docker_tag = self.analysis.get_tasks(task_name)[0].docker_image.split(':')[1]
-        payload = {'aliases': ["{}:{}-{}".format(lab_prefix, run_name, docker_tag)],
-                   'status': 'released',
-                   'analysis_step_version': step_version}
-        payload[Connection.PROFILE_KEY] = 'analysis_step_runs'
+        aliases = [
+            '{}:{}-{}-{}'.format(
+                lab_prefix,
+                run_name,
+                self.analysis.workflow_id,
+                docker_tag
+            )
+        ]
+        payload = {
+            'aliases': aliases,
+            'status': 'in progress',
+            'analysis_step_version': step_version
+        }
+        profile_key = 'analysis_step_runs'
+        self.log_if_exists(payload, profile_key)
+        payload[Connection.PROFILE_KEY] = profile_key
         return self.conn.post(payload)
 
     @property
@@ -423,7 +460,7 @@ class Accession(object):
         step_run_id = self.get_step_run_id(encode_file)
         qc.update({
             'step_run':             step_run_id,
-            'status':               "released",
+            'status':               'in progress',
         })
         if self.assay_term_name:
             qc['assay_term_name'] = self.assay_term_name
