@@ -14,13 +14,16 @@ from accession.quality_metric import QualityMetric
 COMMON_METADATA = {"lab": "", "award": ""}
 
 QC_MAP = {
-    "cross_correlation": "make_cross_correlation_qc",
-    "samtools_flagstat": "make_flagstat_qc",
-    "idr": "make_idr_qc",
-    "star": "make_star_qc_metric",
-    "mirna_mapping": "make_microrna_mapping_qc",
-    "mirna_quantification": "make_microrna_quantification_qc",
-    "mirna_correlation": "make_microrna_correlation_qc",
+    'cross_correlation':    'make_cross_correlation_qc',
+    'samtools_flagstat':    'make_flagstat_qc',
+    'idr':                  'make_idr_qc',
+    'star':                 'make_star_qc_metric',
+    'mirna_mapping':        'make_microrna_mapping_qc',
+    'mirna_quantification': 'make_microrna_quantification_qc',
+    'mirna_correlation':    'make_microrna_correlation_qc',
+    'long_read_rna_mapping': 'make_long_read_rna_mapping_qc',
+    'long_read_rna_quantification': 'make_long_read_rna_quantification_qc',
+    'long_read_rna_correlation': 'make_long_read_rna_correlation_qc',
 }
 
 
@@ -90,7 +93,7 @@ class Accession(object):
         search_param = [("md5sum", md5sum), ("type", "File")]
         encode_file = self.conn.search(search_param)
         if len(encode_file) > 0:
-            return self.conn.get(encode_file[0].get("accession"))
+            return self.conn.get(encode_file[0].get('@id'))
 
     def raw_fastq_inputs(self, file):
         if not file.task and "fastqs" in file.filekeys:
@@ -170,31 +173,45 @@ class Accession(object):
 
     @property
     def assembly(self):
-        pipeline_name = self.analysis.metadata.get("workflowName")
-        if pipeline_name == "mirna_seq_pipeline":
-            files = self.analysis.get_files(filekey="annotation")
+        """
+        Obtain the assembly from the metadata. These magic strings should be factored out into the
+        accession_steps template.
+        """
+        pipeline_name = self.analysis.metadata.get('workflowName')
+        if pipeline_name in ('mirna_seq_pipeline', 'long_read_rna_pipeline'):
+            if pipeline_name == 'mirna_seq_pipeline':
+                filekey = 'annotation'
+            elif pipeline_name == 'long_read_rna_pipeline':
+                filekey = 'annotation_gtf'
+            files = self.analysis.get_files(filekey=filekey)
             if files:
                 annotation = self.file_at_portal(files[0].filename)
-            return annotation.get("assembly", "")
-        elif pipeline_name == "atac":
-            assembly = [
-                reference
-                for reference in ASSEMBLIES
-                if reference
-                in self.analysis.get_tasks("read_genome_tsv")[0]
-                .outputs.get("genome", {})
-                .get("ref_fa", "")
-            ]
-            return assembly[0] if len(assembly) > 0 else ""
+                return annotation.get('assembly', '')
+            else:
+                raise KeyError('Could not find any file with key {} in metadata'.format(filekey))
+        elif pipeline_name == 'atac':
+            assembly = [reference
+                        for reference
+                        in ASSEMBLIES
+                        if reference
+                        in self.analysis.get_tasks('read_genome_tsv')[0].outputs.get(
+                            'genome', {}).get('ref_fa', '')]
+            return assembly[0] if len(assembly) > 0 else ''
 
     @property
     def genome_annotation(self):
-        pipeline_name = self.analysis.metadata.get("workflowName")
-        if pipeline_name == "mirna_seq_pipeline":
-            files = self.analysis.get_files(filekey="annotation")
+        pipeline_name = self.analysis.metadata.get('workflowName')
+        if pipeline_name in ('mirna_seq_pipeline', 'long_read_rna_pipeline'):
+            if pipeline_name == 'mirna_seq_pipeline':
+                filekey = 'annotation'
+            elif pipeline_name == 'long_read_rna_pipeline':
+                filekey = 'annotation_gtf'
+            files = self.analysis.get_files(filekey=filekey)
             if files:
                 annotation = self.file_at_portal(files[0].filename)
-            return annotation.get("genome_annotation", "")
+                return annotation.get('genome_annotation', '')
+            else:
+                raise KeyError('Could not find any file with key {} in metadata'.format(filekey))
 
     @property
     def lab_pi(self):
@@ -253,14 +270,12 @@ class Accession(object):
         ancestors = []
         for ancestor in files:
             ancestors.append(
-                self.get_derived_from(
-                    file,
-                    ancestor.get("derived_from_task"),
-                    ancestor.get("derived_from_filekey"),
-                    ancestor.get("derived_from_output_type"),
-                    ancestor.get("derived_from_inputs"),
-                )
-            )
+                self.get_derived_from(file,
+                                      ancestor.get('derived_from_task'),
+                                      ancestor.get('derived_from_filekey'),
+                                      ancestor.get('derived_from_output_type'),
+                                      ancestor.get('derived_from_inputs'),
+                                      ancestor.get('allow_empty')))
         return list(self.flatten(ancestors))
 
     def flatten(self, nested_list):
@@ -271,15 +286,15 @@ class Accession(object):
                 yield from self.flatten(item)
 
     # Returns list of accession ids of files on portal or recently accessioned
-    def get_derived_from(
-        self, file, task_name, filekey, output_type=None, inputs=False
-    ):
-        derived_from_files = self.analysis.search_up(
-            file.task, task_name, filekey, inputs
-        )
-        encode_files = [
-            self.file_at_portal(gs_file.filename) for gs_file in derived_from_files
-        ]
+    def get_derived_from(self, file, task_name, filekey,
+                         output_type=None, inputs=False,  allow_empty=False):
+        derived_from_files = self.analysis.search_up(file.task,
+                                                     task_name,
+                                                     filekey,
+                                                     inputs)
+        encode_files = [self.file_at_portal(gs_file.filename)
+                        for gs_file
+                        in derived_from_files]
         accessioned_files = encode_files + self.new_files
         accessioned_files = [x for x in accessioned_files if x is not None]
         derived_from_accession_ids = []
@@ -290,26 +305,16 @@ class Accession(object):
                     # when their md5sum is the same
                     if output_type and output_type != encode_file.get("output_type"):
                         continue
-                    derived_from_accession_ids.append(encode_file.get("accession"))
+                    derived_from_accession_ids.append(encode_file['@id'])
         derived_from_accession_ids = list(set(derived_from_accession_ids))
-
-        # Raise exception when some or all of the derived_from files
-        # are missing from the portal
-
-        # missing = "\n".join(
-        #     [
-        #         "{}: {}".format(filekey, filename)
-        #         for filename in map(lambda x: x.filename, derived_from_files)
-        #     ]
-        # )
-        if not derived_from_accession_ids:
-            raise Exception("Missing all of the derived_from files on the portal")
+        missing = '\n'.join(['{}: {}'.format(filekey, filename)
+                             for filename
+                             in map(lambda x: x.filename, derived_from_files)])
+        if not derived_from_accession_ids and not allow_empty:
+            raise Exception('Missing all of the derived_from files on the portal')
         if len(derived_from_accession_ids) != len(derived_from_files):
-            raise Exception("Missing some of the derived_from files on the portal")
-        return [
-            "/files/{}/".format(accession_id)
-            for accession_id in derived_from_accession_ids
-        ]
+            raise Exception('Missing some of the derived_from files on the portal')
+        return derived_from_accession_ids
 
     # File object to be accessioned
     def make_file_obj(
@@ -471,6 +476,82 @@ class Accession(object):
             encode_file,
             "correlation-quality-metric",
             shared=True,
+        )
+
+    def make_generic_correlation_qc(self, encode_file, gs_file, handler):
+        """
+        Make correlation QC metrics in  a pipeline agnostic fashion. Pipeline specific logic is
+        taken care of in the passed handler (name of a function that )
+        """
+        if self.file_has_qc(encode_file, 'CorrelationQualityMetric') or not self.is_replicated:
+            return
+        qc = handler(gs_file)
+        return self.queue_qc(
+            qc,
+            encode_file,
+            'correlation-quality-metric',
+            shared=True,
+        )
+
+    def make_long_read_rna_correlation_qc(self, encode_file, gs_file):
+        """
+        Make and post Spearman QC for long read RNA by giving the make_generic_correlation_qc the
+        appropriate handler.
+        """
+        return self.make_generic_correlation_qc(
+            encode_file,
+            gs_file,
+            handler=self.prepare_long_read_rna_correlation_qc,
+        )
+
+    def prepare_long_read_rna_correlation_qc(self, gs_file):
+        """
+        Handler for creating the correlation QC object, specifically for long read rna. Finds and
+        parses the spearman QC JSON.
+        """
+        qc_file, *_ = self.analysis.search_down(
+            gs_file.task,
+            'calculate_spearman',
+            'spearman'
+        )
+        qc = self.backend.read_json(qc_file)
+        spearman_value = qc['replicates_correlation']['spearman_correlation']
+        spearman_correlation_qc = {'Spearman correlation': spearman_value}
+        return spearman_correlation_qc
+
+    def make_long_read_rna_mapping_qc(self, encode_file, gs_file):
+        """
+        The commented lines add number_of_mapped_reads to the qc object, a field that is currently
+        not valid under the schema.
+        """
+        if self.file_has_qc(encode_file, 'LongReadRnaMappingQualityMetric'):
+            return
+        qc_file = self.analysis.get_files(filename=gs_file.task.outputs['mapping_qc'])[0]
+        qc = self.backend.read_json(qc_file)
+        output_qc = {}
+        mr = 'mapping_rate'
+        # nomr = 'number_of_mapped_reads'
+        flnc = qc['full_length_non_chimeric_reads']['flnc']
+        output_qc['full_length_non_chimeric_read_count'] = int(flnc)
+        output_qc[mr] = float(qc[mr][mr])
+        # output_qc[nomr] = int(qc[nomr]['mapped'])
+        return self.queue_qc(
+            output_qc,
+            encode_file,
+            'long-read-rna-mapping-quality-metric',
+        )
+
+    def make_long_read_rna_quantification_qc(self, encode_file, gs_file):
+        if self.file_has_qc(encode_file, 'LongReadRnaQuantificationQualityMetric'):
+            return
+        ngd = 'number_of_genes_detected'
+        qc_file = self.analysis.get_files(filename=gs_file.task.outputs[ngd])[0]
+        qc = self.backend.read_json(qc_file)
+        output_qc = {'genes_detected': int(qc[ngd][ngd])}
+        return self.queue_qc(
+            output_qc,
+            encode_file,
+            'long-read-rna-quantification-quality-metric',
         )
 
     def queue_qc(self, qc, encode_file, profile, shared=False):
