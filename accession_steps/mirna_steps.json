@@ -1,0 +1,108 @@
+{
+    "accession.steps" : [
+        {
+            "dcc_step_version" : "/analysis-step-versions/microrna-seq-trimming-alignment-quantification-step-v-1-1/",
+            "dcc_step_run" : "microrna-seq-trimming-alignment-quantification-step-run-v1",
+            "wdl_task_name" : "star",
+            "wdl_files" : [
+                {
+                    "filekey" : "bam",
+                    "output_type" : "alignments",
+                    "file_format" : "bam",
+                    "quality_metrics": ["star", "mirna_mapping"],
+                    "derived_from_files" : [
+                        {
+                            "derived_from_task" : "cutadapt",
+                            "derived_from_filekey" : "fastq",
+                            "derived_from_inputs" : "true"
+                        },
+                        {
+                            "derived_from_task" : "star",
+                            "derived_from_filekey" : "index",
+                            "derived_from_inputs" : "true"
+                        },
+                        {
+                            "derived_from_task" : "star",
+                            "derived_from_filekey" : "annotation",
+                            "derived_from_inputs" : "true"
+                        }
+                    ]
+                },
+                {
+                    "filekey" : "tsv",
+                    "output_type" : "gene quantifications",
+                    "file_format" : "tsv",
+                    "quality_metrics": ["mirna_quantification", "mirna_correlation"],
+                    "derived_from_files" : [
+                        {
+                            "derived_from_task" : "cutadapt",
+                            "derived_from_filekey" : "fastq",
+                            "derived_from_inputs" : "true"
+                        },
+                        {
+                            "derived_from_task" : "star",
+                            "derived_from_filekey" : "index",
+                            "derived_from_inputs" : "true"
+                        },
+                        {
+                            "derived_from_task" : "star",
+                            "derived_from_filekey" : "annotation",
+                            "derived_from_inputs" : "true"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "dcc_step_version" : "/analysis-step-versions/microrna-seq-signal-generation-step-v-1-1/",
+            "dcc_step_run" : "microrna-seq-signal-generation-step-run-v1",
+            "wdl_task_name" : "wigtobigwig",
+            "wdl_files" : [
+                {
+                    "filekey" : "plus_strand_all_bigwig",
+                    "output_type" : "plus strand signal of all reads",
+                    "file_format" : "bigWig",
+                    "derived_from_files" : [
+                        {
+                            "derived_from_task" : "star",
+                            "derived_from_filekey" : "bam"
+                        }
+                    ]
+                },
+                {
+                    "filekey" : "minus_strand_all_bigwig",
+                    "output_type" : "minus strand signal of all reads",
+                    "file_format" : "bigWig",
+                    "derived_from_files" : [
+                        {
+                            "derived_from_task" : "star",
+                            "derived_from_filekey" : "bam"
+                        }
+                    ]
+                },
+                {
+                    "filekey" : "plus_strand_unique_bigwig",
+                    "output_type" : "plus strand signal of unique reads",
+                    "file_format" : "bigWig",
+                    "derived_from_files" : [
+                        {
+                            "derived_from_task" : "star",
+                            "derived_from_filekey" : "bam"
+                        }
+                    ]
+                },
+                {
+                    "filekey" : "minus_strand_unique_bigwig",
+                    "output_type" : "minus strand signal of unique reads",
+                    "file_format" : "bigWig",
+                    "derived_from_files" : [
+                        {
+                            "derived_from_task" : "star",
+                            "derived_from_filekey" : "bam"
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}
