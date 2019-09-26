@@ -61,26 +61,6 @@
             ]
         },
         {
-            "dcc_step_version" : "/analysis-step-versions/long-read-rna-seq-transcriptome-assembly-step-v-1-0/",
-            "dcc_step_run" : "/analysis-steps/long-read-rna-seq-transcriptome-assembly-step-v-1/",
-            "wdl_task_name" : "init_talon_db",
-            "wdl_files" : [
-                {
-                    "filekey" : "database",
-                    "output_type" : "transcriptome index",
-                    "file_format" : "database",
-                    "quality_metrics": [],
-                    "derived_from_files" : [
-                        {
-                            "derived_from_task" : "init_talon_db",
-                            "derived_from_filekey" : "annotation_gtf",
-                            "derived_from_inputs": "true"
-                        }
-                    ]
-                }
-            ]
-        },
-        {
             "dcc_step_version" : "/analysis-step-versions/long-read-rna-seq-quantification-step-v-1-0/",
             "dcc_step_run" : "/analysis-steps/long-read-rna-seq-quantification-step-v-1/",
             "wdl_task_name" : "create_abundance_from_talon_db",
@@ -93,7 +73,8 @@
                     "derived_from_files" : [
                         {
                             "derived_from_task" : "init_talon_db",
-                            "derived_from_filekey" : "database"
+                            "derived_from_filekey" : "annotation_gtf",
+                            "derived_from_inputs": "true"
                         },
                         {
                             "derived_from_task" : "filter_transcriptclean",
@@ -116,7 +97,8 @@
                     "derived_from_files" : [
                         {
                             "derived_from_task" : "init_talon_db",
-                            "derived_from_filekey" : "database"
+                            "derived_from_filekey" : "annotation_gtf",
+                            "derived_from_inputs": "true"
                         },
                         {
                             "derived_from_task" : "filter_transcriptclean",
