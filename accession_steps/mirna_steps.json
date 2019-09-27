@@ -30,7 +30,7 @@
                 },
                 {
                     "filekey" : "tsv",
-                    "output_type" : "gene quantifications",
+                    "output_type" : "microRNA quantifications",
                     "file_format" : "tsv",
                     "quality_metrics": ["mirna_quantification", "mirna_correlation"],
                     "derived_from_files" : [
