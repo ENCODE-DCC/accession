@@ -104,3 +104,4 @@ venv.bak/
 .mypy_cache/
 
 EU_Logs
+*.DS_Store

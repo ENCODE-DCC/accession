@@ -1,0 +1,125 @@
+version: 2.1
+
+# default envs
+py35: &py35
+  docker:
+    - image: circleci/python:3.5.7-stretch
+  working_directory: ~/qc-utils
+
+py36: &py36
+  docker:
+    - image: circleci/python:3.6.7-stretch
+  working_directory: ~/qc-utils
+
+py37: &py37
+  docker:
+    - image: circleci/python:3.7.3-stretch
+  working_directory: ~/qc-utils
+
+py38: &py38
+  docker:
+    - image: circleci/python:3.8.0b1-stretch
+  working_directory: ~/qc-utils
+
+defaults: &defaults
+  docker:
+    - image: circleci/buildpack-deps:xenial-scm
+  working_directory: ~/qc-utils
+
+master_only: &master_only
+  filters:
+    branches:
+      only:
+        - master
+
+commands:
+  install_shellcheck:
+    description: "Install shellcheck"
+    steps:
+      - run: sudo apt-get install -y shellcheck
+  run_tox:
+    description: "Install and run tox with a given environment"
+    parameters:
+      toxenv:
+        type: string
+    steps:
+      - run: sudo pip install tox
+      - run: tox -e << parameters.toxenv >>
+
+jobs:
+  lint:
+    <<: *py37
+    steps:
+      - checkout
+      - install_shellcheck
+      - run_tox:
+          toxenv: "lint"
+  py35_unit:
+    <<: *py35
+    steps:
+      - checkout
+      - run_tox:
+          toxenv: "py35"
+  py36_unit:
+    <<: *py36
+    steps:
+      - checkout
+      - run_tox:
+          toxenv: "py36"
+  py37_unit:
+    <<: *py37
+    steps:
+      - checkout
+      - run_tox:
+          toxenv: "py37"
+  py38_unit:
+    <<: *py38
+    steps:
+      - checkout
+      - run_tox:
+          toxenv: "py38"
+  pypy3_unit:
+    <<: *py37
+    steps:
+      - checkout
+      - run:
+          command: |
+            wget -P .. https://bitbucket.org/squeaky/portable-pypy/downloads/pypy3.6-7.1.1-beta-linux_x86_64-portable.tar.bz2
+            cd ..
+            tar xjvf pypy3.6-7.1.1-beta-linux_x86_64-portable.tar.bz2
+            chmod 755 pypy3.6-7.1.1-beta-linux_x86_64-portable/bin/pypy3.6
+            sudo ln -s $PWD/pypy3.6-7.1.1-beta-linux_x86_64-portable/bin/pypy3.6 /usr/local/bin/pypy3
+            pypy3 --version
+      - run_tox:
+          toxenv: "pypy3"
+  docs:
+    <<: *py37
+    steps:
+      - checkout
+      - run_tox:
+          toxenv: "docs"
+  pypi-description:
+    <<: *py37
+    steps:
+      - checkout
+      - run_tox:
+          toxenv: "pypi-description"
+  coverage-report:
+    <<: *py37
+    steps:
+      - checkout
+      - run_tox:
+          toxenv: "coverage-report"
+  release_to_pypi:
+    <<: *py37
+    steps:
+      - checkout
+      - run: sudo pip install --upgrade setuptools wheel twine
+      - run: ./release_to_pypi.sh https://upload.pypi.org/legacy/
+
+workflows:
+  build_workflow:
+    jobs:
+      - lint
+      - pypi-description
+      - docs
