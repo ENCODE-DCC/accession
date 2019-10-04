@@ -1,0 +1,1484 @@
+{
+  "actualWorkflowLanguage": "WDL",
+  "actualWorkflowLanguageVersion": "draft-2",
+  "calls": {
+    "mirna_seq_pipeline.cutadapt": [
+      {
+        "attempt": 1,
+        "backend": "gcp",
+        "backendLabels": {
+          "cromwell-workflow-id": "cromwell-ff2a61b1-8708-407f-a075-6a262d7d1ca0",
+          "wdl-task-name": "cutadapt"
+        },
+        "backendLogs": {
+          "log": "gs://encode-processing/caper_out/mirna_seq_pipeline/ff2a61b1-8708-407f-a075-6a262d7d1ca0/call-cutadapt/shard-0/cutadapt-0.log"
+        },
+        "backendStatus": "Success",
+        "callCaching": {
+          "allowResultReuse": true,
+          "effectiveCallCachingMode": "ReadAndWriteCache",
+          "hashes": {
+            "backend name": "50F66ECBC45488EE5826941BFBC50411",
+            "command template": "CEF1105D06D40BD54B9507279FB4C724",
+            "input": {
+              "File fastq": "jypcOA==",
+              "File five_prime_adapters": "MNNPUQ==",
+              "File three_prime_adapters": "iZKfdA==",
+              "Int ncpus": "C81E728D9D4C2F636F067F89CC14862C",
+              "Int ramGB": "8F14E45FCEEA167A5A36DEDD4BEA2543",
+              "String disk": "2922BF0DCFA3E4A97CF5B6EAF2EC0C06",
+              "String output_prefix": "EAA0B59B1145B2343F0133E595C1C10D"
+            },
+            "input count": "8F14E45FCEEA167A5A36DEDD4BEA2543",
+            "output count": "A87FF679A2F3E71D9181A67B7542122C",
+            "output expression": {
+              "File no3ad_untrimmed_fastq": "51C8638A52C9A15E0517408FF5AE9250",
+              "File no5ad_untrimmed_fastq": "362C0458A675B6CE22F3AC9F87448A7F",
+              "File too_short_fastq": "BDE63C0E062D55700E98738FB03B3EAD",
+              "File trimmed_fastq": "5F813B5842F0D94B84D3DF1463F992AB"
+            },
+            "runtime attribute": {
+              "continueOnReturnCode": "CFCD208495D565EF66E7DFF9F98764DA",
+              "docker": "1DF91074AADD2FCAFDBF35DCCC785867",
+              "failOnStderr": "68934A3E9455FA72420237EB05902327"
+            }
+          },
+          "hit": false,
+          "result": "Cache Miss"
+        },
+        "callRoot": "gs://encode-processing/caper_out/mirna_seq_pipeline/ff2a61b1-8708-407f-a075-6a262d7d1ca0/call-cutadapt/shard-0",
+        "commandLine": "cutadapt \\\n    -a file:/cromwell_root/encode-processing/caper_tmp/meenakshi/ca31b14d4535436a9d7959bdcf77e706/ENCFF463QEL.txt \\\n    -e 0.25 \\\n    --match-read-wildcards \\\n    --untrimmed-output=rep1ENCSR715NEZ_NO3AD.fastq \\\n    /cromwell_root/encode-processing/caper_tmp/meenakshi/encode-public/2017/06/29/5e59f7f5-02aa-482a-bb3e-7e49ab8828e8/ENCFF961HXV.fastq.gz \\\n    | cutadapt \\\n    -e 0.34 \\\n    --match-read-wildcards \\\n    --no-indels \\\n    -m 15 \\\n    -O 6 \\\n    -n 1 \\\n    -g file:/cromwell_root/encode-processing/caper_tmp/meenakshi/df8acfb115cb667ef5a787093c4115bd/ENCFF642YMX.txt \\\n    --untrimmed-output=rep1ENCSR715NEZ_NO5AD.fastq \\\n    --too-short-output=rep1ENCSR715NEZ_SHORT_FAIL.fastq \\\n    - > rep1ENCSR715NEZ_trim.fastq",
+        "dockerImageUsed": "quay.io/encode-dcc/mirna-seq-pipeline@sha256:0b25e3493c87cb16403bcd870b3446d2c99fae6848ebe46bd5338cec51918703",
+        "end": "2019-07-14T05:05:44.812Z",
+        "executionEvents": [
+          {
+            "description": "UpdatingCallCache",
+            "endTime": "2019-07-14T05:05:43.830Z",
+            "startTime": "2019-07-14T05:05:41.864Z"
+          },
+          {
+            "description": "UpdatingJobStore",
+            "endTime": "2019-07-14T05:05:44.812Z",
+            "startTime": "2019-07-14T05:05:43.830Z"
+          },
+          {
+            "description": "UserAction",
+            "endTime": "2019-07-14T05:00:56.021Z",
+            "startTime": "2019-07-14T04:53:44.795Z"
+          },
+          {
+            "description": "Pending",
+            "endTime": "2019-07-14T04:51:03.363Z",
+            "startTime": "2019-07-14T04:51:03.362Z"
+          },
+          {
+            "description": "Worker released",
+            "endTime": "2019-07-14T05:05:41.864Z",
+            "startTime": "2019-07-14T05:03:09.894Z"
+          },
+          {
+            "description": "RunningJob",
+            "endTime": "2019-07-14T04:51:12.488Z",
+            "startTime": "2019-07-14T04:51:03.951Z"
+          },
+          {
+            "description": "Pulling \"google/cloud-sdk:slim\"",
+            "endTime": "2019-07-14T04:52:07.029Z",
+            "startTime": "2019-07-14T04:51:50.846Z"
+          },
+          {
+            "description": "Background",
+            "endTime": "2019-07-14T04:52:44.831Z",
+            "startTime": "2019-07-14T04:52:44.579Z"
+          },
+          {
+            "description": "CheckingCallCache",
+            "endTime": "2019-07-14T04:51:03.951Z",
+            "startTime": "2019-07-14T04:51:03.950Z"
+          },
+          {
+            "description": "Localization",
+            "endTime": "2019-07-14T04:53:44.795Z",
+            "startTime": "2019-07-14T04:52:58.128Z"
+          },
+          {
+            "description": "Pulling \"quay.io/encode-dcc/mirna-seq-pipeline@sha256:0b25e3493c87cb16403bcd870b3446d2c99fae6848ebe46bd5338cec51918703\"",
+            "endTime": "2019-07-14T04:52:44.136Z",
+            "startTime": "2019-07-14T04:52:07.029Z"
+          },
+          {
+            "description": "Delocalization",
+            "endTime": "2019-07-14T05:03:09.894Z",
+            "startTime": "2019-07-14T05:00:56.021Z"
+          },
+          {
+            "description": "RequestingExecutionToken",
+            "endTime": "2019-07-14T04:51:03.938Z",
+            "startTime": "2019-07-14T04:51:03.363Z"
+          },
+          {
+            "description": "ContainerSetup",
+            "endTime": "2019-07-14T04:52:58.128Z",
+            "startTime": "2019-07-14T04:52:44.831Z"
+          },
+          {
+            "description": "PreparingJob",
+            "endTime": "2019-07-14T04:51:03.950Z",
+            "startTime": "2019-07-14T04:51:03.939Z"
+          },
+          {
+            "description": "waiting for quota",
+            "endTime": "2019-07-14T04:51:15.178Z",
+            "startTime": "2019-07-14T04:51:12.488Z"
+          },
+          {
+            "description": "WaitingForValueStore",
+            "endTime": "2019-07-14T04:51:03.939Z",
+            "startTime": "2019-07-14T04:51:03.938Z"
+          },
+          {
+            "description": "Worker \"google-pipelines-worker-cf508fdb01c0628eb8dbe166d5d8da2e\" assigned in \"us-central1-b\"",
+            "endTime": "2019-07-14T04:51:50.846Z",
+            "startTime": "2019-07-14T04:51:15.178Z"
+          }
+        ],
+        "executionStatus": "Done",
+        "inputs": {
+          "disk": "local-disk 200 SSD",
+          "fastq": "gs://encode-processing/caper_tmp/meenakshi/encode-public/2017/06/29/5e59f7f5-02aa-482a-bb3e-7e49ab8828e8/ENCFF961HXV.fastq.gz",
+          "five_prime_adapters": "gs://encode-processing/caper_tmp/meenakshi/df8acfb115cb667ef5a787093c4115bd/ENCFF642YMX.txt",
+          "ncpus": 2,
+          "output_prefix": "rep1ENCSR715NEZ",
+          "ramGB": 7,
+          "three_prime_adapters": "gs://encode-processing/caper_tmp/meenakshi/ca31b14d4535436a9d7959bdcf77e706/ENCFF463QEL.txt"
+        },
+        "jes": {
+          "endpointUrl": "https://genomics.googleapis.com/",
+          "executionBucket": "gs://encode-processing/caper_out",
+          "googleProject": "encode-processing",
+          "instanceName": "google-pipelines-worker-cf508fdb01c0628eb8dbe166d5d8da2e",
+          "machineType": "custom-2-7168",
+          "zone": "us-central1-b"
+        },
+        "jobId": "projects/encode-processing/operations/15821158685674594814",
+        "labels": {
+          "cromwell-workflow-id": "cromwell-ff2a61b1-8708-407f-a075-6a262d7d1ca0",
+          "wdl-task-name": "cutadapt"
+        },
+        "outputs": {
+          "no3ad_untrimmed_fastq": "gs://encode-processing/caper_out/mirna_seq_pipeline/ff2a61b1-8708-407f-a075-6a262d7d1ca0/call-cutadapt/shard-0/glob-98d26fbed0c2af6137e088cfa3d900ec/rep1ENCSR715NEZ_NO3AD.fastq",
+          "no5ad_untrimmed_fastq": "gs://encode-processing/caper_out/mirna_seq_pipeline/ff2a61b1-8708-407f-a075-6a262d7d1ca0/call-cutadapt/shard-0/glob-572b7543d93f95b496a2056e7f497e36/rep1ENCSR715NEZ_NO5AD.fastq",
+          "too_short_fastq": "gs://encode-processing/caper_out/mirna_seq_pipeline/ff2a61b1-8708-407f-a075-6a262d7d1ca0/call-cutadapt/shard-0/glob-5d1a0338bc17768917cfb246a1d2fd6c/rep1ENCSR715NEZ_SHORT_FAIL.fastq",
+          "trimmed_fastq": "gs://encode-processing/caper_out/mirna_seq_pipeline/ff2a61b1-8708-407f-a075-6a262d7d1ca0/call-cutadapt/shard-0/glob-13510a96631ebcd33b0389553a698adf/rep1ENCSR715NEZ_trim.fastq"
+        },
+        "preemptible": false,
+        "returnCode": 0,
+        "runtimeAttributes": {
+          "bootDiskSizeGb": "10",
+          "continueOnReturnCode": "0",
+          "cpu": "2",
+          "cpuMin": "1",
+          "disks": "local-disk 200 SSD",
+          "docker": "quay.io/encode-dcc/mirna-seq-pipeline:v1.0",
+          "failOnStderr": "false",
+          "maxRetries": "0",
+          "memory": "7 GB",
+          "memoryMin": "2 GB",
+          "noAddress": "false",
+          "preemptible": "0",
+          "zones": "us-central1-b"
+        },
+        "shardIndex": 0,
+        "start": "2019-07-14T04:51:03.362Z",
+        "stderr": "gs://encode-processing/caper_out/mirna_seq_pipeline/ff2a61b1-8708-407f-a075-6a262d7d1ca0/call-cutadapt/shard-0/stderr",
+        "stdout": "gs://encode-processing/caper_out/mirna_seq_pipeline/ff2a61b1-8708-407f-a075-6a262d7d1ca0/call-cutadapt/shard-0/stdout"
+      },
+      {
+        "attempt": 1,
+        "backend": "gcp",
+        "backendLabels": {
+          "cromwell-workflow-id": "cromwell-ff2a61b1-8708-407f-a075-6a262d7d1ca0",
+          "wdl-task-name": "cutadapt"
+        },
+        "backendLogs": {
+          "log": "gs://encode-processing/caper_out/mirna_seq_pipeline/ff2a61b1-8708-407f-a075-6a262d7d1ca0/call-cutadapt/shard-1/cutadapt-1.log"
+        },
+        "backendStatus": "Success",
+        "callCaching": {
+          "allowResultReuse": true,
+          "effectiveCallCachingMode": "ReadAndWriteCache",
+          "hashes": {
+            "backend name": "50F66ECBC45488EE5826941BFBC50411",
+            "command template": "CEF1105D06D40BD54B9507279FB4C724",
+            "input": {
+              "File fastq": "RMANTQ==",
+              "File five_prime_adapters": "MNNPUQ==",
+              "File three_prime_adapters": "iZKfdA==",
+              "Int ncpus": "C81E728D9D4C2F636F067F89CC14862C",
+              "Int ramGB": "8F14E45FCEEA167A5A36DEDD4BEA2543",
+              "String disk": "2922BF0DCFA3E4A97CF5B6EAF2EC0C06",
+              "String output_prefix": "18D5E935EF4FFD5419DEDBC86948B8BE"
+            },
+            "input count": "8F14E45FCEEA167A5A36DEDD4BEA2543",
+            "output count": "A87FF679A2F3E71D9181A67B7542122C",
+            "output expression": {
+              "File no3ad_untrimmed_fastq": "51C8638A52C9A15E0517408FF5AE9250",
+              "File no5ad_untrimmed_fastq": "362C0458A675B6CE22F3AC9F87448A7F",
+              "File too_short_fastq": "BDE63C0E062D55700E98738FB03B3EAD",
+              "File trimmed_fastq": "5F813B5842F0D94B84D3DF1463F992AB"
+            },
+            "runtime attribute": {
+              "continueOnReturnCode": "CFCD208495D565EF66E7DFF9F98764DA",
+              "docker": "1DF91074AADD2FCAFDBF35DCCC785867",
+              "failOnStderr": "68934A3E9455FA72420237EB05902327"
+            }
+          },
+          "hit": false,
+          "result": "Cache Miss"
+        },
+        "callRoot": "gs://encode-processing/caper_out/mirna_seq_pipeline/ff2a61b1-8708-407f-a075-6a262d7d1ca0/call-cutadapt/shard-1",
+        "commandLine": "cutadapt \\\n    -a file:/cromwell_root/encode-processing/caper_tmp/meenakshi/ca31b14d4535436a9d7959bdcf77e706/ENCFF463QEL.txt \\\n    -e 0.25 \\\n    --match-read-wildcards \\\n    --untrimmed-output=rep2ENCSR715NEZ_NO3AD.fastq \\\n    /cromwell_root/encode-processing/caper_tmp/meenakshi/encode-public/2017/06/29/9bf53883-a8c2-404b-b9f5-59b3665ea023/ENCFF414HIZ.fastq.gz \\\n    | cutadapt \\\n    -e 0.34 \\\n    --match-read-wildcards \\\n    --no-indels \\\n    -m 15 \\\n    -O 6 \\\n    -n 1 \\\n    -g file:/cromwell_root/encode-processing/caper_tmp/meenakshi/df8acfb115cb667ef5a787093c4115bd/ENCFF642YMX.txt \\\n    --untrimmed-output=rep2ENCSR715NEZ_NO5AD.fastq \\\n    --too-short-output=rep2ENCSR715NEZ_SHORT_FAIL.fastq \\\n    - > rep2ENCSR715NEZ_trim.fastq",
+        "dockerImageUsed": "quay.io/encode-dcc/mirna-seq-pipeline@sha256:0b25e3493c87cb16403bcd870b3446d2c99fae6848ebe46bd5338cec51918703",
+        "end": "2019-07-14T05:10:44.790Z",
+        "executionEvents": [
+          {
+            "description": "WaitingForValueStore",
+            "endTime": "2019-07-14T04:51:05.939Z",
+            "startTime": "2019-07-14T04:51:05.939Z"
+          },
+          {
+            "description": "Worker released",
+            "endTime": "2019-07-14T05:10:42.928Z",
+            "startTime": "2019-07-14T05:06:57.577Z"
+          },
+          {
+            "description": "UserAction",
+            "endTime": "2019-07-14T05:04:50.211Z",
+            "startTime": "2019-07-14T04:54:17.403Z"
+          },
+          {
+            "description": "CheckingCallCache",
+            "endTime": "2019-07-14T04:51:05.944Z",
+            "startTime": "2019-07-14T04:51:05.943Z"
+          },
+          {
+            "description": "Localization",
+            "endTime": "2019-07-14T04:54:17.403Z",
+            "startTime": "2019-07-14T04:53:30.019Z"
+          },
+          {
+            "description": "RunningJob",
+            "endTime": "2019-07-14T04:51:12.376Z",
+            "startTime": "2019-07-14T04:51:05.944Z"
+          },
+          {
+            "description": "Pending",
+            "endTime": "2019-07-14T04:51:03.363Z",
+            "startTime": "2019-07-14T04:51:03.362Z"
+          },
+          {
+            "description": "UpdatingCallCache",
+            "endTime": "2019-07-14T05:10:43.840Z",
+            "startTime": "2019-07-14T05:10:42.928Z"
+          },
+          {
+            "description": "UpdatingJobStore",
+            "endTime": "2019-07-14T05:10:44.791Z",
+            "startTime": "2019-07-14T05:10:43.840Z"
+          },
+          {
+            "description": "Worker \"google-pipelines-worker-74f75c403fa08678c6f394c884829b57\" assigned in \"us-central1-b\"",
+            "endTime": "2019-07-14T04:51:49.843Z",
+            "startTime": "2019-07-14T04:51:15.177Z"
+          },
+          {
+            "description": "PreparingJob",
+            "endTime": "2019-07-14T04:51:05.943Z",
+            "startTime": "2019-07-14T04:51:05.939Z"
+          },
+          {
+            "description": "ContainerSetup",
+            "endTime": "2019-07-14T04:53:30.019Z",
+            "startTime": "2019-07-14T04:53:14.328Z"
+          },
+          {
+            "description": "Pulling \"google/cloud-sdk:slim\"",
+            "endTime": "2019-07-14T04:52:04.935Z",
+            "startTime": "2019-07-14T04:51:49.843Z"
+          },
+          {
+            "description": "waiting for quota",
+            "endTime": "2019-07-14T04:51:15.177Z",
+            "startTime": "2019-07-14T04:51:12.376Z"
+          },
+          {
+            "description": "Delocalization",
+            "endTime": "2019-07-14T05:06:57.577Z",
+            "startTime": "2019-07-14T05:04:50.211Z"
+          },
+          {
+            "description": "Background",
+            "endTime": "2019-07-14T04:53:14.328Z",
+            "startTime": "2019-07-14T04:53:13.551Z"
+          },
+          {
+            "description": "RequestingExecutionToken",
+            "endTime": "2019-07-14T04:51:05.939Z",
+            "startTime": "2019-07-14T04:51:03.363Z"
+          },
+          {
+            "description": "Pulling \"quay.io/encode-dcc/mirna-seq-pipeline@sha256:0b25e3493c87cb16403bcd870b3446d2c99fae6848ebe46bd5338cec51918703\"",
+            "endTime": "2019-07-14T04:53:13.551Z",
+            "startTime": "2019-07-14T04:52:04.935Z"
+          }
+        ],
+        "executionStatus": "Done",
+        "inputs": {
+          "disk": "local-disk 200 SSD",
+          "fastq": "gs://encode-processing/caper_tmp/meenakshi/encode-public/2017/06/29/9bf53883-a8c2-404b-b9f5-59b3665ea023/ENCFF414HIZ.fastq.gz",
+          "five_prime_adapters": "gs://encode-processing/caper_tmp/meenakshi/df8acfb115cb667ef5a787093c4115bd/ENCFF642YMX.txt",
+          "ncpus": 2,
+          "output_prefix": "rep2ENCSR715NEZ",
+          "ramGB": 7,
+          "three_prime_adapters": "gs://encode-processing/caper_tmp/meenakshi/ca31b14d4535436a9d7959bdcf77e706/ENCFF463QEL.txt"
+        },
+        "jes": {
+          "endpointUrl": "https://genomics.googleapis.com/",
+          "executionBucket": "gs://encode-processing/caper_out",
+          "googleProject": "encode-processing",
+          "instanceName": "google-pipelines-worker-74f75c403fa08678c6f394c884829b57",
+          "machineType": "custom-2-7168",
+          "zone": "us-central1-b"
+        },
+        "jobId": "projects/encode-processing/operations/13309269878001627155",
+        "labels": {
+          "cromwell-workflow-id": "cromwell-ff2a61b1-8708-407f-a075-6a262d7d1ca0",
+          "wdl-task-name": "cutadapt"
+        },
+        "outputs": {
+          "no3ad_untrimmed_fastq": "gs://encode-processing/caper_out/mirna_seq_pipeline/ff2a61b1-8708-407f-a075-6a262d7d1ca0/call-cutadapt/shard-1/glob-98d26fbed0c2af6137e088cfa3d900ec/rep2ENCSR715NEZ_NO3AD.fastq",
+          "no5ad_untrimmed_fastq": "gs://encode-processing/caper_out/mirna_seq_pipeline/ff2a61b1-8708-407f-a075-6a262d7d1ca0/call-cutadapt/shard-1/glob-572b7543d93f95b496a2056e7f497e36/rep2ENCSR715NEZ_NO5AD.fastq",
+          "too_short_fastq": "gs://encode-processing/caper_out/mirna_seq_pipeline/ff2a61b1-8708-407f-a075-6a262d7d1ca0/call-cutadapt/shard-1/glob-5d1a0338bc17768917cfb246a1d2fd6c/rep2ENCSR715NEZ_SHORT_FAIL.fastq",
+          "trimmed_fastq": "gs://encode-processing/caper_out/mirna_seq_pipeline/ff2a61b1-8708-407f-a075-6a262d7d1ca0/call-cutadapt/shard-1/glob-13510a96631ebcd33b0389553a698adf/rep2ENCSR715NEZ_trim.fastq"
+        },
+        "preemptible": false,
+        "returnCode": 0,
+        "runtimeAttributes": {
+          "bootDiskSizeGb": "10",
+          "continueOnReturnCode": "0",
+          "cpu": "2",
+          "cpuMin": "1",
+          "disks": "local-disk 200 SSD",
+          "docker": "quay.io/encode-dcc/mirna-seq-pipeline:v1.0",
+          "failOnStderr": "false",
+          "maxRetries": "0",
+          "memory": "7 GB",
+          "memoryMin": "2 GB",
+          "noAddress": "false",
+          "preemptible": "0",
+          "zones": "us-central1-b"
+        },
+        "shardIndex": 1,
+        "start": "2019-07-14T04:51:03.362Z",
+        "stderr": "gs://encode-processing/caper_out/mirna_seq_pipeline/ff2a61b1-8708-407f-a075-6a262d7d1ca0/call-cutadapt/shard-1/stderr",
+        "stdout": "gs://encode-processing/caper_out/mirna_seq_pipeline/ff2a61b1-8708-407f-a075-6a262d7d1ca0/call-cutadapt/shard-1/stdout"
+      }
+    ],
+    "mirna_seq_pipeline.spearman_correlation": [
+      {
+        "attempt": 1,
+        "backend": "gcp",
+        "backendLabels": {
+          "cromwell-workflow-id": "cromwell-ff2a61b1-8708-407f-a075-6a262d7d1ca0",
+          "wdl-task-name": "spearman-correlation"
+        },
+        "backendLogs": {
+          "log": "gs://encode-processing/caper_out/mirna_seq_pipeline/ff2a61b1-8708-407f-a075-6a262d7d1ca0/call-spearman_correlation/spearman_correlation.log"
+        },
+        "backendStatus": "Success",
+        "callCaching": {
+          "allowResultReuse": true,
+          "effectiveCallCachingMode": "ReadAndWriteCache",
+          "hashes": {
+            "backend name": "50F66ECBC45488EE5826941BFBC50411",
+            "command template": "6E06E967F10D1D302AF225F28291B56F",
+            "input": {
+              "File quants": [
+                "+ggo6g==",
+                "Meic6w=="
+              ],
+              "String output_filename": "1C4C5EBB1825EC0A11B82D2821A65E31"
+            },
+            "input count": "ECCBC87E4B5CE2FE28308FD9F2A7BAF3",
+            "output count": "C4CA4238A0B923820DCC509A6F75849B",
+            "output expression": {
+              "File spearman_json": "71E8FCC9D5BFF3A431966C0F38F14A3C"
+            },
+            "runtime attribute": {
+              "continueOnReturnCode": "CFCD208495D565EF66E7DFF9F98764DA",
+              "docker": "1DF91074AADD2FCAFDBF35DCCC785867",
+              "failOnStderr": "68934A3E9455FA72420237EB05902327"
+            }
+          },
+          "hit": false,
+          "result": "Cache Miss"
+        },
+        "callRoot": "gs://encode-processing/caper_out/mirna_seq_pipeline/ff2a61b1-8708-407f-a075-6a262d7d1ca0/call-spearman_correlation",
+        "commandLine": "python3 $(which calculate_correlation.py) --quants /cromwell_root/encode-processing/caper_out/mirna_seq_pipeline/ff2a61b1-8708-407f-a075-6a262d7d1ca0/call-star/shard-0/glob-ee3cac44669b7460fea102fa893f1b06/rep1ENCSR715NEZ.tsv /cromwell_root/encode-processing/caper_out/mirna_seq_pipeline/ff2a61b1-8708-407f-a075-6a262d7d1ca0/call-star/shard-1/glob-ee3cac44669b7460fea102fa893f1b06/rep2ENCSR715NEZ.tsv --output_filename ENCSR715NEZ_spearman.json",
+        "dockerImageUsed": "quay.io/encode-dcc/mirna-seq-pipeline@sha256:0b25e3493c87cb16403bcd870b3446d2c99fae6848ebe46bd5338cec51918703",
+        "end": "2019-07-14T05:39:11.765Z",
+        "executionEvents": [
+          {
+            "description": "PreparingJob",
+            "endTime": "2019-07-14T05:34:49.942Z",
+            "startTime": "2019-07-14T05:34:49.939Z"
+          },
+          {
+            "description": "WaitingForValueStore",
+            "endTime": "2019-07-14T05:34:49.939Z",
+            "startTime": "2019-07-14T05:34:49.939Z"
+          },
+          {
+            "description": "RunningJob",
+            "endTime": "2019-07-14T05:35:14.700Z",
+            "startTime": "2019-07-14T05:34:49.944Z"
+          },
+          {
+            "description": "UpdatingCallCache",
+            "endTime": "2019-07-14T05:39:10.800Z",
+            "startTime": "2019-07-14T05:39:08.575Z"
+          },
+          {
+            "description": "RequestingExecutionToken",
+            "endTime": "2019-07-14T05:34:49.939Z",
+            "startTime": "2019-07-14T05:34:46.989Z"
+          },
+          {
+            "description": "Localization",
+            "endTime": "2019-07-14T05:37:26.118Z",
+            "startTime": "2019-07-14T05:36:48.106Z"
+          },
+          {
+            "description": "Pending",
+            "endTime": "2019-07-14T05:34:46.989Z",
+            "startTime": "2019-07-14T05:34:46.989Z"
+          },
+          {
+            "description": "Pulling \"google/cloud-sdk:slim\"",
+            "endTime": "2019-07-14T05:36:08.315Z",
+            "startTime": "2019-07-14T05:35:49.301Z"
+          },
+          {
+            "description": "Delocalization",
+            "endTime": "2019-07-14T05:38:33.963Z",
+            "startTime": "2019-07-14T05:37:33.871Z"
+          },
+          {
+            "description": "Worker released",
+            "endTime": "2019-07-14T05:39:08.575Z",
+            "startTime": "2019-07-14T05:38:33.963Z"
+          },
+          {
+            "description": "ContainerSetup",
+            "endTime": "2019-07-14T05:36:48.106Z",
+            "startTime": "2019-07-14T05:36:32.646Z"
+          },
+          {
+            "description": "Pulling \"quay.io/encode-dcc/mirna-seq-pipeline@sha256:0b25e3493c87cb16403bcd870b3446d2c99fae6848ebe46bd5338cec51918703\"",
+            "endTime": "2019-07-14T05:36:31.570Z",
+            "startTime": "2019-07-14T05:36:08.315Z"
+          },
+          {
+            "description": "waiting for quota",
+            "endTime": "2019-07-14T05:35:14.799Z",
+            "startTime": "2019-07-14T05:35:14.700Z"
+          },
+          {
+            "description": "Worker \"google-pipelines-worker-30d2ae19505f65a5267002452118f5e7\" assigned in \"us-central1-b\"",
+            "endTime": "2019-07-14T05:35:49.301Z",
+            "startTime": "2019-07-14T05:35:14.799Z"
+          },
+          {
+            "description": "Background",
+            "endTime": "2019-07-14T05:36:32.646Z",
+            "startTime": "2019-07-14T05:36:31.570Z"
+          },
+          {
+            "description": "UserAction",
+            "endTime": "2019-07-14T05:37:33.871Z",
+            "startTime": "2019-07-14T05:37:26.118Z"
+          },
+          {
+            "description": "CheckingCallCache",
+            "endTime": "2019-07-14T05:34:49.944Z",
+            "startTime": "2019-07-14T05:34:49.942Z"
+          },
+          {
+            "description": "UpdatingJobStore",
+            "endTime": "2019-07-14T05:39:11.765Z",
+            "startTime": "2019-07-14T05:39:10.800Z"
+          }
+        ],
+        "executionStatus": "Done",
+        "inputs": {
+          "output_filename": "ENCSR715NEZ_spearman.json",
+          "quants": [
+            "gs://encode-processing/caper_out/mirna_seq_pipeline/ff2a61b1-8708-407f-a075-6a262d7d1ca0/call-star/shard-0/glob-ee3cac44669b7460fea102fa893f1b06/rep1ENCSR715NEZ.tsv",
+            "gs://encode-processing/caper_out/mirna_seq_pipeline/ff2a61b1-8708-407f-a075-6a262d7d1ca0/call-star/shard-1/glob-ee3cac44669b7460fea102fa893f1b06/rep2ENCSR715NEZ.tsv"
+          ]
+        },
+        "jes": {
+          "endpointUrl": "https://genomics.googleapis.com/",
+          "executionBucket": "gs://encode-processing/caper_out",
+          "googleProject": "encode-processing",
+          "instanceName": "google-pipelines-worker-30d2ae19505f65a5267002452118f5e7",
+          "machineType": "custom-1-2048",
+          "zone": "us-central1-b"
+        },
+        "jobId": "projects/encode-processing/operations/11565327842522554577",
+        "labels": {
+          "cromwell-workflow-id": "cromwell-ff2a61b1-8708-407f-a075-6a262d7d1ca0",
+          "wdl-task-name": "spearman_correlation"
+        },
+        "outputs": {
+          "spearman_json": "gs://encode-processing/caper_out/mirna_seq_pipeline/ff2a61b1-8708-407f-a075-6a262d7d1ca0/call-spearman_correlation/glob-a561370dd84a477b9f6b00e9824fbde0/ENCSR715NEZ_spearman.json"
+        },
+        "preemptible": false,
+        "returnCode": 0,
+        "runtimeAttributes": {
+          "bootDiskSizeGb": "10",
+          "continueOnReturnCode": "0",
+          "cpu": "1",
+          "cpuMin": "1",
+          "disks": "local-disk 20 SSD",
+          "docker": "quay.io/encode-dcc/mirna-seq-pipeline:v1.0",
+          "failOnStderr": "false",
+          "maxRetries": "0",
+          "memory": "2 GB",
+          "memoryMin": "2 GB",
+          "noAddress": "false",
+          "preemptible": "0",
+          "zones": "us-central1-b"
+        },
+        "shardIndex": -1,
+        "start": "2019-07-14T05:34:46.989Z",
+        "stderr": "gs://encode-processing/caper_out/mirna_seq_pipeline/ff2a61b1-8708-407f-a075-6a262d7d1ca0/call-spearman_correlation/stderr",
+        "stdout": "gs://encode-processing/caper_out/mirna_seq_pipeline/ff2a61b1-8708-407f-a075-6a262d7d1ca0/call-spearman_correlation/stdout"
+      }
+    ],
+    "mirna_seq_pipeline.star": [
+      {
+        "attempt": 1,
+        "backend": "gcp",
+        "backendLabels": {
+          "cromwell-workflow-id": "cromwell-ff2a61b1-8708-407f-a075-6a262d7d1ca0",
+          "wdl-task-name": "star"
+        },
+        "backendLogs": {
+          "log": "gs://encode-processing/caper_out/mirna_seq_pipeline/ff2a61b1-8708-407f-a075-6a262d7d1ca0/call-star/shard-0/star-0.log"
+        },
+        "backendStatus": "Success",
+        "callCaching": {
+          "allowResultReuse": true,
+          "effectiveCallCachingMode": "ReadAndWriteCache",
+          "hashes": {
+            "backend name": "50F66ECBC45488EE5826941BFBC50411",
+            "command template": "68EFAF50626D5E762292F3A78CC78535",
+            "input": {
+              "File annotation": "3UdHZA==",
+              "File fastq": "gYZO2A==",
+              "File index": "z3yajw==",
+              "Int ncpus": "C74D97B01EAE257E44AA9D5BADE97BAF",
+              "Int ramGB": "072B030BA126B2F4B2374F342BE9ED44",
+              "String disk": "2922BF0DCFA3E4A97CF5B6EAF2EC0C06",
+              "String output_prefix": "EAA0B59B1145B2343F0133E595C1C10D"
+            },
+            "input count": "8F14E45FCEEA167A5A36DEDD4BEA2543",
+            "output count": "C9F0F895FB98AB9159F51FD0297E236D",
+            "output expression": {
+              "File bam": "ECFD97957A4C00BEF8709F8162F60442",
+              "File minus_strand_all_wig": "087CB5DCBE2A94C80821BEEDDAA237DC",
+              "File minus_strand_unique_wig": "62FB49D68FE2C8A9FBE39FFB594CA0B7",
+              "File plus_strand_all_wig": "FB873BB9E8188ABE5A98CBFBEA748489",
+              "File plus_strand_unique_wig": "00BA9BC54A3DE52CB7315DD358334832",
+              "File star_qc_json": "356A838B263938C0A1E01F32A68A13CB",
+              "File star_qc_log": "43E7209249C5507F226F5090B050AFE3",
+              "File tsv": "B6B52C18E2C9938940A3BA9C363ACFEB"
+            },
+            "runtime attribute": {
+              "continueOnReturnCode": "CFCD208495D565EF66E7DFF9F98764DA",
+              "docker": "1DF91074AADD2FCAFDBF35DCCC785867",
+              "failOnStderr": "68934A3E9455FA72420237EB05902327"
+            }
+          },
+          "hit": false,
+          "result": "Cache Miss"
+        },
+        "callRoot": "gs://encode-processing/caper_out/mirna_seq_pipeline/ff2a61b1-8708-407f-a075-6a262d7d1ca0/call-star/shard-0",
+        "commandLine": "tar -xzvf /cromwell_root/encode-processing/caper_tmp/meenakshi/8d73a50a7aab6aa71cbd489cf81e26a3/ENCFF795AAA.tar.gz\ngzip -cd /cromwell_root/encode-processing/caper_tmp/meenakshi/59b8f3ac1bad56f32e98f8b6223ddc81/ENCFF094ICJ.gtf.gz > anno.gtf\nSTAR \\\n    --genomeDir out \\\n    --readFilesIn /cromwell_root/encode-processing/caper_out/mirna_seq_pipeline/ff2a61b1-8708-407f-a075-6a262d7d1ca0/call-cutadapt/shard-0/glob-13510a96631ebcd33b0389553a698adf/rep1ENCSR715NEZ_trim.fastq \\\n    --sjdbGTFfile anno.gtf \\\n    --runThreadN 16 \\\n    --alignEndsType EndToEnd \\\n    --outFilterMismatchNmax 1 \\\n    --outFilterMultimapScoreRange 0 \\\n    --quantMode TranscriptomeSAM GeneCounts \\\n    --outReadsUnmapped Fastx \\\n    --outSAMtype BAM SortedByCoordinate \\\n    --outFilterMultimapNmax 10 \\\n    --outSAMunmapped Within \\\n    --outFilterScoreMinOverLread 0 \\\n    --outFilterMatchNminOverLread 0 \\\n    --outFilterMatchNmin 16 \\\n    --alignSJDBoverhangMin 1000 \\\n    --alignIntronMax 1 \\\n    --outWigType wiggle \\\n    --outWigStrand Stranded \\\n    --outWigNorm RPM\nmv Aligned.sortedByCoord.out.bam rep1ENCSR715NEZ.bam\nmv ReadsPerGene.out.tab rep1ENCSR715NEZ.tsv\nmv Log.final.out rep1ENCSR715NEZ.Log.final.out\npython3  $(which make_star_qc.py) --quants rep1ENCSR715NEZ.tsv \\\n                                  --star_log rep1ENCSR715NEZ.Log.final.out \\\n                                  --output_filename rep1ENCSR715NEZ_star_qc.json",
+        "dockerImageUsed": "quay.io/encode-dcc/mirna-seq-pipeline@sha256:0b25e3493c87cb16403bcd870b3446d2c99fae6848ebe46bd5338cec51918703",
+        "end": "2019-07-14T05:28:36.059Z",
+        "executionEvents": [
+          {
+            "description": "ContainerSetup",
+            "endTime": "2019-07-14T05:08:03.414Z",
+            "startTime": "2019-07-14T05:07:50.515Z"
+          },
+          {
+            "description": "RequestingExecutionToken",
+            "endTime": "2019-07-14T05:05:49.939Z",
+            "startTime": "2019-07-14T05:05:46.780Z"
+          },
+          {
+            "description": "Localization",
+            "endTime": "2019-07-14T05:13:36.950Z",
+            "startTime": "2019-07-14T05:08:03.414Z"
+          },
+          {
+            "description": "UpdatingJobStore",
+            "endTime": "2019-07-14T05:28:36.059Z",
+            "startTime": "2019-07-14T05:28:34.885Z"
+          },
+          {
+            "description": "UserAction",
+            "endTime": "2019-07-14T05:22:38.858Z",
+            "startTime": "2019-07-14T05:13:36.950Z"
+          },
+          {
+            "description": "Pending",
+            "endTime": "2019-07-14T05:05:46.780Z",
+            "startTime": "2019-07-14T05:05:46.780Z"
+          },
+          {
+            "description": "UpdatingCallCache",
+            "endTime": "2019-07-14T05:28:34.885Z",
+            "startTime": "2019-07-14T05:28:34.281Z"
+          },
+          {
+            "description": "PreparingJob",
+            "endTime": "2019-07-14T05:05:49.943Z",
+            "startTime": "2019-07-14T05:05:49.939Z"
+          },
+          {
+            "description": "WaitingForValueStore",
+            "endTime": "2019-07-14T05:05:49.939Z",
+            "startTime": "2019-07-14T05:05:49.939Z"
+          },
+          {
+            "description": "waiting for quota",
+            "endTime": "2019-07-14T05:06:15.629Z",
+            "startTime": "2019-07-14T05:06:15.040Z"
+          },
+          {
+            "description": "CheckingCallCache",
+            "endTime": "2019-07-14T05:05:49.944Z",
+            "startTime": "2019-07-14T05:05:49.943Z"
+          },
+          {
+            "description": "Worker released",
+            "endTime": "2019-07-14T05:28:34.281Z",
+            "startTime": "2019-07-14T05:25:47.353Z"
+          },
+          {
+            "description": "Background",
+            "endTime": "2019-07-14T05:07:50.515Z",
+            "startTime": "2019-07-14T05:07:49.905Z"
+          },
+          {
+            "description": "Pulling \"quay.io/encode-dcc/mirna-seq-pipeline@sha256:0b25e3493c87cb16403bcd870b3446d2c99fae6848ebe46bd5338cec51918703\"",
+            "endTime": "2019-07-14T05:07:49.905Z",
+            "startTime": "2019-07-14T05:07:27.673Z"
+          },
+          {
+            "description": "RunningJob",
+            "endTime": "2019-07-14T05:06:15.040Z",
+            "startTime": "2019-07-14T05:05:49.944Z"
+          },
+          {
+            "description": "Delocalization",
+            "endTime": "2019-07-14T05:25:47.353Z",
+            "startTime": "2019-07-14T05:22:38.858Z"
+          },
+          {
+            "description": "Pulling \"google/cloud-sdk:slim\"",
+            "endTime": "2019-07-14T05:07:27.673Z",
+            "startTime": "2019-07-14T05:07:17.753Z"
+          },
+          {
+            "description": "Worker \"google-pipelines-worker-c711da93b6c2b88078b68d1fda5c1957\" assigned in \"us-central1-b\"",
+            "endTime": "2019-07-14T05:07:17.753Z",
+            "startTime": "2019-07-14T05:06:15.629Z"
+          }
+        ],
+        "executionStatus": "Done",
+        "inputs": {
+          "annotation": "gs://encode-processing/caper_tmp/meenakshi/59b8f3ac1bad56f32e98f8b6223ddc81/ENCFF094ICJ.gtf.gz",
+          "disk": "local-disk 200 SSD",
+          "fastq": "gs://encode-processing/caper_out/mirna_seq_pipeline/ff2a61b1-8708-407f-a075-6a262d7d1ca0/call-cutadapt/shard-0/glob-13510a96631ebcd33b0389553a698adf/rep1ENCSR715NEZ_trim.fastq",
+          "index": "gs://encode-processing/caper_tmp/meenakshi/8d73a50a7aab6aa71cbd489cf81e26a3/ENCFF795AAA.tar.gz",
+          "ncpus": 16,
+          "output_prefix": "rep1ENCSR715NEZ",
+          "ramGB": 60
+        },
+        "jes": {
+          "endpointUrl": "https://genomics.googleapis.com/",
+          "executionBucket": "gs://encode-processing/caper_out",
+          "googleProject": "encode-processing",
+          "instanceName": "google-pipelines-worker-c711da93b6c2b88078b68d1fda5c1957",
+          "machineType": "custom-16-61440",
+          "zone": "us-central1-b"
+        },
+        "jobId": "projects/encode-processing/operations/12645986483532146871",
+        "labels": {
+          "cromwell-workflow-id": "cromwell-ff2a61b1-8708-407f-a075-6a262d7d1ca0",
+          "wdl-task-name": "star"
+        },
+        "outputs": {
+          "bam": "gs://encode-processing/caper_out/mirna_seq_pipeline/ff2a61b1-8708-407f-a075-6a262d7d1ca0/call-star/shard-0/glob-0d2b4556b219bc41f9a10d12eee46cec/rep1ENCSR715NEZ.bam",
+          "minus_strand_all_wig": "gs://encode-processing/caper_out/mirna_seq_pipeline/ff2a61b1-8708-407f-a075-6a262d7d1ca0/call-star/shard-0/glob-95ad94f4655a5da1faa51c905e436322/Signal.UniqueMultiple.str2.out.wig",
+          "minus_strand_unique_wig": "gs://encode-processing/caper_out/mirna_seq_pipeline/ff2a61b1-8708-407f-a075-6a262d7d1ca0/call-star/shard-0/glob-581651af3e8d85ac9aecfba9cf6eaea5/Signal.Unique.str2.out.wig",
+          "plus_strand_all_wig": "gs://encode-processing/caper_out/mirna_seq_pipeline/ff2a61b1-8708-407f-a075-6a262d7d1ca0/call-star/shard-0/glob-41773c7ab111b23d6eb594bba78fa1d9/Signal.UniqueMultiple.str1.out.wig",
+          "plus_strand_unique_wig": "gs://encode-processing/caper_out/mirna_seq_pipeline/ff2a61b1-8708-407f-a075-6a262d7d1ca0/call-star/shard-0/glob-34e0341cc922c3159cacc690d41b117b/Signal.Unique.str1.out.wig",
+          "star_qc_json": "gs://encode-processing/caper_out/mirna_seq_pipeline/ff2a61b1-8708-407f-a075-6a262d7d1ca0/call-star/shard-0/glob-4c4d21ad2cdbd65d478f6b4b36f6c20a/rep1ENCSR715NEZ_star_qc.json",
+          "star_qc_log": "gs://encode-processing/caper_out/mirna_seq_pipeline/ff2a61b1-8708-407f-a075-6a262d7d1ca0/call-star/shard-0/glob-fdee3fa8e419c9ae7368882e11dc0027/star_qc.log",
+          "tsv": "gs://encode-processing/caper_out/mirna_seq_pipeline/ff2a61b1-8708-407f-a075-6a262d7d1ca0/call-star/shard-0/glob-ee3cac44669b7460fea102fa893f1b06/rep1ENCSR715NEZ.tsv"
+        },
+        "preemptible": false,
+        "returnCode": 0,
+        "runtimeAttributes": {
+          "bootDiskSizeGb": "10",
+          "continueOnReturnCode": "0",
+          "cpu": "16",
+          "cpuMin": "1",
+          "disks": "local-disk 200 SSD",
+          "docker": "quay.io/encode-dcc/mirna-seq-pipeline:v1.0",
+          "failOnStderr": "false",
+          "maxRetries": "0",
+          "memory": "60 GB",
+          "memoryMin": "2 GB",
+          "noAddress": "false",
+          "preemptible": "0",
+          "zones": "us-central1-b"
+        },
+        "shardIndex": 0,
+        "start": "2019-07-14T05:05:46.780Z",
+        "stderr": "gs://encode-processing/caper_out/mirna_seq_pipeline/ff2a61b1-8708-407f-a075-6a262d7d1ca0/call-star/shard-0/stderr",
+        "stdout": "gs://encode-processing/caper_out/mirna_seq_pipeline/ff2a61b1-8708-407f-a075-6a262d7d1ca0/call-star/shard-0/stdout"
+      },
+      {
+        "attempt": 1,
+        "backend": "gcp",
+        "backendLabels": {
+          "cromwell-workflow-id": "cromwell-ff2a61b1-8708-407f-a075-6a262d7d1ca0",
+          "wdl-task-name": "star"
+        },
+        "backendLogs": {
+          "log": "gs://encode-processing/caper_out/mirna_seq_pipeline/ff2a61b1-8708-407f-a075-6a262d7d1ca0/call-star/shard-1/star-1.log"
+        },
+        "backendStatus": "Success",
+        "callCaching": {
+          "allowResultReuse": true,
+          "effectiveCallCachingMode": "ReadAndWriteCache",
+          "hashes": {
+            "backend name": "50F66ECBC45488EE5826941BFBC50411",
+            "command template": "68EFAF50626D5E762292F3A78CC78535",
+            "input": {
+              "File annotation": "3UdHZA==",
+              "File fastq": "y0R2xg==",
+              "File index": "z3yajw==",
+              "Int ncpus": "C74D97B01EAE257E44AA9D5BADE97BAF",
+              "Int ramGB": "072B030BA126B2F4B2374F342BE9ED44",
+              "String disk": "2922BF0DCFA3E4A97CF5B6EAF2EC0C06",
+              "String output_prefix": "18D5E935EF4FFD5419DEDBC86948B8BE"
+            },
+            "input count": "8F14E45FCEEA167A5A36DEDD4BEA2543",
+            "output count": "C9F0F895FB98AB9159F51FD0297E236D",
+            "output expression": {
+              "File bam": "ECFD97957A4C00BEF8709F8162F60442",
+              "File minus_strand_all_wig": "087CB5DCBE2A94C80821BEEDDAA237DC",
+              "File minus_strand_unique_wig": "62FB49D68FE2C8A9FBE39FFB594CA0B7",
+              "File plus_strand_all_wig": "FB873BB9E8188ABE5A98CBFBEA748489",
+              "File plus_strand_unique_wig": "00BA9BC54A3DE52CB7315DD358334832",
+              "File star_qc_json": "356A838B263938C0A1E01F32A68A13CB",
+              "File star_qc_log": "43E7209249C5507F226F5090B050AFE3",
+              "File tsv": "B6B52C18E2C9938940A3BA9C363ACFEB"
+            },
+            "runtime attribute": {
+              "continueOnReturnCode": "CFCD208495D565EF66E7DFF9F98764DA",
+              "docker": "1DF91074AADD2FCAFDBF35DCCC785867",
+              "failOnStderr": "68934A3E9455FA72420237EB05902327"
+            }
+          },
+          "hit": false,
+          "result": "Cache Miss"
+        },
+        "callRoot": "gs://encode-processing/caper_out/mirna_seq_pipeline/ff2a61b1-8708-407f-a075-6a262d7d1ca0/call-star/shard-1",
+        "commandLine": "tar -xzvf /cromwell_root/encode-processing/caper_tmp/meenakshi/8d73a50a7aab6aa71cbd489cf81e26a3/ENCFF795AAA.tar.gz\ngzip -cd /cromwell_root/encode-processing/caper_tmp/meenakshi/59b8f3ac1bad56f32e98f8b6223ddc81/ENCFF094ICJ.gtf.gz > anno.gtf\nSTAR \\\n    --genomeDir out \\\n    --readFilesIn /cromwell_root/encode-processing/caper_out/mirna_seq_pipeline/ff2a61b1-8708-407f-a075-6a262d7d1ca0/call-cutadapt/shard-1/glob-13510a96631ebcd33b0389553a698adf/rep2ENCSR715NEZ_trim.fastq \\\n    --sjdbGTFfile anno.gtf \\\n    --runThreadN 16 \\\n    --alignEndsType EndToEnd \\\n    --outFilterMismatchNmax 1 \\\n    --outFilterMultimapScoreRange 0 \\\n    --quantMode TranscriptomeSAM GeneCounts \\\n    --outReadsUnmapped Fastx \\\n    --outSAMtype BAM SortedByCoordinate \\\n    --outFilterMultimapNmax 10 \\\n    --outSAMunmapped Within \\\n    --outFilterScoreMinOverLread 0 \\\n    --outFilterMatchNminOverLread 0 \\\n    --outFilterMatchNmin 16 \\\n    --alignSJDBoverhangMin 1000 \\\n    --alignIntronMax 1 \\\n    --outWigType wiggle \\\n    --outWigStrand Stranded \\\n    --outWigNorm RPM\nmv Aligned.sortedByCoord.out.bam rep2ENCSR715NEZ.bam\nmv ReadsPerGene.out.tab rep2ENCSR715NEZ.tsv\nmv Log.final.out rep2ENCSR715NEZ.Log.final.out\npython3  $(which make_star_qc.py) --quants rep2ENCSR715NEZ.tsv \\\n                                  --star_log rep2ENCSR715NEZ.Log.final.out \\\n                                  --output_filename rep2ENCSR715NEZ_star_qc.json",
+        "dockerImageUsed": "quay.io/encode-dcc/mirna-seq-pipeline@sha256:0b25e3493c87cb16403bcd870b3446d2c99fae6848ebe46bd5338cec51918703",
+        "end": "2019-07-14T05:34:44.789Z",
+        "executionEvents": [
+          {
+            "description": "Worker \"google-pipelines-worker-cba8863026acca8fe7599e1b998b05f0\" assigned in \"us-central1-b\"",
+            "endTime": "2019-07-14T05:12:21.794Z",
+            "startTime": "2019-07-14T05:11:16.672Z"
+          },
+          {
+            "description": "PreparingJob",
+            "endTime": "2019-07-14T05:10:47.943Z",
+            "startTime": "2019-07-14T05:10:47.939Z"
+          },
+          {
+            "description": "UserAction",
+            "endTime": "2019-07-14T05:29:02.444Z",
+            "startTime": "2019-07-14T05:19:11.608Z"
+          },
+          {
+            "description": "Delocalization",
+            "endTime": "2019-07-14T05:32:07.986Z",
+            "startTime": "2019-07-14T05:29:02.444Z"
+          },
+          {
+            "description": "Worker released",
+            "endTime": "2019-07-14T05:34:41.977Z",
+            "startTime": "2019-07-14T05:32:07.986Z"
+          },
+          {
+            "description": "RunningJob",
+            "endTime": "2019-07-14T05:11:16.039Z",
+            "startTime": "2019-07-14T05:10:47.945Z"
+          },
+          {
+            "description": "Background",
+            "endTime": "2019-07-14T05:12:56.525Z",
+            "startTime": "2019-07-14T05:12:56.335Z"
+          },
+          {
+            "description": "CheckingCallCache",
+            "endTime": "2019-07-14T05:10:47.945Z",
+            "startTime": "2019-07-14T05:10:47.943Z"
+          },
+          {
+            "description": "Pending",
+            "endTime": "2019-07-14T05:10:46.650Z",
+            "startTime": "2019-07-14T05:10:46.650Z"
+          },
+          {
+            "description": "UpdatingCallCache",
+            "endTime": "2019-07-14T05:34:43.843Z",
+            "startTime": "2019-07-14T05:34:41.977Z"
+          },
+          {
+            "description": "Pulling \"quay.io/encode-dcc/mirna-seq-pipeline@sha256:0b25e3493c87cb16403bcd870b3446d2c99fae6848ebe46bd5338cec51918703\"",
+            "endTime": "2019-07-14T05:12:56.193Z",
+            "startTime": "2019-07-14T05:12:33.603Z"
+          },
+          {
+            "description": "Localization",
+            "endTime": "2019-07-14T05:19:11.608Z",
+            "startTime": "2019-07-14T05:13:10.798Z"
+          },
+          {
+            "description": "waiting for quota",
+            "endTime": "2019-07-14T05:11:16.672Z",
+            "startTime": "2019-07-14T05:11:16.039Z"
+          },
+          {
+            "description": "Pulling \"google/cloud-sdk:slim\"",
+            "endTime": "2019-07-14T05:12:33.603Z",
+            "startTime": "2019-07-14T05:12:21.794Z"
+          },
+          {
+            "description": "UpdatingJobStore",
+            "endTime": "2019-07-14T05:34:44.788Z",
+            "startTime": "2019-07-14T05:34:43.843Z"
+          },
+          {
+            "description": "WaitingForValueStore",
+            "endTime": "2019-07-14T05:10:47.939Z",
+            "startTime": "2019-07-14T05:10:47.939Z"
+          },
+          {
+            "description": "RequestingExecutionToken",
+            "endTime": "2019-07-14T05:10:47.939Z",
+            "startTime": "2019-07-14T05:10:46.650Z"
+          },
+          {
+            "description": "ContainerSetup",
+            "endTime": "2019-07-14T05:13:10.798Z",
+            "startTime": "2019-07-14T05:12:56.695Z"
+          }
+        ],
+        "executionStatus": "Done",
+        "inputs": {
+          "annotation": "gs://encode-processing/caper_tmp/meenakshi/59b8f3ac1bad56f32e98f8b6223ddc81/ENCFF094ICJ.gtf.gz",
+          "disk": "local-disk 200 SSD",
+          "fastq": "gs://encode-processing/caper_out/mirna_seq_pipeline/ff2a61b1-8708-407f-a075-6a262d7d1ca0/call-cutadapt/shard-1/glob-13510a96631ebcd33b0389553a698adf/rep2ENCSR715NEZ_trim.fastq",
+          "index": "gs://encode-processing/caper_tmp/meenakshi/8d73a50a7aab6aa71cbd489cf81e26a3/ENCFF795AAA.tar.gz",
+          "ncpus": 16,
+          "output_prefix": "rep2ENCSR715NEZ",
+          "ramGB": 60
+        },
+        "jes": {
+          "endpointUrl": "https://genomics.googleapis.com/",
+          "executionBucket": "gs://encode-processing/caper_out",
+          "googleProject": "encode-processing",
+          "instanceName": "google-pipelines-worker-cba8863026acca8fe7599e1b998b05f0",
+          "machineType": "custom-16-61440",
+          "zone": "us-central1-b"
+        },
+        "jobId": "projects/encode-processing/operations/7107117413835649831",
+        "labels": {
+          "cromwell-workflow-id": "cromwell-ff2a61b1-8708-407f-a075-6a262d7d1ca0",
+          "wdl-task-name": "star"
+        },
+        "outputs": {
+          "bam": "gs://encode-processing/caper_out/mirna_seq_pipeline/ff2a61b1-8708-407f-a075-6a262d7d1ca0/call-star/shard-1/glob-884b52e26475eb0e01d160f1c7e5a9b5/rep2ENCSR715NEZ.bam",
+          "minus_strand_all_wig": "gs://encode-processing/caper_out/mirna_seq_pipeline/ff2a61b1-8708-407f-a075-6a262d7d1ca0/call-star/shard-1/glob-95ad94f4655a5da1faa51c905e436322/Signal.UniqueMultiple.str2.out.wig",
+          "minus_strand_unique_wig": "gs://encode-processing/caper_out/mirna_seq_pipeline/ff2a61b1-8708-407f-a075-6a262d7d1ca0/call-star/shard-1/glob-581651af3e8d85ac9aecfba9cf6eaea5/Signal.Unique.str2.out.wig",
+          "plus_strand_all_wig": "gs://encode-processing/caper_out/mirna_seq_pipeline/ff2a61b1-8708-407f-a075-6a262d7d1ca0/call-star/shard-1/glob-41773c7ab111b23d6eb594bba78fa1d9/Signal.UniqueMultiple.str1.out.wig",
+          "plus_strand_unique_wig": "gs://encode-processing/caper_out/mirna_seq_pipeline/ff2a61b1-8708-407f-a075-6a262d7d1ca0/call-star/shard-1/glob-34e0341cc922c3159cacc690d41b117b/Signal.Unique.str1.out.wig",
+          "star_qc_json": "gs://encode-processing/caper_out/mirna_seq_pipeline/ff2a61b1-8708-407f-a075-6a262d7d1ca0/call-star/shard-1/glob-4c4d21ad2cdbd65d478f6b4b36f6c20a/rep2ENCSR715NEZ_star_qc.json",
+          "star_qc_log": "gs://encode-processing/caper_out/mirna_seq_pipeline/ff2a61b1-8708-407f-a075-6a262d7d1ca0/call-star/shard-1/glob-fdee3fa8e419c9ae7368882e11dc0027/star_qc.log",
+          "tsv": "gs://encode-processing/caper_out/mirna_seq_pipeline/ff2a61b1-8708-407f-a075-6a262d7d1ca0/call-star/shard-1/glob-ee3cac44669b7460fea102fa893f1b06/rep2ENCSR715NEZ.tsv"
+        },
+        "preemptible": false,
+        "returnCode": 0,
+        "runtimeAttributes": {
+          "bootDiskSizeGb": "10",
+          "continueOnReturnCode": "0",
+          "cpu": "16",
+          "cpuMin": "1",
+          "disks": "local-disk 200 SSD",
+          "docker": "quay.io/encode-dcc/mirna-seq-pipeline:v1.0",
+          "failOnStderr": "false",
+          "maxRetries": "0",
+          "memory": "60 GB",
+          "memoryMin": "2 GB",
+          "noAddress": "false",
+          "preemptible": "0",
+          "zones": "us-central1-b"
+        },
+        "shardIndex": 1,
+        "start": "2019-07-14T05:10:46.649Z",
+        "stderr": "gs://encode-processing/caper_out/mirna_seq_pipeline/ff2a61b1-8708-407f-a075-6a262d7d1ca0/call-star/shard-1/stderr",
+        "stdout": "gs://encode-processing/caper_out/mirna_seq_pipeline/ff2a61b1-8708-407f-a075-6a262d7d1ca0/call-star/shard-1/stdout"
+      }
+    ],
+    "mirna_seq_pipeline.wigtobigwig": [
+      {
+        "attempt": 1,
+        "backend": "gcp",
+        "backendLabels": {
+          "cromwell-workflow-id": "cromwell-ff2a61b1-8708-407f-a075-6a262d7d1ca0",
+          "wdl-task-name": "wigtobigwig"
+        },
+        "backendLogs": {
+          "log": "gs://encode-processing/caper_out/mirna_seq_pipeline/ff2a61b1-8708-407f-a075-6a262d7d1ca0/call-wigtobigwig/shard-0/wigtobigwig-0.log"
+        },
+        "backendStatus": "Success",
+        "callCaching": {
+          "allowResultReuse": true,
+          "effectiveCallCachingMode": "ReadAndWriteCache",
+          "hashes": {
+            "backend name": "50F66ECBC45488EE5826941BFBC50411",
+            "command template": "7D325E170EA48D0883FDCA2E41304AB2",
+            "input": {
+              "File chrom_sizes": "k+GV9Q==",
+              "File minus_strand_all_wig": "8Jw6aw==",
+              "File minus_strand_unique_wig": "cDxCwQ==",
+              "File plus_strand_all_wig": "tAZaLA==",
+              "File plus_strand_unique_wig": "XIsLtg==",
+              "Int ncpus": "C81E728D9D4C2F636F067F89CC14862C",
+              "Int ramGB": "8F14E45FCEEA167A5A36DEDD4BEA2543",
+              "String disk": "2922BF0DCFA3E4A97CF5B6EAF2EC0C06",
+              "String output_prefix": "EAA0B59B1145B2343F0133E595C1C10D"
+            },
+            "input count": "45C48CCE2E2D7FBDEA1AFC51C7C6AD26",
+            "output count": "A87FF679A2F3E71D9181A67B7542122C",
+            "output expression": {
+              "File minus_strand_all_bigwig": "A539A570AEB5CE6DF5AFE679753EDEE1",
+              "File minus_strand_unique_bigwig": "F03CCEEF1396B3A3C9769B37C7F49038",
+              "File plus_strand_all_bigwig": "A225C0385E22C0F9947BFCADF69CD3FD",
+              "File plus_strand_unique_bigwig": "D43AA67E560A4879C1BF268F8814EDA9"
+            },
+            "runtime attribute": {
+              "continueOnReturnCode": "CFCD208495D565EF66E7DFF9F98764DA",
+              "docker": "1DF91074AADD2FCAFDBF35DCCC785867",
+              "failOnStderr": "68934A3E9455FA72420237EB05902327"
+            }
+          },
+          "hit": false,
+          "result": "Cache Miss"
+        },
+        "callRoot": "gs://encode-processing/caper_out/mirna_seq_pipeline/ff2a61b1-8708-407f-a075-6a262d7d1ca0/call-wigtobigwig/shard-0",
+        "commandLine": "wigToBigWig /cromwell_root/encode-processing/caper_out/mirna_seq_pipeline/ff2a61b1-8708-407f-a075-6a262d7d1ca0/call-star/shard-0/glob-41773c7ab111b23d6eb594bba78fa1d9/Signal.UniqueMultiple.str1.out.wig /cromwell_root/encode-processing/caper_tmp/meenakshi/a4733a4e097a19c869b1cb1aae1b33c9/mm10_no_alt.chrom.sizes.tsv rep1ENCSR715NEZ.signal.all.plus.bigWig\nwigToBigWig /cromwell_root/encode-processing/caper_out/mirna_seq_pipeline/ff2a61b1-8708-407f-a075-6a262d7d1ca0/call-star/shard-0/glob-95ad94f4655a5da1faa51c905e436322/Signal.UniqueMultiple.str2.out.wig /cromwell_root/encode-processing/caper_tmp/meenakshi/a4733a4e097a19c869b1cb1aae1b33c9/mm10_no_alt.chrom.sizes.tsv rep1ENCSR715NEZ.signal.all.minus.bigWig\nwigToBigWig /cromwell_root/encode-processing/caper_out/mirna_seq_pipeline/ff2a61b1-8708-407f-a075-6a262d7d1ca0/call-star/shard-0/glob-34e0341cc922c3159cacc690d41b117b/Signal.Unique.str1.out.wig /cromwell_root/encode-processing/caper_tmp/meenakshi/a4733a4e097a19c869b1cb1aae1b33c9/mm10_no_alt.chrom.sizes.tsv rep1ENCSR715NEZ.signal.unique.plus.bigWig\nwigToBigWig /cromwell_root/encode-processing/caper_out/mirna_seq_pipeline/ff2a61b1-8708-407f-a075-6a262d7d1ca0/call-star/shard-0/glob-581651af3e8d85ac9aecfba9cf6eaea5/Signal.Unique.str2.out.wig /cromwell_root/encode-processing/caper_tmp/meenakshi/a4733a4e097a19c869b1cb1aae1b33c9/mm10_no_alt.chrom.sizes.tsv rep1ENCSR715NEZ.signal.unique.minus.bigWig",
+        "dockerImageUsed": "quay.io/encode-dcc/mirna-seq-pipeline@sha256:0b25e3493c87cb16403bcd870b3446d2c99fae6848ebe46bd5338cec51918703",
+        "end": "2019-07-14T05:34:44.788Z",
+        "executionEvents": [
+          {
+            "description": "Worker \"google-pipelines-worker-fc9c86c9ada51a7f1ed3c8ab1f1e171f\" assigned in \"us-central1-b\"",
+            "endTime": "2019-07-14T05:29:46.039Z",
+            "startTime": "2019-07-14T05:29:08.043Z"
+          },
+          {
+            "description": "UpdatingJobStore",
+            "endTime": "2019-07-14T05:34:44.788Z",
+            "startTime": "2019-07-14T05:34:43.843Z"
+          },
+          {
+            "description": "RequestingExecutionToken",
+            "endTime": "2019-07-14T05:28:37.939Z",
+            "startTime": "2019-07-14T05:28:37.750Z"
+          },
+          {
+            "description": "ContainerSetup",
+            "endTime": "2019-07-14T05:30:39.692Z",
+            "startTime": "2019-07-14T05:30:25.800Z"
+          },
+          {
+            "description": "WaitingForValueStore",
+            "endTime": "2019-07-14T05:28:37.940Z",
+            "startTime": "2019-07-14T05:28:37.939Z"
+          },
+          {
+            "description": "Localization",
+            "endTime": "2019-07-14T05:31:41.943Z",
+            "startTime": "2019-07-14T05:30:39.692Z"
+          },
+          {
+            "description": "UserAction",
+            "endTime": "2019-07-14T05:31:58.720Z",
+            "startTime": "2019-07-14T05:31:41.943Z"
+          },
+          {
+            "description": "UpdatingCallCache",
+            "endTime": "2019-07-14T05:34:43.843Z",
+            "startTime": "2019-07-14T05:34:41.562Z"
+          },
+          {
+            "description": "Pulling \"quay.io/encode-dcc/mirna-seq-pipeline@sha256:0b25e3493c87cb16403bcd870b3446d2c99fae6848ebe46bd5338cec51918703\"",
+            "endTime": "2019-07-14T05:30:25.065Z",
+            "startTime": "2019-07-14T05:30:02.016Z"
+          },
+          {
+            "description": "waiting for quota",
+            "endTime": "2019-07-14T05:29:08.043Z",
+            "startTime": "2019-07-14T05:29:06.942Z"
+          },
+          {
+            "description": "Delocalization",
+            "endTime": "2019-07-14T05:34:01.546Z",
+            "startTime": "2019-07-14T05:31:58.720Z"
+          },
+          {
+            "description": "Worker released",
+            "endTime": "2019-07-14T05:34:41.562Z",
+            "startTime": "2019-07-14T05:34:01.546Z"
+          },
+          {
+            "description": "PreparingJob",
+            "endTime": "2019-07-14T05:28:37.943Z",
+            "startTime": "2019-07-14T05:28:37.940Z"
+          },
+          {
+            "description": "CheckingCallCache",
+            "endTime": "2019-07-14T05:28:37.945Z",
+            "startTime": "2019-07-14T05:28:37.943Z"
+          },
+          {
+            "description": "Pulling \"google/cloud-sdk:slim\"",
+            "endTime": "2019-07-14T05:30:02.016Z",
+            "startTime": "2019-07-14T05:29:46.039Z"
+          },
+          {
+            "description": "Background",
+            "endTime": "2019-07-14T05:30:25.800Z",
+            "startTime": "2019-07-14T05:30:25.405Z"
+          },
+          {
+            "description": "Pending",
+            "endTime": "2019-07-14T05:28:37.750Z",
+            "startTime": "2019-07-14T05:28:37.750Z"
+          },
+          {
+            "description": "RunningJob",
+            "endTime": "2019-07-14T05:29:06.942Z",
+            "startTime": "2019-07-14T05:28:37.945Z"
+          }
+        ],
+        "executionStatus": "Done",
+        "inputs": {
+          "chrom_sizes": "gs://encode-processing/caper_tmp/meenakshi/a4733a4e097a19c869b1cb1aae1b33c9/mm10_no_alt.chrom.sizes.tsv",
+          "disk": "local-disk 200 SSD",
+          "minus_strand_all_wig": "gs://encode-processing/caper_out/mirna_seq_pipeline/ff2a61b1-8708-407f-a075-6a262d7d1ca0/call-star/shard-0/glob-95ad94f4655a5da1faa51c905e436322/Signal.UniqueMultiple.str2.out.wig",
+          "minus_strand_unique_wig": "gs://encode-processing/caper_out/mirna_seq_pipeline/ff2a61b1-8708-407f-a075-6a262d7d1ca0/call-star/shard-0/glob-581651af3e8d85ac9aecfba9cf6eaea5/Signal.Unique.str2.out.wig",
+          "ncpus": 2,
+          "output_prefix": "rep1ENCSR715NEZ",
+          "plus_strand_all_wig": "gs://encode-processing/caper_out/mirna_seq_pipeline/ff2a61b1-8708-407f-a075-6a262d7d1ca0/call-star/shard-0/glob-41773c7ab111b23d6eb594bba78fa1d9/Signal.UniqueMultiple.str1.out.wig",
+          "plus_strand_unique_wig": "gs://encode-processing/caper_out/mirna_seq_pipeline/ff2a61b1-8708-407f-a075-6a262d7d1ca0/call-star/shard-0/glob-34e0341cc922c3159cacc690d41b117b/Signal.Unique.str1.out.wig",
+          "ramGB": 7
+        },
+        "jes": {
+          "endpointUrl": "https://genomics.googleapis.com/",
+          "executionBucket": "gs://encode-processing/caper_out",
+          "googleProject": "encode-processing",
+          "instanceName": "google-pipelines-worker-fc9c86c9ada51a7f1ed3c8ab1f1e171f",
+          "machineType": "custom-2-7168",
+          "zone": "us-central1-b"
+        },
+        "jobId": "projects/encode-processing/operations/7339386171288541278",
+        "labels": {
+          "cromwell-workflow-id": "cromwell-ff2a61b1-8708-407f-a075-6a262d7d1ca0",
+          "wdl-task-name": "wigtobigwig"
+        },
+        "outputs": {
+          "minus_strand_all_bigwig": "gs://encode-processing/caper_out/mirna_seq_pipeline/ff2a61b1-8708-407f-a075-6a262d7d1ca0/call-wigtobigwig/shard-0/glob-f2920e4cd5a28e8c120bd92e7ba31ecf/rep1ENCSR715NEZ.signal.all.minus.bigWig",
+          "minus_strand_unique_bigwig": "gs://encode-processing/caper_out/mirna_seq_pipeline/ff2a61b1-8708-407f-a075-6a262d7d1ca0/call-wigtobigwig/shard-0/glob-e26cce3d0ca522acfdb935f7efeb3e0f/rep1ENCSR715NEZ.signal.unique.minus.bigWig",
+          "plus_strand_all_bigwig": "gs://encode-processing/caper_out/mirna_seq_pipeline/ff2a61b1-8708-407f-a075-6a262d7d1ca0/call-wigtobigwig/shard-0/glob-ecf13a1f988469a7767bed84843bd510/rep1ENCSR715NEZ.signal.all.plus.bigWig",
+          "plus_strand_unique_bigwig": "gs://encode-processing/caper_out/mirna_seq_pipeline/ff2a61b1-8708-407f-a075-6a262d7d1ca0/call-wigtobigwig/shard-0/glob-5d1de83c72d3b961f02eb173e9f6d5a2/rep1ENCSR715NEZ.signal.unique.plus.bigWig"
+        },
+        "preemptible": false,
+        "returnCode": 0,
+        "runtimeAttributes": {
+          "bootDiskSizeGb": "10",
+          "continueOnReturnCode": "0",
+          "cpu": "2",
+          "cpuMin": "1",
+          "disks": "local-disk 200 SSD",
+          "docker": "quay.io/encode-dcc/mirna-seq-pipeline:v1.0",
+          "failOnStderr": "false",
+          "maxRetries": "0",
+          "memory": "7 GB",
+          "memoryMin": "2 GB",
+          "noAddress": "false",
+          "preemptible": "0",
+          "zones": "us-central1-b"
+        },
+        "shardIndex": 0,
+        "start": "2019-07-14T05:28:37.750Z",
+        "stderr": "gs://encode-processing/caper_out/mirna_seq_pipeline/ff2a61b1-8708-407f-a075-6a262d7d1ca0/call-wigtobigwig/shard-0/stderr",
+        "stdout": "gs://encode-processing/caper_out/mirna_seq_pipeline/ff2a61b1-8708-407f-a075-6a262d7d1ca0/call-wigtobigwig/shard-0/stdout"
+      },
+      {
+        "attempt": 1,
+        "backend": "gcp",
+        "backendLabels": {
+          "cromwell-workflow-id": "cromwell-ff2a61b1-8708-407f-a075-6a262d7d1ca0",
+          "wdl-task-name": "wigtobigwig"
+        },
+        "backendLogs": {
+          "log": "gs://encode-processing/caper_out/mirna_seq_pipeline/ff2a61b1-8708-407f-a075-6a262d7d1ca0/call-wigtobigwig/shard-1/wigtobigwig-1.log"
+        },
+        "backendStatus": "Success",
+        "callCaching": {
+          "allowResultReuse": true,
+          "effectiveCallCachingMode": "ReadAndWriteCache",
+          "hashes": {
+            "backend name": "50F66ECBC45488EE5826941BFBC50411",
+            "command template": "7D325E170EA48D0883FDCA2E41304AB2",
+            "input": {
+              "File chrom_sizes": "k+GV9Q==",
+              "File minus_strand_all_wig": "Pufgyw==",
+              "File minus_strand_unique_wig": "m8IUUQ==",
+              "File plus_strand_all_wig": "//lPfA==",
+              "File plus_strand_unique_wig": "KzZh1Q==",
+              "Int ncpus": "C81E728D9D4C2F636F067F89CC14862C",
+              "Int ramGB": "8F14E45FCEEA167A5A36DEDD4BEA2543",
+              "String disk": "2922BF0DCFA3E4A97CF5B6EAF2EC0C06",
+              "String output_prefix": "18D5E935EF4FFD5419DEDBC86948B8BE"
+            },
+            "input count": "45C48CCE2E2D7FBDEA1AFC51C7C6AD26",
+            "output count": "A87FF679A2F3E71D9181A67B7542122C",
+            "output expression": {
+              "File minus_strand_all_bigwig": "A539A570AEB5CE6DF5AFE679753EDEE1",
+              "File minus_strand_unique_bigwig": "F03CCEEF1396B3A3C9769B37C7F49038",
+              "File plus_strand_all_bigwig": "A225C0385E22C0F9947BFCADF69CD3FD",
+              "File plus_strand_unique_bigwig": "D43AA67E560A4879C1BF268F8814EDA9"
+            },
+            "runtime attribute": {
+              "continueOnReturnCode": "CFCD208495D565EF66E7DFF9F98764DA",
+              "docker": "1DF91074AADD2FCAFDBF35DCCC785867",
+              "failOnStderr": "68934A3E9455FA72420237EB05902327"
+            }
+          },
+          "hit": false,
+          "result": "Cache Miss"
+        },
+        "callRoot": "gs://encode-processing/caper_out/mirna_seq_pipeline/ff2a61b1-8708-407f-a075-6a262d7d1ca0/call-wigtobigwig/shard-1",
+        "commandLine": "wigToBigWig /cromwell_root/encode-processing/caper_out/mirna_seq_pipeline/ff2a61b1-8708-407f-a075-6a262d7d1ca0/call-star/shard-1/glob-41773c7ab111b23d6eb594bba78fa1d9/Signal.UniqueMultiple.str1.out.wig /cromwell_root/encode-processing/caper_tmp/meenakshi/a4733a4e097a19c869b1cb1aae1b33c9/mm10_no_alt.chrom.sizes.tsv rep2ENCSR715NEZ.signal.all.plus.bigWig\nwigToBigWig /cromwell_root/encode-processing/caper_out/mirna_seq_pipeline/ff2a61b1-8708-407f-a075-6a262d7d1ca0/call-star/shard-1/glob-95ad94f4655a5da1faa51c905e436322/Signal.UniqueMultiple.str2.out.wig /cromwell_root/encode-processing/caper_tmp/meenakshi/a4733a4e097a19c869b1cb1aae1b33c9/mm10_no_alt.chrom.sizes.tsv rep2ENCSR715NEZ.signal.all.minus.bigWig\nwigToBigWig /cromwell_root/encode-processing/caper_out/mirna_seq_pipeline/ff2a61b1-8708-407f-a075-6a262d7d1ca0/call-star/shard-1/glob-34e0341cc922c3159cacc690d41b117b/Signal.Unique.str1.out.wig /cromwell_root/encode-processing/caper_tmp/meenakshi/a4733a4e097a19c869b1cb1aae1b33c9/mm10_no_alt.chrom.sizes.tsv rep2ENCSR715NEZ.signal.unique.plus.bigWig\nwigToBigWig /cromwell_root/encode-processing/caper_out/mirna_seq_pipeline/ff2a61b1-8708-407f-a075-6a262d7d1ca0/call-star/shard-1/glob-581651af3e8d85ac9aecfba9cf6eaea5/Signal.Unique.str2.out.wig /cromwell_root/encode-processing/caper_tmp/meenakshi/a4733a4e097a19c869b1cb1aae1b33c9/mm10_no_alt.chrom.sizes.tsv rep2ENCSR715NEZ.signal.unique.minus.bigWig",
+        "dockerImageUsed": "quay.io/encode-dcc/mirna-seq-pipeline@sha256:0b25e3493c87cb16403bcd870b3446d2c99fae6848ebe46bd5338cec51918703",
+        "end": "2019-07-14T05:41:23.771Z",
+        "executionEvents": [
+          {
+            "description": "ContainerSetup",
+            "endTime": "2019-07-14T05:37:03.387Z",
+            "startTime": "2019-07-14T05:36:47.828Z"
+          },
+          {
+            "description": "Worker released",
+            "endTime": "2019-07-14T05:41:22.388Z",
+            "startTime": "2019-07-14T05:40:24.792Z"
+          },
+          {
+            "description": "RunningJob",
+            "endTime": "2019-07-14T05:35:14.629Z",
+            "startTime": "2019-07-14T05:34:47.945Z"
+          },
+          {
+            "description": "waiting for quota",
+            "endTime": "2019-07-14T05:35:14.800Z",
+            "startTime": "2019-07-14T05:35:14.629Z"
+          },
+          {
+            "description": "WaitingForValueStore",
+            "endTime": "2019-07-14T05:34:47.940Z",
+            "startTime": "2019-07-14T05:34:47.939Z"
+          },
+          {
+            "description": "Worker \"google-pipelines-worker-540be69c997052a0aaea5dbc93787446\" assigned in \"us-central1-b\"",
+            "endTime": "2019-07-14T05:36:08.730Z",
+            "startTime": "2019-07-14T05:35:14.800Z"
+          },
+          {
+            "description": "UserAction",
+            "endTime": "2019-07-14T05:38:29.683Z",
+            "startTime": "2019-07-14T05:38:07.182Z"
+          },
+          {
+            "description": "PreparingJob",
+            "endTime": "2019-07-14T05:34:47.943Z",
+            "startTime": "2019-07-14T05:34:47.940Z"
+          },
+          {
+            "description": "RequestingExecutionToken",
+            "endTime": "2019-07-14T05:34:47.939Z",
+            "startTime": "2019-07-14T05:34:45.970Z"
+          },
+          {
+            "description": "Pending",
+            "endTime": "2019-07-14T05:34:45.970Z",
+            "startTime": "2019-07-14T05:34:45.970Z"
+          },
+          {
+            "description": "Localization",
+            "endTime": "2019-07-14T05:38:07.182Z",
+            "startTime": "2019-07-14T05:37:03.387Z"
+          },
+          {
+            "description": "Delocalization",
+            "endTime": "2019-07-14T05:40:24.792Z",
+            "startTime": "2019-07-14T05:38:29.683Z"
+          },
+          {
+            "description": "CheckingCallCache",
+            "endTime": "2019-07-14T05:34:47.945Z",
+            "startTime": "2019-07-14T05:34:47.943Z"
+          },
+          {
+            "description": "Pulling \"google/cloud-sdk:slim\"",
+            "endTime": "2019-07-14T05:36:24.379Z",
+            "startTime": "2019-07-14T05:36:08.730Z"
+          },
+          {
+            "description": "UpdatingCallCache",
+            "endTime": "2019-07-14T05:41:22.808Z",
+            "startTime": "2019-07-14T05:41:22.388Z"
+          },
+          {
+            "description": "Pulling \"quay.io/encode-dcc/mirna-seq-pipeline@sha256:0b25e3493c87cb16403bcd870b3446d2c99fae6848ebe46bd5338cec51918703\"",
+            "endTime": "2019-07-14T05:36:47.142Z",
+            "startTime": "2019-07-14T05:36:24.379Z"
+          },
+          {
+            "description": "UpdatingJobStore",
+            "endTime": "2019-07-14T05:41:23.771Z",
+            "startTime": "2019-07-14T05:41:22.808Z"
+          },
+          {
+            "description": "Background",
+            "endTime": "2019-07-14T05:36:47.308Z",
+            "startTime": "2019-07-14T05:36:47.142Z"
+          }
+        ],
+        "executionStatus": "Done",
+        "inputs": {
+          "chrom_sizes": "gs://encode-processing/caper_tmp/meenakshi/a4733a4e097a19c869b1cb1aae1b33c9/mm10_no_alt.chrom.sizes.tsv",
+          "disk": "local-disk 200 SSD",
+          "minus_strand_all_wig": "gs://encode-processing/caper_out/mirna_seq_pipeline/ff2a61b1-8708-407f-a075-6a262d7d1ca0/call-star/shard-1/glob-95ad94f4655a5da1faa51c905e436322/Signal.UniqueMultiple.str2.out.wig",
+          "minus_strand_unique_wig": "gs://encode-processing/caper_out/mirna_seq_pipeline/ff2a61b1-8708-407f-a075-6a262d7d1ca0/call-star/shard-1/glob-581651af3e8d85ac9aecfba9cf6eaea5/Signal.Unique.str2.out.wig",
+          "ncpus": 2,
+          "output_prefix": "rep2ENCSR715NEZ",
+          "plus_strand_all_wig": "gs://encode-processing/caper_out/mirna_seq_pipeline/ff2a61b1-8708-407f-a075-6a262d7d1ca0/call-star/shard-1/glob-41773c7ab111b23d6eb594bba78fa1d9/Signal.UniqueMultiple.str1.out.wig",
+          "plus_strand_unique_wig": "gs://encode-processing/caper_out/mirna_seq_pipeline/ff2a61b1-8708-407f-a075-6a262d7d1ca0/call-star/shard-1/glob-34e0341cc922c3159cacc690d41b117b/Signal.Unique.str1.out.wig",
+          "ramGB": 7
+        },
+        "jes": {
+          "endpointUrl": "https://genomics.googleapis.com/",
+          "executionBucket": "gs://encode-processing/caper_out",
+          "googleProject": "encode-processing",
+          "instanceName": "google-pipelines-worker-540be69c997052a0aaea5dbc93787446",
+          "machineType": "custom-2-7168",
+          "zone": "us-central1-b"
+        },
+        "jobId": "projects/encode-processing/operations/17290524285634190964",
+        "labels": {
+          "cromwell-workflow-id": "cromwell-ff2a61b1-8708-407f-a075-6a262d7d1ca0",
+          "wdl-task-name": "wigtobigwig"
+        },
+        "outputs": {
+          "minus_strand_all_bigwig": "gs://encode-processing/caper_out/mirna_seq_pipeline/ff2a61b1-8708-407f-a075-6a262d7d1ca0/call-wigtobigwig/shard-1/glob-f2920e4cd5a28e8c120bd92e7ba31ecf/rep2ENCSR715NEZ.signal.all.minus.bigWig",
+          "minus_strand_unique_bigwig": "gs://encode-processing/caper_out/mirna_seq_pipeline/ff2a61b1-8708-407f-a075-6a262d7d1ca0/call-wigtobigwig/shard-1/glob-e26cce3d0ca522acfdb935f7efeb3e0f/rep2ENCSR715NEZ.signal.unique.minus.bigWig",
+          "plus_strand_all_bigwig": "gs://encode-processing/caper_out/mirna_seq_pipeline/ff2a61b1-8708-407f-a075-6a262d7d1ca0/call-wigtobigwig/shard-1/glob-ecf13a1f988469a7767bed84843bd510/rep2ENCSR715NEZ.signal.all.plus.bigWig",
+          "plus_strand_unique_bigwig": "gs://encode-processing/caper_out/mirna_seq_pipeline/ff2a61b1-8708-407f-a075-6a262d7d1ca0/call-wigtobigwig/shard-1/glob-5d1de83c72d3b961f02eb173e9f6d5a2/rep2ENCSR715NEZ.signal.unique.plus.bigWig"
+        },
+        "preemptible": false,
+        "returnCode": 0,
+        "runtimeAttributes": {
+          "bootDiskSizeGb": "10",
+          "continueOnReturnCode": "0",
+          "cpu": "2",
+          "cpuMin": "1",
+          "disks": "local-disk 200 SSD",
+          "docker": "quay.io/encode-dcc/mirna-seq-pipeline:v1.0",
+          "failOnStderr": "false",
+          "maxRetries": "0",
+          "memory": "7 GB",
+          "memoryMin": "2 GB",
+          "noAddress": "false",
+          "preemptible": "0",
+          "zones": "us-central1-b"
+        },
+        "shardIndex": 1,
+        "start": "2019-07-14T05:34:45.970Z",
+        "stderr": "gs://encode-processing/caper_out/mirna_seq_pipeline/ff2a61b1-8708-407f-a075-6a262d7d1ca0/call-wigtobigwig/shard-1/stderr",
+        "stdout": "gs://encode-processing/caper_out/mirna_seq_pipeline/ff2a61b1-8708-407f-a075-6a262d7d1ca0/call-wigtobigwig/shard-1/stdout"
+      }
+    ]
+  },
+  "end": "2019-07-14T05:41:26.822Z",
+  "id": "ff2a61b1-8708-407f-a075-6a262d7d1ca0",
+  "inputs": {
+    "mirna_seq_pipeline.chrom_sizes": "gs://encode-processing/caper_tmp/meenakshi/a4733a4e097a19c869b1cb1aae1b33c9/mm10_no_alt.chrom.sizes.tsv",
+    "mirna_seq_pipeline.cutadapt_disk": "local-disk 200 SSD",
+    "mirna_seq_pipeline.cutadapt_ncpus": 2,
+    "mirna_seq_pipeline.cutadapt_ramGB": 7,
+    "mirna_seq_pipeline.experiment_prefix": "ENCSR715NEZ",
+    "mirna_seq_pipeline.fastqs": [
+      "gs://encode-processing/caper_tmp/meenakshi/encode-public/2017/06/29/5e59f7f5-02aa-482a-bb3e-7e49ab8828e8/ENCFF961HXV.fastq.gz",
+      "gs://encode-processing/caper_tmp/meenakshi/encode-public/2017/06/29/9bf53883-a8c2-404b-b9f5-59b3665ea023/ENCFF414HIZ.fastq.gz"
+    ],
+    "mirna_seq_pipeline.five_prime_adapters": [
+      "gs://encode-processing/caper_tmp/meenakshi/df8acfb115cb667ef5a787093c4115bd/ENCFF642YMX.txt",
+      "gs://encode-processing/caper_tmp/meenakshi/df8acfb115cb667ef5a787093c4115bd/ENCFF642YMX.txt"
+    ],
+    "mirna_seq_pipeline.mirna_annotation": "gs://encode-processing/caper_tmp/meenakshi/59b8f3ac1bad56f32e98f8b6223ddc81/ENCFF094ICJ.gtf.gz",
+    "mirna_seq_pipeline.star_disk": "local-disk 200 SSD",
+    "mirna_seq_pipeline.star_index": "gs://encode-processing/caper_tmp/meenakshi/8d73a50a7aab6aa71cbd489cf81e26a3/ENCFF795AAA.tar.gz",
+    "mirna_seq_pipeline.star_ncpus": 16,
+    "mirna_seq_pipeline.star_ramGB": 60,
+    "mirna_seq_pipeline.three_prime_adapters": "gs://encode-processing/caper_tmp/meenakshi/ca31b14d4535436a9d7959bdcf77e706/ENCFF463QEL.txt",
+    "mirna_seq_pipeline.wigtobigwig_disk": "local-disk 200 SSD",
+    "mirna_seq_pipeline.wigtobigwig_ncpus": 2,
+    "mirna_seq_pipeline.wigtobigwig_ramGB": 7
+  },
+  "labels": {
+    "caper-backend": "gcp",
+    "caper-str-label": "ENCSR715NEZ_final_run",
+    "caper-user": "meenakshi",
+    "cromwell-workflow-id": "cromwell-ff2a61b1-8708-407f-a075-6a262d7d1ca0"
+  },
+  "outputs": {
+    "mirna_seq_pipeline.cutadapt.no3ad_untrimmed_fastq": [
+      "gs://encode-processing/caper_out/mirna_seq_pipeline/ff2a61b1-8708-407f-a075-6a262d7d1ca0/call-cutadapt/shard-0/glob-98d26fbed0c2af6137e088cfa3d900ec/rep1ENCSR715NEZ_NO3AD.fastq",
+      "gs://encode-processing/caper_out/mirna_seq_pipeline/ff2a61b1-8708-407f-a075-6a262d7d1ca0/call-cutadapt/shard-1/glob-98d26fbed0c2af6137e088cfa3d900ec/rep2ENCSR715NEZ_NO3AD.fastq"
+    ],
+    "mirna_seq_pipeline.cutadapt.no5ad_untrimmed_fastq": [
+      "gs://encode-processing/caper_out/mirna_seq_pipeline/ff2a61b1-8708-407f-a075-6a262d7d1ca0/call-cutadapt/shard-0/glob-572b7543d93f95b496a2056e7f497e36/rep1ENCSR715NEZ_NO5AD.fastq",
+      "gs://encode-processing/caper_out/mirna_seq_pipeline/ff2a61b1-8708-407f-a075-6a262d7d1ca0/call-cutadapt/shard-1/glob-572b7543d93f95b496a2056e7f497e36/rep2ENCSR715NEZ_NO5AD.fastq"
+    ],
+    "mirna_seq_pipeline.cutadapt.too_short_fastq": [
+      "gs://encode-processing/caper_out/mirna_seq_pipeline/ff2a61b1-8708-407f-a075-6a262d7d1ca0/call-cutadapt/shard-0/glob-5d1a0338bc17768917cfb246a1d2fd6c/rep1ENCSR715NEZ_SHORT_FAIL.fastq",
+      "gs://encode-processing/caper_out/mirna_seq_pipeline/ff2a61b1-8708-407f-a075-6a262d7d1ca0/call-cutadapt/shard-1/glob-5d1a0338bc17768917cfb246a1d2fd6c/rep2ENCSR715NEZ_SHORT_FAIL.fastq"
+    ],
+    "mirna_seq_pipeline.cutadapt.trimmed_fastq": [
+      "gs://encode-processing/caper_out/mirna_seq_pipeline/ff2a61b1-8708-407f-a075-6a262d7d1ca0/call-cutadapt/shard-0/glob-13510a96631ebcd33b0389553a698adf/rep1ENCSR715NEZ_trim.fastq",
+      "gs://encode-processing/caper_out/mirna_seq_pipeline/ff2a61b1-8708-407f-a075-6a262d7d1ca0/call-cutadapt/shard-1/glob-13510a96631ebcd33b0389553a698adf/rep2ENCSR715NEZ_trim.fastq"
+    ],
+    "mirna_seq_pipeline.spearman_correlation.spearman_json": "gs://encode-processing/caper_out/mirna_seq_pipeline/ff2a61b1-8708-407f-a075-6a262d7d1ca0/call-spearman_correlation/glob-a561370dd84a477b9f6b00e9824fbde0/ENCSR715NEZ_spearman.json",
+    "mirna_seq_pipeline.star.bam": [
+      "gs://encode-processing/caper_out/mirna_seq_pipeline/ff2a61b1-8708-407f-a075-6a262d7d1ca0/call-star/shard-0/glob-0d2b4556b219bc41f9a10d12eee46cec/rep1ENCSR715NEZ.bam",
+      "gs://encode-processing/caper_out/mirna_seq_pipeline/ff2a61b1-8708-407f-a075-6a262d7d1ca0/call-star/shard-1/glob-884b52e26475eb0e01d160f1c7e5a9b5/rep2ENCSR715NEZ.bam"
+    ],
+    "mirna_seq_pipeline.star.minus_strand_all_wig": [
+      "gs://encode-processing/caper_out/mirna_seq_pipeline/ff2a61b1-8708-407f-a075-6a262d7d1ca0/call-star/shard-0/glob-95ad94f4655a5da1faa51c905e436322/Signal.UniqueMultiple.str2.out.wig",
+      "gs://encode-processing/caper_out/mirna_seq_pipeline/ff2a61b1-8708-407f-a075-6a262d7d1ca0/call-star/shard-1/glob-95ad94f4655a5da1faa51c905e436322/Signal.UniqueMultiple.str2.out.wig"
+    ],
+    "mirna_seq_pipeline.star.minus_strand_unique_wig": [
+      "gs://encode-processing/caper_out/mirna_seq_pipeline/ff2a61b1-8708-407f-a075-6a262d7d1ca0/call-star/shard-0/glob-581651af3e8d85ac9aecfba9cf6eaea5/Signal.Unique.str2.out.wig",
+      "gs://encode-processing/caper_out/mirna_seq_pipeline/ff2a61b1-8708-407f-a075-6a262d7d1ca0/call-star/shard-1/glob-581651af3e8d85ac9aecfba9cf6eaea5/Signal.Unique.str2.out.wig"
+    ],
+    "mirna_seq_pipeline.star.plus_strand_all_wig": [
+      "gs://encode-processing/caper_out/mirna_seq_pipeline/ff2a61b1-8708-407f-a075-6a262d7d1ca0/call-star/shard-0/glob-41773c7ab111b23d6eb594bba78fa1d9/Signal.UniqueMultiple.str1.out.wig",
+      "gs://encode-processing/caper_out/mirna_seq_pipeline/ff2a61b1-8708-407f-a075-6a262d7d1ca0/call-star/shard-1/glob-41773c7ab111b23d6eb594bba78fa1d9/Signal.UniqueMultiple.str1.out.wig"
+    ],
+    "mirna_seq_pipeline.star.plus_strand_unique_wig": [
+      "gs://encode-processing/caper_out/mirna_seq_pipeline/ff2a61b1-8708-407f-a075-6a262d7d1ca0/call-star/shard-0/glob-34e0341cc922c3159cacc690d41b117b/Signal.Unique.str1.out.wig",
+      "gs://encode-processing/caper_out/mirna_seq_pipeline/ff2a61b1-8708-407f-a075-6a262d7d1ca0/call-star/shard-1/glob-34e0341cc922c3159cacc690d41b117b/Signal.Unique.str1.out.wig"
+    ],
+    "mirna_seq_pipeline.star.star_qc_json": [
+      "gs://encode-processing/caper_out/mirna_seq_pipeline/ff2a61b1-8708-407f-a075-6a262d7d1ca0/call-star/shard-0/glob-4c4d21ad2cdbd65d478f6b4b36f6c20a/rep1ENCSR715NEZ_star_qc.json",
+      "gs://encode-processing/caper_out/mirna_seq_pipeline/ff2a61b1-8708-407f-a075-6a262d7d1ca0/call-star/shard-1/glob-4c4d21ad2cdbd65d478f6b4b36f6c20a/rep2ENCSR715NEZ_star_qc.json"
+    ],
+    "mirna_seq_pipeline.star.star_qc_log": [
+      "gs://encode-processing/caper_out/mirna_seq_pipeline/ff2a61b1-8708-407f-a075-6a262d7d1ca0/call-star/shard-0/glob-fdee3fa8e419c9ae7368882e11dc0027/star_qc.log",
+      "gs://encode-processing/caper_out/mirna_seq_pipeline/ff2a61b1-8708-407f-a075-6a262d7d1ca0/call-star/shard-1/glob-fdee3fa8e419c9ae7368882e11dc0027/star_qc.log"
+    ],
+    "mirna_seq_pipeline.star.tsv": [
+      "gs://encode-processing/caper_out/mirna_seq_pipeline/ff2a61b1-8708-407f-a075-6a262d7d1ca0/call-star/shard-0/glob-ee3cac44669b7460fea102fa893f1b06/rep1ENCSR715NEZ.tsv",
+      "gs://encode-processing/caper_out/mirna_seq_pipeline/ff2a61b1-8708-407f-a075-6a262d7d1ca0/call-star/shard-1/glob-ee3cac44669b7460fea102fa893f1b06/rep2ENCSR715NEZ.tsv"
+    ],
+    "mirna_seq_pipeline.wigtobigwig.minus_strand_all_bigwig": [
+      "gs://encode-processing/caper_out/mirna_seq_pipeline/ff2a61b1-8708-407f-a075-6a262d7d1ca0/call-wigtobigwig/shard-0/glob-f2920e4cd5a28e8c120bd92e7ba31ecf/rep1ENCSR715NEZ.signal.all.minus.bigWig",
+      "gs://encode-processing/caper_out/mirna_seq_pipeline/ff2a61b1-8708-407f-a075-6a262d7d1ca0/call-wigtobigwig/shard-1/glob-f2920e4cd5a28e8c120bd92e7ba31ecf/rep2ENCSR715NEZ.signal.all.minus.bigWig"
+    ],
+    "mirna_seq_pipeline.wigtobigwig.minus_strand_unique_bigwig": [
+      "gs://encode-processing/caper_out/mirna_seq_pipeline/ff2a61b1-8708-407f-a075-6a262d7d1ca0/call-wigtobigwig/shard-0/glob-e26cce3d0ca522acfdb935f7efeb3e0f/rep1ENCSR715NEZ.signal.unique.minus.bigWig",
+      "gs://encode-processing/caper_out/mirna_seq_pipeline/ff2a61b1-8708-407f-a075-6a262d7d1ca0/call-wigtobigwig/shard-1/glob-e26cce3d0ca522acfdb935f7efeb3e0f/rep2ENCSR715NEZ.signal.unique.minus.bigWig"
+    ],
+    "mirna_seq_pipeline.wigtobigwig.plus_strand_all_bigwig": [
+      "gs://encode-processing/caper_out/mirna_seq_pipeline/ff2a61b1-8708-407f-a075-6a262d7d1ca0/call-wigtobigwig/shard-0/glob-ecf13a1f988469a7767bed84843bd510/rep1ENCSR715NEZ.signal.all.plus.bigWig",
+      "gs://encode-processing/caper_out/mirna_seq_pipeline/ff2a61b1-8708-407f-a075-6a262d7d1ca0/call-wigtobigwig/shard-1/glob-ecf13a1f988469a7767bed84843bd510/rep2ENCSR715NEZ.signal.all.plus.bigWig"
+    ],
+    "mirna_seq_pipeline.wigtobigwig.plus_strand_unique_bigwig": [
+      "gs://encode-processing/caper_out/mirna_seq_pipeline/ff2a61b1-8708-407f-a075-6a262d7d1ca0/call-wigtobigwig/shard-0/glob-5d1de83c72d3b961f02eb173e9f6d5a2/rep1ENCSR715NEZ.signal.unique.plus.bigWig",
+      "gs://encode-processing/caper_out/mirna_seq_pipeline/ff2a61b1-8708-407f-a075-6a262d7d1ca0/call-wigtobigwig/shard-1/glob-5d1de83c72d3b961f02eb173e9f6d5a2/rep2ENCSR715NEZ.signal.unique.plus.bigWig"
+    ]
+  },
+  "start": "2019-07-14T04:50:59.191Z",
+  "status": "Succeeded",
+  "submission": "2019-07-14T04:50:47.473Z",
+  "submittedFiles": {
+    "inputs": "{\"mirna_seq_pipeline.chrom_sizes\":\"gs://encode-processing/caper_tmp/meenakshi/a4733a4e097a19c869b1cb1aae1b33c9/mm10_no_alt.chrom.sizes.tsv\",\"mirna_seq_pipeline.cutadapt_disk\":\"local-disk 200 SSD\",\"mirna_seq_pipeline.cutadapt_ncpus\":2,\"mirna_seq_pipeline.cutadapt_ramGB\":7,\"mirna_seq_pipeline.experiment_prefix\":\"ENCSR715NEZ\",\"mirna_seq_pipeline.fastqs\":[\"gs://encode-processing/caper_tmp/meenakshi/encode-public/2017/06/29/5e59f7f5-02aa-482a-bb3e-7e49ab8828e8/ENCFF961HXV.fastq.gz\",\"gs://encode-processing/caper_tmp/meenakshi/encode-public/2017/06/29/9bf53883-a8c2-404b-b9f5-59b3665ea023/ENCFF414HIZ.fastq.gz\"],\"mirna_seq_pipeline.five_prime_adapters\":[\"gs://encode-processing/caper_tmp/meenakshi/df8acfb115cb667ef5a787093c4115bd/ENCFF642YMX.txt\",\"gs://encode-processing/caper_tmp/meenakshi/df8acfb115cb667ef5a787093c4115bd/ENCFF642YMX.txt\"],\"mirna_seq_pipeline.mirna_annotation\":\"gs://encode-processing/caper_tmp/meenakshi/59b8f3ac1bad56f32e98f8b6223ddc81/ENCFF094ICJ.gtf.gz\",\"mirna_seq_pipeline.star_disk\":\"local-disk 200 SSD\",\"mirna_seq_pipeline.star_index\":\"gs://encode-processing/caper_tmp/meenakshi/8d73a50a7aab6aa71cbd489cf81e26a3/ENCFF795AAA.tar.gz\",\"mirna_seq_pipeline.star_ncpus\":16,\"mirna_seq_pipeline.star_ramGB\":6E+1,\"mirna_seq_pipeline.three_prime_adapters\":\"gs://encode-processing/caper_tmp/meenakshi/ca31b14d4535436a9d7959bdcf77e706/ENCFF463QEL.txt\",\"mirna_seq_pipeline.wigtobigwig_disk\":\"local-disk 200 SSD\",\"mirna_seq_pipeline.wigtobigwig_ncpus\":2,\"mirna_seq_pipeline.wigtobigwig_ramGB\":7}",
+    "labels": "{\n    \"caper-user\": \"meenakshi\",\n    \"caper-str-label\": \"ENCSR715NEZ_final_run\",\n    \"caper-backend\": \"gcp\"\n}",
+    "options": "{\n  \"backend\": \"gcp\",\n  \"default_runtime_attributes\": {\n    \"docker\": \"quay.io/encode-dcc/mirna-seq-pipeline:v1.0\"\n  }\n}",
+    "root": "",
+    "workflow": "# ENCODE micro rna seq pipeline: main pipeline\n# Maintainer: Otto Jolanki\n\n#CAPER docker quay.io/encode-dcc/mirna-seq-pipeline:v1.0\n#CAPER singularity docker://quay.io/encode-dcc/mirna-seq-pipeline:v1.0\n\nworkflow mirna_seq_pipeline {\n    #File inputs\n\n    #cutadapt\n    #Array containing the input fastq files\n    Array[File] fastqs\n    #Array containing Fasta files with 5' adapter sequence(s), in the same order as the fastqs\n    Array[File] five_prime_adapters \n    #Fasta file with 3' adapter sequence(s)\n    File three_prime_adapters\n    \n    #star\n    #tar.gz archive that contains star index\n    File star_index\n    #micro-rna annotations\n    File mirna_annotation\n\n    #wigtobigwig\n    #tsv with chromosome sizes\n    File chrom_sizes\n\n    #common\n    #Prefix for outputs (additionally replicate number will be added)\n    String experiment_prefix\n\n    #Resources\n\n    #cutadapt\n    Int cutadapt_ncpus\n    Int cutadapt_ramGB\n    String cutadapt_disk\n\n    #star\n    Int star_ncpus\n    Int star_ramGB\n    String star_disk\n\n    #wigtobigwig\n    Int wigtobigwig_ncpus\n    Int wigtobigwig_ramGB\n    String wigtobigwig_disk\n\n    #Pipeline starts here\n\n    scatter (i in range(length(fastqs))) {\n        call cutadapt { input:\n            fastq = fastqs[i],\n            five_prime_adapters = five_prime_adapters[i],\n            three_prime_adapters = three_prime_adapters,\n            output_prefix = \"rep\"+(i+1)+experiment_prefix,\n            ncpus = cutadapt_ncpus,\n            ramGB = cutadapt_ramGB,\n            disk = cutadapt_disk,\n        }\n\n        call star { input:\n            fastq = cutadapt.trimmed_fastq,\n            index = star_index,\n            annotation = mirna_annotation,\n            output_prefix = \"rep\"+(i+1)+experiment_prefix,\n            ncpus = star_ncpus,\n            ramGB = star_ramGB,\n            disk = star_disk,\n            }\n\n        call wigtobigwig { input:\n            plus_strand_all_wig = star.plus_strand_all_wig,\n            minus_strand_all_wig = star.minus_strand_all_wig,\n            plus_strand_unique_wig = star.plus_strand_unique_wig,\n            minus_strand_unique_wig = star.minus_strand_unique_wig,\n            chrom_sizes = chrom_sizes,\n            output_prefix = \"rep\"+(i+1)+experiment_prefix,\n            ncpus = wigtobigwig_ncpus,\n            ramGB = wigtobigwig_ramGB,\n            disk = wigtobigwig_disk,\n        }\n    }\n\n    #If there are exactly two replicates, calculate spearman correlation between quants in replicates\n    if (length(fastqs) == 2) {\n        call spearman_correlation { input:\n            quants = star.tsv,\n            output_filename = experiment_prefix+\"_spearman.json\",\n            }\n    }\n}\n\n#Task definitions\n\ntask cutadapt {\n    File fastq\n    File five_prime_adapters\n    File three_prime_adapters\n    String output_prefix\n    Int ncpus\n    Int ramGB\n    String disk\n\n    command {\n        cutadapt \\\n            -a file:${three_prime_adapters} \\\n            -e 0.25 \\\n            --match-read-wildcards \\\n            --untrimmed-output=${output_prefix + \"_NO3AD.fastq\"} \\\n            ${fastq} \\\n            | cutadapt \\\n            -e 0.34 \\\n            --match-read-wildcards \\\n            --no-indels \\\n            -m 15 \\\n            -O 6 \\\n            -n 1 \\\n            -g file:${five_prime_adapters} \\\n            --untrimmed-output=${output_prefix + \"_NO5AD.fastq\"} \\\n            --too-short-output=${output_prefix + \"_SHORT_FAIL.fastq\"} \\\n            - > ${output_prefix + \"_trim.fastq\"}\n    }\n\n    output {\n        File no3ad_untrimmed_fastq = glob(\"*_NO3AD.fastq\")[0]\n        File no5ad_untrimmed_fastq = glob(\"*_NO5AD.fastq\")[0]\n        File too_short_fastq = glob(\"*_SHORT_FAIL.fastq\")[0]\n        File trimmed_fastq = glob(\"*_trim.fastq\")[0]\n    }\n\n    runtime {\n        cpu: ncpus\n        memory: \"${ramGB} GB\"\n        disks: disk\n    }\n}\n\ntask star {\n    File fastq\n    File index\n    File annotation\n    String output_prefix\n    Int ncpus\n    Int ramGB\n    String disk\n\n    command {\n        tar -xzvf ${index}\n        gzip -cd ${annotation} > anno.gtf\n        STAR \\\n            --genomeDir out \\\n            --readFilesIn ${fastq} \\\n            --sjdbGTFfile anno.gtf \\\n            --runThreadN ${ncpus} \\\n            --alignEndsType EndToEnd \\\n            --outFilterMismatchNmax 1 \\\n            --outFilterMultimapScoreRange 0 \\\n            --quantMode TranscriptomeSAM GeneCounts \\\n            --outReadsUnmapped Fastx \\\n            --outSAMtype BAM SortedByCoordinate \\\n            --outFilterMultimapNmax 10 \\\n            --outSAMunmapped Within \\\n            --outFilterScoreMinOverLread 0 \\\n            --outFilterMatchNminOverLread 0 \\\n            --outFilterMatchNmin 16 \\\n            --alignSJDBoverhangMin 1000 \\\n            --alignIntronMax 1 \\\n            --outWigType wiggle \\\n            --outWigStrand Stranded \\\n            --outWigNorm RPM\n        mv Aligned.sortedByCoord.out.bam ${output_prefix}.bam\n        mv ReadsPerGene.out.tab ${output_prefix}.tsv\n        mv Log.final.out ${output_prefix}.Log.final.out\n        python3  $(which make_star_qc.py) --quants ${output_prefix}.tsv \\\n                                          --star_log ${output_prefix}.Log.final.out \\\n                                          --output_filename ${output_prefix}_star_qc.json\n    }\n\n    output {\n        File bam = glob(\"${output_prefix}.bam\")[0]\n        File tsv = glob(\"*.tsv\")[0]\n        File plus_strand_all_wig = glob(\"Signal.UniqueMultiple.str1.out.wig\")[0]\n        File minus_strand_all_wig = glob(\"Signal.UniqueMultiple.str2.out.wig\")[0]\n        File plus_strand_unique_wig = glob(\"Signal.Unique.str1.out.wig\")[0]\n        File minus_strand_unique_wig = glob(\"Signal.Unique.str2.out.wig\")[0]\n        File star_qc_json = glob(\"*_star_qc.json\")[0]\n        File star_qc_log = glob(\"star_qc.log\")[0]\n    }\n\n    runtime {\n        cpu: ncpus\n        memory: \"${ramGB} GB\"\n        disks: disk\n    }\n}\n\ntask wigtobigwig {\n    File plus_strand_all_wig\n    File minus_strand_all_wig\n    File plus_strand_unique_wig\n    File minus_strand_unique_wig\n    File chrom_sizes\n    String output_prefix\n    Int ncpus\n    Int ramGB\n    String disk\n\n    command {\n        wigToBigWig ${plus_strand_all_wig} ${chrom_sizes} ${output_prefix}.signal.all.plus.bigWig\n        wigToBigWig ${minus_strand_all_wig} ${chrom_sizes} ${output_prefix}.signal.all.minus.bigWig\n        wigToBigWig ${plus_strand_unique_wig} ${chrom_sizes} ${output_prefix}.signal.unique.plus.bigWig\n        wigToBigWig ${minus_strand_unique_wig} ${chrom_sizes} ${output_prefix}.signal.unique.minus.bigWig\n    }\n\n    output {\n        File plus_strand_all_bigwig = glob(\"*.signal.all.plus.bigWig\")[0]\n        File minus_strand_all_bigwig = glob(\"*.signal.all.minus.bigWig\")[0]\n        File plus_strand_unique_bigwig = glob(\"*.signal.unique.plus.bigWig\")[0]\n        File minus_strand_unique_bigwig = glob(\"*.signal.unique.minus.bigWig\")[0]\n    }\n\n    runtime {\n        cpu: ncpus\n        memory: \"${ramGB} GB\"\n        disks: disk\n    }\n}\n\ntask spearman_correlation {\n    Array[File] quants\n    String output_filename\n\n    command {\n        python3 $(which calculate_correlation.py) --quants ${sep=' ' quants} --output_filename ${output_filename}\n    }\n\n    output {\n        File spearman_json = glob(\"*spearman.json\")[0]\n    }\n\n    runtime {\n        cpu: 1\n        memory: \"2 GB\"\n        disks: \"local-disk 20 SSD\"\n    }\n}\n\ntask bamtosam {\n    File bamfile\n    String output_sam\n    Int ncpus\n    Int ramGB\n    String disk\n\n    command {\n        samtools view ${bamfile} > ${output_sam}\n    }\n\n    output {\n        File samfile = glob(\"${output_sam}\")[0]\n    }\n\n    runtime {\n        cpu: ncpus\n        memory: \"${ramGB} GB\"\n        disks: disk\n    }\n}",
+    "workflowUrl": ""
+  },
+  "workflowName": "mirna_seq_pipeline",
+  "workflowProcessingEvents": [
+    {
+      "cromwellId": "cromid-1a8e272",
+      "cromwellVersion": "42",
+      "description": "PickedUp",
+      "timestamp": "2019-07-14T04:50:59.191Z"
+    },
+    {
+      "cromwellId": "cromid-1a8e272",
+      "cromwellVersion": "42",
+      "description": "Finished",
+      "timestamp": "2019-07-14T05:41:26.823Z"
+    }
+  ],
+  "workflowRoot": "gs://encode-processing/caper_out/mirna_seq_pipeline/ff2a61b1-8708-407f-a075-6a262d7d1ca0/"
+}

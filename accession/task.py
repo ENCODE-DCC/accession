@@ -14,7 +14,7 @@ class Task(object):
         self.output_files = []
         self.inputs = task["inputs"]
         self.outputs = task["outputs"]
-        self.docker_image = (
-            task.get("dockerImageUsed") or task["runtimeAttributes"]["docker"]
-        )
+        self.docker_image = task.get("dockerImageUsed") or task.get(
+            "runtimeAttributes", {}
+        ).get("docker")
         self.analysis = analysis

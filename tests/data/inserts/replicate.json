@@ -1,0 +1,44 @@
+[
+  {
+    "aliases": [
+      "richard-myers:SL236343-rep"
+    ],
+    "biological_replicate_number": 2,
+    "date_created": "2017-05-30T21:53:49.488292+00:00",
+    "experiment": "ENCSR715NEZ",
+    "library": "ENCLB794GIJ",
+    "schema_version": "9",
+    "status": "released",
+    "submitted_by": "facilisi.tristique@potenti.vivamus",
+    "technical_replicate_number": 1,
+    "uuid": "2feea5c3-cf4b-1234-b73b-0202f00b631f"
+  },
+  {
+    "aliases": [
+      "richard-myers:SL236342-rep"
+    ],
+    "biological_replicate_number": 1,
+    "date_created": "2017-05-30T21:53:49.311512+00:00",
+    "experiment": "ENCSR715NEZ",
+    "library": "ENCLB515LXI",
+    "schema_version": "9",
+    "status": "released",
+    "submitted_by": "facilisi.tristique@potenti.vivamus",
+    "technical_replicate_number": 1,
+    "uuid": "4fccc5c3-cf4b-4420-b73b-0202f12b631f"
+  },
+  {
+    "aliases": [
+      "richard-myers:SL153338-rep"
+    ],
+    "biological_replicate_number": 2,
+    "date_created": "2016-07-25T22:18:00.440524+00:00",
+    "experiment": "ENCSR543MWW",
+    "library": "ENCLB242IQX",
+    "schema_version": "9",
+    "status": "released",
+    "submitted_by": "facilisi.tristique@potenti.vivamus",
+    "technical_replicate_number": 1,
+    "uuid": "5a7a2e68-2b4e-459e-b554-204dbb1917b6"
+  }
+]

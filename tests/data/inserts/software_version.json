@@ -1,0 +1,23 @@
+[
+  {
+    "date_created": "2016-01-20T20:45:16.541995+00:00",
+    "download_checksum": "4bff1086765377f4b1706c31769367b7",
+    "downloaded_url": "https://github.com/alexdobin/STAR/archive/2.5.1b.tar.gz",
+    "notes": "Using bin/Linux_x86_64_static/STAR executable",
+    "schema_version": "4",
+    "software": "star",
+    "status": "released",
+    "uuid": "70a085ad-194e-4de0-838c-7af257680f54",
+    "version": "2.5.1b"
+  },
+  {
+    "date_created": "2015-08-18T18:54:03.949276+00:00",
+    "downloaded_url": "http://hgdownload.cse.ucsc.edu/admin/exe/",
+    "notes": "After navigating to the link for the version, choose the correct operating system and then the correct software.",
+    "schema_version": "4",
+    "software": "wigtobigwig",
+    "status": "released",
+    "uuid": "ad0d99b7-c9f9-4b59-9515-4b64314e837c",
+    "version": "4"
+  }
+]

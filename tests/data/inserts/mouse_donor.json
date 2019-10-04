@@ -1,0 +1,27 @@
+[
+  {
+    "accession": "ENCDO956IXV",
+    "aliases": [
+      "encode:B6NCrl"
+    ],
+    "award": "U54HG006998",
+    "characterizations": [],
+    "date_created": "2014-05-06T23:58:26.774563+00:00",
+    "dbxrefs": [],
+    "documents": [],
+    "external_ids": [
+      "GEO:SAMN04284200"
+    ],
+    "genetic_modifications": [],
+    "lab": "ali-mortazavi",
+    "notes": "C57BL/6 mice from Charles River Lab.",
+    "organism": "mouse",
+    "references": [],
+    "schema_version": "11",
+    "status": "released",
+    "strain_background": "C57BL/6",
+    "strain_name": "B6NCrl",
+    "submitted_by": "facilisi.tristique@potenti.vivamus",
+    "uuid": "a67605ad-45d9-4ec3-8470-18be07a676f0"
+  }
+]

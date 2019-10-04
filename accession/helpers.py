@@ -5,9 +5,12 @@ import tempfile
 from accession.backends import GCBackend
 
 
-def filter_outputs_by_path(path):
+def filter_outputs_by_path(path, backend=None):
     bucket = path.split("gs://")[1].split("/")[0]
-    google_backend = GCBackend(bucket)
+    if not backend:
+        google_backend = GCBackend(bucket)
+    else:
+        google_backend = backend
     filtered = [
         file
         for file in list(google_backend.bucket.list_blobs())
@@ -16,6 +19,8 @@ def filter_outputs_by_path(path):
 
     for file in filtered:
         file.download_to_filename(file.public_url.split("/")[-1])
+
+    return filtered
 
 
 # Python equivalent of WDL's write_json

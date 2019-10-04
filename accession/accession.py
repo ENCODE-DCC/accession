@@ -1,4 +1,3 @@
-#!/usr/bin/python3
 import json
 import logging
 import os
@@ -76,14 +75,7 @@ class Accession(object):
             step_run_id = step_run.get("@id")
         return step_run_id
 
-    def accession_fastqs(self):
-        pass
-
-    def wait_for_portal(self):
-        pass
-
     def file_at_portal(self, file):
-        self.wait_for_portal()
         md5sum = self.backend.md5sum(file)
         search_param = [("md5sum", md5sum), ("type", "File")]
         encode_file = self.conn.search(search_param)
@@ -319,10 +311,24 @@ class Accession(object):
                         continue
                     derived_from_accession_ids.append(encode_file["@id"])
         derived_from_accession_ids = list(set(derived_from_accession_ids))
-        if not derived_from_accession_ids and not allow_empty:
-            raise Exception("Missing all of the derived_from files on the portal")
+
+        # Raise exception when some or all of the derived_from files
+        # are missing from the portal
+
+        missing = "\n".join(
+            [
+                "{}: {}".format(filekey, filename)
+                for filename in map(lambda x: x.filename, derived_from_files)
+            ]
+        )
+        if not derived_from_accession_ids:
+            raise Exception(
+                f"Missing all of the derived_from files on the portal: {missing}"
+            )
         if len(derived_from_accession_ids) != len(derived_from_files):
-            raise Exception("Missing some of the derived_from files on the portal")
+            raise Exception(
+                f"Missing some of the derived_from files on the portal: {missing}"
+            )
         return derived_from_accession_ids
 
     # File object to be accessioned
