@@ -1,18 +1,20 @@
-import tempfile
 import json
-from google.cloud import storage
+import tempfile
 from base64 import b64decode
 
+from google.cloud import storage
 
-class GCBackend():
+
+class GCBackend:
     """docstring for GCBackend"""
+
     def __init__(self, bucket):
         self.client = storage.Client()
         self.bucket = self.client.get_bucket(bucket)
         self.local_mapping = {}
 
     def blob_from_filename(self, filename):
-        bucket_name = filename.split('gs://')[1].split('/')[0]
+        bucket_name = filename.split("gs://")[1].split("/")[0]
         # Reference genome may reside in different buckets
         if self.bucket.name != bucket_name:
             bucket = self.client.get_bucket(bucket_name)
@@ -37,7 +39,7 @@ class GCBackend():
 
     # File path without bucket name
     def file_path(self, file, bucket):
-        file_path = file.split('gs://{}/'.format(bucket.name))[1]
+        file_path = file.split("gs://{}/".format(bucket.name))[1]
         return file_path
 
     # Downloads file as string
@@ -53,7 +55,7 @@ class GCBackend():
     def download(self, file):
         blob = self.blob_from_filename(file)
         temp_file = tempfile.NamedTemporaryFile(delete=False)
-        with open(temp_file.name, 'wb'):
+        with open(temp_file.name, "wb"):
             blob.download_to_filename(temp_file.name)
         self.local_mapping[file] = [temp_file.name, self.md5_from_blob(blob)]
         return self.local_mapping[file]

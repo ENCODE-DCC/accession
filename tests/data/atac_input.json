@@ -1,173 +1,202 @@
 {
-    "accession.steps": [
+  "accession.steps": [
+    {
+      "dcc_step_run": "atac-seq-trim-align-filter-step-run-v1",
+      "dcc_step_version": "/analysis-step-versions/kundaje-lab-atac-seq-trim-align-filter-step-v-1-0/",
+      "wdl_files": [
         {
-            "dcc_step_version":     "/analysis-step-versions/kundaje-lab-atac-seq-trim-align-filter-step-v-1-0/",
-            "dcc_step_run":         "atac-seq-trim-align-filter-step-run-v1",
-            "wdl_task_name":        "bowtie2",
-            "wdl_files":            [
-                {
-                    "filekey":                  "bam",
-                    "output_type":              "unfiltered alignments",
-                    "file_format":              "bam",
-                    "derived_from_files":       [{
-                        "derived_from_task":        "trim_adapter",
-                        "derived_from_filekey":     "fastqs",
-                        "derived_from_inputs":      "true"
-                    }]
-                }
-            ]
-        },
-        {
-            "dcc_step_version":     "/analysis-step-versions/kundaje-lab-atac-seq-trim-align-filter-step-v-1-0/",
-            "dcc_step_run":         "atac-seq-trim-align-filter-step-run-v1",
-            "wdl_task_name":        "filter",
-            "wdl_files":            [
-                {
-                    "filekey":                  "nodup_bam",
-                    "output_type":              "alignments",
-                    "file_format":              "bam",
-                    "quality_metrics":          ["cross_correlation", "samtools_flagstat"],
-                    "derived_from_files":       [{
-                        "derived_from_task":        "trim_adapter",
-                        "derived_from_filekey":     "fastqs",
-                        "derived_from_inputs":      "true"
-                    }]
-                }
-            ]
-        },
-        {
-            "dcc_step_version":     "/analysis-step-versions/kundaje-lab-atac-seq-signals-step-v-1-0/",
-            "dcc_step_run":         "atac-seq-signal-generation-step-run-v1",
-            "wdl_task_name":        "macs2",
-            "wdl_files":            [
-                {
-                    "filekey":                  "sig_fc",
-                    "output_type":              "fold change over control",
-                    "file_format":              "bigWig",
-                    "derived_from_files":       [{
-                        "derived_from_task":        "filter",
-                        "derived_from_filekey":     "nodup_bam"
-                    }]
-                },
-                {
-                    "filekey":                  "sig_pval",
-                    "output_type":              "signal p-value",
-                    "file_format":              "bigWig",
-                    "derived_from_files":       [{
-                        "derived_from_task":        "filter",
-                        "derived_from_filekey":     "nodup_bam"
-                    }]
-                }
-            ]
-        },
-        {
-            "dcc_step_version":     "/analysis-step-versions/kundaje-lab-atac-seq-peak-call-step-v-1-0/",
-            "dcc_step_run":         "atac-seq-peaks-filter-step-run-v1",
-            "wdl_task_name":        "macs2",
-            "wdl_files":            [
-                {
-                    "filekey":                  "bfilt_npeak",
-                    "output_type":              "peaks and background as input for IDR",
-                    "file_format":              "bed",
-                    "file_format_type":         "narrowPeak",
-                    "derived_from_files":       [{
-                        "derived_from_task":        "filter",
-                        "derived_from_filekey":     "nodup_bam"
-                    }]
-                }
-            ]
-        },
-        {
-            "dcc_step_version":     "/analysis-step-versions/kundaje-lab-atac-seq-filtered-peaks-conversion-step-v-1-0/",
-            "dcc_step_run":         "atac-seq-filtered-peaks-to-bigbed-step-run-v1",
-            "wdl_task_name":        "macs2",
-            "wdl_files":            [
-                {
-                    "filekey":                  "bfilt_npeak_bb",
-                    "output_type":              "peaks and background as input for IDR",
-                    "file_format":              "bigBed",
-                    "file_format_type":         "narrowPeak",
-                    "derived_from_files":       [{
-                        "derived_from_task":        "macs2",
-                        "derived_from_filekey":     "bfilt_npeak"
-                    }]
-                }
-            ]
-        },
-        {
-            "dcc_step_version":     "/analysis-step-versions/kundaje-lab-atac-seq-idr-step-v-1-0/",
-            "dcc_step_run":         "atac-seq-idr-step-run-v1",
-            "wdl_task_name":        "reproducibility_idr",
-            "wdl_files":            [
-                {
-                    "filekey":                  "optimal_peak",
-                    "output_type":              "optimal idr thresholded peaks",
-                    "file_format":              "bed",
-                    "file_format_type":         "narrowPeak",
-                    "quality_metrics":          ["idr"],
-                    "derived_from_files":       [{
-                        "derived_from_task":        "macs2",
-                        "derived_from_filekey":     "bfilt_npeak"
-                    }]
-                },
-                {
-                    "filekey":                  "conservative_peak",
-                    "output_type":              "conservative idr thresholded peaks",
-                    "file_format":              "bed",
-                    "file_format_type":         "narrowPeak",
-                    "quality_metrics":          ["idr"],
-                    "possible_duplicate":       "true",
-                    "derived_from_files":       [{
-                        "derived_from_task":        "macs2",
-                        "derived_from_filekey":     "bfilt_npeak"
-                    }]
-                }
-            ]
-        },      
-        {
-            "dcc_step_version":     "/analysis-step-versions/kundaje-lab-atac-seq-idr-peaks-conversion-step-v-1-0/",
-            "dcc_step_run":         "atac-seq-idr-peaks-conversion-step-run-v1",
-            "wdl_task_name":        "reproducibility_idr",
-            "wdl_files":            [
-                {
-                    "filekey":                  "optimal_peak_bb",
-                    "output_type":              "optimal idr thresholded peaks",
-                    "file_format":              "bigBed",
-                    "file_format_type":         "narrowPeak",
-                    "derived_from_files":       [{
-                        "derived_from_task":        "reproducibility_idr",
-                        "derived_from_filekey":     "optimal_peak"
-                    }]
-                },
-                {
-                    "filekey":                  "conservative_peak_bb",
-                    "output_type":              "conservative idr thresholded peaks",
-                    "file_format":              "bigBed",
-                    "file_format_type":         "narrowPeak",
-                    "derived_from_files":       [{
-                        "derived_from_task":        "reproducibility_idr",
-                        "derived_from_filekey":     "conservative_peak",
-                        "derived_from_output_type": "conservative idr thresholded peaks"
-                    }]
-                }
-            ]
-        },
-        {
-            "dcc_step_version":     "/analysis-step-versions/kundaje-lab-atac-seq-overlap-peaks-step-v-1-0/",
-            "dcc_step_run":         "atac-seq-overlap-step-run-v1",
-            "wdl_task_name":        "reproducibility_overlap",
-            "wdl_files":            [
-                {
-                    "filekey":                  "optimal_peak",
-                    "output_type":              "replicated peaks",
-                    "file_format":              "bed",
-                    "file_format_type":         "narrowPeak",
-                    "derived_from_files":       [{
-                        "derived_from_task":        "macs2",
-                        "derived_from_filekey":     "bfilt_npeak"
-                    }]
-                }
-            ]
+          "derived_from_files": [
+            {
+              "derived_from_filekey": "fastqs",
+              "derived_from_inputs": "true",
+              "derived_from_task": "trim_adapter"
+            }
+          ],
+          "file_format": "bam",
+          "filekey": "bam",
+          "output_type": "unfiltered alignments"
         }
-    ]
+      ],
+      "wdl_task_name": "bowtie2"
+    },
+    {
+      "dcc_step_run": "atac-seq-trim-align-filter-step-run-v1",
+      "dcc_step_version": "/analysis-step-versions/kundaje-lab-atac-seq-trim-align-filter-step-v-1-0/",
+      "wdl_files": [
+        {
+          "derived_from_files": [
+            {
+              "derived_from_filekey": "fastqs",
+              "derived_from_inputs": "true",
+              "derived_from_task": "trim_adapter"
+            }
+          ],
+          "file_format": "bam",
+          "filekey": "nodup_bam",
+          "output_type": "alignments",
+          "quality_metrics": [
+            "cross_correlation",
+            "samtools_flagstat"
+          ]
+        }
+      ],
+      "wdl_task_name": "filter"
+    },
+    {
+      "dcc_step_run": "atac-seq-signal-generation-step-run-v1",
+      "dcc_step_version": "/analysis-step-versions/kundaje-lab-atac-seq-signals-step-v-1-0/",
+      "wdl_files": [
+        {
+          "derived_from_files": [
+            {
+              "derived_from_filekey": "nodup_bam",
+              "derived_from_task": "filter"
+            }
+          ],
+          "file_format": "bigWig",
+          "filekey": "sig_fc",
+          "output_type": "fold change over control"
+        },
+        {
+          "derived_from_files": [
+            {
+              "derived_from_filekey": "nodup_bam",
+              "derived_from_task": "filter"
+            }
+          ],
+          "file_format": "bigWig",
+          "filekey": "sig_pval",
+          "output_type": "signal p-value"
+        }
+      ],
+      "wdl_task_name": "macs2"
+    },
+    {
+      "dcc_step_run": "atac-seq-peaks-filter-step-run-v1",
+      "dcc_step_version": "/analysis-step-versions/kundaje-lab-atac-seq-peak-call-step-v-1-0/",
+      "wdl_files": [
+        {
+          "derived_from_files": [
+            {
+              "derived_from_filekey": "nodup_bam",
+              "derived_from_task": "filter"
+            }
+          ],
+          "file_format": "bed",
+          "file_format_type": "narrowPeak",
+          "filekey": "bfilt_npeak",
+          "output_type": "peaks and background as input for IDR"
+        }
+      ],
+      "wdl_task_name": "macs2"
+    },
+    {
+      "dcc_step_run": "atac-seq-filtered-peaks-to-bigbed-step-run-v1",
+      "dcc_step_version": "/analysis-step-versions/kundaje-lab-atac-seq-filtered-peaks-conversion-step-v-1-0/",
+      "wdl_files": [
+        {
+          "derived_from_files": [
+            {
+              "derived_from_filekey": "bfilt_npeak",
+              "derived_from_task": "macs2"
+            }
+          ],
+          "file_format": "bigBed",
+          "file_format_type": "narrowPeak",
+          "filekey": "bfilt_npeak_bb",
+          "output_type": "peaks and background as input for IDR"
+        }
+      ],
+      "wdl_task_name": "macs2"
+    },
+    {
+      "dcc_step_run": "atac-seq-idr-step-run-v1",
+      "dcc_step_version": "/analysis-step-versions/kundaje-lab-atac-seq-idr-step-v-1-0/",
+      "wdl_files": [
+        {
+          "derived_from_files": [
+            {
+              "derived_from_filekey": "bfilt_npeak",
+              "derived_from_task": "macs2"
+            }
+          ],
+          "file_format": "bed",
+          "file_format_type": "narrowPeak",
+          "filekey": "optimal_peak",
+          "output_type": "optimal idr thresholded peaks",
+          "quality_metrics": [
+            "idr"
+          ]
+        },
+        {
+          "derived_from_files": [
+            {
+              "derived_from_filekey": "bfilt_npeak",
+              "derived_from_task": "macs2"
+            }
+          ],
+          "file_format": "bed",
+          "file_format_type": "narrowPeak",
+          "filekey": "conservative_peak",
+          "output_type": "conservative idr thresholded peaks",
+          "possible_duplicate": "true",
+          "quality_metrics": [
+            "idr"
+          ]
+        }
+      ],
+      "wdl_task_name": "reproducibility_idr"
+    },
+    {
+      "dcc_step_run": "atac-seq-idr-peaks-conversion-step-run-v1",
+      "dcc_step_version": "/analysis-step-versions/kundaje-lab-atac-seq-idr-peaks-conversion-step-v-1-0/",
+      "wdl_files": [
+        {
+          "derived_from_files": [
+            {
+              "derived_from_filekey": "optimal_peak",
+              "derived_from_task": "reproducibility_idr"
+            }
+          ],
+          "file_format": "bigBed",
+          "file_format_type": "narrowPeak",
+          "filekey": "optimal_peak_bb",
+          "output_type": "optimal idr thresholded peaks"
+        },
+        {
+          "derived_from_files": [
+            {
+              "derived_from_filekey": "conservative_peak",
+              "derived_from_output_type": "conservative idr thresholded peaks",
+              "derived_from_task": "reproducibility_idr"
+            }
+          ],
+          "file_format": "bigBed",
+          "file_format_type": "narrowPeak",
+          "filekey": "conservative_peak_bb",
+          "output_type": "conservative idr thresholded peaks"
+        }
+      ],
+      "wdl_task_name": "reproducibility_idr"
+    },
+    {
+      "dcc_step_run": "atac-seq-overlap-step-run-v1",
+      "dcc_step_version": "/analysis-step-versions/kundaje-lab-atac-seq-overlap-peaks-step-v-1-0/",
+      "wdl_files": [
+        {
+          "derived_from_files": [
+            {
+              "derived_from_filekey": "bfilt_npeak",
+              "derived_from_task": "macs2"
+            }
+          ],
+          "file_format": "bed",
+          "file_format_type": "narrowPeak",
+          "filekey": "optimal_peak",
+          "output_type": "replicated peaks"
+        }
+      ],
+      "wdl_task_name": "reproducibility_overlap"
+    }
+  ]
 }
