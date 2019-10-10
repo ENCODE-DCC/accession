@@ -1,5 +1,6 @@
 class GSFile(object):
     """docstring for File"""
+
     def __init__(self, key, name, md5sum, size, task=None, used_by_tasks=None):
         super().__init__()
         self.filename = name

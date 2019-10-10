@@ -1,11 +1,11 @@
-from accession.task import Task
 from accession.file import GSFile
+from accession.task import Task
 
 
 def test_gcfile_init(metadata_json, analysis):
-    task = metadata_json['calls']['atac.bam2ta'][0]
-    new_task = Task('bam2ta', task, analysis)
-    filekey = 'ta'
+    task = metadata_json["calls"]["atac.bam2ta"][0]
+    new_task = Task("bam2ta", task, analysis)
+    filekey = "ta"
     filename = new_task.outputs[filekey]
     md5sum = analysis.backend.md5sum(filename)
     size = analysis.backend.size(filename)

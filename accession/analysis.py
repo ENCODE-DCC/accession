@@ -1,6 +1,7 @@
 import json
 import operator
 from functools import reduce
+
 from accession.backends import GCBackend
 from accession.file import GSFile
 from accession.task import Task
@@ -8,23 +9,24 @@ from accession.task import Task
 
 class Analysis(object):
     """docstring for Analysis"""
+
     def __init__(self, metadata_json, auto_populate=True):
         self.files = []
         self.tasks = []
         with open(metadata_json) as json_file:
             self.metadata = json.load(json_file)
         if self.metadata:
-            bucket = self.metadata['workflowRoot'].split('gs://')[1].split('/')[0]
+            bucket = self.metadata["workflowRoot"].split("gs://")[1].split("/")[0]
             self.backend = GCBackend(bucket)
         else:
-            raise Exception('Valid metadata json output must be supplied')
+            raise Exception("Valid metadata json output must be supplied")
         if auto_populate:
             self.tasks = self.make_tasks()
 
     # Makes instances of Task
     def make_tasks(self):
         tasks = []
-        for key, value in self.metadata['calls'].items():
+        for key, value in self.metadata["calls"].items():
             for task in value:
                 tasks.append(self.make_task(key, task))
         for task in tasks:
@@ -32,13 +34,12 @@ class Analysis(object):
         # Making input files after making output files avoids creating
         # a duplicate file
         for task in tasks:
-            task.input_files = self.get_or_make_files(task.inputs,
-                                                      used_by_tasks=task)
+            task.input_files = self.get_or_make_files(task.inputs, used_by_tasks=task)
         return tasks
 
     # Makes an instance of task with input and output GSFile instances
     def make_task(self, task_name, task):
-        new_task = Task(task_name.split('.')[1], task, self)
+        new_task = Task(task_name.split(".")[1], task, self)
         return new_task
 
     # Makes instances of GSFile from input or output section of task
@@ -47,10 +48,7 @@ class Analysis(object):
         files = []
         for key, value in section.items():
             for filename in self.extract_files(value):
-                files.append(self.get_or_make_file(key,
-                                                   filename,
-                                                   task,
-                                                   used_by_tasks))
+                files.append(self.get_or_make_file(key, filename, task, used_by_tasks))
         return files
 
     # Returns a GSFile object, makes a new one if one doesn't exist
@@ -71,23 +69,23 @@ class Analysis(object):
     # Cromwell workflow id
     @property
     def workflow_id(self):
-        return self.metadata['labels']['cromwell-workflow-id']
+        return self.metadata["labels"]["cromwell-workflow-id"]
 
     # Files in the 'outputs' of the metadata that are
     # used for filtering out intermediate outputs
     @property
     def outputs_whitelist(self):
-        return list(self.extract_files(self.metadata['outputs']))
+        return list(self.extract_files(self.metadata["outputs"]))
 
     # Files in the 'inputs' of the metadata that are
     # used for filtering out intermediate inputs
     @property
     def inputs_whitelist(self):
-        return list(self.extract_files(self.metadata['inputs']))
+        return list(self.extract_files(self.metadata["inputs"]))
 
     # Extracts file names from dict values
     def extract_files(self, outputs):
-        if (isinstance(outputs, str) and 'gs://' in outputs):
+        if isinstance(outputs, str) and "gs://" in outputs:
             yield outputs
         elif isinstance(outputs, list):
             for item in outputs:
@@ -119,21 +117,17 @@ class Analysis(object):
     def raw_fastqs(self):
         fastqs = []
         for file in self.files:
-            if (('fastqs' in file.filekeys or 'fastq' in file.filekeys)
-               and file.task is None):
+            if (
+                "fastqs" in file.filekeys or "fastq" in file.filekeys
+            ) and file.task is None:
                 fastqs.append(file)
         return fastqs
 
     def search_up(self, start_task, task_name, filekey, inputs=False):
-        return list(set(self._search_up(start_task,
-                                        task_name,
-                                        filekey,
-                                        inputs)))
+        return list(set(self._search_up(start_task, task_name, filekey, inputs)))
 
     def search_down(self, start_task, task_name, filekey):
-        return list(set(self._search_down(start_task,
-                                          task_name,
-                                          filekey)))
+        return list(set(self._search_down(start_task, task_name, filekey)))
 
     # Search the Analysis hirearchy up for a file matching filekey
     # Returns generator object, access with next() or list()
@@ -151,10 +145,7 @@ class Analysis(object):
                         yield file
         for task_item in set(map(lambda x: x.task, start_task.input_files)):
             if task_item:
-                yield from self._search_up(task_item,
-                                           task_name,
-                                           filekey,
-                                           inputs)
+                yield from self._search_up(task_item, task_name, filekey, inputs)
 
     # Search the Analysis hirearchy down for a file matching filekey
     # Returns generator object, access with next()
@@ -165,10 +156,10 @@ class Analysis(object):
             for file in start_task.output_files:
                 if filekey in file.filekeys:
                     yield file
-        for task_item in set(reduce(operator.concat,
-                                    map(lambda x: x.used_by_tasks,
-                                        start_task.output_files))):
+        for task_item in set(
+            reduce(
+                operator.concat, map(lambda x: x.used_by_tasks, start_task.output_files)
+            )
+        ):
             if task_item:
-                yield from self._search_down(task_item,
-                                             task_name,
-                                             filekey)
+                yield from self._search_down(task_item, task_name, filekey)
