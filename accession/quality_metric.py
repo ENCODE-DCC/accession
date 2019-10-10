@@ -1,5 +1,6 @@
 class QualityMetric(object):
     """docstring for QualityMetric"""
+
     def __init__(self, payload, file_id):
         super().__init__()
         if not file_id:
