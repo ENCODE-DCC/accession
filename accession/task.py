@@ -6,12 +6,15 @@ class Task(object):
     dockerImageUsedThis key does not include the image SHA, but rather the image tag. See
     https://github.com/broadinstitute/cromwell/issues/4001
     """
+
     def __init__(self, task_name, task, analysis):
         super().__init__()
         self.task_name = task_name
         self.input_files = []
         self.output_files = []
-        self.inputs = task['inputs']
-        self.outputs = task['outputs']
-        self.docker_image = task.get('dockerImageUsed') or task['runtimeAttributes']['docker']
+        self.inputs = task["inputs"]
+        self.outputs = task["outputs"]
+        self.docker_image = (
+            task.get("dockerImageUsed") or task["runtimeAttributes"]["docker"]
+        )
         self.analysis = analysis
