@@ -38,7 +38,7 @@
                     "derived_from_files" : [
                         {
                             "derived_from_task" : "minimap2",
-                            "derived_from_filekey" : "sam"
+                            "derived_from_filekey" : "bam"
                         },
                         {
                             "derived_from_task" : "transcriptclean",
