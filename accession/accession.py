@@ -27,20 +27,17 @@ QC_MAP = {
 }
 
 
-ASSEMBLIES = ["GRCh38", "mm10"]
-ACCESSION_LOG_KEY = "ACC_MSG"
-
-
 class Accession(object):
     """docstring for Accession"""
+    ACCESSION_LOG_KEY = "ACC_MSG"
+    ASSEMBLIES = ["GRCh38", "mm10"]
 
     def __init__(self, steps, metadata_json, server, lab, award):
-        super(Accession, self).__init__()
-        self.set_lab_award(lab, award)
         self.analysis = Analysis(metadata_json)
         self.steps_and_params_json = self.file_to_json(steps).get("accession.steps")
         self.backend = self.analysis.backend
         self.conn = Connection(server)
+        self.COMMON_METADATA = {"lab": lab, "award": award}
         self.new_files = []
         self.new_qcs = []
         self.raw_qcs = []
@@ -51,11 +48,6 @@ class Accession(object):
             format="%(asctime)s %(levelname)s %(message)s",
             level=logging.DEBUG,
         )
-
-    def set_lab_award(self, lab, award):
-        global COMMON_METADATA
-        COMMON_METADATA["lab"] = lab
-        COMMON_METADATA["award"] = award
 
     def get_current_user(self):
         path = "/session-properties" + "?format=json"
@@ -114,7 +106,7 @@ class Accession(object):
         if file_exists:
             self.logger.warning(
                 "%s Attempting to post duplicate file of %s with md5sum %s",
-                ACCESSION_LOG_KEY,
+                type(self).ACCESSION_LOG_KEY,
                 file_exists.get("accession"),
                 encode_file.get("md5sum"),
             )
@@ -145,7 +137,7 @@ class Accession(object):
                 self.logger.error(
                     "%s %s with aliases %s already exists, will not post it",
                     profile_key.capitalize().replace("_", " "),
-                    ACCESSION_LOG_KEY,
+                    type(self).ACCESSION_LOG_KEY,
                     aliases,
                 )
 
@@ -194,7 +186,7 @@ class Accession(object):
         elif pipeline_name == "atac":
             assembly = [
                 reference
-                for reference in ASSEMBLIES
+                for reference in type(self).ASSEMBLIES
                 if reference
                 in self.analysis.get_tasks("read_genome_tsv")[0]
                 .outputs.get("genome", {})
@@ -221,7 +213,7 @@ class Accession(object):
 
     @property
     def lab_pi(self):
-        return COMMON_METADATA["lab"].split("/labs/")[1].split("/")[0]
+        return self.COMMON_METADATA["lab"].split("/labs/")[1].split("/")[0]
 
     @property
     def dataset(self):
@@ -269,7 +261,7 @@ class Accession(object):
         if self.genome_annotation:
             obj["genome_annotation"] = self.genome_annotation
         obj[Connection.PROFILE_KEY] = "file"
-        obj.update(COMMON_METADATA)
+        obj.update(self.COMMON_METADATA)
         return obj
 
     def get_derived_from_all(self, file, files):
@@ -563,7 +555,7 @@ class Accession(object):
         qc.update({"step_run": step_run_id, "status": "in progress"})
         if self.assay_term_name:
             qc["assay_term_name"] = self.assay_term_name
-        qc.update(COMMON_METADATA)
+        qc.update(self.COMMON_METADATA)
         qc[Connection.PROFILE_KEY] = profile
         # Shared QCs will have two or more file ids
         # under the 'quality_metric_of' property
