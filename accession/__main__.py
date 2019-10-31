@@ -1,6 +1,7 @@
 import argparse
 
 from accession.accession import Accession
+from accession.accession import AccessionSteps
 from accession.helpers import filter_outputs_by_path
 
 
@@ -42,7 +43,8 @@ def main(args=None):
     if args.filter_from_path:
         filter_outputs_by_path(args.filter_from_path)
         return
-    accession_steps = args.accession_steps
+
+    accession_steps = AccessionSteps(args.accession_steps)
     accession_metadata = args.accession_metadata
     lab = args.lab
     award = args.award

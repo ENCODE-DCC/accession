@@ -11,7 +11,6 @@ from accession.analysis import Analysis
 from accession.helpers import string_to_number
 from accession.quality_metric import QualityMetric
 
-COMMON_METADATA = {"lab": "", "award": ""}
 
 QC_MAP = {
     "cross_correlation": "make_cross_correlation_qc",
@@ -26,15 +25,38 @@ QC_MAP = {
     "long_read_rna_correlation": "make_long_read_rna_correlation_qc",
 }
 
+class AccessionSteps:
+
+    def __init__(self, path_to_accession_step_json):
+        self._path_to_accession_step_json = path_to_accession_step_json
+        self._steps = None
+
+    @property
+    def path_to_json(self):
+        return self._path_to_accession_step_json
+
+    @property
+    def content(self):
+        if self._steps:
+            return self._steps["accession.steps"]
+        else:
+            with open(self.path_to_json) as fp:
+                self._steps = json.load(fp)
+        return self._steps["accession.steps"]
+
+
 
 class Accession(object):
-    """docstring for Accession"""
+    """docstring for Accession
+       Args:
+        steps: AccessionSteps object
+    """
     ACCESSION_LOG_KEY = "ACC_MSG"
     ASSEMBLIES = ["GRCh38", "mm10"]
 
     def __init__(self, steps, metadata_json, server, lab, award):
         self.analysis = Analysis(metadata_json)
-        self.steps_and_params_json = self.file_to_json(steps).get("accession.steps")
+        self.steps_and_params_json = steps.content
         self.backend = self.analysis.backend
         self.conn = Connection(server)
         self.COMMON_METADATA = {"lab": lab, "award": award}
