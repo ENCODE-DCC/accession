@@ -50,15 +50,17 @@ class Accession(object):
     """docstring for Accession
        Args:
         steps: AccessionSteps object
+        analysis: Analysis object
+        connection: Connection object
     """
     ACCESSION_LOG_KEY = "ACC_MSG"
     ASSEMBLIES = ["GRCh38", "mm10"]
 
-    def __init__(self, steps, metadata_json, server, lab, award):
-        self.analysis = Analysis(metadata_json)
+    def __init__(self, steps, analysis, connection, lab, award):
+        self.analysis = analysis
         self.steps_and_params_json = steps.content
         self.backend = self.analysis.backend
-        self.conn = Connection(server)
+        self.conn = connection
         self.COMMON_METADATA = {"lab": lab, "award": award}
         self.new_files = []
         self.new_qcs = []
