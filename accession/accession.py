@@ -84,11 +84,6 @@ class Accession(object):
         else:
             raise Exception("Request to portal failed")
 
-    def file_to_json(self, file):
-        with open(file) as json_file:
-            json_obj = json.load(json_file)
-        return json_obj
-
     def get_step_run_id(self, encode_file):
         step_run = encode_file.get("step_run")
         if isinstance(step_run, str):
