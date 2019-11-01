@@ -3,6 +3,7 @@ import argparse
 from accession.accession import Accession
 from accession.accession import AccessionSteps
 from accession.analysis import Analysis
+from accession.analysis import MetaData
 from accession.helpers import filter_outputs_by_path
 
 from encode_utils.connection import Connection
@@ -46,9 +47,9 @@ def main(args=None):
     if args.filter_from_path:
         filter_outputs_by_path(args.filter_from_path)
         return
-
+    metadata = MetaData(args.accession_metadata)
     accession_steps = AccessionSteps(args.accession_steps)
-    analysis = Analysis(args.accession_metadata)
+    analysis = Analysis(metadata)
     connection = Connection(args.server)
     lab = args.lab
     award = args.award
