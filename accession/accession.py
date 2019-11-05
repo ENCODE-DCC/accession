@@ -178,7 +178,7 @@ class Accession(object):
         }
         profile_key = "analysis_step_runs"
         self.log_if_exists(payload, profile_key)
-        payload[self.PROFILE_KEY] = profile_key
+        payload[type(self).PROFILE_KEY] = profile_key
         return self.conn.post(payload)
 
     @property
@@ -278,7 +278,7 @@ class Accession(object):
             obj["file_format_type"] = file_format_type
         if self.genome_annotation:
             obj["genome_annotation"] = self.genome_annotation
-        obj[self.PROFILE_KEY] = "file"
+        obj[type(self).PROFILE_KEY] = "file"
         obj.update(self.COMMON_METADATA)
         return obj
 
@@ -574,7 +574,7 @@ class Accession(object):
         if self.assay_term_name:
             qc["assay_term_name"] = self.assay_term_name
         qc.update(self.COMMON_METADATA)
-        qc[self.PROFILE_KEY] = profile
+        qc[type(self).PROFILE_KEY] = profile
         # Shared QCs will have two or more file ids
         # under the 'quality_metric_of' property
         # and payload must be the same for all
@@ -647,7 +647,7 @@ class Accession(object):
                     # the methods to attach the quality metrics
                     quality_metrics = file_params.get("quality_metrics", [])
                     for qc in quality_metrics:
-                        qc_method = getattr(self, self.QC_MAP[qc])
+                        qc_method = getattr(self, type(self).QC_MAP[qc])
                         # Pass encode file with
                         # calculated properties
                         qc_method(
