@@ -2,10 +2,10 @@ import pytest
 from io import StringIO
 from requests import Response
 from unittest.mock import patch
+from unittest.mock import MagicMock
 
 from accession.accession import AccessionSteps
 from accession.accession import Accession
-from encode_utils.connection import Connection
 
 LONG_RNA_STEPS = """{
   "accession.steps": [
@@ -126,11 +126,23 @@ LONG_RNA_STEPS = """{
 }
 """
 
-@pytest.fixture
-def ok_response():
-    r = Response()
-    r.status_code = 200
-    return r
+class FakeConnection:
+    def __init__(self, dcc_url, auth):
+        self._dcc_url = dcc_url
+        self._auth = auth
+
+    @property
+    def dcc_url(self):
+        return self._dcc_url
+
+    @property
+    def auth(self):
+        return self._auth
+
+class FakeAnalysis:
+    def __init__(self):
+        self.backend = "backend"
+    
 
 def test_path_to_json():
     x = AccessionSteps("path")
@@ -143,14 +155,14 @@ def test_steps(mock_open):
     assert x.content[0]["dcc_step_run"] == "/analysis-steps/long-read-rna-seq-alignments-step-v-1/"
 
 @patch("requests.get")
-@patch("accession.analysis.Analysis")
-def test_accession(mock_analysis, mock_get):
+def test_create_Accession(mock_get):
     r = Response()
     r.status_code = 200
     r.json = lambda: {"user": {"@id": "pertti"}}
     mock_get.return_value = r
-    steps = AccessionSteps("path")
-    steps._steps = {"accession.steps": "foo"}
-    x = Accession(steps, mock_analysis, Connection("server"), "lab", "award")
+    x = AccessionSteps("path")
+    analysis = FakeAnalysis()
+    connection = FakeConnection("https://www.zencodeproject.borg", ("api_key", "secret_key"))
+    y = Accession(x, analysis, connection, "lab", "award")
 
 

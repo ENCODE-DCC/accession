@@ -5,7 +5,6 @@ import os
 from base64 import b64encode
 
 import requests
-from encode_utils.connection import Connection
 
 from accession.analysis import Analysis
 from accession.helpers import string_to_number
@@ -55,10 +54,11 @@ class Accession(object):
     """
     ACCESSION_LOG_KEY = "ACC_MSG"
     ASSEMBLIES = ["GRCh38", "mm10"]
+    PROFILE_KEY = "_profile"
 
     def __init__(self, steps, analysis, connection, lab, award):
         self.analysis = analysis
-        self.steps_and_params_json = steps.content
+        self.steps = steps
         self.backend = self.analysis.backend
         self.conn = connection
         self.COMMON_METADATA = {"lab": lab, "award": award}
@@ -179,7 +179,7 @@ class Accession(object):
         }
         profile_key = "analysis_step_runs"
         self.log_if_exists(payload, profile_key)
-        payload[Connection.PROFILE_KEY] = profile_key
+        payload[self.PROFILE_KEY] = profile_key
         return self.conn.post(payload)
 
     @property
@@ -279,7 +279,7 @@ class Accession(object):
             obj["file_format_type"] = file_format_type
         if self.genome_annotation:
             obj["genome_annotation"] = self.genome_annotation
-        obj[Connection.PROFILE_KEY] = "file"
+        obj[self.PROFILE_KEY] = "file"
         obj.update(self.COMMON_METADATA)
         return obj
 
@@ -575,7 +575,7 @@ class Accession(object):
         if self.assay_term_name:
             qc["assay_term_name"] = self.assay_term_name
         qc.update(self.COMMON_METADATA)
-        qc[Connection.PROFILE_KEY] = profile
+        qc[self.PROFILE_KEY] = profile
         # Shared QCs will have two or more file ids
         # under the 'quality_metric_of' property
         # and payload must be the same for all
@@ -659,6 +659,6 @@ class Accession(object):
         return accessioned_files
 
     def accession_steps(self):
-        for step in self.steps_and_params_json:
+        for step in self.steps.content:
             self.accession_step(step)
         self.post_qcs()
