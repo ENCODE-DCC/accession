@@ -11,19 +11,6 @@ from accession.helpers import string_to_number
 from accession.quality_metric import QualityMetric
 
 
-QC_MAP = {
-    "cross_correlation": "make_cross_correlation_qc",
-    "samtools_flagstat": "make_flagstat_qc",
-    "idr": "make_idr_qc",
-    "star": "make_star_qc_metric",
-    "mirna_mapping": "make_microrna_mapping_qc",
-    "mirna_quantification": "make_microrna_quantification_qc",
-    "mirna_correlation": "make_microrna_correlation_qc",
-    "long_read_rna_mapping": "make_long_read_rna_mapping_qc",
-    "long_read_rna_quantification": "make_long_read_rna_quantification_qc",
-    "long_read_rna_correlation": "make_long_read_rna_correlation_qc",
-}
-
 class AccessionSteps:
 
     def __init__(self, path_to_accession_step_json):
@@ -55,6 +42,18 @@ class Accession(object):
     ACCESSION_LOG_KEY = "ACC_MSG"
     ASSEMBLIES = ["GRCh38", "mm10"]
     PROFILE_KEY = "_profile"
+    QC_MAP = {
+    "cross_correlation": "make_cross_correlation_qc",
+    "samtools_flagstat": "make_flagstat_qc",
+    "idr": "make_idr_qc",
+    "star": "make_star_qc_metric",
+    "mirna_mapping": "make_microrna_mapping_qc",
+    "mirna_quantification": "make_microrna_quantification_qc",
+    "mirna_correlation": "make_microrna_correlation_qc",
+    "long_read_rna_mapping": "make_long_read_rna_mapping_qc",
+    "long_read_rna_quantification": "make_long_read_rna_quantification_qc",
+    "long_read_rna_correlation": "make_long_read_rna_correlation_qc",
+    }
 
     def __init__(self, steps, analysis, connection, lab, award):
         self.analysis = analysis
@@ -648,7 +647,7 @@ class Accession(object):
                     # the methods to attach the quality metrics
                     quality_metrics = file_params.get("quality_metrics", [])
                     for qc in quality_metrics:
-                        qc_method = getattr(self, QC_MAP[qc])
+                        qc_method = getattr(self, self.QC_MAP[qc])
                         # Pass encode file with
                         # calculated properties
                         qc_method(
