@@ -6,8 +6,8 @@ from accession.backends import GCBackend
 from accession.file import GSFile
 from accession.task import Task
 
-class MetaData:
 
+class MetaData:
     def __init__(self, metadata_filepath):
         with open(metadata_filepath) as fp:
             self._content = json.load(fp)
@@ -15,7 +15,8 @@ class MetaData:
     @property
     def content(self):
         return self._content
-    
+
+
 class Analysis(object):
     """docstring for Analysis
         Args: metadata: MetaData object

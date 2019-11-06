@@ -126,6 +126,7 @@ LONG_RNA_STEPS = """{
 }
 """
 
+
 class FakeConnection:
     def __init__(self, dcc_url, auth):
         self._dcc_url = dcc_url
@@ -139,20 +140,26 @@ class FakeConnection:
     def auth(self):
         return self._auth
 
+
 class FakeAnalysis:
     def __init__(self):
         self.backend = "backend"
-    
+
 
 def test_path_to_json():
     x = AccessionSteps("path")
     assert x.path_to_json == "path"
 
+
 @patch("builtins.open", return_value=StringIO(LONG_RNA_STEPS))
 def test_steps(mock_open):
     x = AccessionSteps("path")
     assert x.content
-    assert x.content[0]["dcc_step_run"] == "/analysis-steps/long-read-rna-seq-alignments-step-v-1/"
+    assert (
+        x.content[0]["dcc_step_run"]
+        == "/analysis-steps/long-read-rna-seq-alignments-step-v-1/"
+    )
+
 
 @patch("requests.get")
 def test_create_Accession(mock_get):
@@ -162,7 +169,7 @@ def test_create_Accession(mock_get):
     mock_get.return_value = r
     x = AccessionSteps("path")
     analysis = FakeAnalysis()
-    connection = FakeConnection("https://www.zencodeproject.borg", ("api_key", "secret_key"))
+    connection = FakeConnection(
+        "https://www.zencodeproject.borg", ("api_key", "secret_key")
+    )
     y = Accession(x, analysis, connection, "lab", "award")
-
-

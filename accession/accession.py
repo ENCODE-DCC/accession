@@ -12,7 +12,6 @@ from accession.quality_metric import QualityMetric
 
 
 class AccessionSteps:
-
     def __init__(self, path_to_accession_step_json):
         self._path_to_accession_step_json = path_to_accession_step_json
         self._steps = None
@@ -31,7 +30,6 @@ class AccessionSteps:
         return self._steps["accession.steps"]
 
 
-
 class Accession(object):
     """docstring for Accession
        Args:
@@ -39,20 +37,21 @@ class Accession(object):
         analysis: Analysis object
         connection: Connection object
     """
+
     ACCESSION_LOG_KEY = "ACC_MSG"
     ASSEMBLIES = ["GRCh38", "mm10"]
     PROFILE_KEY = "_profile"
     QC_MAP = {
-    "cross_correlation": "make_cross_correlation_qc",
-    "samtools_flagstat": "make_flagstat_qc",
-    "idr": "make_idr_qc",
-    "star": "make_star_qc_metric",
-    "mirna_mapping": "make_microrna_mapping_qc",
-    "mirna_quantification": "make_microrna_quantification_qc",
-    "mirna_correlation": "make_microrna_correlation_qc",
-    "long_read_rna_mapping": "make_long_read_rna_mapping_qc",
-    "long_read_rna_quantification": "make_long_read_rna_quantification_qc",
-    "long_read_rna_correlation": "make_long_read_rna_correlation_qc",
+        "cross_correlation": "make_cross_correlation_qc",
+        "samtools_flagstat": "make_flagstat_qc",
+        "idr": "make_idr_qc",
+        "star": "make_star_qc_metric",
+        "mirna_mapping": "make_microrna_mapping_qc",
+        "mirna_quantification": "make_microrna_quantification_qc",
+        "mirna_correlation": "make_microrna_correlation_qc",
+        "long_read_rna_mapping": "make_long_read_rna_mapping_qc",
+        "long_read_rna_quantification": "make_long_read_rna_quantification_qc",
+        "long_read_rna_correlation": "make_long_read_rna_correlation_qc",
     }
 
     def __init__(self, steps, analysis, connection, lab, award):
