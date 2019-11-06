@@ -7,14 +7,25 @@ from accession.file import GSFile
 from accession.task import Task
 
 
-class Analysis(object):
-    """docstring for Analysis"""
+class MetaData:
+    def __init__(self, metadata_filepath):
+        with open(metadata_filepath) as fp:
+            self._content = json.load(fp)
 
-    def __init__(self, metadata_json, auto_populate=True):
+    @property
+    def content(self):
+        return self._content
+
+
+class Analysis(object):
+    """docstring for Analysis
+        Args: metadata: MetaData object
+    """
+
+    def __init__(self, metadata, auto_populate=True):
         self.files = []
         self.tasks = []
-        with open(metadata_json) as json_file:
-            self.metadata = json.load(json_file)
+        self.metadata = metadata.content
         if self.metadata:
             bucket = self.metadata["workflowRoot"].split("gs://")[1].split("/")[0]
             self.backend = GCBackend(bucket)

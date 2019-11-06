@@ -1,7 +1,12 @@
 import argparse
 
 from accession.accession import Accession
+from accession.accession import AccessionSteps
+from accession.analysis import Analysis
+from accession.analysis import MetaData
 from accession.helpers import filter_outputs_by_path
+
+from encode_utils.connection import Connection
 
 
 def get_parser():
@@ -42,13 +47,14 @@ def main(args=None):
     if args.filter_from_path:
         filter_outputs_by_path(args.filter_from_path)
         return
-    accession_steps = args.accession_steps
-    accession_metadata = args.accession_metadata
+    metadata = MetaData(args.accession_metadata)
+    accession_steps = AccessionSteps(args.accession_steps)
+    analysis = Analysis(metadata)
+    connection = Connection(args.server)
     lab = args.lab
     award = args.award
-    server = args.server
-    if all([accession_steps, accession_metadata, lab, award, server]):
-        accessioner = Accession(accession_steps, accession_metadata, server, lab, award)
+    if all([accession_steps, analysis, lab, award, connection]):
+        accessioner = Accession(accession_steps, analysis, connection, lab, award)
         accessioner.accession_steps()
         return
     print("Module called without proper arguments")

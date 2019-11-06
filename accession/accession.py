@@ -5,42 +5,61 @@ import os
 from base64 import b64encode
 
 import requests
-from encode_utils.connection import Connection
 
 from accession.analysis import Analysis
 from accession.helpers import string_to_number
 from accession.quality_metric import QualityMetric
 
-COMMON_METADATA = {"lab": "", "award": ""}
 
-QC_MAP = {
-    "cross_correlation": "make_cross_correlation_qc",
-    "samtools_flagstat": "make_flagstat_qc",
-    "idr": "make_idr_qc",
-    "star": "make_star_qc_metric",
-    "mirna_mapping": "make_microrna_mapping_qc",
-    "mirna_quantification": "make_microrna_quantification_qc",
-    "mirna_correlation": "make_microrna_correlation_qc",
-    "long_read_rna_mapping": "make_long_read_rna_mapping_qc",
-    "long_read_rna_quantification": "make_long_read_rna_quantification_qc",
-    "long_read_rna_correlation": "make_long_read_rna_correlation_qc",
-}
+class AccessionSteps:
+    def __init__(self, path_to_accession_step_json):
+        self._path_to_accession_step_json = path_to_accession_step_json
+        self._steps = None
 
+    @property
+    def path_to_json(self):
+        return self._path_to_accession_step_json
 
-ASSEMBLIES = ["GRCh38", "mm10"]
-ACCESSION_LOG_KEY = "ACC_MSG"
+    @property
+    def content(self):
+        if self._steps:
+            return self._steps["accession.steps"]
+        else:
+            with open(self.path_to_json) as fp:
+                self._steps = json.load(fp)
+        return self._steps["accession.steps"]
 
 
 class Accession(object):
-    """docstring for Accession"""
+    """docstring for Accession
+       Args:
+        steps: AccessionSteps object
+        analysis: Analysis object
+        connection: Connection object
+    """
 
-    def __init__(self, steps, metadata_json, server, lab, award):
-        super(Accession, self).__init__()
-        self.set_lab_award(lab, award)
-        self.analysis = Analysis(metadata_json)
-        self.steps_and_params_json = self.file_to_json(steps).get("accession.steps")
+    ACCESSION_LOG_KEY = "ACC_MSG"
+    ASSEMBLIES = ["GRCh38", "mm10"]
+    PROFILE_KEY = "_profile"
+    QC_MAP = {
+        "cross_correlation": "make_cross_correlation_qc",
+        "samtools_flagstat": "make_flagstat_qc",
+        "idr": "make_idr_qc",
+        "star": "make_star_qc_metric",
+        "mirna_mapping": "make_microrna_mapping_qc",
+        "mirna_quantification": "make_microrna_quantification_qc",
+        "mirna_correlation": "make_microrna_correlation_qc",
+        "long_read_rna_mapping": "make_long_read_rna_mapping_qc",
+        "long_read_rna_quantification": "make_long_read_rna_quantification_qc",
+        "long_read_rna_correlation": "make_long_read_rna_correlation_qc",
+    }
+
+    def __init__(self, steps, analysis, connection, lab, award):
+        self.analysis = analysis
+        self.steps = steps
         self.backend = self.analysis.backend
-        self.conn = Connection(server)
+        self.conn = connection
+        self.COMMON_METADATA = {"lab": lab, "award": award}
         self.new_files = []
         self.new_qcs = []
         self.raw_qcs = []
@@ -52,11 +71,6 @@ class Accession(object):
             level=logging.DEBUG,
         )
 
-    def set_lab_award(self, lab, award):
-        global COMMON_METADATA
-        COMMON_METADATA["lab"] = lab
-        COMMON_METADATA["award"] = award
-
     def get_current_user(self):
         path = "/session-properties" + "?format=json"
         response = requests.get(self.conn.dcc_url + path, auth=self.conn.auth)
@@ -67,11 +81,6 @@ class Accession(object):
             raise Exception("Authenticated user not found")
         else:
             raise Exception("Request to portal failed")
-
-    def file_to_json(self, file):
-        with open(file) as json_file:
-            json_obj = json.load(json_file)
-        return json_obj
 
     def get_step_run_id(self, encode_file):
         step_run = encode_file.get("step_run")
@@ -114,7 +123,7 @@ class Accession(object):
         if file_exists:
             self.logger.warning(
                 "%s Attempting to post duplicate file of %s with md5sum %s",
-                ACCESSION_LOG_KEY,
+                type(self).ACCESSION_LOG_KEY,
                 file_exists.get("accession"),
                 encode_file.get("md5sum"),
             )
@@ -145,7 +154,7 @@ class Accession(object):
                 self.logger.error(
                     "%s %s with aliases %s already exists, will not post it",
                     profile_key.capitalize().replace("_", " "),
-                    ACCESSION_LOG_KEY,
+                    type(self).ACCESSION_LOG_KEY,
                     aliases,
                 )
 
@@ -168,7 +177,7 @@ class Accession(object):
         }
         profile_key = "analysis_step_runs"
         self.log_if_exists(payload, profile_key)
-        payload[Connection.PROFILE_KEY] = profile_key
+        payload[type(self).PROFILE_KEY] = profile_key
         return self.conn.post(payload)
 
     @property
@@ -194,7 +203,7 @@ class Accession(object):
         elif pipeline_name == "atac":
             assembly = [
                 reference
-                for reference in ASSEMBLIES
+                for reference in type(self).ASSEMBLIES
                 if reference
                 in self.analysis.get_tasks("read_genome_tsv")[0]
                 .outputs.get("genome", {})
@@ -221,7 +230,7 @@ class Accession(object):
 
     @property
     def lab_pi(self):
-        return COMMON_METADATA["lab"].split("/labs/")[1].split("/")[0]
+        return self.COMMON_METADATA["lab"].split("/labs/")[1].split("/")[0]
 
     @property
     def dataset(self):
@@ -268,8 +277,8 @@ class Accession(object):
             obj["file_format_type"] = file_format_type
         if self.genome_annotation:
             obj["genome_annotation"] = self.genome_annotation
-        obj[Connection.PROFILE_KEY] = "file"
-        obj.update(COMMON_METADATA)
+        obj[type(self).PROFILE_KEY] = "file"
+        obj.update(self.COMMON_METADATA)
         return obj
 
     def get_derived_from_all(self, file, files):
@@ -563,8 +572,8 @@ class Accession(object):
         qc.update({"step_run": step_run_id, "status": "in progress"})
         if self.assay_term_name:
             qc["assay_term_name"] = self.assay_term_name
-        qc.update(COMMON_METADATA)
-        qc[Connection.PROFILE_KEY] = profile
+        qc.update(self.COMMON_METADATA)
+        qc[type(self).PROFILE_KEY] = profile
         # Shared QCs will have two or more file ids
         # under the 'quality_metric_of' property
         # and payload must be the same for all
@@ -637,7 +646,7 @@ class Accession(object):
                     # the methods to attach the quality metrics
                     quality_metrics = file_params.get("quality_metrics", [])
                     for qc in quality_metrics:
-                        qc_method = getattr(self, QC_MAP[qc])
+                        qc_method = getattr(self, type(self).QC_MAP[qc])
                         # Pass encode file with
                         # calculated properties
                         qc_method(
@@ -648,6 +657,6 @@ class Accession(object):
         return accessioned_files
 
     def accession_steps(self):
-        for step in self.steps_and_params_json:
+        for step in self.steps.content:
             self.accession_step(step)
         self.post_qcs()
