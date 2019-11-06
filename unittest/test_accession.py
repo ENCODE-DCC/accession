@@ -127,10 +127,19 @@ LONG_RNA_STEPS = """{
 """
 
 
+@pytest.fixture
+def ok_response():
+    r = Response()
+    r.status_code = 200
+    r.json = lambda: {"user": {"@id": "pertti"}}
+    return r
+
+
 class FakeConnection:
-    def __init__(self, dcc_url, auth):
+    def __init__(self, dcc_url, auth, response=None):
         self._dcc_url = dcc_url
         self._auth = auth
+        self._response = response
 
     @property
     def dcc_url(self):
@@ -139,6 +148,9 @@ class FakeConnection:
     @property
     def auth(self):
         return self._auth
+
+    def get(self, query):
+        return self._response
 
 
 class FakeAnalysis:
@@ -162,14 +174,31 @@ def test_steps(mock_open):
 
 
 @patch("requests.get")
-def test_create_Accession(mock_get):
-    r = Response()
-    r.status_code = 200
-    r.json = lambda: {"user": {"@id": "pertti"}}
-    mock_get.return_value = r
+def test_create_Accession(mock_get, ok_response):
+    mock_get.return_value = ok_response
     x = AccessionSteps("path")
     analysis = FakeAnalysis()
     connection = FakeConnection(
         "https://www.zencodeproject.borg", ("api_key", "secret_key")
     )
     y = Accession(x, analysis, connection, "lab", "award")
+
+
+@patch("requests.get")
+def test_get_number_of_biological_replicates(mock_get, ok_response):
+    mock_get.return_value = ok_response
+    x = AccessionSteps("path")
+    analysis = FakeAnalysis()
+    connection = FakeConnection(
+        "https://www.zencodeproject.borg",
+        ("api_key", "secret_key"),
+        {
+            "replicates": [
+                {"biological_replicate_number": 1},
+                {"biological_replicate_number": 2},
+            ]
+        },
+    )
+    y = Accession(x, analysis, connection, "lab", "award")
+    y._dataset = "my_dataset"
+    assert y.get_number_of_biological_replicates() == 2
