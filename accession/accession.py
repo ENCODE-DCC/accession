@@ -60,6 +60,7 @@ class Accession(object):
         self.backend = self.analysis.backend
         self.conn = connection
         self.COMMON_METADATA = {"lab": lab, "award": award}
+        self._dataset = None
         self.new_files = []
         self.new_qcs = []
         self.raw_qcs = []
@@ -234,21 +235,30 @@ class Accession(object):
 
     @property
     def dataset(self):
-        return self.file_at_portal(self.analysis.raw_fastqs[0].filename).get("dataset")
+        if self._dataset is None:
+            self._dataset = self.file_at_portal(
+                self.analysis.raw_fastqs[0].filename
+            ).get("dataset")
+            return self._dataset
+        else:
+            return self._dataset
 
     @property
     def assay_term_name(self):
         return self.conn.get(self.dataset).get("assay_term_name")
 
-    @property
-    def is_replicated(self):
+    def get_number_of_biological_replicates(self):
         bio_reps = set(
             [
                 rep.get("biological_replicate_number")
                 for rep in self.conn.get(self.dataset).get("replicates")
             ]
         )
-        return True if len(bio_reps) > 1 else False
+        return len(bio_reps)
+
+    @property
+    def is_replicated(self):
+        return True if self.get_number_of_biological_replicates() > 1 else False
 
     def file_from_template(
         self,
@@ -502,11 +512,14 @@ class Accession(object):
     def make_generic_correlation_qc(self, encode_file, gs_file, handler):
         """
         Make correlation QC metrics in  a pipeline agnostic fashion. Pipeline specific logic is
-        taken care of in the passed handler (name of a function that )
+        taken care of in the handler, the function that formats the qc metric dictionary. 
+        
+        TODO: this RNA (micro, bulk, long) specific method needs to go to the transcriptome pipeline
+        subclass when that refactoring is done.
         """
         if (
             self.file_has_qc(encode_file, "CorrelationQualityMetric")
-            or not self.is_replicated
+            or self.get_number_of_biological_replicates() != 2
         ):
             return
         qc = handler(gs_file)
