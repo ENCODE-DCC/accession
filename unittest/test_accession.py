@@ -131,7 +131,6 @@ LONG_RNA_STEPS = """{
 def ok_response():
     r = Response()
     r.status_code = 200
-    r.json = lambda: {"user": {"@id": "pertti"}}
     return r
 
 
