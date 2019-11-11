@@ -1,12 +1,10 @@
 import argparse
 
-from accession.accession import Accession
-from accession.accession import AccessionSteps
-from accession.analysis import Analysis
-from accession.analysis import MetaData
-from accession.helpers import filter_outputs_by_path
-
 from encode_utils.connection import Connection
+
+from accession.accession import Accession, AccessionSteps
+from accession.analysis import Analysis, MetaData
+from accession.helpers import filter_outputs_by_path
 
 
 def get_parser():

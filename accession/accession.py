@@ -4,8 +4,6 @@ import logging
 import os
 from base64 import b64encode
 
-import requests
-
 from accession.helpers import string_to_number
 from accession.quality_metric import QualityMetric
 
@@ -492,8 +490,8 @@ class Accession(object):
     def make_generic_correlation_qc(self, encode_file, gs_file, handler):
         """
         Make correlation QC metrics in  a pipeline agnostic fashion. Pipeline specific logic is
-        taken care of in the handler, the function that formats the qc metric dictionary. 
-        
+        taken care of in the handler, the function that formats the qc metric dictionary.
+
         TODO: this RNA (micro, bulk, long) specific method needs to go to the transcriptome pipeline
         subclass when that refactoring is done.
         """

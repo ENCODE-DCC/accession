@@ -1,11 +1,10 @@
-import pytest
 from io import StringIO
-from requests import Response
-from unittest.mock import patch
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, patch
 
-from accession.accession import AccessionSteps
-from accession.accession import Accession
+import pytest
+from requests import Response
+
+from accession.accession import Accession, AccessionSteps
 
 LONG_RNA_STEPS = """{
   "accession.steps": [
