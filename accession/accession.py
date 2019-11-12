@@ -4,9 +4,6 @@ import logging
 import os
 from base64 import b64encode
 
-import requests
-
-from accession.analysis import Analysis
 from accession.helpers import string_to_number
 from accession.quality_metric import QualityMetric
 
@@ -64,24 +61,12 @@ class Accession(object):
         self.new_files = []
         self.new_qcs = []
         self.raw_qcs = []
-        self.current_user = self.get_current_user()
         self.logger = logging.getLogger(__name__)
         logging.basicConfig(
             filename="accession.log",
             format="%(asctime)s %(levelname)s %(message)s",
             level=logging.DEBUG,
         )
-
-    def get_current_user(self):
-        path = "/session-properties" + "?format=json"
-        response = requests.get(self.conn.dcc_url + path, auth=self.conn.auth)
-        if response.ok:
-            user = response.json().get("user")
-            if user:
-                return user.get("@id")
-            raise Exception("Authenticated user not found")
-        else:
-            raise Exception("Request to portal failed")
 
     def get_step_run_id(self, encode_file):
         step_run = encode_file.get("step_run")
@@ -104,13 +89,6 @@ class Accession(object):
         encode_file = self.conn.search(search_param)
         if len(encode_file) > 0:
             return self.conn.get(encode_file[0].get("@id"))
-
-    def raw_fastq_inputs(self, file):
-        if not file.task and "fastqs" in file.filekeys:
-            yield file
-        if file.task:
-            for input_file in file.task.input_files:
-                yield from self.raw_fastq_inputs(input_file)
 
     def raw_files_accessioned(self):
         for file in self.analysis.raw_fastqs:
@@ -512,8 +490,8 @@ class Accession(object):
     def make_generic_correlation_qc(self, encode_file, gs_file, handler):
         """
         Make correlation QC metrics in  a pipeline agnostic fashion. Pipeline specific logic is
-        taken care of in the handler, the function that formats the qc metric dictionary. 
-        
+        taken care of in the handler, the function that formats the qc metric dictionary.
+
         TODO: this RNA (micro, bulk, long) specific method needs to go to the transcriptome pipeline
         subclass when that refactoring is done.
         """
