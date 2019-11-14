@@ -1,6 +1,9 @@
+import pytest
+
 from accession.task import Task
 
 
+@pytest.mark.filesystem
 def test_task_init(metadata_json, normal_analysis):  # noqa: F811
     task = metadata_json["calls"]["atac.bam2ta"][0]
     new_task = Task("bam2ta", task, normal_analysis)

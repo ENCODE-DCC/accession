@@ -32,6 +32,7 @@ def mirna_accessioner(accessioner_factory):
 
 
 @pytest.mark.docker
+@pytest.mark.filesystem
 def test_file_at_portal(mirna_accessioner):
     fastq = mirna_accessioner.analysis.raw_fastqs[0]
     portal_file = mirna_accessioner.file_at_portal(fastq.filename)
@@ -39,16 +40,19 @@ def test_file_at_portal(mirna_accessioner):
 
 
 @pytest.mark.docker
+@pytest.mark.filesystem
 def test_raw_files_accessioned(mirna_accessioner):
     assert mirna_accessioner.raw_files_accessioned()
 
 
 @pytest.mark.docker
+@pytest.mark.filesystem
 def test_assembly(mirna_accessioner):
     assert mirna_accessioner.assembly == "mm10"
 
 
 @pytest.mark.docker
+@pytest.mark.filesystem
 def test_genome_annotation(mirna_accessioner):
     assert mirna_accessioner.genome_annotation == "M21"
 
@@ -96,6 +100,7 @@ def test_get_number_of_biological_replicates(
 @pytest.mark.skip(
     reason="Elasticsearch is not reliable, produces inconsistent results."
 )
+@pytest.mark.filesystem
 def test_get_derived_from(mirna_accessioner):
     bowtie_step = mirna_accessioner.steps.content[0]
     analysis = mirna_accessioner.analysis
@@ -124,6 +129,7 @@ def test_get_derived_from(mirna_accessioner):
 @pytest.mark.skip(
     reason="Elasticsearch is not reliable, produces inconsistent results."
 )
+@pytest.mark.filesystem
 def test_get_derived_from_all(mirna_accessioner):
     bowtie_step = mirna_accessioner.steps.content[0]
     analysis = mirna_accessioner.analysis
@@ -148,6 +154,7 @@ def mock_post_step_run(payload):
 
 
 @pytest.mark.docker
+@pytest.mark.filesystem
 def test_get_or_make_step_run(mocker, mirna_accessioner):
     mocker.patch.object(mirna_accessioner.conn, "post", mock_post_step_run)
     mocker.patch.object(mirna_accessioner, "log_if_exists", autospec=True)
@@ -164,6 +171,7 @@ def test_get_or_make_step_run(mocker, mirna_accessioner):
 
 
 @pytest.mark.docker
+@pytest.mark.filesystem
 def test_accession_file(mirna_accessioner):
     bowtie_step = mirna_accessioner.steps.content[0]
     analysis = mirna_accessioner.analysis
@@ -191,6 +199,7 @@ def test_accession_file(mirna_accessioner):
 
 
 @pytest.mark.docker
+@pytest.mark.filesystem
 def test_make_file_obj(mirna_accessioner):
     bowtie_step = mirna_accessioner.steps.content[0]
     analysis = mirna_accessioner.analysis
@@ -310,6 +319,7 @@ def mock_queue_qc(qc, *args, **kwargs):
     return qc
 
 
+@pytest.mark.filesystem
 def test_make_microrna_quantification_qc(mock_replicated_mirna_accession):
     gs_file = [
         i
@@ -320,6 +330,7 @@ def test_make_microrna_quantification_qc(mock_replicated_mirna_accession):
     assert qc == {"expressed_mirnas": 393}
 
 
+@pytest.mark.filesystem
 def test_make_microrna_mapping_qc(mock_replicated_mirna_accession):
     gs_file = [
         i
@@ -330,6 +341,7 @@ def test_make_microrna_mapping_qc(mock_replicated_mirna_accession):
     assert qc == {"aligned_reads": 5873570}
 
 
+@pytest.mark.filesystem
 def test_make_microrna_correlation_qc_replicated(mock_replicated_mirna_accession):
     gs_file = [
         i for i in mock_replicated_mirna_accession.analysis.get_files(filekey="tsv")
@@ -338,6 +350,7 @@ def test_make_microrna_correlation_qc_replicated(mock_replicated_mirna_accession
     assert qc == {"Spearman correlation": 0.8885044458946942}
 
 
+@pytest.mark.filesystem
 def test_make_microrna_correlation_qc_unreplicated_returns_none(
     mocker, mock_accession_unreplicated, mirna_replicated_analysis
 ):
@@ -356,6 +369,7 @@ def test_make_microrna_correlation_qc_unreplicated_returns_none(
     assert qc is None
 
 
+@pytest.mark.filesystem
 def test_make_star_qc_metric(mock_replicated_mirna_accession):
     gs_file = [
         i

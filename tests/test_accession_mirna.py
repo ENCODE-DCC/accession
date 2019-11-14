@@ -2,6 +2,7 @@ import pytest
 
 
 @pytest.mark.docker
+@pytest.mark.filesystem
 def test_accession_mirna_replicated(accessioner_factory):
     factory = accessioner_factory(
         metadata_file="mirna_replicated_metadata.json", assay_name="mirna"
@@ -14,6 +15,7 @@ def test_accession_mirna_replicated(accessioner_factory):
 
 
 @pytest.mark.docker
+@pytest.mark.filesystem
 def test_accession_mirna_unreplicated(accessioner_factory):
     factory = accessioner_factory(
         metadata_file="mirna_unreplicated_metadata.json", assay_name="mirna"

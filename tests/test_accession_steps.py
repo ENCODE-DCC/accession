@@ -5,6 +5,7 @@ import pytest
 from accession.accession import AccessionSteps
 
 
+@pytest.mark.filesystem
 def test_accession_steps_init(steps):
     """
     Once we access steps.content, the _steps is initialized.
@@ -18,6 +19,7 @@ def test_accession_steps_init(steps):
     assert steps._steps
 
 
+@pytest.mark.filesystem
 def test_accession_steps_path_to_json(steps):
     """
     The absolute path will vary across systems, so we only observe the last two pieces
@@ -25,6 +27,7 @@ def test_accession_steps_path_to_json(steps):
     assert steps.path_to_json.parts[-2:] == ("data", "long_rna_steps.json")
 
 
+@pytest.mark.filesystem
 def test_accession_steps_content(steps):
     assert isinstance(steps.content, list)
     assert all(isinstance(x, dict) for x in steps.content)

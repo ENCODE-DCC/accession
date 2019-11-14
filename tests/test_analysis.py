@@ -16,6 +16,7 @@ def test_invalid_metadata_raises():
         Analysis(metadata_json)
 
 
+@pytest.mark.filesystem
 def test_make_tasks(empty_analysis):
     assert len(empty_analysis.files) == 0
     empty_analysis.tasks = empty_analysis.make_tasks()
@@ -23,6 +24,7 @@ def test_make_tasks(empty_analysis):
     assert len(empty_analysis.tasks) == 38
 
 
+@pytest.mark.filesystem
 def test_make_task(normal_analysis):
     inputs = {"foo": "gs://foo/foo"}
     outputs = {"baz": "gs://foo/baz"}
@@ -36,6 +38,7 @@ def test_make_task(normal_analysis):
     assert new_task.docker_image == docker_image
 
 
+@pytest.mark.filesystem
 def test_get_or_make_file_empty_analysis(empty_analysis):
     assert len(empty_analysis.files) == 0
     task = {"inputs": {}, "outputs": {}, "dockerImageUsed": ""}
@@ -55,15 +58,18 @@ def test_get_or_make_file_empty_analysis(empty_analysis):
     assert len(empty_analysis.files) == 1
 
 
+@pytest.mark.filesystem
 def test_get_or_make_file_normal_analysis(normal_analysis):
     assert len(normal_analysis.files) == 208
 
 
+@pytest.mark.filesystem
 def test_workflow_id(normal_analysis):
     expected = "cromwell-2099edd0-0399-46ba-941c-abdcea355c1c"
     assert normal_analysis.workflow_id == expected
 
 
+@pytest.mark.filesystem
 def test_outputs_whitelist(normal_analysis):
     prefix = (
         "gs://encode-pipeline-test-runs/atac/2099edd0-0399-46ba-941c-abdcea355c1c/call-"
@@ -76,6 +82,7 @@ def test_outputs_whitelist(normal_analysis):
     assert normal_analysis.outputs_whitelist == expected
 
 
+@pytest.mark.filesystem
 def test_inputs_whitelist(normal_analysis):
     prefix = "gs://atac-seq-accessioning-samples/ENCSR609OHJ/"
     expected = [
@@ -88,6 +95,7 @@ def test_inputs_whitelist(normal_analysis):
     assert normal_analysis.inputs_whitelist == expected
 
 
+@pytest.mark.filesystem
 def test_get_files(normal_analysis):
     files = normal_analysis.get_files(filekey="ta")
     assert len(files) == 9
@@ -107,6 +115,7 @@ def test_get_tasks(normal_analysis):
     assert tasks2[0].task_name == "qc_report"
 
 
+@pytest.mark.filesystem
 def test_search_up(normal_analysis):
     task = normal_analysis.get_tasks("qc_report")[0]
     files = normal_analysis.search_up(task, "bam2ta", "ta")
@@ -121,6 +130,7 @@ def test_search_up(normal_analysis):
     assert len(files3) == 4
 
 
+@pytest.mark.filesystem
 def test_search_down(normal_analysis):
     task = normal_analysis.get_tasks("bam2ta")[0]
     files = normal_analysis.search_down(task, "ataqc", "html")
