@@ -1,0 +1,81 @@
+[
+  {
+    "accession": "ENCBS892NXC",
+    "award": "U54HG006998",
+    "biosample_ontology": "tissue_UBERON_0002101",
+    "date_created": "2016-04-01T11:47:21.877547+00:00",
+    "date_obtained": "2016-02-08",
+    "dbxrefs": [
+      "GEO:SAMN05733899"
+    ],
+    "description": "Limb from 51 embryonic 10.5 day mice",
+    "donor": "ENCDO956IXV",
+    "lab": "ali-mortazavi",
+    "model_organism_age": "10.5",
+    "model_organism_age_units": "day",
+    "model_organism_health_status": "healthy",
+    "model_organism_sex": "mixed",
+    "mouse_life_stage": "embryonic",
+    "organism": "mouse",
+    "schema_version": "24",
+    "source": "atcc",
+    "starting_amount": 51,
+    "starting_amount_units": "items",
+    "status": "released",
+    "submitted_by": "facilisi.tristique@potenti.vivamus",
+    "uuid": "56e94f2b-25ac-4c58-9828-f63b66220999"
+  },
+  {
+    "accession": "ENCBS844FSC",
+    "award": "U54HG006998",
+    "biosample_ontology": "tissue_UBERON_0002101",
+    "date_created": "2016-04-01T11:47:21.877547+00:00",
+    "date_obtained": "2016-02-08",
+    "dbxrefs": [
+      "GEO:SAMN05733899"
+    ],
+    "description": "Limb from 51 embryonic 10.5 day mice",
+    "donor": "ENCDO956IXV",
+    "lab": "ali-mortazavi",
+    "model_organism_age": "10.5",
+    "model_organism_age_units": "day",
+    "model_organism_health_status": "healthy",
+    "model_organism_sex": "mixed",
+    "mouse_life_stage": "embryonic",
+    "organism": "mouse",
+    "schema_version": "24",
+    "source": "atcc",
+    "starting_amount": 51,
+    "starting_amount_units": "items",
+    "status": "released",
+    "submitted_by": "facilisi.tristique@potenti.vivamus",
+    "uuid": "467c7505-5039-4935-8da1-6ad22d813310"
+  },
+  {
+    "accession": "ENCBS504MQP",
+    "aliases": [
+      "gtex:ENC-1LGRB-115-SM-A94JB"
+    ],
+    "award": "U54HG006998",
+    "biosample_ontology": "tissue_UBERON_0006631",
+    "date_created": "2016-01-12T00:40:59.326379+00:00",
+    "date_obtained": "2015-12-14",
+    "dbxrefs": [
+      "GEO:SAMN07791036"
+    ],
+    "description": "Heart - Atrial Appendage",
+    "donor": "ENCDO793LXB",
+    "internal_tags": [
+      "ENTEx"
+    ],
+    "lab": "ali-mortazavi",
+    "organism": "human",
+    "schema_version": "24",
+    "source": "atcc",
+    "starting_amount": 1,
+    "starting_amount_units": "items",
+    "status": "released",
+    "submitted_by": "facilisi.tristique@potenti.vivamus",
+    "uuid": "41924025-9d6c-45bb-9530-15a47df1805a"
+  }
+]

@@ -1,0 +1,32 @@
+[
+  {
+    "description": "The goal of the ENCODE Project is to provide the biomedical community with a complete and biologically interpretable annotation of the human genome. This means discovering and mapping all parts of all genes, including exons, introns, promoters and cis-regulatory sequences, in previous phases of the ENCODE Project, the applicants of this proposal developed and applied robust, high-throughput, genome-wide methods for determining transcription factor occupancy, assessing DNA methylation, identifying RNA transcripts, and experimentally testing candidate regulatory elements and mutations. The combination of experiences from the previous phases with the resulting technology and analysis platforms and the existing, highly productive infrastructure of the applicants form the basis of this response to NHGRI's RFA-HG-11-024 (\"Expanding the Encyclopedia of DNA Elements (ENCODE) in the Human and Model Organisms\"). This application presents an ambitious proposal to expand the biological dimensions of ENCODE to include essentially all transcription factors for measurements of occupancy and to produce transcriptomes from hundreds of very specific cell types, and even single cells. The specific plan is to: 1) determine genome wide occupancy for all transcription factors and major cofactors with high resolution in two or more cell types; 2) map and quantify all messenger RNA transcripts, microRNAs and other non-ribosomal RNAs in more than 300 well-defined, uncultured cell types; 3) map DNA methylation state genome-wide at nucleotide resolution in more than 300 cell types; and 4) apply a high-throughput transient transfection assay system to test the impact of -2,000 candidate regulatory elements on gene regulation. All experimental work in this project will be evaluated by appropriate quality metrics, and after quality control, all data will be rapidly deposited in publi, freely accessible genome databases. In addition, computational analyses, including evaluation of comparative and population genomics data, will be integrated with the experimental production to help ensure quality and to capture information in forms useful to biologists, genomicists, and medical researchers. Completion of these Specific Aims will enable biomedical researchers to better and more rapidly understand the consequences of mutations in genomic disorders, including cancer, cardiovascular disease, and almost ail common diseases and, therefore, to more fully realize the potential of genomics to impact human health.",
+    "end_date": "2016-07-31",
+    "name": "U54HG006998",
+    "pi": "facilisi.tristique@potenti.vivamus",
+    "project": "ENCODE",
+    "rfa": "ENCODE3",
+    "schema_version": "7",
+    "start_date": "2012-09-21",
+    "status": "disabled",
+    "title": "TOWARD A COMPREHENSIVE FUNCTIONAL ANNOTATION OF THE HUMAN GENOME",
+    "url": "http://projectreporter.nih.gov/project_info_details.cfm?aid=8402461",
+    "uuid": "f06a0db4-b388-48d9-b414-37d83859cad0",
+    "viewing_group": "ENCODE3"
+  },
+  {
+    "description": "The goals of the ENCODE Data Coordinating Center (DCC) is to support the ENCODE Consortium by defining and establishing a strategy that connects all participants to the data and by creating avenues of access that distribute these data to the greater biological research community. The ENCODE Consortium brings together laboratories that generate complex data types via experimental assays with laboratories that integrate these unique data using computational analyses to discover how chromosomal elements function together to define human cells and tissues. The DCC's participation enhances the data created by these laboratories through the creation of structured procedures for the verification and validation of all submitted data and providing processes for the documentation of metadata that describe each biological sample and assay method. To facilitate access to all the data created the DCC will construct a state of the art data warehouse. The DCC will design and development robust software to enhance the data submission and unified data processing pipelines, the organization and access to metadata and the data warehouse. In addition, we will develop and maintain the ENCODE Portal that will be the primary entry point to the wealth of experimentally determined information as well as results of computational analyses. The Portal will integrate these data resources and make them available via enhanced search and browsing capabilities. Tools will be implemented to aid discovery by both experienced bioinformaticians and na\u00efve laboratory staff. The DCC will evolve into a substantial service organization allowing biomedical research to take full advance of the ENCODE results. To this end the DCC will provide documentation via many media including written documentation, video tutorials, webinars, and meeting presentations. The DCC, DAC, production laboratories and AWG will be tightly woven together to create the ENCODE Consortium.",
+    "end_date": "2021-01-31",
+    "name": "U24HG009397",
+    "pi": "facilisi.tristique@potenti.vivamus",
+    "project": "ENCODE",
+    "rfa": "ENCODE4",
+    "schema_version": "7",
+    "start_date": "2017-02-01",
+    "status": "current",
+    "title": "A DATA COORDINATING CENTER FOR ENCODE",
+    "url": "https://projectreporter.nih.gov/project_info_description.cfm?aid=9247374&icde=32923597&ddparam=&ddvalue=&ddsub=&cr=1&csb=default&cs=ASC&pball=",
+    "uuid": "f06a0db4-b123-48d9-b414-37d83859cad0",
+    "viewing_group": "ENCODE4"
+  }
+]

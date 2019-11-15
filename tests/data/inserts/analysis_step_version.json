@@ -1,0 +1,26 @@
+[
+  {
+    "analysis_step": "microrna-seq-trimming-alignment-quantification-step-v-1",
+    "date_created": "2019-03-23T00:15:13.829540+00:00",
+    "minor_version": 1,
+    "schema_version": "4",
+    "software_versions": [
+      "70a085ad-194e-4de0-838c-7af257680f54"
+    ],
+    "status": "in progress",
+    "submitted_by": "facilisi.tristique@potenti.vivamus",
+    "uuid": "34f43f2b-25ac-4c58-9828-f63b66220999"
+  },
+  {
+    "analysis_step": "/analysis-steps/microrna-seq-signal-generation-step-v-1/",
+    "date_created": "2019-03-23T00:17:57.437237+00:00",
+    "minor_version": 1,
+    "schema_version": "4",
+    "software_versions": [
+      "ad0d99b7-c9f9-4b59-9515-4b64314e837c"
+    ],
+    "status": "in progress",
+    "submitted_by": "facilisi.tristique@potenti.vivamus",
+    "uuid": "34f43f2b-25ac-4c58-9828-f63b66221111"
+  }
+]

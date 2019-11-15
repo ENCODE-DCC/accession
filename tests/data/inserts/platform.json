@@ -1,0 +1,19 @@
+[
+  {
+    "aliases": [
+      "encode:Illumina_HiSeq_2000",
+      "encode:HiSeq2000"
+    ],
+    "date_created": "2013-11-14T22:17:00.135861+00:00",
+    "dbxrefs": [
+      "UCSC-ENCODE-cv:Illumina_HiSeq_2000"
+    ],
+    "schema_version": "7",
+    "status": "released",
+    "submitted_by": "facilisi.tristique@potenti.vivamus",
+    "term_id": "OBI:0002001",
+    "term_name": "Illumina HiSeq 2000",
+    "url": "http://www.illumina.com/documents/products/datasheets/datasheet_hiseq2000.pdf",
+    "uuid": "616db2ff-a1c3-4c4f-b0de-9ea11c825b82"
+  }
+]

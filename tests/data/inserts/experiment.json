@@ -1,0 +1,53 @@
+[
+  {
+    "accession": "ENCSR715NEZ",
+    "aliases": [
+      "ali-mortazavi:e10.5-mouse-limb-mirna-seq"
+    ],
+    "assay_term_name": "microRNA-seq",
+    "award": "U54HG006998",
+    "biosample_ontology": "tissue_UBERON_0002101",
+    "date_created": "2017-05-30T21:43:04.950978+00:00",
+    "date_released": "2017-08-15",
+    "date_submitted": "2017-06-29",
+    "dbxrefs": [
+      "GEO:GSE105844"
+    ],
+    "description": "miRNA-seq on embryonic 10.5 day mouse limb",
+    "internal_status": "unreviewed",
+    "internal_tags": [
+      "ENCYCLOPEDIAv5"
+    ],
+    "lab": "ali-mortazavi",
+    "schema_version": "27",
+    "status": "released",
+    "submitted_by": "facilisi.tristique@potenti.vivamus",
+    "uuid": "56e94f2b-25ac-4c58-9828-f63b66220763"
+  },
+  {
+    "accession": "ENCSR543MWW",
+    "aliases": [
+      "ali-mortazavi:human-right-cardiac-atrium-ENTEX101-102-mirna-seq"
+    ],
+    "assay_term_name": "microRNA-seq",
+    "award": "U54HG006998",
+    "biosample_ontology": "tissue_UBERON_0006631",
+    "date_created": "2016-07-25T22:17:15.906822+00:00",
+    "date_released": "2017-01-31",
+    "date_submitted": "2017-01-30",
+    "dbxrefs": [
+      "GEO:GSE105668"
+    ],
+    "description": "miRNA-seq on human right cardiac atrium",
+    "internal_status": "unreviewed",
+    "internal_tags": [
+      "ENCYCLOPEDIAv5",
+      "ENTEx"
+    ],
+    "lab": "ali-mortazavi",
+    "schema_version": "28",
+    "status": "released",
+    "submitted_by": "facilisi.tristique@potenti.vivamus",
+    "uuid": "df7a3c62-2d5c-44ba-a8a8-2ff1f8d53a74"
+  }
+]

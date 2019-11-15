@@ -1,0 +1,28 @@
+[
+  {
+    "email": "facilisi.tristique@potenti.vivamus",
+    "first_name": "Tincidunt",
+    "job_title": "Project Manager",
+    "lab": "Ali Mortazavi, UCI",
+    "last_name": "Volutpat-Ullamcorper",
+    "submits_for": [
+      "Ali Mortazavi, UCI"
+    ],
+    "uuid": "df9f3c8e-b819-4885-8f16-08f6ef1231e8"
+  },
+  {
+    "email": "duis.pede@nonummy.scelerisque",
+    "first_name": "Inceptos",
+    "groups": [
+      "admin",
+      "verified"
+    ],
+    "job_title": "Data Wrangler",
+    "lab": "ENCODE Processing Pipeline",
+    "last_name": "Nullam",
+    "submits_for": [
+      "ENCODE Processing Pipeline"
+    ],
+    "uuid": "3787a0ac-f13a-40fc-a524-69628b04cd59"
+  }
+]

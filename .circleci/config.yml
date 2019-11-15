@@ -1,50 +1,76 @@
 version: 2.1
 
-# default envs
-py35: &py35
-  docker:
-    - image: circleci/python:3.5.7-stretch
-  working_directory: ~/qc-utils
-
-py36: &py36
-  docker:
-    - image: circleci/python:3.6.7-stretch
-  working_directory: ~/qc-utils
-
 py37: &py37
   docker:
     - image: circleci/python:3.7.3-stretch
-  working_directory: ~/qc-utils
-
-py38: &py38
-  docker:
-    - image: circleci/python:3.8.0b1-stretch
-  working_directory: ~/qc-utils
+  working_directory: ~/accession
 
 defaults: &defaults
   docker:
     - image: circleci/buildpack-deps:xenial-scm
-  working_directory: ~/qc-utils
+  working_directory: ~/accession
 
-master_only: &master_only
+machine_defaults: &machine_defaults
+  machine:
+    image: ubuntu-1604:201903-01
+  resource_class: large
+  working_directory: ~/accession
+
+make_tag: &make_tag
+  name: make docker image tag
+  command: |
+    echo "export TAG=quay.io/encode-dcc/${CIRCLE_PROJECT_REPONAME}:${CIRCLE_BRANCH}_${CIRCLE_WORKFLOW_ID}" >> ${BASH_ENV}
+
+only_dev_and_master: &only_dev_and_master
   filters:
     branches:
       only:
+        - dev
         - master
 
 commands:
   install_shellcheck:
-    description: "Install shellcheck"
+    description: "Install shellcheck by downloading the binary, don't want to apt-get update"
     steps:
-      - run: sudo apt-get install -y shellcheck
+      - run: curl -s https://storage.googleapis.com/shellcheck/shellcheck-stable.linux.x86_64.tar.xz | tar xJ && sudo mv shellcheck-stable/shellcheck /usr/local/bin
+  install_jq:
+    description: "Install jq"
+    steps:
+      - run: sudo apt-get install -y jq
   run_tox:
     description: "Install and run tox with a given environment"
     parameters:
       toxenv:
+        description: "The name of the environment as per tox.ini, e.g. py36 or lint"
         type: string
+      docker:
+        description: "Determines if the test needs to use --docker"
+        type: boolean
+        default: false
+      extra_args:
+        description: "Extra arguments that are consumed only when running pytest"
+        type: string
+        default: ""
     steps:
-      - run: sudo pip install tox
-      - run: tox -e << parameters.toxenv >>
+      - when:
+          condition: <<parameters.docker>>
+          steps:
+            - attach_workspace:
+                at: ~/accession
+            - run:
+                name: Run tests using docker image
+                command: |
+                  pyenv install 3.6.7
+                  pyenv global 3.6.7
+                  pip install tox
+                  echo "Sourcing env vars:" && cat vars.sh && source vars.sh
+                  docker pull "${TAG}"
+                  tox -e << parameters.toxenv >> -- --docker "${TAG}" << parameters.extra_args >>
+      - unless:
+          condition: <<parameters.docker>>
+          steps:
+            - run: sudo pip install tox
+            - run: tox -e << parameters.toxenv >> -- << parameters.extra_args >>
 
 jobs:
   lint:
@@ -54,44 +80,13 @@ jobs:
       - install_shellcheck
       - run_tox:
           toxenv: "lint"
-  py35_unit:
-    <<: *py35
-    steps:
-      - checkout
-      - run_tox:
-          toxenv: "py35"
-  py36_unit:
-    <<: *py36
+  test_py36:
+    <<: *machine_defaults
     steps:
       - checkout
       - run_tox:
           toxenv: "py36"
-  py37_unit:
-    <<: *py37
-    steps:
-      - checkout
-      - run_tox:
-          toxenv: "py37"
-  py38_unit:
-    <<: *py38
-    steps:
-      - checkout
-      - run_tox:
-          toxenv: "py38"
-  pypy3_unit:
-    <<: *py37
-    steps:
-      - checkout
-      - run:
-          command: |
-            wget -P .. https://bitbucket.org/squeaky/portable-pypy/downloads/pypy3.6-7.1.1-beta-linux_x86_64-portable.tar.bz2
-            cd ..
-            tar xjvf pypy3.6-7.1.1-beta-linux_x86_64-portable.tar.bz2
-            chmod 755 pypy3.6-7.1.1-beta-linux_x86_64-portable/bin/pypy3.6
-            sudo ln -s $PWD/pypy3.6-7.1.1-beta-linux_x86_64-portable/bin/pypy3.6 /usr/local/bin/pypy3
-            pypy3 --version
-      - run_tox:
-          toxenv: "pypy3"
+          docker: true
   docs:
     <<: *py37
     steps:
@@ -116,6 +111,67 @@ jobs:
       - checkout
       - run: sudo pip install --upgrade setuptools wheel twine
       - run: ./release_to_pypi.sh https://upload.pypi.org/legacy/
+  build:
+    <<: *defaults
+    steps:
+      - checkout
+      - setup_remote_docker
+      - install_jq
+      - run: *make_tag
+      - run:
+          name: build test docker image
+          command: |
+            source ${BASH_ENV}
+            docker login -u=${QUAY_ROBOT_USER} -p=${QUAY_ROBOT_USER_TOKEN} quay.io
+            # We use a regex to filter out RC tags like v90rc2 that don't end up on prod
+            # Parsing encodeproject.org metadata (GET /) is less robust than the Github API
+            LATEST_PORTAL_TAG=$(curl -s https://api.github.com/repos/ENCODE-DCC/encoded/tags | jq '.[] | select(.name | test("^v\\d{2,3}\\.\\d(-hotfix-\\d)?$")) | .name ' | tr -d '"' | head -n 1)
+            echo "Found latest portal tag from Github: ${LATEST_PORTAL_TAG}"
+            # Get the latest accession git tag reachable from current commit
+            LATEST_ACCESSION_GIT_TAG=$(git describe --tags | cut -d '-' -f 1)
+            echo "Found latest accession git tag: ${LATEST_ACCESSION_GIT_TAG}"
+            # Set the default tag to cache from as the most recent portal version
+            CACHE_TAG="${LATEST_PORTAL_TAG}"
+            # See https://superuser.com/a/1176569, captures cURL return code
+            # We check if the portal tag is on quay, if not then we can't use it as build cache, and we use the accession tag instead
+            IMAGE_URL="https://quay.io/api/v1/repository/encode-dcc/accession/tag/${LATEST_PORTAL_TAG}/images"
+            TAG_STATUS=$(curl -LI ${IMAGE_URL} -o /dev/null -w '%{http_code}\n' -s)
+            echo "Attempted to find image tagged with current portal version at ${IMAGE_URL}, got ${TAG_STATUS}"
+            # If we couldn't find the new tag, then use the accession git tag as a cache
+            if [[ "${TAG_STATUS}" -ne "200" ]]; then CACHE_TAG="${LATEST_ACCESSION_GIT_TAG}"; fi
+            # Create tags for the image to build from the latest portal and accession tags
+            QUAY_NAMESPACED_REPO="quay.io/encode-dcc/${CIRCLE_PROJECT_REPONAME}"
+            CACHE_TAG="${QUAY_NAMESPACED_REPO}:${CACHE_TAG}"
+            echo "Will use ${CACHE_TAG} as docker build cache"
+            PORTAL_VERSION_DOCKER_TAG="${QUAY_NAMESPACED_REPO}:${LATEST_PORTAL_TAG}"
+            ACCESSION_VERSION_DOCKER_TAG="${QUAY_NAMESPACED_REPO}:${LATEST_ACCESSION_GIT_TAG}"
+            docker pull "${CACHE_TAG}"
+            docker build --cache-from "${CACHE_TAG}" -f docker/Dockerfile -t "${TAG}" --build-arg ENCODED_RELEASE_TAG="${LATEST_PORTAL_TAG}" .
+            docker push "${TAG}"
+            docker logout
+            ENV_FILE="vars.sh"
+            echo "export PORTAL_VERSION_DOCKER_TAG=${PORTAL_VERSION_DOCKER_TAG}" > "${ENV_FILE}"
+            echo "export ACCESSION_VERSION_DOCKER_TAG=${ACCESSION_VERSION_DOCKER_TAG}" >> "${ENV_FILE}"
+            echo "export TAG=${TAG}" >> "${ENV_FILE}"
+      - persist_to_workspace:
+          root: .
+          paths:
+            - vars.sh
+  push:
+    <<: *defaults
+    steps:
+      - attach_workspace:
+          at: ~/accession
+      - run:
+          name: push test docker image
+          command: |
+            echo "Sourcing env vars:" && cat vars.sh && source vars.sh
+            docker login -u=${QUAY_ROBOT_USER} -p=${QUAY_ROBOT_USER_TOKEN} quay.io
+            docker pull "${TAG}"
+            docker tag "${TAG}" "${ACCESSION_VERSION_DOCKER_TAG}" "${PORTAL_VERSION_DOCKER_TAG}"
+            docker push "${ACCESSION_VERSION_DOCKER_TAG}"
+            docker push "${PORTAL_VERSION_DOCKER_TAG}"
+            docker logout
 
 workflows:
   build_workflow:
@@ -123,3 +179,11 @@ workflows:
       - lint
       - pypi-description
       - docs
+      - build
+      - test_py36:
+          requires:
+            - build
+      - push:
+          <<: *only_dev_and_master
+          requires:
+            - build

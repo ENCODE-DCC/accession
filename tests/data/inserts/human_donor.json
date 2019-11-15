@@ -1,0 +1,35 @@
+[
+  {
+    "accession": "ENCDO793LXB",
+    "age": "53",
+    "age_units": "year",
+    "aliases": [
+      "gtex:ENC-MAC",
+      "gtex:ENC-003",
+      "gtex:PT-1LGRB",
+      "bradley-bernstein:Donor GTEX-1LGRB"
+    ],
+    "alternate_accessions": [],
+    "award": "U54HG006998",
+    "characterizations": [],
+    "date_created": "2015-02-14T00:31:58.080965+00:00",
+    "dbxrefs": [],
+    "external_ids": [
+      "GEO:SAMN05897794"
+    ],
+    "internal_tags": [
+      "ENTEx"
+    ],
+    "lab": "ali-mortazavi",
+    "life_stage": "adult",
+    "organism": "human",
+    "parents": [],
+    "references": [],
+    "schema_version": "11",
+    "sex": "female",
+    "siblings": [],
+    "status": "released",
+    "submitted_by": "facilisi.tristique@potenti.vivamus",
+    "uuid": "28e5135a-6529-4f7a-8dad-41e0a216f46e"
+  }
+]

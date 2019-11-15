@@ -1,0 +1,62 @@
+[
+  {
+    "accession": "ENCLB794GIJ",
+    "aliases": [
+      "ali-mortazavi:SL236343"
+    ],
+    "award": "U54HG006998",
+    "biosample": "ENCBS892NXC",
+    "date_created": "2017-05-30T21:46:12.592216+00:00",
+    "dbxrefs": [
+      "GEO:GSM2828510"
+    ],
+    "lab": "ali-mortazavi",
+    "nucleic_acid_term_name": "miRNA",
+    "schema_version": "9",
+    "size_range": "<30",
+    "status": "released",
+    "strand_specificity": false,
+    "submitted_by": "facilisi.tristique@potenti.vivamus",
+    "uuid": "2fbbb5c3-cf4b-4420-b73b-0202f00b631f"
+  },
+  {
+    "accession": "ENCLB515LXI",
+    "aliases": [
+      "ali-mortazavi:SL236342"
+    ],
+    "award": "U54HG006998",
+    "biosample": "ENCBS844FSC",
+    "date_created": "2017-05-30T21:46:12.592216+00:00",
+    "dbxrefs": [
+      "GEO:GSM2828510"
+    ],
+    "lab": "ali-mortazavi",
+    "nucleic_acid_term_name": "miRNA",
+    "schema_version": "9",
+    "size_range": "<30",
+    "status": "released",
+    "strand_specificity": false,
+    "submitted_by": "facilisi.tristique@potenti.vivamus",
+    "uuid": "1abbb5c3-cf4b-4420-b73b-0202f00b631f"
+  },
+  {
+    "accession": "ENCLB242IQX",
+    "aliases": [
+      "richard-myers:SL153338"
+    ],
+    "award": "U54HG006998",
+    "biosample": "ENCBS504MQP",
+    "date_created": "2016-07-25T22:17:37.386073+00:00",
+    "dbxrefs": [
+      "GEO:GSM2827470"
+    ],
+    "lab": "ali-mortazavi",
+    "nucleic_acid_term_name": "miRNA",
+    "schema_version": "9",
+    "size_range": "<30",
+    "status": "released",
+    "strand_specificity": false,
+    "submitted_by": "facilisi.tristique@potenti.vivamus",
+    "uuid": "a6752081-fbcf-41a2-9fdd-09aad04b790c"
+  }
+]

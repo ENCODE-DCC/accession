@@ -1,0 +1,30 @@
+[
+  {
+    "accession": "ENCSR488FQU",
+    "aliases": [
+      "encode:microRNA_indexes"
+    ],
+    "award": "U24HG009397",
+    "date_created": "2019-04-02T17:06:25.389567+00:00",
+    "date_released": "2019-04-09",
+    "description": "STAR indexed reference files for use with microRNA pipeline",
+    "lab": "encode-processing-pipeline",
+    "reference_type": "index",
+    "schema_version": "16",
+    "status": "released",
+    "submitted_by": "facilisi.tristique@potenti.vivamus",
+    "uuid": "84c2c840-4146-4c93-90cf-67a11a4fc123"
+  },
+  {
+    "accession": "ENCSR564GPK",
+    "award": "U24HG009397",
+    "date_created": "2016-01-08T19:49:32.922568+00:00",
+    "date_released": "2016-05-07",
+    "description": "microRNA subset of GENCODE annotations",
+    "lab": "ali-mortazavi",
+    "schema_version": "16",
+    "status": "released",
+    "submitted_by": "facilisi.tristique@potenti.vivamus",
+    "uuid": "98c2c843-4146-4c93-90cf-67a11a4fc123"
+  }
+]

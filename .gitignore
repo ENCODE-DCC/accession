@@ -105,3 +105,4 @@ venv.bak/
 
 EU_Logs
 *.DS_Store
+.vscode

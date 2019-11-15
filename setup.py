@@ -23,8 +23,11 @@ CLASSIFIERS = [
     "Programming Language :: Python :: 3.7",
     "Programming Language :: Python :: 3.8",
 ]
-INSTALL_REQUIRES = ["requests", "encode_utils==2.5.0", "google-cloud-storage"]
-EXTRAS_REQUIRE = {"docs": ["sphinx"], "tests": ["pytest", "pytest-cov"]}
+INSTALL_REQUIRES = ["requests", "encode_utils==2.5.0", "google-cloud-storage", "attrs"]
+EXTRAS_REQUIRE = {
+    "docs": ["sphinx"],
+    "tests": ["pytest", "pytest-cov", "pytest-mock", "docker"],
+}
 EXTRAS_REQUIRE["dev"] = (
     EXTRAS_REQUIRE["docs"] + EXTRAS_REQUIRE["tests"] + ["pre-commit"]
 )

@@ -1,0 +1,40 @@
+[
+  {
+    "award": "U24HG009397",
+    "description": "STAR (Spliced Transcript Alignment to a Reference) aligns short and long RNA-seq reads to a reference genome using uncompressed suffix arrays.",
+    "lab": "encode-processing-pipeline",
+    "name": "star",
+    "purpose": [
+      "RNA-seq"
+    ],
+    "software_type": [
+      "aligner"
+    ],
+    "source_url": "https://github.com/alexdobin/STAR/releases",
+    "status": "released",
+    "title": "STAR",
+    "used_by": [
+      "ENCODE"
+    ],
+    "uuid": "0afb6080-1c08-11e4-8c21-0800200c9a66"
+  },
+  {
+    "award": "U24HG009397",
+    "date_created": "2015-08-18T18:52:28.905386+00:00",
+    "description": "The bigWig format is for display of dense, continuous data that will be displayed in the Genome Browser as a graph. BigWig files are created initially from wiggle (wig) type files, using the program wigToBigWig. The resulting bigWig files are in an indexed binary format. The main advantage of the bigWig files is that only the portions of the files needed to display a particular region are transferred to UCSC, so for large data sets bigWig is considerably faster than regular wiggle files.",
+    "lab": "encode-processing-pipeline",
+    "name": "wigtobigwig",
+    "purpose": [
+      "community resource"
+    ],
+    "schema_version": "6",
+    "software_type": [
+      "file format conversion"
+    ],
+    "source_url": "http://hgdownload.cse.ucsc.edu/admin/exe/",
+    "status": "released",
+    "title": "wigToBigWig",
+    "url": "http://genome.ucsc.edu/goldenpath/help/bigWig.html",
+    "uuid": "0afb6080-1c08-11e4-8c21-9811211c9a66"
+  }
+]

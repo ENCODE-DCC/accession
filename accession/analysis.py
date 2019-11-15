@@ -22,13 +22,16 @@ class Analysis(object):
         Args: metadata: MetaData object
     """
 
-    def __init__(self, metadata, auto_populate=True):
+    def __init__(self, metadata, auto_populate=True, backend=None):
         self.files = []
         self.tasks = []
         self.metadata = metadata.content
         if self.metadata:
             bucket = self.metadata["workflowRoot"].split("gs://")[1].split("/")[0]
-            self.backend = GCBackend(bucket)
+            if backend is None:
+                self.backend = GCBackend(bucket)
+            else:
+                self.backend = backend
         else:
             raise Exception("Valid metadata json output must be supplied")
         if auto_populate:

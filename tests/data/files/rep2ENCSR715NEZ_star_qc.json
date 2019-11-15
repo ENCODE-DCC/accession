@@ -1,0 +1,39 @@
+{
+  "aligned_reads": {
+    "aligned_reads": 6817403
+  },
+  "expressed_mirnas": {
+    "expressed_mirnas": 412
+  },
+  "star_qc_metric": {
+    "% of chimeric reads": "0.00%",
+    "% of reads mapped to multiple loci": "21.89%",
+    "% of reads mapped to too many loci": "2.20%",
+    "% of reads unmapped: other": "4.20%",
+    "% of reads unmapped: too many mismatches": "22.77%",
+    "% of reads unmapped: too short": "3.10%",
+    "Average input read length": "22",
+    "Average mapped length": "22.21",
+    "Deletion average length": "1.00",
+    "Deletion rate per base": "0.00%",
+    "Finished on": "Jul 14 05:29:00",
+    "Insertion average length": "1.03",
+    "Insertion rate per base": "0.00%",
+    "Mapping speed, Million of reads per hour": "156.85",
+    "Mismatch rate per base, %": "0.86%",
+    "Number of chimeric reads": "0",
+    "Number of input reads": "10064833",
+    "Number of reads mapped to multiple loci": "2202709",
+    "Number of reads mapped to too many loci": "221621",
+    "Number of splices: AT/AC": "0",
+    "Number of splices: Annotated (sjdb)": "0",
+    "Number of splices: GC/AG": "0",
+    "Number of splices: GT/AG": "0",
+    "Number of splices: Non-canonical": "0",
+    "Number of splices: Total": "0",
+    "Started job on": "Jul 14 05:23:12",
+    "Started mapping on": "Jul 14 05:25:09",
+    "Uniquely mapped reads %": "45.85%",
+    "Uniquely mapped reads number": "4614694"
+  }
+}

@@ -1,0 +1,51 @@
+[
+  {
+    "analysis_step_types": [
+      "signal generation"
+    ],
+    "date_created": "2019-03-23T00:08:51.448854+00:00",
+    "input_file_types": [
+      "alignments"
+    ],
+    "major_version": 1,
+    "output_file_types": [
+      "minus strand signal of all reads",
+      "minus strand signal of unique reads",
+      "plus strand signal of all reads",
+      "plus strand signal of unique reads"
+    ],
+    "parents": [
+      "microrna-seq-trimming-alignment-quantification-step-v-1"
+    ],
+    "schema_version": "8",
+    "status": "in progress",
+    "step_label": "microrna-seq-signal-generation-step",
+    "submitted_by": "facilisi.tristique@potenti.vivamus",
+    "title": "microRNA-seq signal generation step",
+    "uuid": "98a99f2b-25ac-4c58-9828-f63b66220999"
+  },
+  {
+    "analysis_step_types": [
+      "alignment",
+      "read trimming",
+      "quantification"
+    ],
+    "date_created": "2019-03-23T00:05:00.746075+00:00",
+    "input_file_types": [
+      "reads",
+      "genome index",
+      "genome reference"
+    ],
+    "major_version": 1,
+    "output_file_types": [
+      "alignments",
+      "microRNA quantifications"
+    ],
+    "schema_version": "8",
+    "status": "in progress",
+    "step_label": "microrna-seq-trimming-alignment-quantification-step",
+    "submitted_by": "facilisi.tristique@potenti.vivamus",
+    "title": "microRNA-seq alignment and quantification step",
+    "uuid": "11a11f2b-25ac-4c58-9828-f63b66220999"
+  }
+]
