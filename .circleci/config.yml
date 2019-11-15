@@ -160,6 +160,7 @@ jobs:
   push:
     <<: *defaults
     steps:
+      - setup_remote_docker
       - attach_workspace:
           at: ~/accession
       - run:
@@ -168,7 +169,8 @@ jobs:
             echo "Sourcing env vars:" && cat vars.sh && source vars.sh
             docker login -u=${QUAY_ROBOT_USER} -p=${QUAY_ROBOT_USER_TOKEN} quay.io
             docker pull "${TAG}"
-            docker tag "${TAG}" "${ACCESSION_VERSION_DOCKER_TAG}" "${PORTAL_VERSION_DOCKER_TAG}"
+            docker tag "${TAG}" "${ACCESSION_VERSION_DOCKER_TAG}"
+            docker tag "${TAG}" "${PORTAL_VERSION_DOCKER_TAG}"
             docker push "${ACCESSION_VERSION_DOCKER_TAG}"
             docker push "${PORTAL_VERSION_DOCKER_TAG}"
             docker logout
@@ -187,3 +189,4 @@ workflows:
           <<: *only_dev_and_master
           requires:
             - build
+            - test_py36
