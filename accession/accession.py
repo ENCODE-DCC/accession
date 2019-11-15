@@ -75,21 +75,63 @@ class Accession(object):
             step_run_id = step_run.get("@id")
         return step_run_id
 
-    def file_at_portal(self, file):
+    def get_encode_file_matching_md5_of_blob(self, file):
+        """Finds an ENCODE File object whose md5sum matches md5 of a blob in URI in backend.
+
+        Args:
+            file (str): String representing an URI to an object in the backend.
+
+        Returns:
+            dict: Dictionary representation of the matching file object on portal.
+            None if no matching objects are found.
+        """
+        self.wait_for_portal()
         md5sum = self.backend.md5sum(file)
         search_param = [("md5sum", md5sum), ("type", "File")]
-        encode_file = self.conn.search(search_param)
-        if len(encode_file) > 0:
-            return self.conn.get(encode_file[0].get("@id"))
+        encode_files = self.conn.search(search_param)
+        filtered_encode_files = type(self).filter_encode_files_by_status(encode_files)
+        if filtered_encode_files:
+            if len(filtered_encode_files) > 1:
+                self.logger.warning(
+                    "get_encode_file_matching_md5_of_blob found more than 1 files matching the md5 of the blob."
+                )
+            return self.conn.get(filtered_encode_files[0].get("@id"))
+        else:
+            return None
+
+    @staticmethod
+    def filter_encode_files_by_status(
+        encode_files, forbidden_statuses=["replaced", "revoked", "deleted"]
+    ):
+        """Filter out files whose statuses are not allowed.
+
+        From list of dicts representing encode file objects, filter out ones whose statuses are not allowed.
+
+        Args:
+            encode_files (list): List containing dicts representing encode file objects.
+            forbidden_statuses (list): List of statuses. If file object has one of these statuses it will be filtered out.
+            Statuses that encode file can have are: uploading, upload failed, in progress, released, archived, deleted, replaced,
+            revoked, content error.
+
+        Returns:
+            list: List containing the dicts whose statuses are not contained in forbidden_statuses, empty list is possible.
+
+        Raises:
+            KeyError: If some of the files do not have status (this is an indication of an error on portal).
+        """
+        filtered_files = [
+            file for file in encode_files if file["status"] not in forbidden_statuses
+        ]
+        return filtered_files
 
     def raw_files_accessioned(self):
         for file in self.analysis.raw_fastqs:
-            if not self.file_at_portal(file.filename):
+            if not self.get_encode_file_matching_md5_of_blob(file.filename):
                 return False
         return True
 
     def accession_file(self, encode_file, gs_file):
-        file_exists = self.file_at_portal(gs_file.filename)
+        file_exists = self.get_encode_file_matching_md5_of_blob(gs_file.filename)
         submitted_file_path = {"submitted_file_name": gs_file.filename}
         if file_exists:
             self.logger.warning(
@@ -165,7 +207,9 @@ class Accession(object):
                 filekey = "annotation_gtf"
             files = self.analysis.get_files(filekey=filekey)
             if files:
-                annotation = self.file_at_portal(files[0].filename)
+                annotation = self.get_encode_file_matching_md5_of_blob(
+                    files[0].filename
+                )
                 return annotation.get("assembly", "")
             else:
                 raise KeyError(
@@ -192,7 +236,9 @@ class Accession(object):
                 filekey = "annotation_gtf"
             files = self.analysis.get_files(filekey=filekey)
             if files:
-                annotation = self.file_at_portal(files[0].filename)
+                annotation = self.get_encode_file_matching_md5_of_blob(
+                    files[0].filename
+                )
                 return annotation.get("genome_annotation", "")
             else:
                 raise KeyError(
@@ -206,7 +252,7 @@ class Accession(object):
     @property
     def dataset(self):
         if self._dataset is None:
-            self._dataset = self.file_at_portal(
+            self._dataset = self.get_encode_file_matching_md5_of_blob(
                 self.analysis.raw_fastqs[0].filename
             ).get("dataset")
             return self._dataset
@@ -297,7 +343,8 @@ class Accession(object):
             file.task, task_name, filekey, inputs
         )
         encode_files = [
-            self.file_at_portal(gs_file.filename) for gs_file in derived_from_files
+            self.get_encode_file_matching_md5_of_blob(gs_file.filename)
+            for gs_file in derived_from_files
         ]
         accessioned_files = encode_files + self.new_files
         accessioned_files = [x for x in accessioned_files if x is not None]
