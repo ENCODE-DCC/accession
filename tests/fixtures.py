@@ -89,6 +89,7 @@ def local_encoded_server(
             continue
         container.kill()
         raise RuntimeError("Elasticsearch took too long to index")
+    sleep(10)
     yield server_address
     container.kill()
 
