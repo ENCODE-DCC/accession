@@ -2,6 +2,7 @@ import argparse
 
 from encode_utils.connection import Connection
 
+from accession import __version__
 from accession.accession import Accession, AccessionSteps
 from accession.analysis import Analysis, MetaData
 from accession.helpers import filter_outputs_by_path
@@ -35,6 +36,9 @@ def get_parser():
     )
     parser.add_argument("--lab", type=str, default=None, help="Lab")
     parser.add_argument("--award", type=str, default=None, help="Award")
+    parser.add_argument(
+        "-v", "--version", action="version", version="%(prog)s {}".format(__version__)
+    )
     return parser
 
 
