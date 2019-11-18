@@ -100,7 +100,7 @@ class Accession(object):
 
     @staticmethod
     def filter_encode_files_by_status(
-        encode_files, forbidden_statuses=["replaced", "revoked", "deleted"]
+        encode_files, forbidden_statuses=("replaced", "revoked", "deleted")
     ):
         """Filter out files whose statuses are not allowed.
 
