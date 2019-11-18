@@ -85,7 +85,6 @@ class Accession(object):
             dict: Dictionary representation of the matching file object on portal.
             None if no matching objects are found.
         """
-        self.wait_for_portal()
         md5sum = self.backend.md5sum(file)
         search_param = [("md5sum", md5sum), ("type", "File")]
         encode_files = self.conn.search(search_param)
