@@ -71,7 +71,22 @@ Server
 
 Lab and Award
 -------------
-These are unique identifiers that are expected to be already present on the ENCODE Portal.
+| These are unique identifiers that are expected to be already present on the ENCODE
+  Portal. It is recommended to specify them as the environment variables ``DCC_LAB`` and
+  ``DCC_AWARD``, respectively. However, you may also specify them on the command line
+  using the ``--lab`` and ``--award`` flags. Specifying these parameters with flags will
+  take override any values in your environment. The values correspond to the lab and
+  award identifiers given by the ENCODE portal, e.g. ``/labs/foo/`` and ``U00HG123456``.
+
+| To set these variables in your environment, run the following two commands in your
+  shell. You may wish to add these to your ``~/.bashrc``, ``~/.bash_profile``,
+  ``~/.zshrc``, or similar to configure them for your shell so you don't need to set
+  them every time.
+
+.. code-block:: console
+
+    $ export DCC_LAB=XXXXXXXX
+    $ export DCC_AWARD=yyyyyyyyyyy
 
 Table of Contents
 ==================

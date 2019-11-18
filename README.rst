@@ -38,6 +38,15 @@ You will also need `Google Application Credentials <https://cloud.google.com/vid
 
     $ export GOOGLE_APPLICATION_CREDENTIALS=<path_to_service_account_file>
 
+| Finally, it is highly recommended to set the DCC_LAB and DCC_AWARD environment
+  variables for ease of use. These correspond to the lab and award identifiers given by
+  the ENCODE portal, e.g. ``/labs/foo/`` and ``U00HG123456``, respectively.
+
+.. code-block:: console
+
+    $ export DCC_LAB=XXXXXXXX
+    $ export DCC_AWARD=yyyyyyyyyyy
+
 Usage
 ======
 
@@ -46,10 +55,8 @@ Usage
     $ accession --accession-metadata metadata.json \
                 --accession-steps steps.json \
                 --server dev \
-                --lab /labs/my-lab/ \
-                --award U00HG123456
 
-Please see the `docs <https://https://accession.readthedocs.io/en/latest/#detailed-argument-description>`_ for greater detail on these input parameters.
+Please see the `docs <https://accession.readthedocs.io/en/latest/#detailed-argument-description>`_ for greater detail on these input parameters.
 
 .. short-intro-end
 
