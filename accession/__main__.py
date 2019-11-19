@@ -1,4 +1,6 @@
 import argparse
+import os
+from typing import Optional, Tuple
 
 from encode_utils.connection import Connection
 
@@ -42,10 +44,34 @@ def get_parser():
     return parser
 
 
+def check_or_set_lab_award(lab: Optional[str], award: Optional[str]) -> Tuple[str, str]:
+    error_msg = (
+        "Could not identify {}, make sure you passed in the --{} command line argument"
+        "or set the DCC_{} environment variable"
+    )
+    lab_prop = "lab"
+    award_prop = "award"
+    if not lab:
+        try:
+            lab = os.environ[f"DCC_{lab_prop.upper()}"]
+        except KeyError as e:
+            raise EnvironmentError(
+                error_msg.format(lab_prop, lab_prop, lab_prop.upper())
+            ) from e
+    if not award:
+        try:
+            award = os.environ[f"DCC_{award_prop.upper()}"]
+        except KeyError as e:
+            raise EnvironmentError(
+                error_msg.format(award_prop, award_prop, award_prop.upper())
+            ) from e
+    return lab, award
+
+
 def main(args=None):
     parser = get_parser()
     args = parser.parse_args(args)
-
+    lab, award = check_or_set_lab_award(args.lab, args.award)
     if args.filter_from_path:
         filter_outputs_by_path(args.filter_from_path)
         return
@@ -53,8 +79,6 @@ def main(args=None):
     accession_steps = AccessionSteps(args.accession_steps)
     analysis = Analysis(metadata)
     connection = Connection(args.server)
-    lab = args.lab
-    award = args.award
     if all([accession_steps, analysis, lab, award, connection]):
         accessioner = Accession(accession_steps, analysis, connection, lab, award)
         accessioner.accession_steps()
