@@ -29,7 +29,7 @@
     },
     {
       "dcc_step_run": "/analysis-steps/long-read-rna-seq-filtering-step-v-1/",
-      "dcc_step_version": "/analysis-step-versions/long-read-rna-seq-filtering-step-v-1-0/",
+      "dcc_step_version": "/analysis-step-versions/long-read-rna-seq-filtering-step-v-1-1/",
       "wdl_files": [
         {
           "derived_from_files": [
