@@ -56,14 +56,14 @@ def check_or_set_lab_award(lab: Optional[str], award: Optional[str]) -> Tuple[st
             lab = os.environ[f"DCC_{lab_prop.upper()}"]
         except KeyError as e:
             raise EnvironmentError(
-                error_msg.format(*2 * [lab_prop], lab_prop.upper())
+                error_msg.format(lab_prop, lab_prop, lab_prop.upper())
             ) from e
     if not award:
         try:
             award = os.environ[f"DCC_{award_prop.upper()}"]
         except KeyError as e:
             raise EnvironmentError(
-                error_msg.format(*2 * [award_prop], award_prop.upper())
+                error_msg.format(award_prop, award_prop, award_prop.upper())
             ) from e
     return lab, award
 
