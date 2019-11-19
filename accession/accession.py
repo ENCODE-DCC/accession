@@ -367,7 +367,7 @@ class Accession(object):
                 for filename in map(lambda x: x.filename, derived_from_files)
             ]
         )
-        if not derived_from_accession_ids:
+        if not derived_from_accession_ids and not allow_empty:
             raise Exception(
                 f"Missing all of the derived_from files on the portal: {missing}"
             )
