@@ -523,7 +523,7 @@ class Accession(object):
         """
         if (
             self.file_has_qc(encode_file, "CorrelationQualityMetric")
-            or not self.is_replicated
+            or self.get_number_of_biological_replicates() != 2
         ):
             return
         qc_file = self.analysis.search_down(
