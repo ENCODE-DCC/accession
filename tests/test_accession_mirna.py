@@ -57,6 +57,7 @@ def validate_accessioning(accessioner, expected_files, expected_num_files, datas
         "content_md5sum",
         "matching_md5sum",
         "audit",
+        "schema_version",
     ]
     qm_keys_to_skip = ["step_run"]
     for keys_to_skip in (file_keys_to_skip, qm_keys_to_skip):
