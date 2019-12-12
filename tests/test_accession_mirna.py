@@ -1,5 +1,3 @@
-from time import sleep
-
 import pytest
 
 
@@ -11,7 +9,6 @@ def test_accession_mirna_replicated(accessioner_factory):
     )
     accessioner, expected_files = next(factory)
     accessioner.accession_steps()
-    sleep(2)
     validate_accessioning(
         accessioner, expected_files, expected_num_files=12, dataset="ENCSR715NEZ"
     )
@@ -60,6 +57,7 @@ def validate_accessioning(accessioner, expected_files, expected_num_files, datas
         "content_md5sum",
         "matching_md5sum",
         "audit",
+        "schema_version",
     ]
     qm_keys_to_skip = ["step_run"]
     for keys_to_skip in (file_keys_to_skip, qm_keys_to_skip):
