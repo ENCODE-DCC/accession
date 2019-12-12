@@ -242,7 +242,9 @@ class Accession(object):
         elif pipeline_name == "chip":
             files = self.analysis.get_files(filekey="ref_fa")
             if files:
-                portal_index = self.get_encode_file_matching_md5_of_blob(files[0].filename)
+                portal_index = self.get_encode_file_matching_md5_of_blob(
+                    files[0].filename
+                )
             return portal_index["assembly"]
 
     @property
