@@ -366,6 +366,11 @@ def test_make_microrna_correlation_qc_unreplicated_returns_none(
     )
     mocker.patch.object(mock_accession_unreplicated, "file_has_qc", return_value=False)
     mocker.patch.object(mock_accession_unreplicated, "queue_qc", mock_queue_qc)
+    mocker.patch.object(
+        mock_accession_unreplicated,
+        "get_number_of_biological_replicates",
+        return_value=1,
+    )
     gs_file = [
         i for i in mock_accession_unreplicated.analysis.get_files(filekey="tsv")
     ][0]
@@ -402,6 +407,9 @@ def mock_replicated_mirna_accession(mocker, mirna_replicated_analysis, mock_acce
     mocker.patch.object(mock_accession, "backend", mirna_replicated_analysis.backend)
     mocker.patch.object(mock_accession, "file_has_qc", return_value=False)
     mocker.patch.object(mock_accession, "queue_qc", mock_queue_qc)
+    mocker.patch.object(
+        mock_accession, "get_number_of_biological_replicates", return_value=2
+    )
     return mock_accession
 
 
