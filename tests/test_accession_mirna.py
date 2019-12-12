@@ -1,5 +1,6 @@
-import pytest
 from time import sleep
+
+import pytest
 
 
 @pytest.mark.docker
