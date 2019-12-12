@@ -1,4 +1,5 @@
 import pytest
+from time import sleep
 
 
 @pytest.mark.docker
@@ -9,6 +10,7 @@ def test_accession_mirna_replicated(accessioner_factory):
     )
     accessioner, expected_files = next(factory)
     accessioner.accession_steps()
+    sleep(2)
     validate_accessioning(
         accessioner, expected_files, expected_num_files=12, dataset="ENCSR715NEZ"
     )
