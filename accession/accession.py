@@ -1,10 +1,16 @@
 import json
 import logging
 import os
+from abc import ABC, abstractmethod
 from base64 import b64encode
+from pathlib import Path
+from typing import Optional, Type
 
 from accession.helpers import string_to_number
 from accession.quality_metric import QualityMetric
+
+ASSEMBLY = "assembly"
+GENOME_ANNOTATION = "genome_annotation"
 
 
 class AccessionSteps:
@@ -26,7 +32,7 @@ class AccessionSteps:
         return self._steps["accession.steps"]
 
 
-class Accession(object):
+class Accession(ABC):
     """docstring for Accession
        Args:
         steps: AccessionSteps object
@@ -42,12 +48,6 @@ class Accession(object):
         "samtools_flagstat": "make_flagstat_qc",
         "idr": "make_idr_qc",
         "star": "make_star_qc_metric",
-        "mirna_mapping": "make_microrna_mapping_qc",
-        "mirna_quantification": "make_microrna_quantification_qc",
-        "mirna_correlation": "make_microrna_correlation_qc",
-        "long_read_rna_mapping": "make_long_read_rna_mapping_qc",
-        "long_read_rna_quantification": "make_long_read_rna_quantification_qc",
-        "long_read_rna_correlation": "make_long_read_rna_correlation_qc",
     }
 
     def __init__(self, steps, analysis, connection, lab, award):
@@ -193,56 +193,43 @@ class Accession(object):
         return self.conn.post(payload)
 
     @property
+    @abstractmethod
     def assembly(self):
         """
-        Obtain the assembly from the metadata. These magic strings should be factored out into the
-        accession_steps template.
+        A reminder that subclasses of Accession *must* provide their own implementation
+        for assembly.
         """
-        pipeline_name = self.analysis.metadata.get("workflowName")
-        if pipeline_name in ("mirna_seq_pipeline", "long_read_rna_pipeline"):
-            if pipeline_name == "mirna_seq_pipeline":
-                filekey = "annotation"
-            elif pipeline_name == "long_read_rna_pipeline":
-                filekey = "annotation_gtf"
-            files = self.analysis.get_files(filekey=filekey)
-            if files:
-                annotation = self.get_encode_file_matching_md5_of_blob(
-                    files[0].filename
-                )
-                return annotation.get("assembly", "")
-            else:
-                raise KeyError(
-                    "Could not find any file with key {} in metadata".format(filekey)
-                )
-        elif pipeline_name == "atac":
-            assembly = [
-                reference
-                for reference in type(self).ASSEMBLIES
-                if reference
-                in self.analysis.get_tasks("read_genome_tsv")[0]
-                .outputs.get("genome", {})
-                .get("ref_fa", "")
-            ]
-            return assembly[0] if len(assembly) > 0 else ""
+        raise NotImplementedError(
+            (
+                "This method should be implemented by concrete derived classes specific to"
+                " the pipeline in question."
+            )
+        )
 
     @property
     def genome_annotation(self):
-        pipeline_name = self.analysis.metadata.get("workflowName")
-        if pipeline_name in ("mirna_seq_pipeline", "long_read_rna_pipeline"):
-            if pipeline_name == "mirna_seq_pipeline":
-                filekey = "annotation"
-            elif pipeline_name == "long_read_rna_pipeline":
-                filekey = "annotation_gtf"
-            files = self.analysis.get_files(filekey=filekey)
-            if files:
-                annotation = self.get_encode_file_matching_md5_of_blob(
-                    files[0].filename
-                )
-                return annotation.get("genome_annotation", "")
-            else:
-                raise KeyError(
-                    "Could not find any file with key {} in metadata".format(filekey)
-                )
+        """
+        Not every pipeline will strictly need this method, so the @abstractmethod
+        decorator is not required as in the case of assembly, but we still need a
+        default implementation to so that file_from_template can check if the annotation
+        is there.
+        """
+        return None
+
+    def find_portal_property_from_filekey(
+        self, filekey: str, portal_property: str
+    ) -> str:
+        """
+        Generic helper method that all pipelines can use to find the annotation
+        """
+        files = self.analysis.get_files(filekey=filekey)
+        if files:
+            annotation = self.get_encode_file_matching_md5_of_blob(files[0].filename)
+            return annotation.get(portal_property, "")
+        else:
+            raise KeyError(
+                "Could not find any file with key {} in metadata".format(filekey)
+            )
 
     @property
     def lab_pi(self):
@@ -492,53 +479,6 @@ class Accession(object):
             star_qc_metric[key] = string_to_number(value)
         return self.queue_qc(star_qc_metric, encode_bam_file, "star-quality-metric")
 
-    def make_microrna_quantification_qc(self, encode_file, gs_file):
-        if self.file_has_qc(encode_file, "MicroRnaQuantificationQualityMetric"):
-            return
-        qc_file = self.analysis.get_files(
-            filename=gs_file.task.outputs["star_qc_json"]
-        )[0]
-        qc = self.backend.read_json(qc_file)
-        expressed_mirnas_qc = qc["expressed_mirnas"]
-        return self.queue_qc(
-            expressed_mirnas_qc, encode_file, "micro-rna-quantification-quality-metric"
-        )
-
-    def make_microrna_mapping_qc(self, encode_file, gs_file):
-        if self.file_has_qc(encode_file, "MicroRnaMappingQualityMetric"):
-            return
-        qc_file = self.analysis.get_files(
-            filename=gs_file.task.outputs["star_qc_json"]
-        )[0]
-        qc = self.backend.read_json(qc_file)
-        aligned_reads_qc = qc["aligned_reads"]
-        return self.queue_qc(
-            aligned_reads_qc, encode_file, "micro-rna-mapping-quality-metric"
-        )
-
-    def make_microrna_correlation_qc(self, encode_file, gs_file):
-        """
-        Returns without queueing this QC for posting if the experiment is not replicated, since
-        correlation is computed between pairs of replicates.
-        """
-        if (
-            self.file_has_qc(encode_file, "CorrelationQualityMetric")
-            or self.get_number_of_biological_replicates() != 2
-        ):
-            return
-        qc_file = self.analysis.search_down(
-            gs_file.task, "spearman_correlation", "spearman_json"
-        )[0]
-        qc = self.backend.read_json(qc_file)
-        spearman_value = qc["spearman_correlation"]["spearman_correlation"]
-        spearman_correlation_qc = {"Spearman correlation": spearman_value}
-        return self.queue_qc(
-            spearman_correlation_qc,
-            encode_file,
-            "correlation-quality-metric",
-            shared=True,
-        )
-
     def make_generic_correlation_qc(self, encode_file, gs_file, handler):
         """
         Make correlation QC metrics in  a pipeline agnostic fashion. Pipeline specific logic is
@@ -554,61 +494,6 @@ class Accession(object):
             return
         qc = handler(gs_file)
         return self.queue_qc(qc, encode_file, "correlation-quality-metric", shared=True)
-
-    def make_long_read_rna_correlation_qc(self, encode_file, gs_file):
-        """
-        Make and post Spearman QC for long read RNA by giving the make_generic_correlation_qc the
-        appropriate handler.
-        """
-        return self.make_generic_correlation_qc(
-            encode_file, gs_file, handler=self.prepare_long_read_rna_correlation_qc
-        )
-
-    def prepare_long_read_rna_correlation_qc(self, gs_file):
-        """
-        Handler for creating the correlation QC object, specifically for long read rna. Finds and
-        parses the spearman QC JSON.
-        """
-        qc_file, *_ = self.analysis.search_down(
-            gs_file.task, "calculate_spearman", "spearman"
-        )
-        qc = self.backend.read_json(qc_file)
-        spearman_value = qc["replicates_correlation"]["spearman_correlation"]
-        spearman_correlation_qc = {"Spearman correlation": spearman_value}
-        return spearman_correlation_qc
-
-    def make_long_read_rna_mapping_qc(self, encode_file, gs_file):
-        """
-        The commented lines add number_of_mapped_reads to the qc object, a field that is currently
-        not valid under the schema.
-        """
-        if self.file_has_qc(encode_file, "LongReadRnaMappingQualityMetric"):
-            return
-        qc_file = self.analysis.get_files(filename=gs_file.task.outputs["mapping_qc"])[
-            0
-        ]
-        qc = self.backend.read_json(qc_file)
-        output_qc = {}
-        mr = "mapping_rate"
-        # nomr = 'number_of_mapped_reads'
-        flnc = qc["full_length_non_chimeric_reads"]["flnc"]
-        output_qc["full_length_non_chimeric_read_count"] = int(flnc)
-        output_qc[mr] = float(qc[mr][mr])
-        # output_qc[nomr] = int(qc[nomr]['mapped'])
-        return self.queue_qc(
-            output_qc, encode_file, "long-read-rna-mapping-quality-metric"
-        )
-
-    def make_long_read_rna_quantification_qc(self, encode_file, gs_file):
-        if self.file_has_qc(encode_file, "LongReadRnaQuantificationQualityMetric"):
-            return
-        ngd = "number_of_genes_detected"
-        qc_file = self.analysis.get_files(filename=gs_file.task.outputs[ngd])[0]
-        qc = self.backend.read_json(qc_file)
-        output_qc = {"genes_detected": int(qc[ngd][ngd])}
-        return self.queue_qc(
-            output_qc, encode_file, "long-read-rna-quantification-quality-metric"
-        )
 
     def queue_qc(self, qc, encode_file, profile, shared=False):
         step_run_id = self.get_step_run_id(encode_file)
@@ -703,3 +588,165 @@ class Accession(object):
         for step in self.steps.content:
             self.accession_step(step)
         self.post_qcs()
+
+
+class AccessionLongReadRna(Accession):
+    QC_MAP = {
+        "long_read_rna_mapping": "make_long_read_rna_mapping_qc",
+        "long_read_rna_quantification": "make_long_read_rna_quantification_qc",
+        "long_read_rna_correlation": "make_long_read_rna_correlation_qc",
+    }
+    QC_MAP.update(Accession.QC_MAP)
+
+    @property
+    def assembly(self):
+        filekey = "annotation_gtf"
+        return self.find_portal_property_from_filekey(filekey, ASSEMBLY)
+
+    @property
+    def genome_annotation(self):
+        filekey = "annotation_gtf"
+        return self.find_portal_property_from_filekey(filekey, GENOME_ANNOTATION)
+
+    def make_long_read_rna_correlation_qc(self, encode_file, gs_file):
+        """
+        Make and post Spearman QC for long read RNA by giving the make_generic_correlation_qc the
+        appropriate handler.
+        """
+        return self.make_generic_correlation_qc(
+            encode_file, gs_file, handler=self.prepare_long_read_rna_correlation_qc
+        )
+
+    def prepare_long_read_rna_correlation_qc(self, gs_file):
+        """
+        Handler for creating the correlation QC object, specifically for long read rna. Finds and
+        parses the spearman QC JSON.
+        """
+        qc_file, *_ = self.analysis.search_down(
+            gs_file.task, "calculate_spearman", "spearman"
+        )
+        qc = self.backend.read_json(qc_file)
+        spearman_value = qc["replicates_correlation"]["spearman_correlation"]
+        spearman_correlation_qc = {"Spearman correlation": spearman_value}
+        return spearman_correlation_qc
+
+    def make_long_read_rna_mapping_qc(self, encode_file, gs_file):
+        """
+        The commented lines add number_of_mapped_reads to the qc object, a field that is currently
+        not valid under the schema.
+        """
+        if self.file_has_qc(encode_file, "LongReadRnaMappingQualityMetric"):
+            return
+        qc_file = self.analysis.get_files(filename=gs_file.task.outputs["mapping_qc"])[
+            0
+        ]
+        qc = self.backend.read_json(qc_file)
+        output_qc = {}
+        mr = "mapping_rate"
+        # nomr = 'number_of_mapped_reads'
+        flnc = qc["full_length_non_chimeric_reads"]["flnc"]
+        output_qc["full_length_non_chimeric_read_count"] = int(flnc)
+        output_qc[mr] = float(qc[mr][mr])
+        # output_qc[nomr] = int(qc[nomr]['mapped'])
+        return self.queue_qc(
+            output_qc, encode_file, "long-read-rna-mapping-quality-metric"
+        )
+
+    def make_long_read_rna_quantification_qc(self, encode_file, gs_file):
+        if self.file_has_qc(encode_file, "LongReadRnaQuantificationQualityMetric"):
+            return
+        ngd = "number_of_genes_detected"
+        qc_file = self.analysis.get_files(filename=gs_file.task.outputs[ngd])[0]
+        qc = self.backend.read_json(qc_file)
+        output_qc = {"genes_detected": int(qc[ngd][ngd])}
+        return self.queue_qc(
+            output_qc, encode_file, "long-read-rna-quantification-quality-metric"
+        )
+
+
+class AccessionMicroRna(Accession):
+    QC_MAP = {
+        "mirna_mapping": "make_microrna_mapping_qc",
+        "mirna_quantification": "make_microrna_quantification_qc",
+        "mirna_correlation": "make_microrna_correlation_qc",
+    }
+    QC_MAP.update(Accession.QC_MAP)
+
+    @property
+    def assembly(self):
+        filekey = "annotation"
+        return self.find_portal_property_from_filekey(filekey, ASSEMBLY)
+
+    @property
+    def genome_annotation(self):
+        filekey = "annotation"
+        return self.find_portal_property_from_filekey(filekey, GENOME_ANNOTATION)
+
+    def make_microrna_quantification_qc(self, encode_file, gs_file):
+        if self.file_has_qc(encode_file, "MicroRnaQuantificationQualityMetric"):
+            return
+        qc_file = self.analysis.get_files(
+            filename=gs_file.task.outputs["star_qc_json"]
+        )[0]
+        qc = self.backend.read_json(qc_file)
+        expressed_mirnas_qc = qc["expressed_mirnas"]
+        return self.queue_qc(
+            expressed_mirnas_qc, encode_file, "micro-rna-quantification-quality-metric"
+        )
+
+    def make_microrna_mapping_qc(self, encode_file, gs_file):
+        if self.file_has_qc(encode_file, "MicroRnaMappingQualityMetric"):
+            return
+        qc_file = self.analysis.get_files(
+            filename=gs_file.task.outputs["star_qc_json"]
+        )[0]
+        qc = self.backend.read_json(qc_file)
+        aligned_reads_qc = qc["aligned_reads"]
+        return self.queue_qc(
+            aligned_reads_qc, encode_file, "micro-rna-mapping-quality-metric"
+        )
+
+    def make_microrna_correlation_qc(self, encode_file, gs_file):
+        """
+        Returns without queueing this QC for posting if the experiment is not replicated, since
+        correlation is computed between pairs of replicates.
+        """
+        if (
+            self.file_has_qc(encode_file, "CorrelationQualityMetric")
+            or self.get_number_of_biological_replicates() != 2
+        ):
+            return
+        qc_file = self.analysis.search_down(
+            gs_file.task, "spearman_correlation", "spearman_json"
+        )[0]
+        qc = self.backend.read_json(qc_file)
+        spearman_value = qc["spearman_correlation"]["spearman_correlation"]
+        spearman_correlation_qc = {"Spearman correlation": spearman_value}
+        return self.queue_qc(
+            spearman_correlation_qc,
+            encode_file,
+            "correlation-quality-metric",
+            shared=True,
+        )
+
+
+PIPELINE_TYPE_MAP = {"mirna": AccessionMicroRna, "long_read_rna": AccessionLongReadRna}
+
+
+def accession_factory(pipeline_type: str, *args, **kwargs) -> Accession:
+    """
+    Matches against the user-specified pipeline_type string and returns an instance of
+    the appropriate accession subclass. Usage of this factory has the nice effect of
+    automatically supplying the appropriate AccessionSteps based on the pipeline name.
+    """
+    selected_accession: Optional[Type[Accession]] = None
+    try:
+        selected_accession = PIPELINE_TYPE_MAP[pipeline_type]
+    except KeyError as e:
+        raise RuntimeError(f"Could not find pipeline type {pipeline_type}") from e
+    current_dir = Path(__file__).resolve()
+    steps_json_path = (
+        current_dir.parents[1] / "accession_steps" / f"{pipeline_type}_steps.json"
+    )
+    accession_steps = AccessionSteps(steps_json_path)
+    return selected_accession(accession_steps, *args, **kwargs)

@@ -82,9 +82,11 @@ setup(
     classifiers=CLASSIFIERS,
     install_requires=INSTALL_REQUIRES,
     extras_require=EXTRAS_REQUIRE,
-    python_requires=">=3.5",
+    # Python 3.6 or higher required for f-strings and attrs
+    python_requires=">=3.6",
     # Specific to accessioning code
     entry_points={"console_scripts": ["accession=accession.__main__:main"]},
     zip_safe=False,
-    include_package_data=True,
+    # Include all JSON files in accession_steps "package"
+    package_data={"accession_steps": ["*.json"]},
 )
