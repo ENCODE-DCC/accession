@@ -5,7 +5,7 @@ from typing import Optional, Tuple
 from encode_utils.connection import Connection
 
 from accession import __version__
-from accession.accession import PIPELINE_TYPE_MAP, accession_factory
+from accession.accession import accession_factory
 from accession.analysis import Analysis, MetaData
 from accession.helpers import filter_outputs_by_path
 
@@ -27,12 +27,11 @@ def get_parser():
         default=None,
         help="path to a metadata json output file",
     )
-    pipeline_type_options = ", ".join(map(lambda x: f"`{x}`", PIPELINE_TYPE_MAP.keys()))
     parser.add_argument(
         "--pipeline-type",
         type=str,
         default=None,
-        help=f"the type of pipeline run being accessioned, valid options are {pipeline_type_options}",
+        help=f"the type of pipeline run being accessioned, e.g. mirna or long_read_rna",
     )
     parser.add_argument(
         "--server", default="dev", help="Server the files will be accessioned to"
