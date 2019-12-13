@@ -730,7 +730,11 @@ class AccessionMicroRna(Accession):
         )
 
 
-PIPELINE_TYPE_MAP = {"mirna": AccessionMicroRna, "long_read_rna": AccessionLongReadRna}
+PIPELINE_TYPE_MAP = {
+    # The map is here instead of at the top of the file to avoid linter errors.
+    "mirna": AccessionMicroRna,
+    "long_read_rna": AccessionLongReadRna,
+}
 
 
 def accession_factory(pipeline_type: str, *args, **kwargs) -> Accession:
