@@ -664,7 +664,6 @@ def accession_factory(pipeline_type: str, *args, **kwargs) -> Accession:
     automatically supplying the appropriate AccessionSteps based on the pipeline name.
     """
     pipeline_type_map = {
-        # The map is here instead of at the top of the file to avoid linter errors.
         "mirna": AccessionMicroRna,
         "long_read_rna": AccessionLongReadRna,
     }
