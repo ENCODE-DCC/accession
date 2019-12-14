@@ -53,7 +53,7 @@ Usage
 .. code-block:: console
 
     $ accession --accession-metadata metadata.json \
-                --accession-steps steps.json \
+                --pipeline-type mirna \
                 --server dev \
 
 Please see the `docs <https://accession.readthedocs.io/en/latest/#detailed-argument-description>`_ for greater detail on these input parameters.

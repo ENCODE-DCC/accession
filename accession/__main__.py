@@ -5,7 +5,7 @@ from typing import Optional, Tuple
 from encode_utils.connection import Connection
 
 from accession import __version__
-from accession.accession import Accession, AccessionSteps
+from accession.accession import accession_factory
 from accession.analysis import Analysis, MetaData
 from accession.helpers import filter_outputs_by_path
 
@@ -28,10 +28,10 @@ def get_parser():
         help="path to a metadata json output file",
     )
     parser.add_argument(
-        "--accession-steps",
+        "--pipeline-type",
         type=str,
         default=None,
-        help="path to an accessioning steps, json file",
+        help=f"the type of pipeline run being accessioned, e.g. mirna or long_read_rna",
     )
     parser.add_argument(
         "--server", default="dev", help="Server the files will be accessioned to"
@@ -76,11 +76,12 @@ def main(args=None):
         filter_outputs_by_path(args.filter_from_path)
         return
     metadata = MetaData(args.accession_metadata)
-    accession_steps = AccessionSteps(args.accession_steps)
     analysis = Analysis(metadata)
     connection = Connection(args.server)
-    if all([accession_steps, analysis, lab, award, connection]):
-        accessioner = Accession(accession_steps, analysis, connection, lab, award)
+    if all([args.pipeline_type, analysis, lab, award, connection]):
+        accessioner = accession_factory(
+            args.pipeline_type, analysis, connection, lab, award
+        )
         accessioner.accession_steps()
         return
     print("Module called without proper arguments")

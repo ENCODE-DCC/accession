@@ -1,4 +1,5 @@
 import json
+from contextlib import contextmanager
 from pathlib import Path
 from types import GeneratorType
 from typing import Dict, List
@@ -9,7 +10,13 @@ import pytest
 from pytest_mock.plugin import MockFixture
 from requests import Response
 
-from accession.accession import Accession, AccessionSteps
+from accession.accession import (
+    Accession,
+    AccessionLongReadRna,
+    AccessionMicroRna,
+    AccessionSteps,
+    accession_factory,
+)
 from accession.analysis import Analysis, MetaData
 
 from .fixtures import MockGCBackend
@@ -91,7 +98,7 @@ def test_get_number_of_biological_replicates(
             ]
         },
     )
-    y = Accession(x, analysis, connection, "lab", "award")
+    y = AccessionMicroRna(x, analysis, connection, "lab", "award")
     y._dataset = "my_dataset"
     assert y.get_number_of_biological_replicates() == 2
 
@@ -397,6 +404,40 @@ def test_make_star_qc_metric(mock_replicated_mirna_accession):
         assert v == expected[k]
 
 
+@contextmanager
+def does_not_raise():
+    yield
+
+
+@attr.s(auto_attribs=True)
+class StubAnalysis:
+    backend: str = "foo"
+
+
+@pytest.fixture
+def stub_analysis():
+    return StubAnalysis()
+
+
+@pytest.mark.parametrize(
+    "pipeline_type,condition,accessioner_class",
+    [
+        ("mirna", does_not_raise(), AccessionMicroRna),
+        ("long_read_rna", does_not_raise(), AccessionLongReadRna),
+        ("not_valid", pytest.raises(RuntimeError), None),
+    ],
+)
+def test_accession_factory(
+    mocker, stub_analysis, pipeline_type, condition, accessioner_class
+):
+    mocker.patch("builtins.open", mocker.mock_open(read_data="foo"))
+    with condition:
+        accessioner = accession_factory(
+            pipeline_type, stub_analysis, "bar", "baz", "qux"
+        )
+        assert isinstance(accessioner, accessioner_class)
+
+
 @pytest.fixture
 def mock_replicated_mirna_accession(mocker, mirna_replicated_analysis, mock_accession):
     """
@@ -461,15 +502,17 @@ def mock_accession(
     assembly property. @properties must be patched before instantiation
     """
     mocker.patch.object(
-        Accession, "assembly", new_callable=PropertyMock(return_value="hg19")
+        AccessionMicroRna, "assembly", new_callable=PropertyMock(return_value="hg19")
     )
     mocker.patch.object(
-        Accession, "genome_annotation", new_callable=PropertyMock(return_value="V19")
+        AccessionMicroRna,
+        "genome_annotation",
+        new_callable=PropertyMock(return_value="V19"),
     )
     mocker.patch.object(
         Accession, "is_replicated", new_callable=PropertyMock(return_value=True)
     )
-    mocked_accession = Accession(
+    mocked_accession = AccessionMicroRna(
         mock_accession_steps,
         Analysis(mock_metadata, backend=mock_accession_gc_backend),
         "mock_server.biz",
@@ -494,7 +537,7 @@ def mock_accession_unreplicated(
     mocker.patch.object(
         Accession, "is_replicated", new_callable=PropertyMock(return_value=False)
     )
-    mocked_accession = Accession(
+    mocked_accession = AccessionMicroRna(
         "imaginary_steps.json",
         Analysis(mock_metadata, backend=mock_accession_gc_backend),
         "mock_server.biz",
