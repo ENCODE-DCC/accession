@@ -15,7 +15,7 @@ from google.cloud import storage
 from pytest_mock.plugin import MockFixture
 
 import docker
-from accession.accession import Accession, AccessionSteps
+from accession.accession import accession_factory
 from accession.analysis import Analysis, MetaData
 from accession.backends import GCBackend
 
@@ -266,9 +266,6 @@ def accessioner_factory(
         current_dir = Path(__file__).resolve()
         metadata = MetaData(current_dir.parent / "data" / metadata_file)
         analysis = Analysis(metadata, backend=mock_accession_gc_backend)
-        accession_steps = AccessionSteps(
-            current_dir.parents[1] / "accession_steps" / f"{assay_name}_steps.json"
-        )
 
         def mock_set_dcc_mode(self, dcc_mode: str) -> str:
             eu.DCC_MODES[dcc_mode] = {"host": dcc_mode, "url": f"http://{dcc_mode}/"}
@@ -277,7 +274,7 @@ def accessioner_factory(
         mocker.patch.object(Connection, "_set_dcc_mode", mock_set_dcc_mode)
         connection = Connection(local_encoded_server)
 
-        accessioner = Accession(accession_steps, analysis, connection, lab, award)
+        accessioner = accession_factory(assay_name, analysis, connection, lab, award)
 
         mocker.patch.object(
             accessioner.conn, "upload_file", return_value=None, autospec=True

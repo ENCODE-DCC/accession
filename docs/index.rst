@@ -16,10 +16,48 @@ Metadata Json
 
 This file is an output of a pipeline analysis run. For details, see `Cromwell documentation <https://cromwell.readthedocs.io/en/stable/api/RESTAPI/#workflowmetadataresponse>`_
 
+Server
+------
+
+``prod`` and ``dev`` indicate the server where the files are being accessioned to. ``dev`` points to `<https://test.encodedcc.org>`_. The server parameter can be explicitly passed as ``test.encodedcc.org`` or ``encodeproject.org``.
+
+Lab and Award
+-------------
+| These are unique identifiers that are expected to be already present on the ENCODE
+  Portal. It is recommended to specify them as the environment variables ``DCC_LAB`` and
+  ``DCC_AWARD``, respectively. However, you may also specify them on the command line
+  using the ``--lab`` and ``--award`` flags. Specifying these parameters with flags will
+  take override any values in your environment. The values correspond to the lab and
+  award identifiers given by the ENCODE portal, e.g. ``/labs/foo/`` and ``U00HG123456``.
+
+| To set these variables in your environment, run the following two commands in your
+  shell. You may wish to add these to your ``~/.bashrc``, ``~/.bash_profile``,
+  ``~/.zshrc``, or similar to configure them for your shell so you don't need to set
+  them every time.
+
+.. code-block:: console
+
+    $ export DCC_LAB=XXXXXXXX
+    $ export DCC_AWARD=yyyyyyyyyyy
+
+Pipeline Type
+-------------
+
+| Use the ``--pipeline-type`` argument to identify the pipeline type to be
+  accessioned, for instance ``mirna``. This name is used to identify the appropriate
+  steps JSON to use as the accessioning template, so if you use ``mirna`` as above the
+  code will look for the corresponding template at ``accession_steps/mirna_steps.json``.
+
+Accession Steps Template Format
+===============================
+
 Accession Steps
 ---------------
 
-The accession steps JSON file specifies the task and file names in the output metadata JSON and the order in which the files and metadata will be submitted. Accessioning code will selectively submit the specified files to the ENCODE Portal. You can find the appropriate accession steps for your pipeline run `here <https://github.com/ENCODE-DCC/accession/tree/master/accession_steps>`_
+| The accession steps JSON file specifies the task and file names in the output metadata
+  JSON and the order in which the files and metadata will be submitted. Accessioning
+  code will selectively submit the specified files to the ENCODE Portal. You can find
+  the appropriate accession steps for your pipeline run `here <https://github.com/ENCODE-DCC/accession/tree/master/accession_steps>`_
 
 A single step is configured in the following way:
 
@@ -63,30 +101,6 @@ A single step is configured in the following way:
 ``derived_from_inputs`` is used when indicating that the parent files were not produced during the pipeline analysis. Instead, these files are initial inputs to the pipeline. Raw fastqs and genome references are examples of such files.
 
 ``derived_from_output_type`` is required in the case the parent file has a possible duplicate.
-
-Server
-------
-
-``prod`` and ``dev`` indicate the server where the files are being accessioned to. ``dev`` points to `<https://test.encodedcc.org>`_. The server parameter can be explicitly passed as ``test.encodedcc.org`` or ``encodeproject.org``.
-
-Lab and Award
--------------
-| These are unique identifiers that are expected to be already present on the ENCODE
-  Portal. It is recommended to specify them as the environment variables ``DCC_LAB`` and
-  ``DCC_AWARD``, respectively. However, you may also specify them on the command line
-  using the ``--lab`` and ``--award`` flags. Specifying these parameters with flags will
-  take override any values in your environment. The values correspond to the lab and
-  award identifiers given by the ENCODE portal, e.g. ``/labs/foo/`` and ``U00HG123456``.
-
-| To set these variables in your environment, run the following two commands in your
-  shell. You may wish to add these to your ``~/.bashrc``, ``~/.bash_profile``,
-  ``~/.zshrc``, or similar to configure them for your shell so you don't need to set
-  them every time.
-
-.. code-block:: console
-
-    $ export DCC_LAB=XXXXXXXX
-    $ export DCC_AWARD=yyyyyyyyyyy
 
 Table of Contents
 ==================
