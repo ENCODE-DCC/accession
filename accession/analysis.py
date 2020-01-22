@@ -22,10 +22,13 @@ class Analysis(object):
         Args: metadata: MetaData object
     """
 
-    def __init__(self, metadata, auto_populate=True, backend=None):
+    def __init__(
+        self, metadata, raw_fastqs_keys=None, auto_populate=True, backend=None
+    ):
         self.files = []
         self.tasks = []
         self.metadata = metadata.content
+        self.raw_fastqs_keys = raw_fastqs_keys
         if self.metadata:
             bucket = self.metadata["workflowRoot"].split("gs://")[1].split("/")[0]
             if backend is None:
@@ -130,10 +133,11 @@ class Analysis(object):
     @property
     def raw_fastqs(self):
         fastqs = []
+        raw_fastqs_keys = ("fastq", "fastqs")
+        if self.raw_fastqs_keys is not None:
+            raw_fastqs_keys = self.raw_fastqs_keys
         for file in self.files:
-            if (
-                "fastqs" in file.filekeys or "fastq" in file.filekeys
-            ) and file.task is None:
+            if any([k in file.filekeys for k in raw_fastqs_keys]) and file.task is None:
                 fastqs.append(file)
         return fastqs
 

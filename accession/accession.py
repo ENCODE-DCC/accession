@@ -31,6 +31,10 @@ class AccessionSteps:
                 self._steps = json.load(fp)
         return self._steps["accession.steps"]
 
+    @property
+    def raw_fastqs_keys(self):
+        return self.steps.get("raw_fastqs_keys")
+
 
 class Accession(ABC):
     """docstring for Accession

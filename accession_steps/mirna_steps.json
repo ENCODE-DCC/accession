@@ -110,5 +110,8 @@
       ],
       "wdl_task_name": "wigtobigwig"
     }
+  ],
+  "raw_fastqs_keys": [
+    "fastqs_to_trim"
   ]
 }
