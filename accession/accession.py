@@ -34,7 +34,7 @@ class AccessionSteps:
 
     @property
     def raw_fastqs_keys(self):
-        return self.steps.get("raw_fastqs_keys")
+        return self._steps.get("raw_fastqs_keys")
 
 
 class Accession(ABC):
