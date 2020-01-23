@@ -6,6 +6,7 @@ from base64 import b64encode
 from pathlib import Path
 from typing import Optional, Type
 
+from accession.analysis import Analysis, MetaData
 from accession.helpers import string_to_number
 from accession.quality_metric import QualityMetric
 
@@ -661,7 +662,9 @@ class AccessionMicroRna(AccessionGenericRna):
         return self.queue_qc(star_qc_metric, encode_bam_file, "star-quality-metric")
 
 
-def accession_factory(pipeline_type: str, *args, **kwargs) -> Accession:
+def accession_factory(
+    pipeline_type: str, accession_metadata: str, *args, **kwargs
+) -> Accession:
     """
     Matches against the user-specified pipeline_type string and returns an instance of
     the appropriate accession subclass. Usage of this factory has the nice effect of
@@ -684,4 +687,6 @@ def accession_factory(pipeline_type: str, *args, **kwargs) -> Accession:
         current_dir.parents[1] / "accession_steps" / f"{pipeline_type}_steps.json"
     )
     accession_steps = AccessionSteps(steps_json_path)
-    return selected_accession(accession_steps, *args, **kwargs)
+    metadata = MetaData(accession_metadata)
+    analysis = Analysis(metadata, raw_fastqs_keys=accession_steps.raw_fastqs_keys)
+    return selected_accession(accession_steps, analysis, *args, **kwargs)
