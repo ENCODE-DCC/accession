@@ -19,21 +19,24 @@ class AccessionSteps:
         self._path_to_accession_step_json = path_to_accession_step_json
         self._steps = None
 
+    def _load_steps(self):
+        if self._steps:
+            return
+        with open(self.path_to_json) as fp:
+            self._steps = json.load(fp)
+
     @property
     def path_to_json(self):
         return self._path_to_accession_step_json
 
     @property
     def content(self):
-        if self._steps:
-            return self._steps["accession.steps"]
-        else:
-            with open(self.path_to_json) as fp:
-                self._steps = json.load(fp)
+        self._load_steps()
         return self._steps["accession.steps"]
 
     @property
-    def raw_fastqs_keys(self):
+    def raw_fastqs_keys(self) -> Optional[str]:
+        self._load_steps()
         return self._steps.get("raw_fastqs_keys")
 
 
