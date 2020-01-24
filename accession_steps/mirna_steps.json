@@ -7,7 +7,7 @@
         {
           "derived_from_files": [
             {
-              "derived_from_filekey": "fastq",
+              "derived_from_filekey": "fastqs_to_trim",
               "derived_from_inputs": "true",
               "derived_from_task": "cutadapt"
             },
@@ -33,7 +33,7 @@
         {
           "derived_from_files": [
             {
-              "derived_from_filekey": "fastq",
+              "derived_from_filekey": "fastqs_to_trim",
               "derived_from_inputs": "true",
               "derived_from_task": "cutadapt"
             },
@@ -110,5 +110,8 @@
       ],
       "wdl_task_name": "wigtobigwig"
     }
+  ],
+  "raw_fastqs_keys": [
+    "fastqs_to_trim"
   ]
 }
