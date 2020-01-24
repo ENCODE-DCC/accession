@@ -6,7 +6,6 @@ from encode_utils.connection import Connection
 
 from accession import __version__
 from accession.accession import accession_factory
-from accession.analysis import Analysis, MetaData
 from accession.helpers import filter_outputs_by_path
 
 
@@ -75,12 +74,10 @@ def main(args=None):
     if args.filter_from_path:
         filter_outputs_by_path(args.filter_from_path)
         return
-    metadata = MetaData(args.accession_metadata)
-    analysis = Analysis(metadata)
     connection = Connection(args.server)
-    if all([args.pipeline_type, analysis, lab, award, connection]):
+    if all([args.pipeline_type, args.accession_metadata, lab, award, connection]):
         accessioner = accession_factory(
-            args.pipeline_type, analysis, connection, lab, award
+            args.pipeline_type, args.accession_metadata, connection, lab, award
         )
         accessioner.accession_steps()
         return
