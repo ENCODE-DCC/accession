@@ -1023,8 +1023,7 @@ def accession_factory(
     accession_steps = AccessionSteps(steps_json_path)
     metadata = MetaData(accession_metadata)
     backend = kwargs.pop("backend", None)
-    if backend is not None:
-        analysis = Analysis(
-            metadata, raw_fastqs_keys=accession_steps.raw_fastqs_keys, backend=backend
-        )
+    analysis = Analysis(
+        metadata, raw_fastqs_keys=accession_steps.raw_fastqs_keys, backend=backend
+    )
     return selected_accession(accession_steps, analysis, *args, **kwargs)
