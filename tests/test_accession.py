@@ -19,7 +19,7 @@ from accession.accession import (
 )
 from accession.analysis import Analysis, MetaData
 
-from .fixtures import MockGCBackend
+from .fixtures import MockGCBackend, MockMetaData
 
 
 @attr.s(auto_attribs=True)
@@ -284,7 +284,7 @@ def test_file_from_template(
         "dataset": "qux",
         "file_format_type": file_format_type,
     }
-    file = mock_accession.file_from_template(**kwargs)
+    file = mock_accession.file_from_template(**kwargs)  # type: ignore
     expected = {
         "status": "uploading",
         "aliases": ["encode-processing-pipeline:foo-bar"],
@@ -409,16 +409,6 @@ def does_not_raise():
     yield
 
 
-@attr.s(auto_attribs=True)
-class StubAnalysis:
-    backend: str = "foo"
-
-
-@pytest.fixture
-def stub_analysis():
-    return StubAnalysis()
-
-
 @pytest.mark.parametrize(
     "pipeline_type,condition,accessioner_class",
     [
@@ -428,12 +418,15 @@ def stub_analysis():
     ],
 )
 def test_accession_factory(
-    mocker, stub_analysis, pipeline_type, condition, accessioner_class
+    mocker, mock_gc_backend, pipeline_type, condition, accessioner_class
 ):
-    mocker.patch("builtins.open", mocker.mock_open(read_data="foo"))
+    mocker.patch(
+        "builtins.open",
+        mocker.mock_open(read_data='{"workflowRoot": "gs://foo/bar", "calls": {}}'),
+    )
     with condition:
         accessioner = accession_factory(
-            pipeline_type, stub_analysis, "bar", "baz", "qux"
+            pipeline_type, "metadata.json", "bar", "baz", "qux", backend=mock_gc_backend
         )
         assert isinstance(accessioner, accessioner_class)
 
@@ -467,59 +460,6 @@ def mirna_replicated_analysis(
 @pytest.fixture
 def mock_encode_file() -> Dict[str, List[int]]:
     return {"biological_replicates": [1, 2]}
-
-
-class MockMetaData:
-    content = {"workflowRoot": "gs://foo/bar", "calls": {}}
-
-
-@pytest.fixture
-def mock_metadata():
-    return MockMetaData()
-
-
-class MockAccessionSteps:
-    path_to_json = "/dev/null"
-    content = {"accession.steps": [{"a": "b"}]}
-
-
-@pytest.fixture
-def mock_accession_steps():
-    return MockAccessionSteps()
-
-
-@pytest.fixture
-def mock_accession(
-    mocker: MockFixture,
-    mock_accession_gc_backend: MockGCBackend,
-    mock_metadata: MockMetaData,
-    mock_accession_steps: MockAccessionSteps,
-    lab: str,
-    award: str,
-) -> Accession:
-    """
-    Mocked accession instance with dummy __init__ that doesn't do anything and pre-baked
-    assembly property. @properties must be patched before instantiation
-    """
-    mocker.patch.object(
-        AccessionMicroRna, "assembly", new_callable=PropertyMock(return_value="hg19")
-    )
-    mocker.patch.object(
-        AccessionMicroRna,
-        "genome_annotation",
-        new_callable=PropertyMock(return_value="V19"),
-    )
-    mocker.patch.object(
-        Accession, "is_replicated", new_callable=PropertyMock(return_value=True)
-    )
-    mocked_accession = AccessionMicroRna(
-        mock_accession_steps,
-        Analysis(mock_metadata, backend=mock_accession_gc_backend),
-        "mock_server.biz",
-        lab,
-        award,
-    )
-    return mocked_accession
 
 
 @pytest.fixture
