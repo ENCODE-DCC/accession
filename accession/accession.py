@@ -496,6 +496,7 @@ class Accession(ABC):
                             step_run,
                             file_params["derived_from_files"],
                             file_format_type=file_params.get("file_format_type"),
+                            callbacks=file_params.get("callbacks"),
                         )
                         encode_file = self.accession_file(obj, wdl_file)
                     except Exception as e:
