@@ -934,10 +934,8 @@ class AccessionChip(Accession):
         elif task_name in ["idr", "overlap"]:
             num_peaks = qc["Nt"]
         elif task_name == f"{method}_pr":
-            if "rep1" in current_set:
-                num_peaks = qc["N1"]
-            elif "rep2" in current_set:
-                num_peaks = qc["N2"]
+            rep_num = current_set.split("-")[0][-1]
+            num_peaks = qc[f"N{rep_num}"]
         if num_peaks is not None:
             output_qc["reproducible_peaks"] = int(num_peaks)
 
