@@ -281,6 +281,11 @@ class Accession(ABC):
         file_format_type=None,
         extras: Optional[Dict[str, Any]] = None,
     ):
+        """
+        Note that extras are used to update the dictionary at the very end. This allows
+        for callbacks to override properties like output_type that may have been
+        specified in the template.
+        """
         file_name = file.filename.split("gs://")[-1].replace("/", "-")
         obj = {
             "status": "uploading",
@@ -508,7 +513,7 @@ class Accession(ABC):
                             raise
                         else:
                             self.logger.critical(
-                                "An error occurred accessioning a file: %s",
+                                "An error occurred accessioning a file",
                                 exc_info=True,
                             )
                             raise
@@ -771,6 +776,24 @@ class AccessionChip(Accession):
         current_set = gs_file.task.inputs["prefix"]
         if current_set == optimal_set:
             return {"preferred_default": True}
+        return {}
+
+    def maybe_conservative_set(self, gs_file: GSFile) -> Dict[str, str]:
+        """
+        For replicated ChIP-seq experiment, the exact file that is to be labeled with
+        preferred_default=true may vary. As such, this callback is registered for any
+        file that might need to have this value set in the steps JSON, and called at
+        file object generation time (make_file_obj) to fill in (or not) the missing
+        value.
+        """
+        qc = self.backend.read_json(self.analysis.get_files("qc_json")[0])[
+            "replication"
+        ]["reproducibility"]["idr"]
+
+        consv_set = qc["consv_set"]
+        current_set = gs_file.task.inputs["prefix"]
+        if current_set == consv_set:
+            return {"output_type": "optimal IDR thresholded peaks"}
         return {}
 
     def add_mapped_read_length(self, gs_file: GSFile) -> Dict[str, int]:
