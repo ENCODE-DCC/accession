@@ -724,6 +724,27 @@ class AccessionGenericRna(Accession):
         return self.queue_qc(qc, encode_file, "correlation-quality-metric", shared=True)
 
 
+class AccessionBulkRna(AccessionGenericRna):
+    QC_MAP = {
+        "star_mapping_qc": "make_star_mapping_qc",
+        "genome_flagstat_qc": "make_genome_flagstat_qc",
+        "anno_flagstat_qc": "make_anno_flagstat_qc",
+        "number_of_genes_detected_qc": "make_number_of_genes_detected_qc",
+        "mad_qc_metric": "make_mad_qc_metric",
+        "read_by_gene_type_qc": "make_reads_by_gene_type_qc",
+    }
+
+    @property
+    def assembly(self):
+        filekey = "index"
+        return self.find_portal_property_from_filekey(filekey, ASSEMBLY)
+
+    @property
+    def genome_annotation(self):
+        filekey = "index"
+        return self.find_portal_property_from_filekey(filekey, GENOME_ANNOTATION)
+
+
 class AccessionLongReadRna(AccessionGenericRna):
     QC_MAP = {
         "long_read_rna_mapping": "make_long_read_rna_mapping_qc",
