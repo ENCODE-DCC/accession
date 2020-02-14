@@ -4,6 +4,7 @@ import shutil
 from pathlib import Path
 from time import sleep
 from typing import Callable, Dict, Iterator, Tuple
+from unittest.mock import PropertyMock
 from urllib.parse import urljoin
 
 import attr
@@ -15,7 +16,12 @@ from google.cloud import storage
 from pytest_mock.plugin import MockFixture
 
 import docker
-from accession.accession import accession_factory
+from accession.accession import (
+    Accession,
+    AccessionChip,
+    AccessionMicroRna,
+    accession_factory,
+)
 from accession.analysis import Analysis, MetaData
 from accession.backends import GCBackend
 
@@ -264,8 +270,6 @@ def accessioner_factory(
     def _accessioner_factory(metadata_file: str, assay_name: str) -> Iterator:
         # Setup
         current_dir = Path(__file__).resolve()
-        metadata = MetaData(current_dir.parent / "data" / metadata_file)
-        analysis = Analysis(metadata, backend=mock_accession_gc_backend)
 
         def mock_set_dcc_mode(self, dcc_mode: str) -> str:
             eu.DCC_MODES[dcc_mode] = {"host": dcc_mode, "url": f"http://{dcc_mode}/"}
@@ -274,7 +278,9 @@ def accessioner_factory(
         mocker.patch.object(Connection, "_set_dcc_mode", mock_set_dcc_mode)
         connection = Connection(local_encoded_server)
 
-        accessioner = accession_factory(assay_name, analysis, connection, lab, award)
+        accessioner = accession_factory(
+            assay_name, metadata_file, connection, lab, award
+        )
 
         mocker.patch.object(
             accessioner.conn, "upload_file", return_value=None, autospec=True
@@ -288,3 +294,90 @@ def accessioner_factory(
         os.remove(current_dir.parents[1] / "accession.log")
 
     return _accessioner_factory
+
+
+class MockMetaData:
+    content = {"workflowRoot": "gs://foo/bar", "calls": {}}
+
+
+@pytest.fixture
+def mock_metadata():
+    return MockMetaData()
+
+
+class MockAccessionSteps:
+    path_to_json = "/dev/null"
+    content = {"accession.steps": [{"a": "b"}]}
+
+
+@pytest.fixture
+def mock_accession_steps():
+    return MockAccessionSteps()
+
+
+@pytest.fixture
+def mock_accession(
+    mocker: MockFixture,
+    mock_accession_gc_backend: MockGCBackend,
+    mock_metadata: MockMetaData,
+    mock_accession_steps: MockAccessionSteps,
+    lab: str,
+    award: str,
+) -> Accession:
+    """
+    Mocked accession instance with dummy __init__ that doesn't do anything and pre-baked
+    assembly property. @properties must be patched before instantiation
+    """
+    mocker.patch.object(
+        AccessionMicroRna, "assembly", new_callable=PropertyMock(return_value="hg19")
+    )
+    mocker.patch.object(
+        AccessionMicroRna,
+        "genome_annotation",
+        new_callable=PropertyMock(return_value="V19"),
+    )
+    mocker.patch.object(
+        Accession, "is_replicated", new_callable=PropertyMock(return_value=True)
+    )
+    mocked_accession = AccessionMicroRna(
+        mock_accession_steps,
+        Analysis(mock_metadata, backend=mock_accession_gc_backend),
+        "mock_server.biz",
+        lab,
+        award,
+    )
+    return mocked_accession
+
+
+@pytest.fixture
+def mock_accession_chip(
+    mocker: MockFixture,
+    mock_accession_gc_backend: MockGCBackend,
+    mock_metadata: MockMetaData,
+    mock_accession_steps: MockAccessionSteps,
+    lab: str,
+    award: str,
+) -> Accession:
+    """
+    Mocked accession instance with dummy __init__ that doesn't do anything and pre-baked
+    assembly property. @properties must be patched before instantiation
+    """
+    mocker.patch.object(
+        AccessionChip, "assembly", new_callable=PropertyMock(return_value="hg19")
+    )
+    mocker.patch.object(
+        AccessionChip,
+        "genome_annotation",
+        new_callable=PropertyMock(return_value="V19"),
+    )
+    mocker.patch.object(
+        Accession, "is_replicated", new_callable=PropertyMock(return_value=True)
+    )
+    mocked_accession = AccessionChip(
+        mock_accession_steps,
+        Analysis(mock_metadata, backend=mock_accession_gc_backend),
+        "mock_server.biz",
+        lab,
+        award,
+    )
+    return mocked_accession
