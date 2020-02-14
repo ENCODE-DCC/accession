@@ -298,6 +298,9 @@
       "requires_replication": true,
       "wdl_files": [
         {
+          "callbacks": [
+            "maybe_conservative_set"
+          ],
           "derived_from_files": [
             {
               "derived_from_filekey": "bfilt_idr_peak",
@@ -307,9 +310,6 @@
           "file_format": "bigBed",
           "file_format_type": "narrowPeak",
           "filekey": "bfilt_idr_peak_bb",
-          "callbacks": [
-            "maybe_conservative_set"
-          ],
           "output_type": "IDR thresholded peaks",
           "quality_metrics": [
             "chip_replication",

@@ -513,8 +513,7 @@ class Accession(ABC):
                             raise
                         else:
                             self.logger.critical(
-                                "An error occurred accessioning a file",
-                                exc_info=True,
+                                "An error occurred accessioning a file", exc_info=True
                             )
                             raise
 
@@ -725,11 +724,11 @@ class AccessionChip(Accession):
     def get_chip_pipeline_replication_method(qc: Dict[str, Any]) -> str:
         """
         Checks the qc report for the pipeline type and returns the appropriate
-        reproducibility criteria, `idr` for TF ChIP-seq and (naive) `overlap` for
-        histone ChIP-seq.
+        reproducibility criteria, `idr` when using SPP peak caller and `overlap` if the
+        peak caller was MACS2.
         """
-        pipeline_type = qc["general"]["pipeline_type"]
-        if pipeline_type == "histone":
+        peak_caller = qc["general"]["peak_caller"]
+        if peak_caller == "macs2":
             return "overlap"
         return "idr"
 
@@ -780,8 +779,8 @@ class AccessionChip(Accession):
 
     def maybe_conservative_set(self, gs_file: GSFile) -> Dict[str, str]:
         """
-        For replicated ChIP-seq experiment, the exact file that is to be labeled with
-        preferred_default=true may vary. As such, this callback is registered for any
+        For replicated ChIP-seq experiment, the exact file that is to be labeled as
+        the conservative set may vary. As such, this callback is registered for any
         file that might need to have this value set in the steps JSON, and called at
         file object generation time (make_file_obj) to fill in (or not) the missing
         value.
@@ -793,7 +792,7 @@ class AccessionChip(Accession):
         consv_set = qc["consv_set"]
         current_set = gs_file.task.inputs["prefix"]
         if current_set == consv_set:
-            return {"output_type": "optimal IDR thresholded peaks"}
+            return {"output_type": "conservative IDR thresholded peaks"}
         return {}
 
     def add_mapped_read_length(self, gs_file: GSFile) -> Dict[str, int]:

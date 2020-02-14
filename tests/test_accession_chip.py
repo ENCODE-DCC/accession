@@ -188,7 +188,7 @@ library_qc = {
 
 
 tf_replication_qc = {
-    "general": {"pipeline_type": "tf"},
+    "general": {"pipeline_type": "tf", "peak_caller": "spp"},
     "replication": {
         "reproducibility": {
             "idr": {
@@ -210,7 +210,7 @@ tf_replication_qc = {
 
 
 histone_replication_qc = {
-    "general": {"pipeline_type": "histone"},
+    "general": {"pipeline_type": "histone", "peak_caller": "macs2"},
     "replication": {
         "reproducibility": {
             "overlap": {
@@ -224,7 +224,7 @@ histone_replication_qc = {
 
 
 peak_enrichment_qc = {
-    "general": {"pipeline_type": "tf"},
+    "general": {"pipeline_type": "tf", "peak_caller": "spp"},
     "replication": {
         "reproducibility": {"idr": {"opt_set": "pooled-pr1_vs_pooled-pr2"}}
     },
@@ -251,12 +251,10 @@ peak_enrichment_qc = {
 }
 
 
-@pytest.mark.parametrize(
-    "pipeline_type,expected", [("tf", "idr"), ("histone", "overlap")]
-)
-def test_get_chip_pipeline_replication_method(pipeline_type, expected):
+@pytest.mark.parametrize("peak_caller,expected", [("spp", "idr"), ("macs2", "overlap")])
+def test_get_chip_pipeline_replication_method(peak_caller, expected):
     method = AccessionChip.get_chip_pipeline_replication_method(
-        {"general": {"pipeline_type": pipeline_type}}
+        {"general": {"peak_caller": peak_caller}}
     )
     assert method == expected
 
