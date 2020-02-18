@@ -744,7 +744,7 @@ class AccessionBulkRna(AccessionGenericRna):
         filekey = "index"
         return self.find_portal_property_from_filekey(filekey, GENOME_ANNOTATION)
 
-    def make_star_qc_metric(self, encode_bam_file, gs_file):
+    def make_star_mapping_qc(self, encode_bam_file, gs_file):
         if self.file_has_qc(
             encode_bam_file, "StarQualityMetric"
         ):  # actual name of the object
@@ -762,6 +762,21 @@ class AccessionBulkRna(AccessionGenericRna):
         return self.queue_qc(
             star_qc_metric, encode_bam_file, "star-quality-metric"
         )  # backend mapping adding hyphens and removing caps
+
+    def make_genome_flagstat_qc(self):
+        pass
+
+    def make_anno_flagstat_qc(self):
+        pass
+
+    def make_number_of_genes_detected_qc(self):
+        pass
+
+    def make_mad_qc_metric(self):
+        pass
+
+    def make_reads_by_gene_type_qc(self):
+        pass
 
 
 class AccessionLongReadRna(AccessionGenericRna):
