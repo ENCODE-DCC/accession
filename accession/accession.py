@@ -763,20 +763,61 @@ class AccessionBulkRna(AccessionGenericRna):
             star_qc_metric, encode_bam_file, "star-quality-metric"
         )  # backend mapping adding hyphens and removing caps
 
-    def make_genome_flagstat_qc(self):
-        pass
+    def make_genome_flagstat_qc(self, encode_file, gs_file):
+        if self.file_has_qc(encode_file, "SamtoolsFlagstatsQualityMetric"):
+            return
+        qc_file = self.analysis.get_files(
+            filename=gs_file.task.outputs["genome_flagstat_json"]
+        )[0]
+        qc = self.backend.read_json(qc_file)
+        output_qc = qc.get("samtools_genome_flagstat")
+        return self.queue_qc(output_qc, encode_file, "samtools-flagstat-quality-metric")
 
-    def make_anno_flagstat_qc(self):
-        pass
+    def make_anno_flagstat_qc(self, encode_file, gs_file):
+        if self.file_has_qc(encode_file, "SamtoolsFlagstatsQualityMetric"):
+            return
+        qc_file = self.analysis.get_files(
+            filename=gs_file.task.outputs["anno_flagstat_json"]
+        )[0]
+        qc = self.backend.read_json(qc_file)
+        output_qc = qc.get("samtools_anno_flagstat")
+        return self.queue_qc(output_qc, encode_file, "samtools-flagstat-quality-metric")
 
-    def make_number_of_genes_detected_qc(self):
-        pass
+    def make_number_of_genes_detected_qc(self, encode_file, gs_file):
+        if self.file_has_qc(encode_file, "GeneQuantificationQualityMetric"):
+            return
+        qc_file = self.analysis.get_files(
+            filename=gs_file.task.outputs["number_of_genes"]
+        )[0]
+        qc = self.backend.read_json(qc_file)
+        output_qc = qc.get("number_of_genes_detected")
+        return self.queue_qc(
+            output_qc, encode_file, "gene-quantification-quality-metric"
+        )
 
     def make_mad_qc_metric(self):
-        pass
+        if self.file_has_qc(encode_file, "MadQualityMetric"):
+            return
+        qc_file = self.analysis.get_files(
+            filename=gs_file.task.outputs["madQCmetrics"]
+        )[0]
+        qc = self.backend.read_json(qc_file)
+        output_qc = qc.get("MAD.R")
+        return self.queue_qc(
+            output_qc, encode_file, "mad-quality-metric"
+        )
 
     def make_reads_by_gene_type_qc(self):
-        pass
+        if self.file_has_qc(encode_file, "GeneTypeQuantificationQualityMetric"):
+            return
+        qc_file = self.analysis.get_files(
+            filename=gs_file.task.outputs["rnaQC"]
+        )[0]
+        qc = self.backend.read_json(qc_file)
+        output_qc = qc.get("gene_type_count")
+        return self.queue_qc(
+            output_qc, encode_file, "gene-type-quantification-quality-metric"
+        )
 
 
 class AccessionLongReadRna(AccessionGenericRna):
