@@ -744,6 +744,25 @@ class AccessionBulkRna(AccessionGenericRna):
         filekey = "index"
         return self.find_portal_property_from_filekey(filekey, GENOME_ANNOTATION)
 
+    def make_star_qc_metric(self, encode_bam_file, gs_file):
+        if self.file_has_qc(
+            encode_bam_file, "StarQualityMetric"
+        ):  # actual name of the object
+            return
+        qc_file = self.analysis.get_files(
+            filename=gs_file.task.outputs["log_json"]  # task output name
+        )[0]
+        qc = self.backend.read_json(qc_file)
+        star_qc_metric = qc.get("star_log_qc")  # what the key is in actual qc json file
+        del star_qc_metric["Started job on"]
+        del star_qc_metric["Started mapping on"]
+        del star_qc_metric["Finished on"]
+        for key, value in star_qc_metric.items():
+            star_qc_metric[key] = string_to_number(value)
+        return self.queue_qc(
+            star_qc_metric, encode_bam_file, "star-quality-metric"
+        )  # backend mapping adding hyphens and removing caps
+
 
 class AccessionLongReadRna(AccessionGenericRna):
     QC_MAP = {
