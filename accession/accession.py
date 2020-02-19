@@ -763,60 +763,72 @@ class AccessionBulkRna(AccessionGenericRna):
             star_qc_metric, encode_bam_file, "star-quality-metric"
         )  # backend mapping adding hyphens and removing caps
 
-    def make_genome_flagstat_qc(self, encode_file, gs_file):
-        if self.file_has_qc(encode_file, "SamtoolsFlagstatsQualityMetric"):
+    def make_qc_from_well_formed_json(
+        self,
+        encode_file,
+        gs_file,
+        qc_schema_name,
+        qc_file_task_output_name,
+        qc_dictionary_key,
+        qc_schema_name_with_hyphens,
+    ):
+        if self.file_has_qc(encode_file, qc_schema_name):
             return
         qc_file = self.analysis.get_files(
-            filename=gs_file.task.outputs["genome_flagstat_json"]
+            filename=gs_file.task.outputs[qc_file_task_output_name]
         )[0]
         qc = self.backend.read_json(qc_file)
-        output_qc = qc.get("samtools_genome_flagstat")
-        return self.queue_qc(output_qc, encode_file, "samtools-flagstat-quality-metric")
+        output_qc = qc.get(qc_dictionary_key)
+        return self.queue_qc(output_qc, encode_file, qc_schema_name_with_hyphens)
+
+    def make_genome_flagstat_qc(self, encode_file, gs_file):
+        self.make_qc_from_well_formed_json(
+            encode_file,
+            gs_file,
+            "SamtoolsFlagstatsQualityMetric",
+            "genome_flagstat_json",
+            "samtools_genome_flagstat",
+            "samtools-flagstat-quality-metric",
+        )
 
     def make_anno_flagstat_qc(self, encode_file, gs_file):
-        if self.file_has_qc(encode_file, "SamtoolsFlagstatsQualityMetric"):
-            return
-        qc_file = self.analysis.get_files(
-            filename=gs_file.task.outputs["anno_flagstat_json"]
-        )[0]
-        qc = self.backend.read_json(qc_file)
-        output_qc = qc.get("samtools_anno_flagstat")
-        return self.queue_qc(output_qc, encode_file, "samtools-flagstat-quality-metric")
+        self.make_qc_from_well_formed_json(
+            encode_file,
+            gs_file,
+            "SamtoolsFlagstatsQualityMetric",
+            "anno_flagstat_json",
+            "samtools_anno_flagstat",
+            "samtools-flagstat-quality-metric",
+        )
 
     def make_number_of_genes_detected_qc(self, encode_file, gs_file):
-        if self.file_has_qc(encode_file, "GeneQuantificationQualityMetric"):
-            return
-        qc_file = self.analysis.get_files(
-            filename=gs_file.task.outputs["number_of_genes"]
-        )[0]
-        qc = self.backend.read_json(qc_file)
-        output_qc = qc.get("number_of_genes_detected")
-        return self.queue_qc(
-            output_qc, encode_file, "gene-quantification-quality-metric"
+        self.make_qc_from_well_formed_json(
+            encode_file,
+            gs_file,
+            "GeneQuantificationQualityMetric",
+            "number_of_genes",
+            "number_of_genes_detected",
+            "gene-quantification-quality-metric",
         )
 
-    def make_mad_qc_metric(self):
-        if self.file_has_qc(encode_file, "MadQualityMetric"):
-            return
-        qc_file = self.analysis.get_files(
-            filename=gs_file.task.outputs["madQCmetrics"]
-        )[0]
-        qc = self.backend.read_json(qc_file)
-        output_qc = qc.get("MAD.R")
-        return self.queue_qc(
-            output_qc, encode_file, "mad-quality-metric"
+    def make_mad_qc_metric(self, encode_file, gs_file):
+        self.make_qc_from_well_formed_json(
+            encode_file,
+            gs_file,
+            "MadQualityMetric",
+            "madQCmetrics",
+            "MAD.R",
+            "mad-quality-metric",
         )
 
-    def make_reads_by_gene_type_qc(self):
-        if self.file_has_qc(encode_file, "GeneTypeQuantificationQualityMetric"):
-            return
-        qc_file = self.analysis.get_files(
-            filename=gs_file.task.outputs["rnaQC"]
-        )[0]
-        qc = self.backend.read_json(qc_file)
-        output_qc = qc.get("gene_type_count")
-        return self.queue_qc(
-            output_qc, encode_file, "gene-type-quantification-quality-metric"
+    def make_reads_by_gene_type_qc(self, encode_file, gs_file):
+        self.make_qc_from_well_formed_json(
+            encode_file,
+            gs_file,
+            "GeneTypeQuantificationQualityMetric",
+            "rnaQC",
+            "gene_type_count",
+            "gene-type-quantification-quality-metric",
         )
 
 
