@@ -710,18 +710,25 @@ class Accession(ABC):
 
 
 class AccessionGenericRna(Accession):
-    def make_generic_correlation_qc(self, encode_file, gs_file, handler):
+    def make_generic_correlation_qc(
+        self,
+        encode_file,
+        gs_file,
+        handler,
+        qc_schema_name="CorrelationQualityMetric",
+        qc_schema_name_with_hyphens="correlation-quality-metric",
+    ):
         """
         Make correlation QC metrics in  a pipeline agnostic fashion. Pipeline specific logic is
         taken care of in the handler, the function that formats the qc metric dictionary.
         """
         if (
-            self.file_has_qc(encode_file, "CorrelationQualityMetric")
+            self.file_has_qc(encode_file, qc_schema_name)
             or self.get_number_of_biological_replicates() != 2
         ):
             return
         qc = handler(gs_file)
-        return self.queue_qc(qc, encode_file, "correlation-quality-metric", shared=True)
+        return self.queue_qc(qc, encode_file, qc_schema_name_with_hyphens, shared=True)
 
 
 class AccessionBulkRna(AccessionGenericRna):
@@ -811,16 +818,6 @@ class AccessionBulkRna(AccessionGenericRna):
             "gene-quantification-quality-metric",
         )
 
-    def make_mad_qc_metric(self, encode_file, gs_file):
-        self.make_qc_from_well_formed_json(
-            encode_file,
-            gs_file,
-            "MadQualityMetric",
-            "madQCmetrics",
-            "MAD.R",
-            "mad-quality-metric",
-        )
-
     def make_reads_by_gene_type_qc(self, encode_file, gs_file):
         self.make_qc_from_well_formed_json(
             encode_file,
@@ -830,6 +827,18 @@ class AccessionBulkRna(AccessionGenericRna):
             "gene_type_count",
             "gene-type-quantification-quality-metric",
         )
+
+    def make_mad_qc_metric(self, encode_file, gs_file):
+        return self.make_generic_correlation_qc(
+            encode_file,
+            gs_file,
+            self.prepare_mad_qc_metric,
+            "MadQualityMetric",
+            "mad-quality-metric",
+        )
+
+    def prepare_mad_qc_metric(self, gs_file):
+        pass  # waiting for wrangler decision
 
 
 class AccessionLongReadRna(AccessionGenericRna):
