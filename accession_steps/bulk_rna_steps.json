@@ -237,5 +237,9 @@
       ],
       "wdl_task_name": "kallisto"
     }
+  ],
+  "raw_fastqs_keys": [
+    "fastqs_R1",
+    "fastqs_R2"
   ]
 }
