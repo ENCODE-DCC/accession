@@ -838,7 +838,14 @@ class AccessionBulkRna(AccessionGenericRna):
         )
 
     def prepare_mad_qc_metric(self, gs_file):
-        pass  # waiting for wrangler decision
+        qc_file = self.analysis.search_down(gs_file.task, "mad_qc", "madQCmetrics")[0]
+        qc = self.backend.read_json(qc_file)
+        try:
+            mad_qc = qc["MAD.R"]
+        except KeyError:
+            self.logger.exception("Something is wrong with the madqc source file")
+            raise
+        return mad_qc
 
 
 class AccessionLongReadRna(AccessionGenericRna):
