@@ -1319,6 +1319,7 @@ def accession_factory(
     automatically supplying the appropriate AccessionSteps based on the pipeline name.
     """
     pipeline_type_map = {
+        "bulk_rna": AccessionBulkRna,
         "mirna": AccessionMicroRna,
         "long_read_rna": AccessionLongReadRna,
         "chip_map_only": AccessionChip,
