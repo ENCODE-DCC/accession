@@ -738,7 +738,7 @@ class AccessionBulkRna(AccessionGenericRna):
         "anno_flagstat_qc": "make_anno_flagstat_qc",
         "number_of_genes_detected_qc": "make_number_of_genes_detected_qc",
         "mad_qc_metric": "make_mad_qc_metric",
-        "read_by_gene_type_qc": "make_reads_by_gene_type_qc",
+        "reads_by_gene_type_qc": "make_reads_by_gene_type_qc",
     }
 
     @property
