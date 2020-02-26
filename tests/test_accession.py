@@ -1,8 +1,9 @@
+import builtins
 import json
 from contextlib import contextmanager
 from pathlib import Path
 from types import GeneratorType
-from typing import Dict, List
+from typing import Dict, List, Optional
 from unittest.mock import PropertyMock
 
 import attr
@@ -18,6 +19,9 @@ from accession.accession import (
     accession_factory,
 )
 from accession.analysis import Analysis, MetaData
+from accession.file import GSFile
+from accession.helpers import MatchingMd5Record, PortalFileRecord
+from accession.task import Task
 
 from .fixtures import MockGCBackend, MockMetaData
 
@@ -44,6 +48,45 @@ def test_get_encode_file_matching_md5_of_blob(mirna_accessioner):
     fastq = mirna_accessioner.analysis.raw_fastqs[0]
     portal_file = mirna_accessioner.get_encode_file_matching_md5_of_blob(fastq.filename)
     assert portal_file.get("fastq_signature")
+
+
+@pytest.mark.parametrize(
+    "returned_files,expected",
+    [
+        (
+            [{"@id": "foo", "status": "revoked"}, {"@id": "bar", "status": "released"}],
+            "bar",
+        ),
+        (None, None),
+    ],
+)
+def test_get_encode_file_matching_md5_of_blob_unit(
+    mocker, mock_accession, returned_files, expected
+):
+    mocker.patch.object(mock_accession.backend, "md5sum", return_value="123")
+    mocker.patch.object(
+        mock_accession,
+        "get_all_encode_files_matching_md5_of_blob",
+        return_value=returned_files,
+    )
+    mocker.patch.object(mock_accession.conn, "get", lambda x: x)
+    gs_file = GSFile(key="bam", name="gs://bam/a.bam", md5sum="123", size=456)
+    result = mock_accession.get_encode_file_matching_md5_of_blob(gs_file)
+    assert result == expected
+
+
+@pytest.mark.parametrize(
+    "returned_files,expected",
+    [([{"accession": "abc"}], [{"accession": "abc"}]), ([], None)],
+)
+def test_get_all_encode_files_matching_md5_of_blob(
+    mocker, mock_accession, returned_files, expected
+):
+    mocker.patch.object(mock_accession.backend, "md5sum", return_value="123")
+    mocker.patch.object(mock_accession.conn, "search", return_value=returned_files)
+    gs_file = GSFile(key="bam", name="gs://bam/a.bam", md5sum="123", size=456)
+    result = mock_accession.get_all_encode_files_matching_md5_of_blob(gs_file)
+    assert result == expected
 
 
 @pytest.mark.docker
@@ -233,6 +276,96 @@ def test_make_file_obj(mirna_accessioner):
     )
     assert obj.get("md5sum") and obj.get("file_size")
     assert len(obj.get("derived_from")) == 3
+
+
+def test_accession_steps_dry_run(mocker: MockFixture, mock_accession: Accession):
+    task_name = "my_task"
+    file_name = "gs://bam/a.bam"
+    filekey = "bam"
+    task = Task(
+        task_name,
+        {"inputs": {}, "outputs": {filekey: file_name}},
+        mock_accession.analysis,
+    )
+    task.output_files = [
+        GSFile(key=filekey, name=file_name, md5sum="123", size=456, task=task)
+    ]
+    mocker.patch.object(mock_accession.analysis, "get_tasks", return_value=[task])
+    mocker.patch.object(
+        mock_accession,
+        "make_file_matching_md5_record",
+        return_value=MatchingMd5Record(
+            "gs://file/a", [PortalFileRecord("ENCFFABC123", "released", "ENCSRCBA321")]
+        ),
+    )
+    single_step_params = {
+        "wdl_files": [
+            {
+                "derived_from_files": [],
+                "file_format": "bam",
+                "filekey": "bam",
+                "output_type": "alignments",
+                "quality_metrics": [],
+            }
+        ],
+        "wdl_task_name": task_name,
+    }
+    results = mock_accession.accession_step(single_step_params, dry_run=True)
+    assert results == [
+        MatchingMd5Record(
+            "gs://file/a", [PortalFileRecord("ENCFFABC123", "released", "ENCSRCBA321")]
+        )
+    ]
+
+
+@pytest.mark.parametrize(
+    "matches,expected",
+    [
+        (
+            [
+                MatchingMd5Record(
+                    "gs://foo/a.b",
+                    [
+                        PortalFileRecord("ENCFF123ABC", "released", "ENCSRCBA321"),
+                        PortalFileRecord("ENCFF456DEF", "in progress", "ENCSRCBA321"),
+                    ],
+                ),
+                MatchingMd5Record(
+                    "gs://foo/c.d",
+                    [PortalFileRecord("ENCFF000AAA", "revoked", "ENCSR222FOO")],
+                ),
+                None,
+            ],
+            [
+                "File Path    | Matching Portal Files | Portal Status | Portal File Dataset",
+                "gs://foo/a.b | ENCFF123ABC           | released      | ENCSRCBA321        ",
+                "             | ENCFF456DEF           | in progress   | ENCSRCBA321        ",
+                "gs://foo/c.d | ENCFF000AAA           | revoked       | ENCSR222FOO        ",
+            ],
+        ),
+        ([None], ["No MD5 conflicts found."]),
+    ],
+)
+def test_report_dry_run(
+    mocker: MockFixture,
+    mock_accession: Accession,
+    matches: List[Optional[MatchingMd5Record]],
+    expected: List[str],
+):
+    """
+    The mocker.patch creates a unittest MagicMock on builtins.print(). We want to
+    conform with pytest-style asserts so we manually extract the print args, rather than
+    using unittest-style mock.assert_*() methods. The first index of mock_calls extracts
+    the matching call (in call order), the second selects the args from the (name, args,
+    kwargs) tuple for that call, and the last index selects the positional arg.
+    """
+    mocker.patch("builtins.print")
+    mock_accession.report_dry_run(matches)
+    print_call_args = [
+        builtins.print.mock_calls[i][1][0]
+        for i in range(0, len(expected))  # type: ignore
+    ]
+    assert print_call_args == expected
 
 
 def test_accession_init(mock_accession: Accession, lab: str, award: str) -> None:

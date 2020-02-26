@@ -8,7 +8,7 @@ from typing import Any, Dict, List, Optional, Tuple, Type
 
 from accession.analysis import Analysis, MetaData
 from accession.file import GSFile
-from accession.helpers import string_to_number
+from accession.helpers import MatchingMd5Record, PortalFileRecord, string_to_number
 from accession.quality_metric import QualityMetric
 
 ASSEMBLY = "assembly"
@@ -83,6 +83,19 @@ class Accession(ABC):
             step_run_id = step_run.get("@id")
         return step_run_id
 
+    def get_all_encode_files_matching_md5_of_blob(
+        self, file: GSFile
+    ) -> Optional[List[Dict[str, Any]]]:
+        """
+        Retrieves all files from the portal with an md5sum matching the blob's md5
+        """
+        md5sum = self.backend.md5sum(file)
+        search_param = [("md5sum", md5sum), ("type", "File")]
+        encode_files = self.conn.search(search_param)
+        if not encode_files:
+            return None
+        return encode_files
+
     def get_encode_file_matching_md5_of_blob(self, file):
         """Finds an ENCODE File object whose md5sum matches md5 of a blob in URI in backend.
 
@@ -90,12 +103,12 @@ class Accession(ABC):
             file (str): String representing an URI to an object in the backend.
 
         Returns:
-            dict: Dictionary representation of the matching file object on portal.
+            dict: Dictionary representation of the matching file object on portal
             None if no matching objects are found.
         """
-        md5sum = self.backend.md5sum(file)
-        search_param = [("md5sum", md5sum), ("type", "File")]
-        encode_files = self.conn.search(search_param)
+        encode_files = self.get_all_encode_files_matching_md5_of_blob(file)
+        if encode_files is None:
+            return None
         filtered_encode_files = type(self).filter_encode_files_by_status(encode_files)
         if filtered_encode_files:
             if len(filtered_encode_files) > 1:
@@ -130,6 +143,27 @@ class Accession(ABC):
             file for file in encode_files if file["status"] not in forbidden_statuses
         ]
         return filtered_files
+
+    def make_file_matching_md5_record(
+        self, gs_file: GSFile
+    ) -> Optional[MatchingMd5Record]:
+        """
+        Returns a record of all portal files with a matching md5sum, or None if no
+        matching files were found.
+        """
+        matching = self.get_all_encode_files_matching_md5_of_blob(gs_file.filename)
+        if not matching:
+            return None
+        portal_file_records = []
+        for file in matching:
+            portal_file_record = PortalFileRecord(
+                file["@id"].split("/")[2], file["status"], file["dataset"]
+            )
+            portal_file_records.append(portal_file_record)
+        matching_md5_record = MatchingMd5Record(
+            gs_file_path=gs_file.filename, portal_files=portal_file_records
+        )
+        return matching_md5_record
 
     def raw_files_accessioned(self):
         for file in self.analysis.raw_fastqs:
@@ -489,7 +523,7 @@ class Accession(ABC):
         obj = self.make_attachment_object(contents, mime_type, filename, add_ext)
         return obj
 
-    def accession_step(self, single_step_params):
+    def accession_step(self, single_step_params, dry_run: bool = False):
         """
         Note that this method will attempt a getattr() when converting the qc method defined in the
         accessioning template to a function name. This will raise a NotImplementedError if the
@@ -502,13 +536,16 @@ class Accession(ABC):
         if single_step_params.get("requires_replication") is True:
             if not self.is_replicated:
                 return
-        step_run = self.get_or_make_step_run(
-            self.lab_pi,
-            single_step_params["dcc_step_run"],
-            single_step_params["dcc_step_version"],
-            single_step_params["wdl_task_name"],
-        )
-        accessioned_files = []
+        if not dry_run:
+            step_run = self.get_or_make_step_run(
+                self.lab_pi,
+                single_step_params["dcc_step_run"],
+                single_step_params["dcc_step_version"],
+                single_step_params["wdl_task_name"],
+            )
+            accessioned_files = []
+        else:
+            matching_records = []
         for task in self.analysis.get_tasks(single_step_params["wdl_task_name"]):
             for file_params in single_step_params["wdl_files"]:
                 for wdl_file in [
@@ -516,7 +553,10 @@ class Accession(ABC):
                     for file in task.output_files
                     if file_params["filekey"] in file.filekeys
                 ]:
-
+                    if dry_run:
+                        matching_record = self.make_file_matching_md5_record(wdl_file)
+                        matching_records.append(matching_record)
+                        continue
                     # Conservative IDR thresholded peaks may have
                     # the same md5sum as optimal one
                     try:
@@ -555,12 +595,66 @@ class Accession(ABC):
                             wdl_file,
                         )
                     accessioned_files.append(encode_file)
+        if dry_run:
+            return matching_records
         return accessioned_files
 
-    def accession_steps(self):
-        for step in self.steps.content:
-            self.accession_step(step)
-        self.post_qcs()
+    def accession_steps(self, dry_run: bool = False):
+        if dry_run:
+            self.logger.info("Currently in dry run mode, will NOT post to server.")
+            accumulated_matches: List[Optional[MatchingMd5Record]] = []
+            for step in self.steps.content:
+                accumulated_matches.extend(self.accession_step(step, dry_run))
+            self.report_dry_run(accumulated_matches)
+        else:
+            for step in self.steps.content:
+                self.accession_step(step)
+            self.post_qcs()
+
+    def report_dry_run(self, records: List[Optional[MatchingMd5Record]]):
+        """
+        Print the report for the dry run. We use a format string to control the width
+        for each column by adding padding where appropriate. The column width is
+        governed by the length (in characters) of the longest element in each column.
+        When there is more than one file at the portal that had a matching md5sum, the
+        file path is not printed for subsequent report rows after the first match for
+        visual clarity.
+
+        Note that the match records are an Optional type, thus we need to remove Nones
+        """
+        header = (
+            "File Path",
+            "Matching Portal Files",
+            "Portal Status",
+            "Portal File Dataset",
+        )
+        matches = [i for i in records if i is not None]
+        if not matches:
+            print("No MD5 conflicts found.")
+            return
+        rows = [header]
+        for match in matches:
+            for i, portal_file in enumerate(match.portal_files):
+                if i == 0:
+                    display_filename = match.gs_file_path
+                else:
+                    display_filename = ""
+                rows.append(
+                    (
+                        display_filename,
+                        portal_file.accession,
+                        portal_file.status,
+                        portal_file.experiment,
+                    )
+                )
+        columns = list(zip(*rows))
+        column_widths = []
+        for column in columns:
+            lens = [len(i) for i in column]
+            column_widths.append(max(lens))
+        template = "{{:{}}} | {{:{}}} | {{:{}}} | {{:{}}}".format(*column_widths)
+        for row in rows:
+            print(template.format(*row))
 
 
 class AccessionGenericRna(Accession):

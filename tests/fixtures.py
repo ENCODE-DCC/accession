@@ -4,7 +4,7 @@ import shutil
 from pathlib import Path
 from time import sleep
 from typing import Callable, Dict, Iterator, Tuple
-from unittest.mock import PropertyMock
+from unittest.mock import PropertyMock, create_autospec
 from urllib.parse import urljoin
 
 import attr
@@ -354,7 +354,7 @@ def mock_accession(
     mocked_accession = AccessionMicroRna(
         mock_accession_steps,
         Analysis(mock_metadata, backend=mock_accession_gc_backend),
-        "mock_server.biz",
+        create_autospec(Connection),
         lab,
         award,
     )

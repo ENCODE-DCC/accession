@@ -33,6 +33,12 @@ def get_parser():
         help=f"the type of pipeline run being accessioned, e.g. mirna or long_read_rna",
     )
     parser.add_argument(
+        "-d",
+        "--dry-run",
+        action="store_true",
+        help="Perform a dry run for accessioning, not post anything.",
+    )
+    parser.add_argument(
         "--server", default="dev", help="Server the files will be accessioned to"
     )
     parser.add_argument("--lab", type=str, default=None, help="Lab")
@@ -79,7 +85,7 @@ def main(args=None):
         accessioner = accession_factory(
             args.pipeline_type, args.accession_metadata, connection, lab, award
         )
-        accessioner.accession_steps()
+        accessioner.accession_steps(args.dry_run)
         return
     print("Module called without proper arguments")
 
