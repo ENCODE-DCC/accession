@@ -770,6 +770,22 @@ class AccessionBulkRna(AccessionGenericRna):
             star_qc_metric, encode_bam_file, "star-quality-metric"
         )  # backend mapping adding hyphens and removing caps
 
+    def make_reads_by_gene_type_qc(self, encode_file, gs_file):
+        if self.file_has_qc(encode_file, "GeneTypeQuantificationQualityMetric"):
+            return
+        qc_file = self.analysis.search_down(gs_file.task, "rna_qc", "rnaQC")[0]
+        qc = self.backend.read_json(qc_file)
+        try:
+            reads_by_gene_type_qc_metric = qc["gene_type_count"]
+        except KeyError:
+            self.logger.exception("Something is wrong with rna_qc file")
+            raise
+        return self.queue_qc(
+            reads_by_gene_type_qc_metric,
+            encode_file,
+            "gene-type-quantification-quality-metric",
+        )
+
     def make_qc_from_well_formed_json(
         self,
         encode_file,
@@ -816,16 +832,6 @@ class AccessionBulkRna(AccessionGenericRna):
             "number_of_genes",
             "number_of_genes_detected",
             "gene-quantification-quality-metric",
-        )
-
-    def make_reads_by_gene_type_qc(self, encode_file, gs_file):
-        self.make_qc_from_well_formed_json(
-            encode_file,
-            gs_file,
-            "GeneTypeQuantificationQualityMetric",
-            "rnaQC",
-            "gene_type_count",
-            "gene-type-quantification-quality-metric",
         )
 
     def make_mad_qc_metric(self, encode_file, gs_file):
