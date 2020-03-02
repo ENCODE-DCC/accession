@@ -130,8 +130,8 @@ jobs:
             # Get the latest accession git tag reachable from current commit
             LATEST_ACCESSION_GIT_TAG=$(git describe --tags | cut -d '-' -f 1)
             echo "Found latest accession git tag: ${LATEST_ACCESSION_GIT_TAG}"
-            # Set the default tag to cache from as the most recent portal version
-            CACHE_TAG="${LATEST_PORTAL_TAG}"
+            # Set the default tag to cache from
+            CACHE_TAG="template"
             # See https://superuser.com/a/1176569, captures cURL return code
             # We check if the portal tag is on quay, if not then we can't use it as build cache, and we use the accession tag instead
             IMAGE_URL="https://quay.io/api/v1/repository/encode-dcc/accession/tag/${LATEST_PORTAL_TAG}/images"
@@ -145,6 +145,7 @@ jobs:
             echo "Will use ${CACHE_TAG} as docker build cache"
             PORTAL_VERSION_DOCKER_TAG="${QUAY_NAMESPACED_REPO}:${LATEST_PORTAL_TAG}"
             ACCESSION_VERSION_DOCKER_TAG="${QUAY_NAMESPACED_REPO}:${LATEST_ACCESSION_GIT_TAG}"
+            TEMPLATE_DOCKER_TAG="${QUAY_NAMESPACED_REPO}:template"
             docker pull "${CACHE_TAG}"
             docker build --cache-from "${CACHE_TAG}" -f docker/Dockerfile -t "${TAG}" --build-arg ENCODED_RELEASE_TAG="${LATEST_PORTAL_TAG}" .
             docker push "${TAG}"
@@ -152,6 +153,7 @@ jobs:
             ENV_FILE="vars.sh"
             echo "export PORTAL_VERSION_DOCKER_TAG=${PORTAL_VERSION_DOCKER_TAG}" > "${ENV_FILE}"
             echo "export ACCESSION_VERSION_DOCKER_TAG=${ACCESSION_VERSION_DOCKER_TAG}" >> "${ENV_FILE}"
+            echo "export TEMPLATE_DOCKER_TAG=${TEMPLATE_DOCKER_TAG}" >> "${ENV_FILE}"
             echo "export TAG=${TAG}" >> "${ENV_FILE}"
       - persist_to_workspace:
           root: .
@@ -171,8 +173,10 @@ jobs:
             docker pull "${TAG}"
             docker tag "${TAG}" "${ACCESSION_VERSION_DOCKER_TAG}"
             docker tag "${TAG}" "${PORTAL_VERSION_DOCKER_TAG}"
+            docker tag "${TAG}" "${TEMPLATE_DOCKER_TAG}"
             docker push "${ACCESSION_VERSION_DOCKER_TAG}"
             docker push "${PORTAL_VERSION_DOCKER_TAG}"
+            docker push "${TEMPLATE_DOCKER_TAG}"
             docker logout
 
 workflows:

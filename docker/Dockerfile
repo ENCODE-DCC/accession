@@ -1,4 +1,4 @@
-FROM ubuntu:trusty@sha256:2f7c79927b346e436cc14c92bd4e5bd778c3bd7037f35bc639ac1589a7acfa90
+FROM ubuntu:bionic@sha256:04d48df82c938587820d7b6006f5071dbbffceb7ca01d2814f81857c631d44df
 
 LABEL maintainer="paulsud@stanford.edu"
 
@@ -24,8 +24,8 @@ RUN apt-get update && apt-get install -y \
     graphviz \
     nodejs \
     openjdk-11-jdk \
-    postgresql-9.3 \
-    python3.4-dev \
+    postgresql-10 \
+    python3-dev \
     python3-pip \
     git \
     libjpeg8-dev \
@@ -34,7 +34,7 @@ RUN apt-get update && apt-get install -y \
 && rm -rf /var/lib/apt/lists/*
 
 # Shouldn't be an issue if we run the container as root?
-ENV PATH=/usr/share/elasticsearch/bin:/usr/lib/postgresql/9.3/bin:$PATH
+ENV PATH=/usr/share/elasticsearch/bin:/usr/lib/postgresql/10/bin:$PATH
 
 # Fix terminal encoding issues that cause buildout to fail
 # https://stackoverflow.com/a/56108986
@@ -46,7 +46,8 @@ RUN alias python=python3
 
 RUN git clone https://github.com/ENCODE-DCC/encoded.git --branch "${ENCODED_RELEASE_TAG}" --single-branch && \
     cd encoded && \
-    pip3 install -U zc.buildout setuptools && \
+    sudo pip3 install --upgrade pip setuptools && \
+    sudo pip3 install zc.buildout && \
     buildout bootstrap && \
     bin/buildout
 
