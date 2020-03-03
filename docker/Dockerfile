@@ -26,6 +26,7 @@ RUN apt-get update && apt-get install -y \
     nodejs \
     openjdk-11-jdk \
     postgresql-10 \
+    libpq-dev \
     python3-dev \
     python3-pip \
     git \
