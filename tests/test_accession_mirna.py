@@ -1,11 +1,15 @@
+from pathlib import Path
+
 import pytest
 
 
 @pytest.mark.docker
 @pytest.mark.filesystem
-def test_accession_mirna_replicated(accessioner_factory):
+def test_accession_mirna_replicated(
+    accessioner_factory, mirna_replicated_metadata_path
+):
     factory = accessioner_factory(
-        metadata_file="mirna_replicated_metadata.json", assay_name="mirna"
+        metadata_file=mirna_replicated_metadata_path, assay_name="mirna"
     )
     accessioner, expected_files = next(factory)
     accessioner.accession_steps()
@@ -17,9 +21,11 @@ def test_accession_mirna_replicated(accessioner_factory):
 @pytest.mark.docker
 @pytest.mark.filesystem
 def test_accession_mirna_unreplicated(accessioner_factory):
-    factory = accessioner_factory(
-        metadata_file="mirna_unreplicated_metadata.json", assay_name="mirna"
+    current_dir = Path(__file__).resolve()
+    metadata_json_path = (
+        current_dir.parent / "data" / "mirna_unreplicated_metadata.json"
     )
+    factory = accessioner_factory(metadata_file=metadata_json_path, assay_name="mirna")
     accessioner, expected_files = next(factory)
     accessioner.accession_steps()
     validate_accessioning(
