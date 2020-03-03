@@ -47,8 +47,8 @@ RUN alias python=python3
 
 RUN git clone https://github.com/ENCODE-DCC/encoded.git --branch "${ENCODED_RELEASE_TAG}" --single-branch && \
     cd encoded && \
-    sudo pip3 install --upgrade pip setuptools && \
-    sudo pip3 install zc.buildout && \
+    pip3 install --upgrade pip setuptools && \
+    pip3 install zc.buildout && \
     buildout bootstrap && \
     bin/buildout
 
