@@ -30,11 +30,9 @@ class MockFile:
 
 
 @pytest.fixture
-def mirna_accessioner(accessioner_factory):
-    current_dir = Path(__file__).resolve()
+def mirna_accessioner(accessioner_factory, mirna_replicated_metadata_path):
     factory = accessioner_factory(
-        metadata_file=current_dir.parent / "data" / "mirna_replicated_metadata.json",
-        assay_name="mirna",
+        metadata_file=mirna_replicated_metadata_path, assay_name="mirna"
     )
     accessioner, _ = next(factory)
     return accessioner
@@ -451,11 +449,11 @@ def mock_replicated_mirna_accession(mocker, mirna_replicated_analysis, mock_acce
 
 @pytest.fixture
 def mirna_replicated_analysis(
-    mock_accession_gc_backend: MockFixture
+    mock_accession_gc_backend: MockFixture, mirna_replicated_metadata_path: str
 ) -> Analysis:  # noqa: F811
-    current_dir = Path(__file__).resolve()
-    metadata_json_path = current_dir.parent / "data" / "mirna_replicated_metadata.json"
-    analysis = Analysis(MetaData(metadata_json_path), backend=mock_accession_gc_backend)
+    analysis = Analysis(
+        MetaData(mirna_replicated_metadata_path), backend=mock_accession_gc_backend
+    )
     return analysis
 
 

@@ -146,6 +146,13 @@ def metadata_json(metadata_json_path: Path) -> Iterator[dict]:
         yield json.load(json_file)
 
 
+@pytest.fixture
+def mirna_replicated_metadata_path() -> str:
+    current_dir = Path(__file__).resolve()
+    metadata_json_path = current_dir.parent / "data" / "mirna_replicated_metadata.json"
+    return str(metadata_json_path)
+
+
 class MockGCBackend(GCBackend):
     def __init__(self, bucket: str):
         self.client = MockGCClient()
@@ -279,7 +286,12 @@ def accessioner_factory(
         connection = Connection(local_encoded_server)
 
         accessioner = accession_factory(
-            assay_name, metadata_file, connection, lab, award
+            assay_name,
+            metadata_file,
+            connection,
+            lab,
+            award,
+            backend=mock_accession_gc_backend,
         )
 
         mocker.patch.object(
