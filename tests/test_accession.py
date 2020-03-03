@@ -33,8 +33,8 @@ class MockFile:
 def mirna_accessioner(accessioner_factory):
     current_dir = Path(__file__).resolve()
     factory = accessioner_factory(
-        pipeline_type="mirna",
         metadata_file=current_dir.parent / "data" / "mirna_replicated_metadata.json",
+        assay_name="mirna",
     )
     accessioner, _ = next(factory)
     return accessioner
