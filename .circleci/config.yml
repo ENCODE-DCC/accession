@@ -137,8 +137,16 @@ jobs:
             IMAGE_URL="https://quay.io/api/v1/repository/encode-dcc/accession/tag/${LATEST_PORTAL_TAG}/images"
             TAG_STATUS=$(curl -LI ${IMAGE_URL} -o /dev/null -w '%{http_code}\n' -s)
             echo "Attempted to find image tagged with current portal version at ${IMAGE_URL}, got ${TAG_STATUS}"
-            # If we couldn't find the new tag, then use the accession git tag as a cache
-            if [[ "${TAG_STATUS}" -ne "200" ]]; then CACHE_TAG="${LATEST_ACCESSION_GIT_TAG}"; fi
+            # If we found the portal tag, then use it as a cache
+            if [[ "${TAG_STATUS}" -eq "200" ]]; then CACHE_TAG="${LATEST_PORTAL_TAG}"; fi
+
+            # Check if the accession tag is on quay
+            IMAGE_URL="https://quay.io/api/v1/repository/encode-dcc/accession/tag/${LATEST_ACCESSION_GIT_TAG}/images"
+            TAG_STATUS=$(curl -LI ${IMAGE_URL} -o /dev/null -w '%{http_code}\n' -s)
+            echo "Attempted to find image tagged with current accession version at ${IMAGE_URL}, got ${TAG_STATUS}"
+            # If we found the accession tag, then use it as a cache
+            if [[ "${TAG_STATUS}" -eq "200" ]]; then CACHE_TAG="${LATEST_ACCESSION_GIT_TAG}"; fi
+
             # Create tags for the image to build from the latest portal and accession tags
             QUAY_NAMESPACED_REPO="quay.io/encode-dcc/${CIRCLE_PROJECT_REPONAME}"
             CACHE_TAG="${QUAY_NAMESPACED_REPO}:${CACHE_TAG}"
