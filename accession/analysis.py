@@ -198,7 +198,9 @@ class Analysis(object):
             )
         ):
             if task_item:
-                yield from self._search_up(task_item, task_name, filekey, inputs)
+                yield from self._search_up(
+                    task_item, task_name, filekey, inputs, disallow_tasks=disallow_tasks
+                )
 
     # Search the Analysis hirearchy down for a file matching filekey
     # Returns generator object, access with next()
