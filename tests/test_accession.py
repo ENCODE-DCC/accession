@@ -31,8 +31,10 @@ class MockFile:
 
 @pytest.fixture
 def mirna_accessioner(accessioner_factory):
+    current_dir = Path(__file__).resolve()
     factory = accessioner_factory(
-        metadata_file="mirna_replicated_metadata.json", assay_name="mirna"
+        pipeline_type="mirna",
+        metadata_file=current_dir.parent / "data" / "mirna_replicated_metadata.json",
     )
     accessioner, _ = next(factory)
     return accessioner
