@@ -8,6 +8,7 @@ ARG ENCODED_RELEASE_TAG
 
 ENV ES_JAVA_OPTS -Xms2g -Xmx2g
 ENV JAVA_HOME /usr/lib/jvm/java-11-openjdk-amd64
+ENV DEBIAN_FRONTEND=noninteractive
 
 RUN apt-get update && apt-get install -y apt-transport-https software-properties-common curl && \
     curl -s https://artifacts.elastic.co/GPG-KEY-elasticsearch | apt-key add - && \
