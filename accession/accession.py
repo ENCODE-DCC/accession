@@ -804,24 +804,35 @@ class AccessionBulkRna(AccessionGenericRna):
         output_qc = qc.get(qc_dictionary_key)
         return self.queue_qc(output_qc, encode_file, qc_schema_name_with_hyphens)
 
+    def make_flagstat_qc(
+        self,
+        encode_file,
+        gs_file,
+        task_output_name,
+        qc_dictionary_key,
+        convert_to_string=["mapped_pct", "paired_properly_pct", "singletons_pct"],
+    ):
+        if self.file_has_qc(encode_file, "SamtoolsFlagstatsQualityMetric"):
+            return
+        qc_file = self.analysis.get_files(
+            filename=gs_file.task.outputs[task_output_name]
+        )[0]
+        qc = self.backend.read_json(qc_file)
+        output_qc = qc.get(qc_dictionary_key)
+        for key in convert_to_string:
+            output_qc[key] = str(output_qc[key])
+        return self.queue_qc(
+            output_qc, encode_file, "samtools-flagstats-quality-metric"
+        )
+
     def make_genome_flagstat_qc(self, encode_file, gs_file):
-        self.make_qc_from_well_formed_json(
-            encode_file,
-            gs_file,
-            "SamtoolsFlagstatsQualityMetric",
-            "genome_flagstat_json",
-            "samtools_genome_flagstat",
-            "samtools-flagstat-quality-metric",
+        self.make_flagstat_qc(
+            encode_file, gs_file, "genome_flagstat_json", "samtools_genome_flagstat"
         )
 
     def make_anno_flagstat_qc(self, encode_file, gs_file):
-        self.make_qc_from_well_formed_json(
-            encode_file,
-            gs_file,
-            "SamtoolsFlagstatsQualityMetric",
-            "anno_flagstat_json",
-            "samtools_anno_flagstat",
-            "samtools-flagstat-quality-metric",
+        self.make_flagstat_qc(
+            encode_file, gs_file, "anno_flagstat_json", "samtools_anno_flagstat"
         )
 
     def make_number_of_genes_detected_qc(self, encode_file, gs_file):

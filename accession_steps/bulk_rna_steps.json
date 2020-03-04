@@ -53,7 +53,8 @@
           "output_type": "transcriptome alignments",
           "quality_metrics": [
             "star_mapping_qc",
-            "anno_flagstat_qc"
+            "anno_flagstat_qc",
+            "reads_by_gene_type_qc"
           ]
         }
       ],
@@ -200,10 +201,7 @@
           ],
           "file_format": "tsv",
           "filekey": "isoforms_results",
-          "output_type": "transcript quantifications",
-          "quality_metrics": [
-            "reads_by_gene_type_qc"
-          ]
+          "output_type": "transcript quantifications"
         }
       ],
       "wdl_task_name": "rsem_quant"
