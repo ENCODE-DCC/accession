@@ -741,6 +741,23 @@ class AccessionBulkRna(AccessionGenericRna):
         "reads_by_gene_type_qc": "make_reads_by_gene_type_qc",
     }
 
+    GENE_TYPE_PROPERTIES = [
+        "spikein",
+        "rRNA",
+        "Mt_rRNA",
+        "miRNA",
+        "protein_coding",
+        "processed_transcript",
+        "ribozyme",
+        "sRNA",
+        "scaRNA",
+        "snRNA",
+        "snoRNA",
+        "antisense",
+        "sense_overlapping",
+        "sense_intronic",
+    ]
+
     @property
     def assembly(self):
         filekey = "index"
@@ -770,6 +787,10 @@ class AccessionBulkRna(AccessionGenericRna):
             star_qc_metric, encode_bam_file, "star-quality-metric"
         )  # backend mapping adding hyphens and removing caps
 
+    def format_reads_by_gene_type_qc(qc_dict, properties_to_report):
+        output = {prop: qc_dict[prop] for prop in properties_to_report}
+        return output
+
     def make_reads_by_gene_type_qc(self, encode_file, gs_file):
         if self.file_has_qc(encode_file, "GeneTypeQuantificationQualityMetric"):
             return
@@ -781,7 +802,7 @@ class AccessionBulkRna(AccessionGenericRna):
             self.logger.exception("Something is wrong with rna_qc file")
             raise
         return self.queue_qc(
-            reads_by_gene_type_qc_metric,
+            format_reads_by_gene_type_qc(reads_by_gene_type_qc_metric),
             encode_file,
             "gene-type-quantification-quality-metric",
         )
