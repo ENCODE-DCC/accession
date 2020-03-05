@@ -4,7 +4,7 @@ import os
 from abc import ABC, abstractmethod
 from base64 import b64encode
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Type
+from typing import Any, Dict, List, Optional, Tuple, Type
 
 from accession.analysis import Analysis, MetaData
 from accession.file import GSFile
@@ -320,6 +320,7 @@ class Accession(ABC):
                     ancestor.get("derived_from_output_type"),
                     ancestor.get("derived_from_inputs"),
                     ancestor.get("allow_empty"),
+                    tuple(ancestor.get("disallow_tasks", ())),
                 )
             )
         return list(self.flatten(ancestors))
@@ -340,10 +341,19 @@ class Accession(ABC):
         output_type=None,
         inputs=False,
         allow_empty=False,
+        disallow_tasks: Tuple[str, ...] = (),
     ):
-        derived_from_files = self.analysis.search_up(
-            file.task, task_name, filekey, inputs
-        )
+        try:
+            derived_from_files = self.analysis.search_up(
+                file.task, task_name, filekey, inputs, disallow_tasks=disallow_tasks
+            )
+        except ValueError:
+            self.logger.error(
+                "An error occured searching up for the parent file of %s",
+                file.filename,
+                exc_info=True,
+            )
+            raise
         encode_files = [
             self.get_encode_file_matching_md5_of_blob(gs_file.filename)
             for gs_file in derived_from_files

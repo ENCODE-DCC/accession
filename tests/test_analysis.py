@@ -1,3 +1,4 @@
+from contextlib import suppress as does_not_raise
 from pathlib import Path
 
 import pytest
@@ -128,6 +129,92 @@ def test_search_up(normal_analysis):
     files3 = normal_analysis.search_up(task3, "trim_adapter", "fastqs", inputs=True)
     # Notice how tree nodes widen the search scope
     assert len(files3) == 4
+
+
+@pytest.mark.parametrize(
+    "condition,disallow_tasks,expected",
+    [
+        (does_not_raise(), ("choose_ctl"), ["gs://foo/bar/ENCFF295YVN.nodup.bam"]),
+        (
+            does_not_raise(),
+            (),
+            [
+                "gs://foo/bar/ENCFF295YVN.nodup.bam",
+                "gs://foo/bar/ENCFF279HDE.nodup.bam",
+            ],
+        ),
+        (pytest.raises(ValueError), ("bam2ta"), []),
+    ],
+)
+def test_search_up_disallow_tasks(
+    mock_metadata, mock_gc_backend, condition, disallow_tasks, expected
+):
+    metadata = {
+        "workflowRoot": "gs://foo/bar/",
+        "calls": {
+            "chip.bam2ta": [
+                {
+                    "dockerImageUsed": "arch:latest",
+                    "inputs": {"bam": "gs://foo/bar/ENCFF295YVN.nodup.bam"},
+                    "outputs": {
+                        "ta": "gs://foo/bar/call-bam2ta/shard-0/glob-35/ENCFF295YVN.nodup.tagAlign.gz"
+                    },
+                },
+                {
+                    "dockerImageUsed": "arch:latest",
+                    "inputs": {"bam": "gs://foo/bar/ENCFF279HDE.nodup.bam"},
+                    "outputs": {
+                        "ta": "gs://foo/bar/call-bam2ta/shard-1/glob-35/ENCFF279HDE.nodup.tagAlign.gz"
+                    },
+                },
+            ],
+            "chip.macs2_signal_track": [
+                {
+                    "dockerImageUsed": "arch:latest",
+                    "inputs": {
+                        "tas": [
+                            "gs://foo/bar/call-bam2ta/shard-0/glob-35/ENCFF295YVN.nodup.tagAlign.gz",
+                            "gs://foo/bar/call-choose_ctl/glob-99/ctl_for_rep1.tagAlign.gz",
+                        ]
+                    },
+                    "outputs": {
+                        "fc_bw": "gs://foo/bar/call-macs2_signal_track/shard-0/glob-10/ENCFF295YVN.bigwig",
+                        "pval_bw": "gs://foo/bar/call-macs2_signal_track/shard-0/glob-89/ENCFF295YVN.bigwig",
+                    },
+                }
+            ],
+            "chip.choose_ctl": [
+                {
+                    "dockerImageUsed": "arch:latest",
+                    "inputs": {
+                        "tas": [
+                            "gs://foo/bar/call-bam2ta/shard-0/glob-35/ENCFF295YVN.nodup.tagAlign.gz",
+                            "gs://foo/bar/call-bam2ta/shard-1/glob-35/ENCFF279HDE.nodup.tagAlign.gz",
+                        ]
+                    },
+                    "outputs": {
+                        "chosen_ctl_tas": [
+                            "gs://foo/bar/call-choose_ctl/glob-99/ctl_for_rep1.tagAlign.gz",
+                            "gs://foo/bar/call-choose_ctl/glob-99/ctl_for_rep2.tagAlign.gz",
+                        ]
+                    },
+                }
+            ],
+        },
+    }
+    mock_metadata.content = metadata
+    analysis = Analysis(mock_metadata, backend=mock_gc_backend)
+    start_task = analysis.get_tasks("macs2_signal_track")[0]
+    with condition:
+        results = analysis.search_up(
+            start_task=start_task,
+            task_name="bam2ta",
+            filekey="bam",
+            inputs="true",
+            disallow_tasks=disallow_tasks,
+        )
+        result = [i.filename for i in results]
+        assert sorted(result) == sorted(expected)
 
 
 @pytest.mark.filesystem
