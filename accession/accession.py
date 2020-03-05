@@ -787,7 +787,7 @@ class AccessionBulkRna(AccessionGenericRna):
             star_qc_metric, encode_bam_file, "star-quality-metric"
         )  # backend mapping adding hyphens and removing caps
 
-    def format_reads_by_gene_type_qc(qc_dict, properties_to_report):
+    def format_reads_by_gene_type_qc(self, qc_dict, properties_to_report):
         output = {prop: qc_dict[prop] for prop in properties_to_report}
         return output
 
@@ -802,7 +802,9 @@ class AccessionBulkRna(AccessionGenericRna):
             self.logger.exception("Something is wrong with rna_qc file")
             raise
         return self.queue_qc(
-            format_reads_by_gene_type_qc(reads_by_gene_type_qc_metric),
+            self.format_reads_by_gene_type_qc(
+                reads_by_gene_type_qc_metric, self.GENE_TYPE_PROPERTIES
+            ),
             encode_file,
             "gene-type-quantification-quality-metric",
         )
