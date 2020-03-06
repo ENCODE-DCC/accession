@@ -263,11 +263,11 @@ def test_get_chip_pipeline_replication_method(peak_caller, expected):
     "qc,expected",
     [
         (
-            b'{"replication": {"reproducibility": {"idr": {"opt_set": "pooled-pr1_vs_pooled-pr2"}}}}',
+            b'{"general": {"peak_caller": "spp"}, "replication": {"reproducibility": {"idr": {"opt_set": "pooled-pr1_vs_pooled-pr2"}}}}',
             {"preferred_default": True},
         ),
         (
-            b'{"replication": {"reproducibility": {"idr": {"opt_set": "rep1_vs_rep2"}}}}',
+            b'{"general": {"peak_caller": "macs2"}, "replication": {"reproducibility": {"overlap": {"opt_set": "rep1_vs_rep2"}}}}',
             {},
         ),
     ],
