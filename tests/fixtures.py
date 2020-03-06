@@ -100,6 +100,11 @@ def local_encoded_server(
     container.kill()
 
 
+@pytest.fixture
+def server_name() -> str:
+    return "mock_server.biz"
+
+
 @pytest.fixture(scope="session")
 def lab() -> str:
     return "/labs/encode-processing-pipeline/"
@@ -333,6 +338,7 @@ def mock_accession(
     mock_accession_gc_backend: MockGCBackend,
     mock_metadata: MockMetaData,
     mock_accession_steps: MockAccessionSteps,
+    server_name: str,
     lab: str,
     award: str,
 ) -> Accession:
@@ -354,7 +360,7 @@ def mock_accession(
     mocked_accession = AccessionMicroRna(
         mock_accession_steps,
         Analysis(mock_metadata, backend=mock_accession_gc_backend),
-        create_autospec(Connection),
+        create_autospec(Connection, dcc_url=server_name),
         lab,
         award,
     )
@@ -367,6 +373,7 @@ def mock_accession_chip(
     mock_accession_gc_backend: MockGCBackend,
     mock_metadata: MockMetaData,
     mock_accession_steps: MockAccessionSteps,
+    server_name: str,
     lab: str,
     award: str,
 ) -> Accession:
@@ -388,7 +395,7 @@ def mock_accession_chip(
     mocked_accession = AccessionChip(
         mock_accession_steps,
         Analysis(mock_metadata, backend=mock_accession_gc_backend),
-        "mock_server.biz",
+        server_name,
         lab,
         award,
     )

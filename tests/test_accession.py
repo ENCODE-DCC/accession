@@ -1,4 +1,3 @@
-import builtins
 import json
 from contextlib import contextmanager
 from pathlib import Path
@@ -337,6 +336,7 @@ def test_accession_steps_dry_run(mocker: MockFixture, mock_accession: Accession)
                 None,
             ],
             [
+                "Found files with duplicate md5sums at mock_server.biz",
                 "File Path    | Matching Portal Files | Portal Status | Portal File Dataset",
                 "gs://foo/a.b | ENCFF123ABC           | released      | ENCSRCBA321        ",
                 "             | ENCFF456DEF           | in progress   | ENCSRCBA321        ",
@@ -353,19 +353,19 @@ def test_report_dry_run(
     expected: List[str],
 ):
     """
-    The mocker.patch creates a unittest MagicMock on builtins.print(). We want to
-    conform with pytest-style asserts so we manually extract the print args, rather than
-    using unittest-style mock.assert_*() methods. The first index of mock_calls extracts
-    the matching call (in call order), the second selects the args from the (name, args,
+    The mocker.patch creates a unittest MagicMock on the logger. We want to conform
+    with pytest-style asserts so we manually extract the print args, rather than using
+    unittest-style mock.assert_*() methods. The first index of mock_calls extracts the
+    matching call (in call order), the second selects the args from the (name, args,
     kwargs) tuple for that call, and the last index selects the positional arg.
     """
-    mocker.patch("builtins.print")
+    mocker.patch.object(mock_accession.logger, "info")
     mock_accession.report_dry_run(matches)
-    print_call_args = [
-        builtins.print.mock_calls[i][1][0]
-        for i in range(0, len(expected))  # type: ignore
+    log_call_args = [
+        mock_accession.logger.info.mock_calls[i][1][0]  # type: ignore
+        for i in range(0, len(expected))
     ]
-    assert print_call_args == expected
+    assert log_call_args == expected
 
 
 def test_accession_init(mock_accession: Accession, lab: str, award: str) -> None:

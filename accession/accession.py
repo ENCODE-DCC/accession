@@ -49,7 +49,6 @@ class Accession(ABC):
         connection: Connection object
     """
 
-    ACCESSION_LOG_KEY = "ACC_MSG"
     ASSEMBLIES = ["GRCh38", "mm10"]
     PROFILE_KEY = "_profile"
 
@@ -63,12 +62,34 @@ class Accession(ABC):
         self.new_files = []
         self.new_qcs = []
         self.raw_qcs = []
-        self.logger = logging.getLogger(__name__)
-        logging.basicConfig(
-            filename="accession.log",
-            format="%(asctime)s %(levelname)s %(message)s",
-            level=logging.DEBUG,
-        )
+        self._logger: Optional[logging.Logger] = None
+
+    @property
+    def logger(self) -> logging.Logger:
+        """
+        Creates the instance's logger if it doesn't already exist, then returns the
+        logger instance. Configured to log both to stderr (StreamHandler default) and to
+        a log file.
+        """
+        if self._logger is None:
+            logger = logging.getLogger(__name__)
+            logger.setLevel(logging.DEBUG)
+            formatter = logging.Formatter(
+                "%(asctime)s %(name)s %(levelname)s %(message)s"
+            )
+
+            stdout_handler = logging.StreamHandler()
+            stdout_handler.setLevel(logging.DEBUG)
+            stdout_handler.setFormatter(formatter)
+
+            file_handler = logging.FileHandler("accession.log")
+            file_handler.setLevel(logging.DEBUG)
+            file_handler.setFormatter(formatter)
+
+            logger.addHandler(stdout_handler)
+            logger.addHandler(file_handler)
+            self._logger = logger
+        return self._logger
 
     @property
     @abstractmethod
@@ -176,8 +197,7 @@ class Accession(ABC):
         submitted_file_path = {"submitted_file_name": gs_file.filename}
         if file_exists:
             self.logger.warning(
-                "%s Attempting to post duplicate file of %s with md5sum %s",
-                type(self).ACCESSION_LOG_KEY,
+                "Attempting to post duplicate file of %s with md5sum %s",
                 file_exists.get("accession"),
                 encode_file.get("md5sum"),
             )
@@ -206,9 +226,8 @@ class Accession(ABC):
         if aliases:
             if self.conn.get(aliases, database=True):
                 self.logger.error(
-                    "%s %s with aliases %s already exists, will not post it",
+                    "%s with aliases %s already exists, will not post it",
                     profile_key.capitalize().replace("_", " "),
-                    type(self).ACCESSION_LOG_KEY,
                     aliases,
                 )
 
@@ -630,8 +649,12 @@ class Accession(ABC):
         )
         matches = [i for i in records if i is not None]
         if not matches:
-            print("No MD5 conflicts found.")
+            self.logger.info("No MD5 conflicts found.")
             return
+        else:
+            self.logger.info(
+                f"Found files with duplicate md5sums at {self.conn.dcc_url}"
+            )
         rows = [header]
         for match in matches:
             for i, portal_file in enumerate(match.portal_files):
@@ -654,7 +677,7 @@ class Accession(ABC):
             column_widths.append(max(lens))
         template = "{{:{}}} | {{:{}}} | {{:{}}} | {{:{}}}".format(*column_widths)
         for row in rows:
-            print(template.format(*row))
+            self.logger.info(template.format(*row))
 
 
 class AccessionGenericRna(Accession):
