@@ -240,6 +240,9 @@
       "requires_replication": true,
       "wdl_files": [
         {
+          "callbacks": [
+            "maybe_preferred_default"
+          ],
           "derived_from_files": [
             {
               "derived_from_filekey": "bfilt_overlap_peak",
@@ -264,6 +267,9 @@
       "requires_replication": true,
       "wdl_files": [
         {
+          "callbacks": [
+            "maybe_preferred_default"
+          ],
           "derived_from_files": [
             {
               "derived_from_filekey": "bfilt_overlap_peak",
