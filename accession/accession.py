@@ -777,11 +777,11 @@ class AccessionChip(Accession):
         file object generation time (make_file_obj) to fill in (or not) the missing
         value.
         """
-        qc = self.backend.read_json(self.analysis.get_files("qc_json")[0])[
-            "replication"
-        ]["reproducibility"]["idr"]
+        qc = self.backend.read_json(self.analysis.get_files("qc_json")[0])
+        method = self.get_chip_pipeline_replication_method(qc)
+        replication_qc = qc["replication"]["reproducibility"][method]
 
-        optimal_set = qc["opt_set"]
+        optimal_set = replication_qc["opt_set"]
         current_set = gs_file.task.inputs["prefix"]
         if current_set == optimal_set:
             return {"preferred_default": True}

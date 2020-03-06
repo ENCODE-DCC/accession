@@ -48,8 +48,8 @@
       "wdl_task_name": "macs2_signal_track"
     },
     {
-      "dcc_step_run": "histone-chip-pooled-signal-generation-step-v-1",
-      "dcc_step_version": "/analysis-step-versions/histone-chip-pooled-signal-generation-step-v-1-0/",
+      "dcc_step_run": "histone-chip-seq-pooled-signal-generation-step-v-1",
+      "dcc_step_version": "/analysis-step-versions/histone-chip-seq-pooled-signal-generation-step-v-1-0/",
       "requires_replication": true,
       "wdl_files": [
         {
@@ -240,6 +240,9 @@
       "requires_replication": true,
       "wdl_files": [
         {
+          "callbacks": [
+            "maybe_preferred_default"
+          ],
           "derived_from_files": [
             {
               "derived_from_filekey": "bfilt_overlap_peak",
@@ -264,6 +267,9 @@
       "requires_replication": true,
       "wdl_files": [
         {
+          "callbacks": [
+            "maybe_preferred_default"
+          ],
           "derived_from_files": [
             {
               "derived_from_filekey": "bfilt_overlap_peak",
