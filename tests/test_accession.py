@@ -505,9 +505,14 @@ def test_filter_encode_files_by_status_no_hits():
 def test_encode_attachment_data():
     assert Accession.encode_attachment_data(b"foo bar baz") == "Zm9vIGJhciBiYXo="
 
+
 def test_encode_attachment_data_string_input():
     with pytest.raises(TypeError):
         Accession.encode_attachment_data("foo bar baz")
 
+
 def test_make_download_link():
-    assert Accession.make_download_link("/my/dir/haz/my_text_file", ".txt") == "my_text_file.txt"
+    assert (
+        Accession.make_download_link("/my/dir/haz/my_text_file", ".txt")
+        == "my_text_file.txt"
+    )
