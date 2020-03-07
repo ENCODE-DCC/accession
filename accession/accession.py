@@ -453,7 +453,8 @@ class Accession(ABC):
             return True
         return False
 
-    def encode_attachment_data(self, data):
+    @staticmethod
+    def encode_attachment_data(data):
         """
         Encodes the attachment data into a b64 datastring
         input: data as bytes object
@@ -461,7 +462,8 @@ class Accession(ABC):
         """
         return b64encode(data).decode("utf-8")
 
-    def make_download_link(self, filename, extension):
+    @staticmethod
+    def make_download_link(filename, extension):
         return filename.split("/")[-1] + extension
 
     def make_attachment_object(self, contents, mime_type, filename, extension):
