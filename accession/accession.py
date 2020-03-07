@@ -453,6 +453,27 @@ class Accession(ABC):
             return True
         return False
 
+    @staticmethod
+    def encode_attachment_data(data):
+        """
+        Encodes the attachment data into a b64 datastring
+        input: data as bytes object
+        Output: data as string, encoded as b64
+        """
+        return b64encode(data).decode("utf-8")
+
+    @staticmethod
+    def make_download_link(filename, extension):
+        return filename.split("/")[-1] + extension
+
+    def make_attachment_object(self, contents, mime_type, filename, extension):
+        attachment_object = {
+            "type": mime_type,
+            "download": self.make_download_link(filename, extension),
+            "href": "data:{};base64,{}".format(mime_type, contents),
+        }
+        return attachment_object
+
     def get_attachment(self, gs_file, mime_type, add_ext=""):
         """
         Files with certain extensions will fail portal validation since it can't guess
@@ -461,16 +482,10 @@ class Accession(ABC):
         extension that will cause the portal to correctly guess the mime type, for
         instance in the above case appending a `.txt` extension will validate properly.
         """
-        contents = self.backend.read_file(gs_file.filename)
-        contents = b64encode(contents)
-        if type(contents) is bytes:
-            # The Portal treats the contents as string "b'bytes'"
-            contents = str(contents).replace("b", "", 1).replace("'", "")
-        obj = {
-            "type": mime_type,
-            "download": gs_file.filename.split("/")[-1] + add_ext,
-            "href": "data:{};base64,{}".format(mime_type, contents),
-        }
+        filename = gs_file.filename
+        contents = self.backend.read_file(filename)
+        contents = self.encode_attachment_data(contents)
+        obj = self.make_attachment_object(contents, mime_type, filename, add_ext)
         return obj
 
     def accession_step(self, single_step_params):
