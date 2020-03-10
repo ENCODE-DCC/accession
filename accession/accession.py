@@ -470,7 +470,9 @@ class Accession(ABC):
         attachment_object = {
             "type": mime_type,
             "download": self.make_download_link(filename, extension),
-            "href": "data:{};base64,{}".format(mime_type, contents),
+            "href": "data:{};base64,{}".format(
+                mime_type, self.encode_attachment_data(contents)
+            ),
         }
         return attachment_object
 
@@ -484,7 +486,6 @@ class Accession(ABC):
         """
         filename = gs_file.filename
         contents = self.backend.read_file(filename)
-        contents = self.encode_attachment_data(contents)
         obj = self.make_attachment_object(contents, mime_type, filename, add_ext)
         return obj
 
