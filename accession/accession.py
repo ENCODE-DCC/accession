@@ -777,7 +777,7 @@ class AccessionBulkRna(AccessionGenericRna):
             filename=gs_file.task.outputs["log_json"]  # task output name
         )[0]
         qc = self.backend.read_json(qc_file)
-        attachment = self.make_attachment_object(qc, "application/json", gs_file.filename, ".txt")
+        attachment = self.make_attachment_object(qc, "text/plain", gs_file.filename, ".txt")
         star_qc_metric = qc.get("star_log_qc")  # what the key is in actual qc json file
         del star_qc_metric["Started job on"]
         del star_qc_metric["Started mapping on"]
