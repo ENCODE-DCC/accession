@@ -785,7 +785,7 @@ class AccessionBulkRna(AccessionGenericRna):
             star_qc_metric[key] = string_to_number(value)
         qc_bytes = json.dumps(qc).encode("utf-8")
         attachment = self.make_attachment_object(
-            qc_bytes, "text/plain", gs_file.filename, ".txt"
+            qc_bytes, "text/plain", qc_file.filename, ".txt"
         )
         star_qc_metric["attachment"] = attachment
         return self.queue_qc(
@@ -811,7 +811,7 @@ class AccessionBulkRna(AccessionGenericRna):
         )
         qc_bytes = json.dumps(qc).encode("utf-8")
         attachment = self.make_attachment_object(
-            qc_bytes, "text/plain", gs_file.filename, ".txt"
+            qc_bytes, "text/plain", qc_file.filename, ".txt"
         )
         output_qc["attachment"] = attachment
         return self.queue_qc(
@@ -855,7 +855,7 @@ class AccessionBulkRna(AccessionGenericRna):
             output_qc[key] = str(output_qc[key])
         qc_bytes = json.dumps(qc).encode("utf-8")
         attachment = self.make_attachment_object(
-            qc_bytes, "text/plain", gs_file.filename, ".txt"
+            qc_bytes, "text/plain", qc_file.filename, ".txt"
         )
         output_qc["attachment"] = attachment
         return self.queue_qc(
