@@ -777,15 +777,15 @@ class AccessionBulkRna(AccessionGenericRna):
             filename=gs_file.task.outputs["log_json"]  # task output name
         )[0]
         qc = self.backend.read_json(qc_file)
-        attachment = self.make_attachment_object(
-            qc, "text/plain", gs_file.filename, ".txt"
-        )
         star_qc_metric = qc.get("star_log_qc")  # what the key is in actual qc json file
         del star_qc_metric["Started job on"]
         del star_qc_metric["Started mapping on"]
         del star_qc_metric["Finished on"]
         for key, value in star_qc_metric.items():
             star_qc_metric[key] = string_to_number(value)
+        attachment = self.make_attachment_object(
+            qc, "text/plain", gs_file.filename, ".txt"
+        )
         star_qc_metric["Attachment"] = attachment
         return self.queue_qc(
             star_qc_metric, encode_bam_file, "star-quality-metric"
@@ -805,15 +805,15 @@ class AccessionBulkRna(AccessionGenericRna):
         except KeyError:
             self.logger.exception("Something is wrong with rna_qc file")
             raise
-        qc_to_post = self.format_reads_by_gene_type_qc(
+        output_qc = self.format_reads_by_gene_type_qc(
             reads_by_gene_type_qc_metric, self.GENE_TYPE_PROPERTIES
         )
         attachment = self.make_attachment_object(
             qc, "text/plain", gs_file.filename, ".txt"
         )
-        qc_to_post["Attachment"] = attachment
+        output_qc["Attachment"] = attachment
         return self.queue_qc(
-            qc_to_post, encode_file, "gene-type-quantification-quality-metric",
+            output_qc, encode_file, "gene-type-quantification-quality-metric",
         )
 
     def make_qc_from_well_formed_json(
@@ -851,6 +851,10 @@ class AccessionBulkRna(AccessionGenericRna):
         output_qc = qc.get(qc_dictionary_key)
         for key in convert_to_string:
             output_qc[key] = str(output_qc[key])
+        attachment = self.make_attachment_object(
+            qc, "text/plain", gs_file.filename, ".txt"
+        )
+        output_qc["Attachment"] = attachment
         return self.queue_qc(
             output_qc, encode_file, "samtools-flagstats-quality-metric"
         )
@@ -892,6 +896,9 @@ class AccessionBulkRna(AccessionGenericRna):
         except KeyError:
             self.logger.exception("Something is wrong with the madqc source file")
             raise
+        attachment_file = self.analysis.search_down(gs_file.task, "mad_qc", "madQCplot")[0]
+        attachment = self.get_attachment(attachment_file, "image/png")
+        mad_qc["Attachment"] = attachment
         return mad_qc
 
 
