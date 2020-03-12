@@ -805,12 +805,15 @@ class AccessionBulkRna(AccessionGenericRna):
         except KeyError:
             self.logger.exception("Something is wrong with rna_qc file")
             raise
+        qc_to_post = self.format_reads_by_gene_type_qc(
+            reads_by_gene_type_qc_metric, self.GENE_TYPE_PROPERTIES
+        )
+        attachment = self.make_attachment_object(
+            qc, "text/plain", gs_file.filename, ".txt"
+        )
+        qc_to_post["Attachment"] = attachment
         return self.queue_qc(
-            self.format_reads_by_gene_type_qc(
-                reads_by_gene_type_qc_metric, self.GENE_TYPE_PROPERTIES
-            ),
-            encode_file,
-            "gene-type-quantification-quality-metric",
+            qc_to_post, encode_file, "gene-type-quantification-quality-metric",
         )
 
     def make_qc_from_well_formed_json(
