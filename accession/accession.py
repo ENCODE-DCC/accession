@@ -404,7 +404,7 @@ class Accession(ABC):
                     tuple(ancestor.get("disallow_tasks", ())),
                 )
             )
-        return list(self.flatten(ancestors))
+        return list(set(self.flatten(ancestors)))
 
     def flatten(self, nested_list):
         if isinstance(nested_list, str):
