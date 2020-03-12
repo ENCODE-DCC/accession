@@ -783,8 +783,9 @@ class AccessionBulkRna(AccessionGenericRna):
         del star_qc_metric["Finished on"]
         for key, value in star_qc_metric.items():
             star_qc_metric[key] = string_to_number(value)
+        qc_bytes = json.dumps(qc).encode("utf-8")
         attachment = self.make_attachment_object(
-            qc, "text/plain", gs_file.filename, ".txt"
+            qc_bytes, "text/plain", gs_file.filename, ".txt"
         )
         star_qc_metric["Attachment"] = attachment
         return self.queue_qc(
@@ -808,8 +809,9 @@ class AccessionBulkRna(AccessionGenericRna):
         output_qc = self.format_reads_by_gene_type_qc(
             reads_by_gene_type_qc_metric, self.GENE_TYPE_PROPERTIES
         )
+        qc_bytes = json.dumps(qc).encode("utf-8")
         attachment = self.make_attachment_object(
-            qc, "text/plain", gs_file.filename, ".txt"
+            qc_bytes, "text/plain", gs_file.filename, ".txt"
         )
         output_qc["Attachment"] = attachment
         return self.queue_qc(
@@ -851,8 +853,9 @@ class AccessionBulkRna(AccessionGenericRna):
         output_qc = qc.get(qc_dictionary_key)
         for key in convert_to_string:
             output_qc[key] = str(output_qc[key])
+        qc_bytes = json.dumps(qc).encode("utf-8")
         attachment = self.make_attachment_object(
-            qc, "text/plain", gs_file.filename, ".txt"
+            qc_bytes, "text/plain", gs_file.filename, ".txt"
         )
         output_qc["Attachment"] = attachment
         return self.queue_qc(
