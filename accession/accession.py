@@ -787,7 +787,7 @@ class AccessionBulkRna(AccessionGenericRna):
         attachment = self.make_attachment_object(
             qc_bytes, "text/plain", gs_file.filename, ".txt"
         )
-        star_qc_metric["Attachment"] = attachment
+        star_qc_metric["attachment"] = attachment
         return self.queue_qc(
             star_qc_metric, encode_bam_file, "star-quality-metric"
         )  # backend mapping adding hyphens and removing caps
@@ -813,7 +813,7 @@ class AccessionBulkRna(AccessionGenericRna):
         attachment = self.make_attachment_object(
             qc_bytes, "text/plain", gs_file.filename, ".txt"
         )
-        output_qc["Attachment"] = attachment
+        output_qc["attachment"] = attachment
         return self.queue_qc(
             output_qc, encode_file, "gene-type-quantification-quality-metric",
         )
@@ -857,7 +857,7 @@ class AccessionBulkRna(AccessionGenericRna):
         attachment = self.make_attachment_object(
             qc_bytes, "text/plain", gs_file.filename, ".txt"
         )
-        output_qc["Attachment"] = attachment
+        output_qc["attachment"] = attachment
         return self.queue_qc(
             output_qc, encode_file, "samtools-flagstats-quality-metric"
         )
@@ -901,7 +901,7 @@ class AccessionBulkRna(AccessionGenericRna):
             raise
         attachment_file = self.analysis.search_down(gs_file.task, "mad_qc", "madQCplot")[0]
         attachment = self.get_attachment(attachment_file, "image/png")
-        mad_qc["Attachment"] = attachment
+        mad_qc["attachment"] = attachment
         return mad_qc
 
 
