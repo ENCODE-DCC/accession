@@ -819,7 +819,7 @@ class AccessionBulkRna(AccessionGenericRna):
         )
         output_qc["attachment"] = attachment
         return self.queue_qc(
-            output_qc, encode_file, "gene-type-quantification-quality-metric",
+            output_qc, encode_file, "gene-type-quantification-quality-metric"
         )
 
     def make_qc_from_well_formed_json(
