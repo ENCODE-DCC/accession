@@ -852,7 +852,12 @@ class AccessionBulkRna(AccessionGenericRna):
         qc = self.backend.read_json(qc_file)
         output_qc = qc.get(qc_dictionary_key)
         for key in convert_to_string:
-            output_qc[key] = str(output_qc[key])
+            # paired_properly_pct and singletons_pct are not there in single-ended
+            try:
+                output_qc[key] = str(output_qc[key])
+            except KeyError:
+                continue
+
         qc_bytes = json.dumps(qc).encode("utf-8")
         attachment = self.make_attachment_object(
             qc_bytes, "text/plain", qc_file.filename, ".txt"
@@ -899,7 +904,9 @@ class AccessionBulkRna(AccessionGenericRna):
         except KeyError:
             self.logger.exception("Something is wrong with the madqc source file")
             raise
-        attachment_file = self.analysis.search_down(gs_file.task, "mad_qc", "madQCplot")[0]
+        attachment_file = self.analysis.search_down(
+            gs_file.task, "mad_qc", "madQCplot"
+        )[0]
         attachment = self.get_attachment(attachment_file, "image/png")
         mad_qc["attachment"] = attachment
         return mad_qc
