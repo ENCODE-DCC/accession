@@ -768,6 +768,10 @@ class AccessionBulkRna(AccessionGenericRna):
         filekey = "index"
         return self.find_portal_property_from_filekey(filekey, GENOME_ANNOTATION)
 
+    @staticmethod
+    def get_bytes_from_dict(input_dict, encoding="utf-8"):
+        return json.dumps(input_dict).encode(encoding)
+
     def make_star_mapping_qc(self, encode_bam_file, gs_file):
         if self.file_has_qc(
             encode_bam_file, "StarQualityMetric"
@@ -815,7 +819,7 @@ class AccessionBulkRna(AccessionGenericRna):
         )
         output_qc["attachment"] = attachment
         return self.queue_qc(
-            output_qc, encode_file, "gene-type-quantification-quality-metric",
+            output_qc, encode_file, "gene-type-quantification-quality-metric"
         )
 
     def make_qc_from_well_formed_json(
