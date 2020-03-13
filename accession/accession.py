@@ -787,7 +787,7 @@ class AccessionBulkRna(AccessionGenericRna):
         del star_qc_metric["Finished on"]
         for key, value in star_qc_metric.items():
             star_qc_metric[key] = string_to_number(value)
-        qc_bytes = json.dumps(qc).encode("utf-8")
+        qc_bytes = self.get_bytes_from_dict(qc)
         attachment = self.make_attachment_object(
             qc_bytes, "text/plain", qc_file.filename, ".txt"
         )
@@ -813,13 +813,13 @@ class AccessionBulkRna(AccessionGenericRna):
         output_qc = self.format_reads_by_gene_type_qc(
             reads_by_gene_type_qc_metric, self.GENE_TYPE_PROPERTIES
         )
-        qc_bytes = json.dumps(qc).encode("utf-8")
+        qc_bytes = self.get_bytes_from_dict(qc)
         attachment = self.make_attachment_object(
             qc_bytes, "text/plain", qc_file.filename, ".txt"
         )
         output_qc["attachment"] = attachment
         return self.queue_qc(
-            output_qc, encode_file, "gene-type-quantification-quality-metric"
+            output_qc, encode_file, "gene-type-quantification-quality-metric",
         )
 
     def make_qc_from_well_formed_json(
@@ -862,7 +862,7 @@ class AccessionBulkRna(AccessionGenericRna):
             except KeyError:
                 continue
 
-        qc_bytes = json.dumps(qc).encode("utf-8")
+        qc_bytes = self.get_bytes_from_dict(qc)
         attachment = self.make_attachment_object(
             qc_bytes, "text/plain", qc_file.filename, ".txt"
         )
