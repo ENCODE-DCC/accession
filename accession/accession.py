@@ -741,6 +741,8 @@ class AccessionBulkRna(AccessionGenericRna):
         "reads_by_gene_type_qc": "make_reads_by_gene_type_qc",
     }
 
+    # These properties get added to the GeneTYpeQuantificationQualityMetric, this list needs to be in sync with the portal schema.
+    # The rest will be available to the users via an attachment.
     GENE_TYPE_PROPERTIES = [
         "spikein",
         "rRNA",
@@ -769,10 +771,10 @@ class AccessionBulkRna(AccessionGenericRna):
         return self.find_portal_property_from_filekey(filekey, GENOME_ANNOTATION)
 
     @staticmethod
-    def get_bytes_from_dict(input_dict, encoding="utf-8"):
+    def get_bytes_from_dict(input_dict: Dict, encoding: str = "utf-8") -> bytes:
         return json.dumps(input_dict).encode(encoding)
 
-    def make_star_mapping_qc(self, encode_bam_file, gs_file):
+    def make_star_mapping_qc(self, encode_bam_file: Dict[str, Any], gs_file: GSFile):
         if self.file_has_qc(
             encode_bam_file, "StarQualityMetric"
         ):  # actual name of the object
@@ -796,11 +798,11 @@ class AccessionBulkRna(AccessionGenericRna):
             star_qc_metric, encode_bam_file, "star-quality-metric"
         )  # backend mapping adding hyphens and removing caps
 
-    def format_reads_by_gene_type_qc(self, qc_dict, properties_to_report):
+    def format_reads_by_gene_type_qc(self, qc_dict: Dict, properties_to_report: List) -> Dict:
         output = {prop: qc_dict[prop] for prop in properties_to_report}
         return output
 
-    def make_reads_by_gene_type_qc(self, encode_file, gs_file):
+    def make_reads_by_gene_type_qc(self, encode_file: Dict[str, Any], gs_file: GSFile):
         if self.file_has_qc(encode_file, "GeneTypeQuantificationQualityMetric"):
             return
         qc_file = self.analysis.search_down(gs_file.task, "rna_qc", "rnaQC")[0]
@@ -819,17 +821,17 @@ class AccessionBulkRna(AccessionGenericRna):
         )
         output_qc["attachment"] = attachment
         return self.queue_qc(
-            output_qc, encode_file, "gene-type-quantification-quality-metric"
+            output_qc, encode_file, "gene-type-quantification-quality-metric",
         )
 
     def make_qc_from_well_formed_json(
         self,
-        encode_file,
-        gs_file,
-        qc_schema_name,
-        qc_file_task_output_name,
-        qc_dictionary_key,
-        qc_schema_name_with_hyphens,
+        encode_file: Dict[str, Any],
+        gs_file: GSFile,
+        qc_schema_name: str,
+        qc_file_task_output_name: str,
+        qc_dictionary_key: str,
+        qc_schema_name_with_hyphens: str,
     ):
         if self.file_has_qc(encode_file, qc_schema_name):
             return
@@ -842,11 +844,11 @@ class AccessionBulkRna(AccessionGenericRna):
 
     def make_flagstat_qc(
         self,
-        encode_file,
-        gs_file,
-        task_output_name,
-        qc_dictionary_key,
-        convert_to_string=["mapped_pct", "paired_properly_pct", "singletons_pct"],
+        encode_file: Dict[str, Any],
+        gs_file: GSFile,
+        task_output_name: str,
+        qc_dictionary_key: str,
+        convert_to_string: List = ["mapped_pct", "paired_properly_pct", "singletons_pct"],
     ):
         if self.file_has_qc(encode_file, "SamtoolsFlagstatsQualityMetric"):
             return
@@ -871,17 +873,17 @@ class AccessionBulkRna(AccessionGenericRna):
             output_qc, encode_file, "samtools-flagstats-quality-metric"
         )
 
-    def make_genome_flagstat_qc(self, encode_file, gs_file):
+    def make_genome_flagstat_qc(self, encode_file: Dict[str, Any], gs_file: GSFile):
         self.make_flagstat_qc(
             encode_file, gs_file, "genome_flagstat_json", "samtools_genome_flagstat"
         )
 
-    def make_anno_flagstat_qc(self, encode_file, gs_file):
+    def make_anno_flagstat_qc(self, encode_file: Dict[str, Any], gs_file: GSFile):
         self.make_flagstat_qc(
             encode_file, gs_file, "anno_flagstat_json", "samtools_anno_flagstat"
         )
 
-    def make_number_of_genes_detected_qc(self, encode_file, gs_file):
+    def make_number_of_genes_detected_qc(self, encode_file: Dict[str, Any], gs_file: GSFile):
         self.make_qc_from_well_formed_json(
             encode_file,
             gs_file,
@@ -891,8 +893,8 @@ class AccessionBulkRna(AccessionGenericRna):
             "gene-quantification-quality-metric",
         )
 
-    def make_mad_qc_metric(self, encode_file, gs_file):
-        return self.make_generic_correlation_qc(
+    def make_mad_qc_metric(self, encode_file: Dict[str, Any], gs_file: GSFile):
+        self.make_generic_correlation_qc(
             encode_file,
             gs_file,
             self.prepare_mad_qc_metric,
@@ -900,7 +902,7 @@ class AccessionBulkRna(AccessionGenericRna):
             "mad-quality-metric",
         )
 
-    def prepare_mad_qc_metric(self, gs_file):
+    def prepare_mad_qc_metric(self, gs_file: GSFile) -> Dict:
         qc_file = self.analysis.search_down(gs_file.task, "mad_qc", "madQCmetrics")[0]
         qc = self.backend.read_json(qc_file)
         try:
