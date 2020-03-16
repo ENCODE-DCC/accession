@@ -798,7 +798,9 @@ class AccessionBulkRna(AccessionGenericRna):
             star_qc_metric, encode_bam_file, "star-quality-metric"
         )  # backend mapping adding hyphens and removing caps
 
-    def format_reads_by_gene_type_qc(self, qc_dict: Dict, properties_to_report: List) -> Dict:
+    def format_reads_by_gene_type_qc(
+        self, qc_dict: Dict, properties_to_report: List
+    ) -> Dict:
         output = {prop: qc_dict[prop] for prop in properties_to_report}
         return output
 
@@ -821,7 +823,7 @@ class AccessionBulkRna(AccessionGenericRna):
         )
         output_qc["attachment"] = attachment
         return self.queue_qc(
-            output_qc, encode_file, "gene-type-quantification-quality-metric",
+            output_qc, encode_file, "gene-type-quantification-quality-metric"
         )
 
     def make_qc_from_well_formed_json(
@@ -848,7 +850,11 @@ class AccessionBulkRna(AccessionGenericRna):
         gs_file: GSFile,
         task_output_name: str,
         qc_dictionary_key: str,
-        convert_to_string: List = ["mapped_pct", "paired_properly_pct", "singletons_pct"],
+        convert_to_string: List = [
+            "mapped_pct",
+            "paired_properly_pct",
+            "singletons_pct",
+        ],
     ):
         if self.file_has_qc(encode_file, "SamtoolsFlagstatsQualityMetric"):
             return
@@ -883,7 +889,9 @@ class AccessionBulkRna(AccessionGenericRna):
             encode_file, gs_file, "anno_flagstat_json", "samtools_anno_flagstat"
         )
 
-    def make_number_of_genes_detected_qc(self, encode_file: Dict[str, Any], gs_file: GSFile):
+    def make_number_of_genes_detected_qc(
+        self, encode_file: Dict[str, Any], gs_file: GSFile
+    ):
         self.make_qc_from_well_formed_json(
             encode_file,
             gs_file,

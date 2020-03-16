@@ -1,5 +1,3 @@
-import pytest
-
 from accession.accession import AccessionBulkRna
 
 
