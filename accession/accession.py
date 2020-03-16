@@ -450,6 +450,13 @@ class Accession(ABC):
                     if output_type and output_type != encode_file.get("output_type"):
                         continue
                     derived_from_accession_ids.append(encode_file["@id"])
+        # Duplicate derived from files may be an indication of a problem
+        # (or absolutely ok as is the case in bulk rna single ended runs)
+        if len(set(derived_from_accession_ids)) != len(derived_from_accession_ids):
+            self.logger.info(
+                "Duplicated accession ids detected in derived_from_accession_ids: %s",
+                " ".derived_from_accession_ids,
+            )
         derived_from_accession_ids = list(set(derived_from_accession_ids))
 
         # Raise exception when some or all of the derived_from files
