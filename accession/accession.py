@@ -455,7 +455,7 @@ class Accession(ABC):
         if len(set(derived_from_accession_ids)) != len(derived_from_accession_ids):
             self.logger.info(
                 "Duplicated accession ids detected in derived_from_accession_ids: %s",
-                " ".derived_from_accession_ids,
+                " ".join(derived_from_accession_ids),
             )
         derived_from_accession_ids = list(set(derived_from_accession_ids))
 
