@@ -1,3 +1,4 @@
+import builtins
 import json
 from contextlib import contextmanager
 from pathlib import Path
@@ -39,6 +40,32 @@ def mirna_accessioner(accessioner_factory, mirna_replicated_metadata_path):
     )
     accessioner, _ = next(factory)
     return accessioner
+
+
+def test_logger_stdout_no_file(mocker, capsys, mock_accession):
+    """
+    The log message by default includes a non-deterministic timestamp, so check only the
+    last part of the log message. Also checks that no log files were written.
+    """
+    mocker.patch("builtins.open", mocker.mock_open())
+    mock_accession._no_log_file = True
+    mock_accession.logger.info("foo")
+    captured = capsys.readouterr()
+    message_no_timestamp = captured.out.split()[-3:]
+    assert message_no_timestamp == ["accession.accession", "INFO", "foo"]
+    assert not builtins.open.mock_calls
+
+
+def test_logger_file_and_stdout(mocker, capsys, mock_accession):
+    mocker.patch("builtins.open", mocker.mock_open())
+    mock_accession.logger.info("foo")
+    captured = capsys.readouterr()
+    message_no_timestamp = captured.out.split()[-3:]
+    file_captured = builtins.open.mock_calls[1][1][0]
+    file_message_no_timestamp = file_captured.split()[-3:]
+    expected = ["accession.accession", "INFO", "foo"]
+    assert message_no_timestamp == expected
+    assert file_message_no_timestamp == expected
 
 
 @pytest.mark.docker

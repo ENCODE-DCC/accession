@@ -41,6 +41,22 @@ def get_parser():
     parser.add_argument(
         "--server", default="dev", help="Server the files will be accessioned to"
     )
+    parser.add_argument(
+        "--no-log-file",
+        action="store_true",
+        help=(
+            "If this flag is specified, don't log to a log file, will still log to "
+            "stdout. Will not write to file specified by `--log-file-path`"
+        ),
+    )
+    parser.add_argument(
+        "--log-file-path",
+        default="accession.log",
+        help=(
+            "Path to file to write logs to. This will create this file if it does not "
+            "exist and append if it already exists."
+        ),
+    )
     parser.add_argument("--lab", type=str, default=None, help="Lab")
     parser.add_argument("--award", type=str, default=None, help="Award")
     parser.add_argument(
@@ -83,7 +99,13 @@ def main(args=None):
     connection = Connection(args.server)
     if all([args.pipeline_type, args.accession_metadata, lab, award, connection]):
         accessioner = accession_factory(
-            args.pipeline_type, args.accession_metadata, connection, lab, award
+            args.pipeline_type,
+            args.accession_metadata,
+            connection,
+            lab,
+            award,
+            log_file_path=args.log_file_path,
+            no_log_file=args.no_log_file,
         )
         accessioner.accession_steps(args.dry_run)
         return

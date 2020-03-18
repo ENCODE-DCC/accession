@@ -1,10 +1,13 @@
 import json
 import logging
 import os
+import sys
 from abc import ABC, abstractmethod
 from base64 import b64encode
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple, Type
+
+import encode_utils
 
 from accession.analysis import Analysis, MetaData
 from accession.file import GSFile
@@ -52,7 +55,16 @@ class Accession(ABC):
     ASSEMBLIES = ["GRCh38", "mm10"]
     PROFILE_KEY = "_profile"
 
-    def __init__(self, steps, analysis, connection, lab, award):
+    def __init__(
+        self,
+        steps,
+        analysis,
+        connection,
+        lab,
+        award,
+        log_file_path="accession.log",
+        no_log_file=False,
+    ):
         self.analysis = analysis
         self.steps = steps
         self.backend = self.analysis.backend
@@ -63,6 +75,8 @@ class Accession(ABC):
         self.new_qcs = []
         self.raw_qcs = []
         self._logger: Optional[logging.Logger] = None
+        self._log_file_path = log_file_path
+        self._no_log_file: bool = no_log_file
 
     @property
     def logger(self) -> logging.Logger:
@@ -78,16 +92,30 @@ class Accession(ABC):
                 "%(asctime)s %(name)s %(levelname)s %(message)s"
             )
 
-            stdout_handler = logging.StreamHandler()
+            stdout_handler = logging.StreamHandler(stream=sys.stdout)
             stdout_handler.setLevel(logging.DEBUG)
             stdout_handler.setFormatter(formatter)
 
-            file_handler = logging.FileHandler("accession.log")
-            file_handler.setLevel(logging.DEBUG)
-            file_handler.setFormatter(formatter)
-
             logger.addHandler(stdout_handler)
-            logger.addHandler(file_handler)
+
+            eu_debug_logger = logging.getLogger(encode_utils.DEBUG_LOGGER_NAME)
+            for hdlr in eu_debug_logger.handlers:
+                eu_debug_logger.removeHandler(hdlr)
+            eu_debug_logger.addHandler(stdout_handler)
+
+            eu_post_logger = logging.getLogger(encode_utils.POST_LOGGER_NAME)
+            for hdlr in eu_post_logger.handlers:
+                eu_post_logger.removeHandler(hdlr)
+            eu_post_logger.addHandler(stdout_handler)
+
+            if not self._no_log_file:
+                file_handler = logging.FileHandler(self._log_file_path)
+                file_handler.setLevel(logging.DEBUG)
+                file_handler.setFormatter(formatter)
+                logger.addHandler(file_handler)
+                eu_debug_logger.addHandler(file_handler)
+                eu_post_logger.addHandler(file_handler)
+
             self._logger = logger
         return self._logger
 
