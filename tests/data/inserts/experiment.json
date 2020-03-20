@@ -49,5 +49,115 @@
     "status": "released",
     "submitted_by": "facilisi.tristique@potenti.vivamus",
     "uuid": "df7a3c62-2d5c-44ba-a8a8-2ff1f8d53a74"
+  },
+  {
+    "@id": "/experiments/ENCSR416YFB/",
+    "@type": [
+      "Experiment",
+      "Dataset",
+      "Item"
+    ],
+    "accession": "ENCSR416YFB",
+    "aliases": [
+      "brenton-graveley:SAFB-BGHcLV09"
+    ],
+    "alternate_accessions": [],
+    "assay_slims": [
+      "Transcription"
+    ],
+    "assay_term_id": "NTR:0003814",
+    "assay_term_name": "CRISPR genome editing followed by RNA-seq",
+    "assay_title": "CRISPR RNA-seq",
+    "assembly": [
+      "GRCh38"
+    ],
+    "award": "/awards/U41HG009889/",
+    "biosample_ontology": "/biosample-types/cell_line_EFO_0001187/",
+    "biosample_summary": "HepG2 genetically modified using CRISPR",
+    "category_slims": [],
+    "contributing_files": [
+      "/files/ENCFF598IDH/",
+      "/files/GRCh38_EBV.chrom.sizes/",
+      "/files/ENCFF285DRD/",
+      "/files/ENCFF471EAM/"
+    ],
+    "date_created": "2019-03-14T16:23:48.674975+00:00",
+    "date_submitted": "2019-05-23",
+    "dbxrefs": [],
+    "description": "RNA-seq on HepG2 cells treated with a CRISPR gRNA against SAFB. (SAFB-BGHcLV09)",
+    "documents": [],
+    "files": [
+      "/files/ENCFF168ZWJ/",
+      "/files/ENCFF373IOW/",
+      "/files/ENCFF177PKE/",
+      "/files/ENCFF937QMD/",
+      "/files/TSTFF891220/",
+      "/files/TSTFF054479/",
+      "/files/TSTFF822870/",
+      "/files/TSTFF671725/",
+      "/files/TSTFF576698/",
+      "/files/TSTFF739969/",
+      "/files/TSTFF257071/",
+      "/files/TSTFF086372/",
+      "/files/TSTFF115769/",
+      "/files/TSTFF983755/",
+      "/files/TSTFF816608/",
+      "/files/TSTFF815965/",
+      "/files/TSTFF384309/",
+      "/files/TSTFF101201/",
+      "/files/TSTFF069215/",
+      "/files/TSTFF265009/",
+      "/files/TSTFF536040/",
+      "/files/TSTFF209605/"
+    ],
+    "hub": "/experiments/ENCSR416YFB/@@hub/hub.txt",
+    "internal_status": "unreviewed",
+    "internal_tags": [],
+    "lab": "/labs/brenton-graveley/",
+    "objective_slims": [],
+    "original_files": [
+      "/files/ENCFF168ZWJ/",
+      "/files/ENCFF373IOW/",
+      "/files/ENCFF177PKE/",
+      "/files/ENCFF937QMD/",
+      "/files/TSTFF891220/",
+      "/files/TSTFF054479/",
+      "/files/TSTFF822870/",
+      "/files/TSTFF671725/",
+      "/files/TSTFF576698/",
+      "/files/TSTFF739969/",
+      "/files/TSTFF257071/",
+      "/files/TSTFF086372/",
+      "/files/TSTFF115769/",
+      "/files/TSTFF983755/",
+      "/files/TSTFF816608/",
+      "/files/TSTFF815965/",
+      "/files/TSTFF384309/",
+      "/files/TSTFF101201/",
+      "/files/TSTFF069215/",
+      "/files/TSTFF265009/",
+      "/files/TSTFF536040/",
+      "/files/TSTFF209605/"
+    ],
+    "possible_controls": [
+      "/experiments/ENCSR300EBW/"
+    ],
+    "references": [],
+    "related_files": [],
+    "related_series": [],
+    "replicates": [
+      "/replicates/a2b28a10-3f63-41b5-9d6b-783fd29b8dd2/",
+      "/replicates/10e088a5-ae5a-4b64-86d4-426dab3aaa9d/"
+    ],
+    "replication_type": "isogenic",
+    "revoked_files": [],
+    "schema_version": "28",
+    "status": "submitted",
+    "submitted_by": "/users/599e4901-78bf-422f-b65d-f3443c6a6450/",
+    "superseded_by": [],
+    "supersedes": [],
+    "target": "/targets/SAFB-human/",
+    "type_slims": [],
+    "uuid": "22bf0fe4-f4e6-4215-a41a-b19538d7cc7b"
   }
 ]
