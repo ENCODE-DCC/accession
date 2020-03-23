@@ -858,7 +858,7 @@ class AccessionBulkRna(AccessionGenericRna):
         gs_file: GSFile,
         task_output_name: str,
         qc_dictionary_key: str,
-        convert_to_string: List = [
+        convert_to_string: List[str,] = [
             "mapped_pct",
             "paired_properly_pct",
             "singletons_pct",
