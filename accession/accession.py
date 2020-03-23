@@ -806,8 +806,8 @@ class AccessionBulkRna(AccessionGenericRna):
         )  # backend mapping adding hyphens and removing caps
 
     def format_reads_by_gene_type_qc(
-        self, qc_dict: Dict, properties_to_report: List
-    ) -> Dict:
+        self, qc_dict: Dict[str, Any], properties_to_report: List[str]
+    ) -> Dict[str, Any]:
         output = {prop: qc_dict[prop] for prop in properties_to_report}
         return output
 
