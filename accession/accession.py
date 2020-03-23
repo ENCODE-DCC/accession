@@ -681,7 +681,7 @@ class Accession(ABC):
             return
         else:
             self.logger.info(
-                f"Found files with duplicate md5sums at {self.conn.dcc_url}"
+                "Found files with duplicate md5sums at %s", self.conn.dcc_url
             )
         rows = [header]
         for match in matches:
@@ -705,7 +705,8 @@ class Accession(ABC):
             column_widths.append(max(lens))
         template = "{{:{}}} | {{:{}}} | {{:{}}} | {{:{}}}".format(*column_widths)
         for row in rows:
-            self.logger.info(template.format(*row))
+            msg = template.format(*row)
+            self.logger.info(msg)
 
 
 class AccessionGenericRna(Accession):

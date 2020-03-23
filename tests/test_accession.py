@@ -363,14 +363,22 @@ def test_accession_steps_dry_run(mocker: MockFixture, mock_accession: Accession)
                 None,
             ],
             [
-                "Found files with duplicate md5sums at mock_server.biz",
-                "File Path    | Matching Portal Files | Portal Status | Portal File Dataset",
-                "gs://foo/a.b | ENCFF123ABC           | released      | ENCSRCBA321        ",
-                "             | ENCFF456DEF           | in progress   | ENCSRCBA321        ",
-                "gs://foo/c.d | ENCFF000AAA           | revoked       | ENCSR222FOO        ",
+                ("Found files with duplicate md5sums at %s", "mock_server.biz"),
+                (
+                    "File Path    | Matching Portal Files | Portal Status | Portal File Dataset",
+                ),
+                (
+                    "gs://foo/a.b | ENCFF123ABC           | released      | ENCSRCBA321        ",
+                ),
+                (
+                    "             | ENCFF456DEF           | in progress   | ENCSRCBA321        ",
+                ),
+                (
+                    "gs://foo/c.d | ENCFF000AAA           | revoked       | ENCSR222FOO        ",
+                ),
             ],
         ),
-        ([None], ["No MD5 conflicts found."]),
+        ([None], [("No MD5 conflicts found.",)]),
     ],
 )
 def test_report_dry_run(
@@ -389,7 +397,7 @@ def test_report_dry_run(
     mocker.patch.object(mock_accession.logger, "info")
     mock_accession.report_dry_run(matches)
     log_call_args = [
-        mock_accession.logger.info.mock_calls[i][1][0]  # type: ignore
+        mock_accession.logger.info.mock_calls[i][1]  # type: ignore
         for i in range(0, len(expected))
     ]
     assert log_call_args == expected
