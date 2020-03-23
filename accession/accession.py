@@ -817,9 +817,10 @@ class AccessionBulkRna(AccessionGenericRna):
         qc_file = self.analysis.search_down(gs_file.task, "rna_qc", "rnaQC")[0]
         qc = self.backend.read_json(qc_file)
         try:
-            reads_by_gene_type_qc_metric = qc["gene_type_count"]
+            gene_type_count_key = "gene_type_count"
+            reads_by_gene_type_qc_metric = qc[gene_type_count_key]
         except KeyError:
-            self.logger.exception("Something is wrong with rna_qc file")
+            self.logger.exception("Could not find key %s in rna_qc file", gene_type_count_key)
             raise
         output_qc = self.format_reads_by_gene_type_qc(
             reads_by_gene_type_qc_metric, self.GENE_TYPE_PROPERTIES
