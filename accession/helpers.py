@@ -1,8 +1,24 @@
 import json
 import random
 import tempfile
+from typing import List
+
+import attr
 
 from accession.backends import GCBackend
+
+
+@attr.s(auto_attribs=True)
+class PortalFileRecord:
+    accession: str
+    status: str
+    experiment: str
+
+
+@attr.s(auto_attribs=True)
+class MatchingMd5Record:
+    gs_file_path: str
+    portal_files: List[PortalFileRecord]
 
 
 def filter_outputs_by_path(path, backend=None):

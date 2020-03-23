@@ -4,7 +4,7 @@ import shutil
 from pathlib import Path
 from time import sleep
 from typing import Callable, Dict, Iterator, Tuple
-from unittest.mock import PropertyMock
+from unittest.mock import PropertyMock, create_autospec
 from urllib.parse import urljoin
 
 import attr
@@ -98,6 +98,11 @@ def local_encoded_server(
     sleep(10)
     yield server_address
     container.kill()
+
+
+@pytest.fixture
+def server_name() -> str:
+    return "mock_server.biz"
 
 
 @pytest.fixture(scope="session")
@@ -333,6 +338,7 @@ def mock_accession(
     mock_accession_gc_backend: MockGCBackend,
     mock_metadata: MockMetaData,
     mock_accession_steps: MockAccessionSteps,
+    server_name: str,
     lab: str,
     award: str,
 ) -> Accession:
@@ -354,7 +360,7 @@ def mock_accession(
     mocked_accession = AccessionMicroRna(
         mock_accession_steps,
         Analysis(mock_metadata, backend=mock_accession_gc_backend),
-        "mock_server.biz",
+        create_autospec(Connection, dcc_url=server_name),
         lab,
         award,
     )
@@ -367,6 +373,7 @@ def mock_accession_chip(
     mock_accession_gc_backend: MockGCBackend,
     mock_metadata: MockMetaData,
     mock_accession_steps: MockAccessionSteps,
+    server_name: str,
     lab: str,
     award: str,
 ) -> Accession:
@@ -388,7 +395,7 @@ def mock_accession_chip(
     mocked_accession = AccessionChip(
         mock_accession_steps,
         Analysis(mock_metadata, backend=mock_accession_gc_backend),
-        "mock_server.biz",
+        server_name,
         lab,
         award,
     )
