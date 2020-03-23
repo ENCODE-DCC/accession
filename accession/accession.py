@@ -922,9 +922,10 @@ class AccessionBulkRna(AccessionGenericRna):
         qc_file = self.analysis.search_down(gs_file.task, "mad_qc", "madQCmetrics")[0]
         qc = self.backend.read_json(qc_file)
         try:
-            mad_qc = qc["MAD.R"]
+            qc_key = "MAD.R"
+            mad_qc = qc[qc_key]
         except KeyError:
-            self.logger.exception("Something is wrong with the madqc source file")
+            self.logger.exception("Could not find key %s in madqc source file", qc_key)
             raise
         attachment_file = self.analysis.search_down(
             gs_file.task, "mad_qc", "madQCplot"
