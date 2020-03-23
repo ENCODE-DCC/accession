@@ -820,7 +820,9 @@ class AccessionBulkRna(AccessionGenericRna):
             gene_type_count_key = "gene_type_count"
             reads_by_gene_type_qc_metric = qc[gene_type_count_key]
         except KeyError:
-            self.logger.exception("Could not find key %s in rna_qc file", gene_type_count_key)
+            self.logger.exception(
+                "Could not find key %s in rna_qc file", gene_type_count_key
+            )
             raise
         output_qc = self.format_reads_by_gene_type_qc(
             reads_by_gene_type_qc_metric, self.GENE_TYPE_PROPERTIES
