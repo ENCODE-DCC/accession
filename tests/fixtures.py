@@ -387,6 +387,7 @@ def mock_accession(
                         {"biological_replicate_number": 1},
                         {"biological_replicate_number": 2},
                     ],
+                    "analyses": [{"files": ["/files/1/"]}],
                 }
             )
         ),

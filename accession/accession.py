@@ -14,6 +14,7 @@ from accession.accession_steps import (
 )
 from accession.analysis import Analysis, MetaData
 from accession.encode_models import (
+    EncodeAnalysis,
     EncodeAttachment,
     EncodeCommonMetadata,
     EncodeExperiment,
@@ -47,7 +48,7 @@ class Accession(ABC):
         self.backend = self.analysis.backend
         self.conn = connection
         self.common_metadata = common_metadata
-        self.new_files = []
+        self.new_files: List[EncodeFile] = []
         self.new_qcs: List[Dict[str, Any]] = []
         self.raw_qcs: List[EncodeQualityMetric] = []
         self.log_file_path = log_file_path
@@ -282,16 +283,15 @@ class Accession(ABC):
                 "An error occured searching up for the parent file of %s", file.filename
             )
             raise
-        encode_files = [
-            self.get_encode_file_matching_md5_of_blob(gs_file.filename)
-            for gs_file in derived_from_files
-        ]
+        encode_files = []
+        for gs_file in derived_from_files:
+            encode_file = self.get_encode_file_matching_md5_of_blob(gs_file.filename)
+            if encode_file is not None:
+                encode_files.append(encode_file)
         accessioned_files = encode_files + self.new_files
         derived_from_accession_ids = []
         for gs_file in derived_from_files:
             for encode_file in accessioned_files:
-                if encode_file is None:
-                    continue
                 if gs_file.md5sum == encode_file.md5sum:
                     # Optimal peaks can be mistaken for conservative peaks
                     # when their md5sum is the same
@@ -402,6 +402,36 @@ class Accession(ABC):
         obj = attachment.get_portal_object(mime_type, add_ext)
         return obj
 
+    def patch_experiment_analyses(self) -> None:
+        """
+        Patch the new analysis (a list of file @ids) to the `analyses` property of the
+        experiment that was being accessioned. If an equivalent analysis exists already,
+        then do not patch anything.
+
+        From the accessioning code standpoint, the analysis is all or nothing: either it
+        is not patched in if it already exists or it is posted after the accessioning of
+        files and qcs completes. As such the code here assumes an analysis is never
+        incomplete.
+
+        encode_utils has `extend_array_values=True` on by default, but we add it here
+        also to be explicit.
+        """
+        current_analysis = EncodeAnalysis.from_files(self.new_files)
+        for analysis in self.experiment.analyses:
+            if current_analysis == analysis:
+                self.logger.info(
+                    "Will not patch analyses for experiment %s, found analysis %s matching the current set of accessioned files %s",
+                    self.experiment.at_id,
+                    analysis,
+                    current_analysis,
+                )
+                return
+        analysis_payload = current_analysis.into_portal_object()
+        payload = self.experiment.make_postable_analyses_from_analysis_payload(
+            analysis_payload
+        )
+        self.conn.patch(payload, extend_array_values=True)
+
     def accession_step(
         self, single_step_params: AccessionStep, dry_run: bool = False
     ) -> Union[List[Optional[MatchingMd5Record]], List[EncodeFile], None]:
@@ -476,6 +506,7 @@ class Accession(ABC):
             for step in self.steps.content:
                 self.accession_step(step)
             self.post_qcs()
+            self.patch_experiment_analyses()
 
 
 class AccessionGenericRna(Accession):
