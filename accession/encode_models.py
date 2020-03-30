@@ -1,6 +1,6 @@
 import json
 from base64 import b64encode
-from typing import Any, Dict, List, Optional, Tuple, TypeVar, Union
+from typing import Any, Dict, List, Optional, Tuple, Type, TypeVar, Union
 
 from encode_utils.connection import Connection
 
@@ -9,6 +9,8 @@ from accession.accession_steps import FileParams
 T = TypeVar("T")
 U = TypeVar("U")
 V = TypeVar("V", bound="EncodeFile")
+W = TypeVar("W", bound="EncodeAnalysis")
+AnalysisPayload = Dict[str, List[str]]
 
 
 class EncodeCommonMetadata(dict):
@@ -179,10 +181,59 @@ class EncodeFile:
         return obj
 
 
+class EncodeAnalysis:
+    def __init__(self, portal_properties: Optional[Dict[str, Any]] = None):
+        self.portal_properties = portal_properties
+        self._files: Optional[List[str]] = None
+        if self.portal_properties:
+            self.files = self.portal_properties["files"]
+
+    def __eq__(
+        self, other
+    ):  # type: ignore  # https://github.com/python/mypy/issues/2783
+        """
+        Helpful for pytest assertions. Should use # type: ignore[override], but flake8
+        gets confused by that, raises F821.
+        """
+        if type(self) != type(other):
+            return False
+        return self.files == other.files
+
+    def __str__(self):
+        return str(self.files)
+
+    @property
+    def files(self) -> Optional[List[str]]:
+        return self._files
+
+    @files.setter
+    def files(self, new_files: List[str]) -> None:
+        self._files = new_files
+
+    @classmethod
+    def from_files(cls: Type[W], files: List[EncodeFile]) -> W:
+        """
+        This type signature is somewhat heinous. W can be thought of as an instance of
+        EncodeAnalysis, the Type[W] is the class itself.
+        """
+        new_analysis = cls()
+        new_analysis.files = [f.at_id for f in files]
+        return new_analysis
+
+    def into_portal_object(self) -> AnalysisPayload:
+        """
+        Obtain the portal-postable dict representation of the analysis.
+        """
+        if self.files is None:
+            raise ValueError("Cannot create payload for analysis without files")
+        return {"files": self.files}
+
+
 class EncodeExperiment:
     def __init__(self, portal_experiment: Dict[str, Any]):
         self.at_id = portal_experiment["@id"]
         self.portal_properties = portal_experiment
+        self._analyses: List[EncodeAnalysis] = []
 
     @property
     def assay_term_name(self) -> str:
@@ -200,6 +251,25 @@ class EncodeExperiment:
             ]
         )
         return len(bio_reps)
+
+    @property
+    def analyses(self) -> List[EncodeAnalysis]:
+        """
+        The portal does not embed the files in the analysis, it is just a list of @ids
+        """
+        if not self._analyses:
+            analyses = self.portal_properties.get("analyses", [])
+            for analysis in analyses:
+                self._analyses.append(EncodeAnalysis(portal_properties=analysis))
+        return self._analyses
+
+    def make_postable_analyses_from_analysis_payload(
+        self, analysis_payload: AnalysisPayload
+    ) -> Dict[str, List[AnalysisPayload]]:
+        return {
+            "analyses": [analysis_payload],
+            Connection.ENCID_KEY: self.experiment_id,
+        }
 
 
 class EncodeAttachment:
