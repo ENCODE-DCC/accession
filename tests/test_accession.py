@@ -13,6 +13,7 @@ from requests import Response
 
 from accession.accession import (
     Accession,
+    AccessionBulkRna,
     AccessionLongReadRna,
     AccessionMicroRna,
     AccessionSteps,
@@ -582,6 +583,7 @@ def does_not_raise():
     [
         ("mirna", does_not_raise(), AccessionMicroRna),
         ("long_read_rna", does_not_raise(), AccessionLongReadRna),
+        ("bulk_rna", does_not_raise(), AccessionBulkRna),
         ("not_valid", pytest.raises(RuntimeError), None),
     ],
 )
