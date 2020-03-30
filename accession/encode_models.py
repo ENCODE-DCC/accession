@@ -1,3 +1,4 @@
+import json
 from base64 import b64encode
 from typing import Any, Dict, List, Optional, Tuple, TypeVar, Union
 
@@ -214,6 +215,13 @@ class EncodeAttachment:
         Output: data as string, encoded as b64
         """
         return b64encode(data).decode("utf-8")
+
+    @staticmethod
+    def get_bytes_from_dict(input_dict: Dict, encoding: str = "utf-8") -> bytes:
+        """
+        Useful for encoding QC JSON files into bytes for posting as attachments
+        """
+        return json.dumps(input_dict).encode(encoding)
 
     def make_download_link(self, extension: str) -> str:
         return self.filename.split("/")[-1] + extension

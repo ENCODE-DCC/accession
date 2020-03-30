@@ -65,6 +65,10 @@ def test_encode_attachment_encode_attachment_data():
     assert EncodeAttachment.encode_attachment_data(b"foo bar baz") == "Zm9vIGJhciBiYXo="
 
 
+def test_encode_attachment_get_bytes_from_dict():
+    assert EncodeAttachment.get_bytes_from_dict({"a": "b"}) == b'{"a": "b"}'
+
+
 def test_encode_attachment_encode_attachment_data_string_input():
     with pytest.raises(TypeError):
         EncodeAttachment.encode_attachment_data("foo bar baz")
