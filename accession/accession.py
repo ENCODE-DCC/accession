@@ -421,7 +421,7 @@ class Accession(ABC):
             if current_analysis == analysis:
                 self.logger.info(
                     "Will not patch analyses for experiment %s, found analysis %s matching the current set of accessioned files %s",
-                    self.experiment.experiment_id,
+                    self.experiment.at_id,
                     analysis,
                     current_analysis,
                 )
@@ -431,7 +431,7 @@ class Accession(ABC):
             analysis_payload
         )
         self.conn.patch(
-            self.experiment.experiment_id, payload, extend_array_values=True
+            self.experiment.at_id, payload, extend_array_values=True
         )
 
     def accession_step(
