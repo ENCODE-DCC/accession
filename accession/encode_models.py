@@ -1,5 +1,6 @@
 import json
 from base64 import b64encode
+from collections import UserDict
 from typing import Any, Dict, List, Optional, Tuple, TypeVar, Union
 
 from encode_utils.connection import Connection
@@ -11,16 +12,22 @@ U = TypeVar("U")
 V = TypeVar("V", bound="EncodeFile")
 
 
-class EncodeCommonMetadata(dict):
+class EncodeCommonMetadata(UserDict):
     """
-    Class to hold common metadata shared by all posted objects. Inherits from dict so
-    we can do things like qc.update(EncodeCommonMetadata("foo", "bar"))
+    Class to hold common metadata shared by all posted objects. Inherits from UserDict
+    so we can do things like qc.update(EncodeCommonMetadata("foo", "bar"))
     """
 
     def __init__(self, lab: str, award: str):
-        self.lab = lab
-        self.award = award
-        super().__init__(lab=lab, award=award)
+        self.data = {"lab": lab, "award": award}
+
+    @property
+    def lab(self) -> str:
+        return self.data["lab"]
+
+    @property
+    def award(self) -> str:
+        return self.data["award"]
 
     @property
     def lab_pi(self) -> str:
@@ -76,7 +83,7 @@ class EncodeFile:
         """
         Type signature here is complicated. Here we want to emulate behaviour of normal
         .get on a dict. If no default is proved, then will return an object of type T
-        or None, while is a default of type U is provided, then the get will either
+        or None, while if a default of type U is provided, then the get will either
         return an object of type T or the default.
         """
         return self.portal_file.get(key, default)
@@ -190,7 +197,7 @@ class EncodeExperiment:
 
     @property
     def is_replicated(self):
-        return True if self.get_number_of_biological_replicates() > 1 else False
+        return self.get_number_of_biological_replicates() > 1
 
     def get_number_of_biological_replicates(self) -> int:
         bio_reps = set(
@@ -226,7 +233,7 @@ class EncodeAttachment:
     def make_download_link(self, extension: str) -> str:
         return self.filename.split("/")[-1] + extension
 
-    def into_portal_object(self, mime_type: str, extension: str) -> Dict[str, str]:
+    def get_portal_object(self, mime_type: str, extension: str) -> Dict[str, str]:
         attachment_object = {
             "type": mime_type,
             "download": self.make_download_link(extension),
@@ -246,7 +253,7 @@ class EncodeQualityMetric:
         self.files = [file_id]
         self.payload = payload
 
-    def into_portal_object(self) -> Dict[str, Any]:
+    def get_portal_object(self) -> Dict[str, Any]:
         self.payload.update({"status": "in progress", "quality_metric_of": self.files})
         return self.payload
 

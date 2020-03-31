@@ -58,8 +58,8 @@ def test_accession_steps_raw_fastqs_keys_defaults_none(steps):
     assert steps.raw_fastqs_keys is None
 
 
-def test_accession_step_into_step_run(steps):
-    result = steps.content[0].into_step_run(aliases=["foo"])
+def test_accession_step_get_portal_step_run(steps):
+    result = steps.content[0].get_portal_step_run(aliases=["foo"])
     assert result == {
         "aliases": ["foo"],
         "status": "in progress",

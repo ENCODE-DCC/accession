@@ -238,7 +238,7 @@ class Accession(ABC):
                 docker_tag,
             )
         ]
-        payload = accession_step.into_step_run(aliases)
+        payload = accession_step.get_portal_step_run(aliases)
         self.log_if_exists(payload)
         posted = self.conn.post(payload)
         return EncodeStepRun(posted)
@@ -356,7 +356,7 @@ class Accession(ABC):
     def post_qcs(self):
         for qc in self.raw_qcs:
             self.new_qcs.append(
-                self.conn.post(qc.into_portal_object(), require_aliases=False)
+                self.conn.post(qc.get_portal_object(), require_aliases=False)
             )
 
     def queue_qc(
@@ -399,7 +399,7 @@ class Accession(ABC):
         filename = gs_file.filename
         contents = self.backend.read_file(filename)
         attachment = EncodeAttachment(contents, filename)
-        obj = attachment.into_portal_object(mime_type, add_ext)
+        obj = attachment.get_portal_object(mime_type, add_ext)
         return obj
 
     def accession_step(
@@ -558,7 +558,7 @@ class AccessionBulkRna(AccessionGenericRna):
             star_qc_metric[key] = string_to_number(value)
         qc_bytes = EncodeAttachment.get_bytes_from_dict(qc)
         modeled_attachment = EncodeAttachment(qc_bytes, gs_file.filename)
-        attachment = modeled_attachment.into_portal_object(
+        attachment = modeled_attachment.get_portal_object(
             mime_type="text/plain", extension=".txt"
         )
         star_qc_metric["attachment"] = attachment
@@ -592,7 +592,7 @@ class AccessionBulkRna(AccessionGenericRna):
         )
         qc_bytes = EncodeAttachment.get_bytes_from_dict(qc)
         modeled_attachment = EncodeAttachment(qc_bytes, gs_file.filename)
-        attachment = modeled_attachment.into_portal_object(
+        attachment = modeled_attachment.get_portal_object(
             mime_type="text/plain", extension=".txt"
         )
         output_qc["attachment"] = attachment
@@ -646,7 +646,7 @@ class AccessionBulkRna(AccessionGenericRna):
 
         qc_bytes = EncodeAttachment.get_bytes_from_dict(qc)
         modeled_attachment = EncodeAttachment(qc_bytes, gs_file.filename)
-        attachment = modeled_attachment.into_portal_object(
+        attachment = modeled_attachment.get_portal_object(
             mime_type="text/plain", extension=".txt"
         )
         output_qc["attachment"] = attachment

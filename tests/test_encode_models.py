@@ -78,8 +78,8 @@ def test_encode_attachment_make_download_link(encode_attachment):
     assert encode_attachment.make_download_link(extension=".txt") == "my_text_file.txt"
 
 
-def test_encode_attachment_into_portal_object(encode_attachment):
-    result = encode_attachment.into_portal_object(
+def test_encode_attachment_get_portal_object(encode_attachment):
+    result = encode_attachment.get_portal_object(
         mime_type="text/plain", extension=".txt"
     )
     assert result == {
@@ -250,9 +250,9 @@ def test_encode_quality_metric_init(payload):
     assert qm.payload == payload
 
 
-def test_encode_quality_metric_into_portal_object(payload):
+def test_encode_quality_metric_get_portal_object(payload):
     qm = EncodeQualityMetric(payload, "my_id")
-    result = qm.into_portal_object()
+    result = qm.get_portal_object()
     assert result == {
         "foo": "bar",
         "quality_metric_of": ["my_id"],

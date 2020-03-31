@@ -35,29 +35,15 @@ class PreflightHelper:
         )
         return matching_md5_record
 
-    def report_dry_run(self, records: List[Optional[MatchingMd5Record]]) -> None:
-        """
-        Print the report for the dry run. We use a format string to control the width
-        for each column by adding padding where appropriate. The column width is
-        governed by the length (in characters) of the longest element in each column.
-        When there is more than one file at the portal that had a matching md5sum, the
-        file path is not printed for subsequent report rows after the first match for
-        visual clarity.
-
-        Note that the match records are an Optional type, thus we need to remove Nones
-        """
+    def make_log_messages_from_records(
+        self, matches: List[MatchingMd5Record]
+    ) -> List[str]:
         header = (
             "File Path",
             "Matching Portal Files",
             "Portal Status",
             "Portal File Dataset",
         )
-        matches = [i for i in records if i is not None]
-        if not matches:
-            self.logger.info("No MD5 conflicts found.")
-            return
-        else:
-            self.logger.info("Found files with duplicate md5sums")
         rows = [header]
         for match in matches:
             for i, portal_file in enumerate(match.portal_files):
@@ -79,6 +65,26 @@ class PreflightHelper:
             lens = [len(i) for i in column]
             column_widths.append(max(lens))
         template = "{{:{}}} | {{:{}}} | {{:{}}} | {{:{}}}".format(*column_widths)
-        for row in rows:
-            msg = template.format(*row)
+        messages = [template.format(*row) for row in rows]
+        return messages
+
+    def report_dry_run(self, records: List[Optional[MatchingMd5Record]]) -> None:
+        """
+        Print the report for the dry run. We use a format string to control the width
+        for each column by adding padding where appropriate. The column width is
+        governed by the length (in characters) of the longest element in each column.
+        When there is more than one file at the portal that had a matching md5sum, the
+        file path is not printed for subsequent report rows after the first match for
+        visual clarity.
+
+        Note that the match records are an Optional type, thus we need to remove Nones
+        """
+        matches = [i for i in records if i is not None]
+        if not matches:
+            self.logger.info("No MD5 conflicts found.")
+            return
+        else:
+            self.logger.info("Found files with duplicate md5sums")
+        messages = self.make_log_messages_from_records(matches)
+        for msg in messages:
             self.logger.info(msg)

@@ -1,5 +1,3 @@
-from types import GeneratorType
-
 from accession.helpers import flatten, string_to_number
 
 
@@ -31,5 +29,4 @@ def test_string_to_number_non_number_string_returns_input():
 
 def test_flatten() -> None:
     result = flatten([["a", "b"], ["c", "d"]])
-    assert isinstance(result, GeneratorType)
-    assert list(result) == ["a", "b", "c", "d"]
+    assert result == ["a", "b", "c", "d"]

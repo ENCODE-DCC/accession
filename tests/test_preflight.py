@@ -114,3 +114,21 @@ def test_make_file_matching_md5_record(preflight_helper, matching, expected):
     filename = "file"
     result = preflight_helper.make_file_matching_md5_record(filename, matching)
     assert result == expected
+
+
+def test_preflight_helper_make_log_messages_from_records(preflight_helper):
+    matches = [
+        MatchingMd5Record(
+            "file",
+            [
+                EncodeFile(
+                    {"@id": "/files/foo/", "status": "released", "dataset": "bar"}
+                )
+            ],
+        )
+    ]
+    messages = preflight_helper.make_log_messages_from_records(matches)
+    assert messages == [
+        "File Path | Matching Portal Files | Portal Status | Portal File Dataset",
+        "file      | foo                   | released      | bar                ",
+    ]

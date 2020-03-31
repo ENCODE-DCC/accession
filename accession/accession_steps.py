@@ -20,7 +20,7 @@ class AccessionStep:
             FileParams(i) for i in step_params["wdl_files"]
         ]
 
-    def into_step_run(self, aliases: List[str]) -> Dict[str, Any]:
+    def get_portal_step_run(self, aliases: List[str]) -> Dict[str, Any]:
         """
         encode_utils.connection.Connection.post() does not fail on alias conflict, and does not
         expose the response status code, so we need to check for the existence of the object first
