@@ -402,6 +402,7 @@ def test_accession_factory(
         "builtins.open",
         mocker.mock_open(read_data='{"workflowRoot": "gs://foo/bar", "calls": {}}'),
     )
+    mocker.patch("encode_utils.connection.Connection")
     with condition:
         accessioner = accession_factory(
             pipeline_type,
