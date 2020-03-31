@@ -430,9 +430,7 @@ class Accession(ABC):
         payload = self.experiment.make_postable_analyses_from_analysis_payload(
             analysis_payload
         )
-        self.conn.patch(
-            self.experiment.at_id, payload, extend_array_values=True
-        )
+        self.conn.patch(self.experiment.at_id, payload, extend_array_values=True)
 
     def accession_step(
         self, single_step_params: AccessionStep, dry_run: bool = False
