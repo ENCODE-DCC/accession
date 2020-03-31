@@ -2,23 +2,14 @@ import argparse
 import os
 from typing import Optional, Tuple
 
-from encode_utils.connection import Connection
-
 from accession import __version__
 from accession.accession import accession_factory
-from accession.helpers import filter_outputs_by_path
 
 
 def get_parser():
     parser = argparse.ArgumentParser(
         description="Accession pipeline outputs, \
                                                  download output metadata for scattering"
-    )
-    parser.add_argument(
-        "--filter-from-path",
-        type=str,
-        default=None,
-        help="path to a folder with pipeline run outputs",
     )
     parser.add_argument(
         "--accession-metadata",
@@ -89,19 +80,15 @@ def check_or_set_lab_award(lab: Optional[str], award: Optional[str]) -> Tuple[st
     return lab, award
 
 
-def main(args=None):
+def main():
     parser = get_parser()
-    args = parser.parse_args(args)
+    args = parser.parse_args()
     lab, award = check_or_set_lab_award(args.lab, args.award)
-    if args.filter_from_path:
-        filter_outputs_by_path(args.filter_from_path)
-        return
-    connection = Connection(args.server)
-    if all([args.pipeline_type, args.accession_metadata, lab, award, connection]):
+    if all([args.pipeline_type, args.accession_metadata, lab, award, args.server]):
         accessioner = accession_factory(
             args.pipeline_type,
             args.accession_metadata,
-            connection,
+            args.server,
             lab,
             award,
             log_file_path=args.log_file_path,

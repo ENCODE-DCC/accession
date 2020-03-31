@@ -49,38 +49,5 @@
     "status": "released",
     "submitted_by": "facilisi.tristique@potenti.vivamus",
     "uuid": "df7a3c62-2d5c-44ba-a8a8-2ff1f8d53a74"
-  },
-  {
-    "accession": "ENCSR416YFB",
-    "aliases": [
-      "brenton-graveley:SAFB-BGHcLV09"
-    ],
-    "alternate_accessions": [],
-    "assay_term_name": "CRISPR genome editing followed by RNA-seq",
-    "award": "/awards/U41HG009889/",
-    "biosample_ontology": "/biosample-types/cell_line_EFO_0001187/",
-    "date_created": "2019-03-14T16:23:48.674975+00:00",
-    "date_submitted": "2019-05-23",
-    "dbxrefs": [],
-    "description": "RNA-seq on HepG2 cells treated with a CRISPR gRNA against SAFB. (SAFB-BGHcLV09)",
-    "documents": [],
-    "internal_status": "unreviewed",
-    "internal_tags": [],
-    "lab": "/labs/brenton-graveley/",
-    "possible_controls": [
-      "/experiments/ENCSR300EBW/"
-    ],
-    "references": [],
-    "related_files": [],
-    "replicates": [
-      "/replicates/10e088a5-ae5a-4b64-86d4-426dab3aaa9d/",
-      "/replicates/a2b28a10-3f63-41b5-9d6b-783fd29b8dd2/"
-    ],
-    "schema_version": "28",
-    "status": "submitted",
-    "submitted_by": "/users/599e4901-78bf-422f-b65d-f3443c6a6450/",
-    "supersedes": [],
-    "target": "/targets/SAFB-human/",
-    "uuid": "22bf0fe4-f4e6-4215-a41a-b19538d7cc7b"
   }
 ]

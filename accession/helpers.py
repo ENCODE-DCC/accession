@@ -1,64 +1,4 @@
-import json
-import random
-import tempfile
-from typing import List
-
-import attr
-
-from accession.backends import GCBackend
-
-
-@attr.s(auto_attribs=True)
-class PortalFileRecord:
-    accession: str
-    status: str
-    experiment: str
-
-
-@attr.s(auto_attribs=True)
-class MatchingMd5Record:
-    gs_file_path: str
-    portal_files: List[PortalFileRecord]
-
-
-def filter_outputs_by_path(path, backend=None):
-    bucket = path.split("gs://")[1].split("/")[0]
-    if not backend:
-        google_backend = GCBackend(bucket)
-    else:
-        google_backend = backend
-    filtered = [
-        file
-        for file in list(google_backend.bucket.list_blobs())
-        if path.split("gs://")[1] in file.id and ".json" in file.id
-    ]
-
-    for file in filtered:
-        file.download_to_filename(file.public_url.split("/")[-1])
-
-    return filtered
-
-
-# Python equivalent of WDL's write_json
-# for testing purposes
-def write_json(json_data):
-    temp_file = tempfile.NamedTemporaryFile(delete=False)
-    with open(temp_file.name, "a") as file:
-        json.dump(json_data, file)
-    return temp_file.name
-
-
-def mutate_digits(md5sum_string):
-    md5sum_list = list(md5sum_string)
-    for i, character in enumerate(md5sum_list):
-        print(i)
-        print(character)
-        if character.isdigit():
-            if random.choice([True, False]):
-                continue
-            md5sum_list[i] = str((int(character) + 1) % 10)
-        print(md5sum_list)
-    return "".join(md5sum_list)
+from typing import Any, List
 
 
 def string_to_number(string):
@@ -71,3 +11,19 @@ def string_to_number(string):
             return float(string)
         except Exception:
             return string
+
+
+def flatten(nested_input: List[Any]):
+    """Flattens a nested list.
+    Args:
+        input_list: A (possibly) nested list.
+    Returns:
+        A flattened list, preserving order.
+    """
+
+    if not nested_input:
+        return []
+    if isinstance(nested_input[0], list):
+        return flatten(nested_input[0]) + flatten(nested_input[1:])
+    else:
+        return nested_input[:1] + flatten(nested_input[1:])

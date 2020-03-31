@@ -1,6 +1,54 @@
+import json
 from pathlib import Path
+from unittest.mock import PropertyMock
 
 import pytest
+from pytest_mock.plugin import MockFixture
+
+from accession.analysis import Analysis, MetaData
+from accession.encode_models import EncodeExperiment
+
+
+def mock_queue_qc(qc, *args, **kwargs):
+    return qc
+
+
+@pytest.fixture
+def mirna_replicated_analysis(
+    mock_accession_gc_backend: MockFixture, mirna_replicated_metadata_path: str
+) -> Analysis:  # noqa: F811
+    analysis = Analysis(
+        MetaData(mirna_replicated_metadata_path), backend=mock_accession_gc_backend
+    )
+    return analysis
+
+
+@pytest.fixture
+def mock_replicated_mirna_accession(mocker, mirna_replicated_analysis, mock_accession):
+    """
+    Contains a legitimate replicated mirna analysis for purposes of testing mirna qm
+    generation without creating any connections to servers.
+    """
+    mocker.patch.object(mock_accession, "analysis", mirna_replicated_analysis)
+    mocker.patch.object(mock_accession, "backend", mirna_replicated_analysis.backend)
+    mocker.patch.object(mock_accession, "queue_qc", mock_queue_qc)
+    mocker.patch.object(
+        mock_accession,
+        "experiment",
+        new_callable=PropertyMock(
+            return_value=EncodeExperiment(
+                {
+                    "@id": "foo",
+                    "assay_term_name": "microRNA",
+                    "replicates": [
+                        {"biological_replicate_number": 1},
+                        {"biological_replicate_number": 2},
+                    ],
+                }
+            )
+        ),
+    )
+    return mock_accession
 
 
 @pytest.mark.docker
@@ -127,3 +175,83 @@ def validate_accessioning(accessioner, expected_files, expected_num_files, datas
                                 assert qm_value == posted_qm[qm_key]
             else:
                 assert file[key] == expected_value
+
+
+@pytest.mark.filesystem
+def test_make_microrna_mapping_qc(mock_replicated_mirna_accession, encode_file_no_qc):
+    gs_file = [
+        i
+        for i in mock_replicated_mirna_accession.analysis.get_files(filekey="bam")
+        if "rep1" in i.filename
+    ][0]
+    qc = mock_replicated_mirna_accession.make_microrna_mapping_qc(
+        encode_file_no_qc, gs_file
+    )
+    assert qc == {"aligned_reads": 5873570}
+
+
+@pytest.mark.filesystem
+def test_make_microrna_correlation_qc_replicated(
+    mock_replicated_mirna_accession, encode_file_no_qc
+):
+    gs_file = [
+        i for i in mock_replicated_mirna_accession.analysis.get_files(filekey="tsv")
+    ][0]
+    qc = mock_replicated_mirna_accession.make_microrna_correlation_qc(
+        encode_file_no_qc, gs_file
+    )
+    assert qc == {"Spearman correlation": 0.8885044458946942}
+
+
+@pytest.mark.filesystem
+def test_make_microrna_correlation_qc_unreplicated_returns_none(
+    mocker, mock_accession_unreplicated, mirna_replicated_analysis, encode_file_no_qc
+):
+    mocker.patch.object(
+        mock_accession_unreplicated, "analysis", mirna_replicated_analysis
+    )
+    mocker.patch.object(
+        mock_accession_unreplicated, "backend", mirna_replicated_analysis.backend
+    )
+    mocker.patch.object(mock_accession_unreplicated, "queue_qc", mock_queue_qc)
+    gs_file = [
+        i for i in mock_accession_unreplicated.analysis.get_files(filekey="tsv")
+    ][0]
+    qc = mock_accession_unreplicated.make_microrna_correlation_qc(
+        encode_file_no_qc, gs_file
+    )
+    assert qc is None
+
+
+@pytest.mark.filesystem
+def test_make_star_qc_metric(mock_replicated_mirna_accession, encode_file_no_qc):
+    gs_file = [
+        i
+        for i in mock_replicated_mirna_accession.analysis.get_files(filekey="bam")
+        if "rep1" in i.filename
+    ][0]
+    current_dir = Path(__file__).resolve()
+    validation = current_dir.parent / "data" / "validation" / "mirna" / "files.json"
+    with open(validation) as f:
+        data = json.load(f)
+    expected = [i for i in data if i["accession"] == "ENCFF590YAX"][0][
+        "quality_metrics"
+    ][0]
+    qc = mock_replicated_mirna_accession.make_star_qc_metric(encode_file_no_qc, gs_file)
+    for k, v in qc.items():
+        assert v == expected[k]
+
+
+@pytest.mark.filesystem
+def test_make_microrna_quantification_qc(
+    mock_replicated_mirna_accession, encode_file_no_qc
+):
+    gs_file = [
+        i
+        for i in mock_replicated_mirna_accession.analysis.get_files(filekey="bam")
+        if "rep1" in i.filename
+    ][0]
+    qc = mock_replicated_mirna_accession.make_microrna_quantification_qc(
+        encode_file_no_qc, gs_file
+    )
+    assert qc == {"expressed_mirnas": 393}

@@ -1,4 +1,4 @@
-class Task(object):
+class Task:
     """
     The dockerImageUsed key in the task metadata can sometimes be missing if there was a cache hit.
     In that event, the dockerImage will fail back to the docker key in the task runtimeAttributes.
@@ -7,8 +7,7 @@ class Task(object):
     https://github.com/broadinstitute/cromwell/issues/4001
     """
 
-    def __init__(self, task_name, task, analysis):
-        super().__init__()
+    def __init__(self, task_name, task):
         self.task_name = task_name
         self.input_files = []
         self.output_files = []
@@ -17,4 +16,3 @@ class Task(object):
         self.docker_image = task.get("dockerImageUsed") or task.get(
             "runtimeAttributes", {}
         ).get("docker")
-        self.analysis = analysis

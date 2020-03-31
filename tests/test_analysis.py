@@ -43,7 +43,7 @@ def test_make_task(normal_analysis):
 def test_get_or_make_file_empty_analysis(empty_analysis):
     assert len(empty_analysis.files) == 0
     task = {"inputs": {}, "outputs": {}, "dockerImageUsed": ""}
-    empty_task = Task("bam2ta", task, empty_analysis)
+    empty_task = Task("bam2ta", task)
     # Make a file when it doesn't exist
     filekey = "ta"
     filename = (

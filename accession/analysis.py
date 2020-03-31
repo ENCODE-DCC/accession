@@ -18,9 +18,9 @@ class MetaData:
         return self._content
 
 
-class Analysis(object):
-    """docstring for Analysis
-        Args: metadata: MetaData object
+class Analysis:
+    """
+    Parses Cromwell workflow metadata into a searchable digraph
     """
 
     def __init__(
@@ -57,7 +57,7 @@ class Analysis(object):
 
     # Makes an instance of task with input and output GSFile instances
     def make_task(self, task_name, task):
-        new_task = Task(task_name.split(".")[1], task, self)
+        new_task = Task(task_name.split(".")[1], task)
         return new_task
 
     # Makes instances of GSFile from input or output section of task
