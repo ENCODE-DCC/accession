@@ -181,7 +181,7 @@ class EncodeFile:
 
 class EncodeExperiment:
     def __init__(self, portal_experiment: Dict[str, Any]):
-        self.experiment_id = portal_experiment["@id"]
+        self.at_id = portal_experiment["@id"]
         self.portal_properties = portal_experiment
 
     @property

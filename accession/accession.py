@@ -342,7 +342,7 @@ class Accession(ABC):
             aliases=["{}:{}".format(self.common_metadata.lab_pi, file_name)],
             assembly=self.assembly,
             common_metadata=self.common_metadata,
-            dataset=self.experiment.experiment_id,
+            dataset=self.experiment.at_id,
             derived_from=derived_from,
             file_params=file_params,
             file_size=file.size,

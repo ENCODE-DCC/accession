@@ -94,7 +94,7 @@ def test_accession_experiment(mocker, mock_accession):
     )
     experiment = EncodeExperiment({"@id": "foo"})
     mocker.patch.object(mock_accession.conn, "get", experiment.portal_properties)
-    assert mock_accession.experiment.experiment_id == experiment.experiment_id
+    assert mock_accession.experiment.at_id == experiment.at_id
 
 
 @pytest.mark.docker
