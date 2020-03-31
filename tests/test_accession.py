@@ -1,41 +1,100 @@
-import json
-from contextlib import contextmanager
-from pathlib import Path
-from types import GeneratorType
+import builtins
+from contextlib import suppress as does_not_raise
 from typing import Dict, List
-from unittest.mock import PropertyMock
 
-import attr
 import pytest
 from pytest_mock.plugin import MockFixture
 from requests import Response
 
 from accession.accession import (
     Accession,
+    AccessionBulkRna,
     AccessionLongReadRna,
     AccessionMicroRna,
-    AccessionSteps,
     accession_factory,
 )
-from accession.analysis import Analysis, MetaData
+from accession.accession_steps import AccessionStep
+from accession.encode_models import EncodeExperiment, EncodeFile
+from accession.file import GSFile
+from accession.preflight import MatchingMd5Record
+from accession.task import Task
 
-from .fixtures import MockGCBackend, MockMetaData
 
+class FakeConnection:
+    def __init__(self, dcc_url, response=None):
+        self._dcc_url = dcc_url
+        self._response = response
 
-@attr.s(auto_attribs=True)
-class MockFile:
-    filename: str
-    size: int
-    md5sum: str
+    @property
+    def dcc_url(self):
+        return self._dcc_url
+
+    def get(self, query):
+        return self._response
 
 
 @pytest.fixture
-def mirna_accessioner(accessioner_factory):
+def mirna_accessioner(accessioner_factory, mirna_replicated_metadata_path):
     factory = accessioner_factory(
-        metadata_file="mirna_replicated_metadata.json", assay_name="mirna"
+        metadata_file=mirna_replicated_metadata_path, assay_name="mirna"
     )
     accessioner, _ = next(factory)
     return accessioner
+
+
+@pytest.fixture
+def mock_encode_file() -> Dict[str, List[int]]:
+    return {"biological_replicates": [1, 2]}
+
+
+@pytest.fixture
+def ok_response():
+    r = Response()
+    r.status_code = 200
+    return r
+
+
+def test_accession_genome_annotation(mock_accession):
+    assert super(AccessionMicroRna, mock_accession).genome_annotation is None
+
+
+def test_logger(mocker, capsys, mock_accession):
+    """
+    The log message by default includes a non-deterministic timestamp, so check only the
+    last part of the log message. Also checks that no log files were written.
+    """
+    mocker.patch("builtins.open", mocker.mock_open())
+    mock_accession.logger.info("foo")
+    captured = capsys.readouterr()
+    message_no_timestamp = captured.out.split()[-3:]
+    assert message_no_timestamp == ["accession.accession", "INFO", "foo"]
+    assert not builtins.open.mock_calls
+
+
+def test_accession_experiment_fastqs_not_on_portal(
+    mocker, mock_accession_not_patched, mock_file
+):
+    """
+    @properties must be patched before instantiation
+    """
+    mocker.patch.object(
+        mock_accession_not_patched,
+        "get_encode_file_matching_md5_of_blob",
+        return_value=None,
+    )
+    with pytest.raises(ValueError):
+        foo = mock_accession_not_patched.experiment  # noqa: F841
+
+
+def test_accession_experiment(mocker, mock_accession):
+    mocker.patch.object(
+        mock_accession,
+        "get_encode_file_matching_md5_of_blob",
+        EncodeFile({"@id": "baz", "dataset": "foo"}),
+    )
+    experiment = EncodeExperiment({"@id": "foo"})
+    mocker.patch.object(mock_accession.conn, "get", experiment.portal_properties)
+    assert mock_accession.experiment.at_id == experiment.at_id
 
 
 @pytest.mark.docker
@@ -44,6 +103,75 @@ def test_get_encode_file_matching_md5_of_blob(mirna_accessioner):
     fastq = mirna_accessioner.analysis.raw_fastqs[0]
     portal_file = mirna_accessioner.get_encode_file_matching_md5_of_blob(fastq.filename)
     assert portal_file.get("fastq_signature")
+
+
+@pytest.mark.parametrize(
+    "returned_files,expected",
+    [
+        (
+            [
+                EncodeFile({"@id": "/files/foo/", "status": "revoked"}),
+                EncodeFile({"@id": "/files/bar/", "status": "released"}),
+            ],
+            EncodeFile({"@id": "/files/bar/", "status": "released"}),
+        ),
+        ([EncodeFile({"@id": "/files/foo/", "status": "revoked"})], None),
+        (None, None),
+    ],
+)
+def test_get_encode_file_matching_md5_of_blob_unit(
+    mocker, mock_accession, returned_files, expected
+):
+    mocker.patch.object(mock_accession.backend, "md5sum", return_value="123")
+    mocker.patch.object(
+        mock_accession,
+        "get_all_encode_files_matching_md5_of_blob",
+        return_value=returned_files,
+    )
+    mocker.patch.object(
+        mock_accession.conn,
+        "get",
+        lambda _: {"@id": "/files/bar/", "status": "released"},
+    )
+    gs_file = GSFile(key="bam", name="gs://bam/a.bam", md5sum="123", size=456)
+    result = mock_accession.get_encode_file_matching_md5_of_blob(gs_file)
+    assert result == expected
+
+
+@pytest.mark.parametrize(
+    "returned_files,expected",
+    [([{"@id": "/files/abc/"}], [EncodeFile({"@id": "/files/abc/"})]), ([], None)],
+)
+def test_get_all_encode_files_matching_md5_of_blob(
+    mocker, mock_accession, returned_files, expected
+):
+    mocker.patch.object(mock_accession.backend, "md5sum", return_value="123")
+    mocker.patch.object(mock_accession.conn, "search", return_value=returned_files)
+    gs_file = GSFile(key="bam", name="gs://bam/a.bam", md5sum="123", size=456)
+    result = mock_accession.get_all_encode_files_matching_md5_of_blob(gs_file)
+    assert result == expected
+
+
+def test_make_file_matching_md5_record_no_matches_returns_none(
+    mocker, mock_accession, mock_file
+):
+    mocker.patch.object(
+        mock_accession, "get_all_encode_files_matching_md5_of_blob", return_value=None
+    )
+    result = mock_accession.make_file_matching_md5_record(mock_file)
+    assert result is None
+
+
+def test_make_file_matching_md5_record_matches_does_not_return_none(
+    mocker, mock_accession, mock_file
+):
+    mocker.patch.object(
+        mock_accession,
+        "get_all_encode_files_matching_md5_of_blob",
+        return_value=[EncodeFile({"@id": "foo"})],
+    )
+    mock_accession.make_file_matching_md5_record(mock_file)
+    assert mock_accession.preflight_helper.make_file_matching_md5_record.mock_calls
 
 
 @pytest.mark.docker
@@ -64,45 +192,6 @@ def test_genome_annotation(mirna_accessioner):
     assert mirna_accessioner.genome_annotation == "M21"
 
 
-@pytest.fixture
-def ok_response():
-    r = Response()
-    r.status_code = 200
-    return r
-
-
-class FakeConnection:
-    def __init__(self, dcc_url, response=None):
-        self._dcc_url = dcc_url
-        self._response = response
-
-    @property
-    def dcc_url(self):
-        return self._dcc_url
-
-    def get(self, query):
-        return self._response
-
-
-def test_get_number_of_biological_replicates(
-    ok_response, mock_metadata, mock_gc_backend
-):
-    x = AccessionSteps("path")
-    analysis = Analysis(mock_metadata, backend=mock_gc_backend)
-    connection = FakeConnection(
-        "https://www.zencodeproject.borg",
-        response={
-            "replicates": [
-                {"biological_replicate_number": 1},
-                {"biological_replicate_number": 2},
-            ]
-        },
-    )
-    y = AccessionMicroRna(x, analysis, connection, "lab", "award")
-    y._dataset = "my_dataset"
-    assert y.get_number_of_biological_replicates() == 2
-
-
 @pytest.mark.docker
 @pytest.mark.skip(
     reason="Elasticsearch is not reliable, produces inconsistent results."
@@ -111,7 +200,7 @@ def test_get_number_of_biological_replicates(
 def test_get_derived_from(mirna_accessioner):
     bowtie_step = mirna_accessioner.steps.content[0]
     analysis = mirna_accessioner.analysis
-    task = analysis.get_tasks(bowtie_step["wdl_task_name"])[0]
+    task = analysis.get_tasks(bowtie_step.wdl_task_name)[0]
     bam = [file for file in task.output_files if "bam" in file.filekeys][0]
     raw_fastq_inputs = list(set(mirna_accessioner.raw_fastq_inputs(bam)))
     accession_ids = [
@@ -120,14 +209,8 @@ def test_get_derived_from(mirna_accessioner):
         )
         for file in raw_fastq_inputs
     ]
-    params = bowtie_step["wdl_files"][0]["derived_from_files"][0]
-    ancestors = mirna_accessioner.get_derived_from(
-        bam,
-        params.get("derived_from_task"),
-        params.get("derived_from_filekey"),
-        params.get("derived_from_output_type"),
-        params.get("derived_from_inputs"),
-    )
+    params = bowtie_step.wdl_files[0].derived_from_files[0]
+    ancestors = mirna_accessioner.get_derived_from(bam, params)
     ancestor_accessions = [ancestor.split("/")[-2] for ancestor in ancestors]
     assert len(ancestor_accessions) == 3
     assert len(accession_ids) == len(ancestor_accessions)
@@ -142,7 +225,7 @@ def test_get_derived_from(mirna_accessioner):
 def test_get_derived_from_all(mirna_accessioner):
     bowtie_step = mirna_accessioner.steps.content[0]
     analysis = mirna_accessioner.analysis
-    task = analysis.get_tasks(bowtie_step["wdl_task_name"])[0]
+    task = analysis.get_tasks(bowtie_step.wdl_task_name)[0]
     bam = [file for file in task.output_files if "bam" in file.filekeys][0]
     raw_fastq_inputs = list(set(mirna_accessioner.raw_fastq_inputs(bam)))
     accession_ids = [
@@ -151,7 +234,7 @@ def test_get_derived_from_all(mirna_accessioner):
         )
         for file in raw_fastq_inputs
     ]
-    derived_from_files = bowtie_step["wdl_files"][0]["derived_from_files"]
+    derived_from_files = bowtie_step.wdl_files[0].derived_from_files
     ancestors = mirna_accessioner.get_derived_from_all(bam, derived_from_files)
     ancestor_accessions = [ancestor.split("/")[-2] for ancestor in ancestors]
     assert len(ancestor_accessions) == 3
@@ -160,7 +243,7 @@ def test_get_derived_from_all(mirna_accessioner):
 
 
 def mock_post_step_run(payload):
-    payload.update({"@type": ["AnalysisStepRun"]})
+    payload.update({"@id": "foo", "@type": ["AnalysisStepRun"]})
     return payload
 
 
@@ -170,15 +253,10 @@ def test_get_or_make_step_run(mocker, mirna_accessioner):
     mocker.patch.object(mirna_accessioner.conn, "post", mock_post_step_run)
     mocker.patch.object(mirna_accessioner, "log_if_exists", autospec=True)
     bowtie_step = mirna_accessioner.steps.content[0]
-    step_run = mirna_accessioner.get_or_make_step_run(
-        mirna_accessioner.lab_pi,
-        bowtie_step["dcc_step_run"],
-        bowtie_step["dcc_step_version"],
-        bowtie_step["wdl_task_name"],
-    )
-    assert "AnalysisStepRun" in step_run.get("@type")
-    step_version = step_run.get("analysis_step_version")
-    assert bowtie_step["dcc_step_version"] == step_version
+    step_run = mirna_accessioner.get_or_make_step_run(bowtie_step)
+    assert "AnalysisStepRun" in step_run.portal_step_run.get("@type")
+    step_version = step_run.portal_step_run.get("analysis_step_version")
+    assert bowtie_step.step_version == step_version
 
 
 @pytest.mark.docker
@@ -186,23 +264,11 @@ def test_get_or_make_step_run(mocker, mirna_accessioner):
 def test_accession_file(mirna_accessioner):
     bowtie_step = mirna_accessioner.steps.content[0]
     analysis = mirna_accessioner.analysis
-    task = analysis.get_tasks(bowtie_step["wdl_task_name"])[0]
+    task = analysis.get_tasks(bowtie_step.wdl_task_name)[0]
     bam = [file for file in task.output_files if "bam" in file.filekeys][0]
-    step_run = mirna_accessioner.get_or_make_step_run(
-        mirna_accessioner.lab_pi,
-        bowtie_step["dcc_step_run"],
-        bowtie_step["dcc_step_version"],
-        bowtie_step["wdl_task_name"],
-    )
-    file_params = bowtie_step["wdl_files"][0]
-    obj = mirna_accessioner.make_file_obj(
-        bam,
-        file_params["file_format"],
-        file_params["output_type"],
-        step_run,
-        file_params["derived_from_files"],
-        file_format_type=file_params.get("file_format_type"),
-    )
+    step_run = mirna_accessioner.get_or_make_step_run(bowtie_step)
+    file_params = bowtie_step.wdl_files[0]
+    obj = mirna_accessioner.make_file_obj(bam, file_params, step_run)
     encode_file = mirna_accessioner.accession_file(obj, bam)
     assert encode_file.get("accession")
     assert encode_file.get("status") == "uploading"
@@ -214,30 +280,77 @@ def test_accession_file(mirna_accessioner):
 def test_make_file_obj(mirna_accessioner):
     bowtie_step = mirna_accessioner.steps.content[0]
     analysis = mirna_accessioner.analysis
-    task = analysis.get_tasks(bowtie_step["wdl_task_name"])[0]
+    task = analysis.get_tasks(bowtie_step.wdl_task_name)[0]
     bam = [file for file in task.output_files if "bam" in file.filekeys][0]
-    step_run = mirna_accessioner.get_or_make_step_run(
-        mirna_accessioner.lab_pi,
-        bowtie_step["dcc_step_run"],
-        bowtie_step["dcc_step_version"],
-        bowtie_step["wdl_task_name"],
-    )
-    file_params = bowtie_step["wdl_files"][0]
-    obj = mirna_accessioner.make_file_obj(
-        bam,
-        file_params["file_format"],
-        file_params["output_type"],
-        step_run,
-        file_params["derived_from_files"],
-        file_format_type=file_params.get("file_format_type"),
-    )
+    step_run = mirna_accessioner.get_or_make_step_run(bowtie_step)
+    file_params = bowtie_step.wdl_files[0]
+    obj = mirna_accessioner.make_file_obj(bam, file_params, step_run)
     assert obj.get("md5sum") and obj.get("file_size")
     assert len(obj.get("derived_from")) == 3
 
 
+def test_accession_steps_dry_run(mocker: MockFixture, mock_accession: Accession):
+    task_name = "my_task"
+    file_name = "gs://bam/a.bam"
+    filekey = "bam"
+    task = Task(task_name, {"inputs": {}, "outputs": {filekey: file_name}})
+    task.output_files = [
+        GSFile(key=filekey, name=file_name, md5sum="123", size=456, task=task)
+    ]
+    mocker.patch.object(mock_accession.backend, "md5sum", return_value="123")
+    mocker.patch.object(mock_accession.analysis, "get_tasks", return_value=[task])
+    mocker.patch.object(
+        mock_accession.preflight_helper,
+        "make_file_matching_md5_record",
+        return_value=MatchingMd5Record(
+            "gs://file/a",
+            [
+                EncodeFile(
+                    {
+                        "@id": "/files/ENCFFABC123/",
+                        "status": "released",
+                        "dataset": "ENCSRCBA321",
+                    }
+                )
+            ],
+        ),
+    )
+    single_step_params = AccessionStep(
+        {
+            "dcc_step_run": "1",
+            "dcc_step_version": "1-0",
+            "wdl_files": [
+                {
+                    "derived_from_files": [],
+                    "file_format": "bam",
+                    "filekey": "bam",
+                    "output_type": "alignments",
+                    "quality_metrics": [],
+                }
+            ],
+            "wdl_task_name": task_name,
+        }
+    )
+    results = mock_accession.accession_step(single_step_params, dry_run=True)
+    assert results == [
+        MatchingMd5Record(
+            "gs://file/a",
+            [
+                EncodeFile(
+                    {
+                        "@id": "/files/ENCFFABC123/",
+                        "status": "released",
+                        "dataset": "ENCSRCBA321",
+                    }
+                )
+            ],
+        )
+    ]
+
+
 def test_accession_init(mock_accession: Accession, lab: str, award: str) -> None:
-    assert mock_accession.COMMON_METADATA["lab"] == lab
-    assert mock_accession.COMMON_METADATA["award"] == award
+    assert mock_accession.common_metadata.lab == lab
+    assert mock_accession.common_metadata.award == award
     assert all(
         (
             mock_accession.analysis,
@@ -248,172 +361,12 @@ def test_accession_init(mock_accession: Accession, lab: str, award: str) -> None
     )
 
 
-def test_get_step_run_id_string(mock_accession: Accession) -> None:
-    expected = "/analysis-step-runs/123foobar"
-    encode_file = {"step_run": expected}
-    result = mock_accession.get_step_run_id(encode_file)
-    assert result == expected
-
-
-def test_get_step_run_id_dict(mock_accession: Accession) -> None:
-    expected = "/analysis-step-runs/123foobar"
-    encode_file = {"step_run": {"@id": expected}}
-    result = mock_accession.get_step_run_id(encode_file)
-    assert result == expected
-
-
-def test_lab_pi(mock_accession: Accession, lab: str, award: str) -> None:
-    assert mock_accession.lab_pi == "encode-processing-pipeline"
-
-
-@pytest.mark.parametrize("file_format_type", [None, "bedMethyl"])
-def test_file_from_template(
-    mocker: MockFixture,
-    mock_accession: Accession,
-    lab: str,
-    award: str,
-    mock_file: MockFile,
-    file_format_type: str,
-) -> None:
-    kwargs = {
-        "file": mock_file,
-        "file_format": "tsv",
-        "output_type": "gene quantifications",
-        "step_run": {"@id": "my-step-run"},
-        "derived_from": "baz",
-        "dataset": "qux",
-        "file_format_type": file_format_type,
-    }
-    file = mock_accession.file_from_template(**kwargs)  # type: ignore
-    expected = {
-        "status": "uploading",
-        "aliases": ["encode-processing-pipeline:foo-bar"],
-        "file_size": mock_file.size,
-        "md5sum": mock_file.md5sum,
-        "assembly": "hg19",
-        "step_run": "my-step-run",
-    }
-    for k in ["output_type", "file_format", "dataset", "derived_from"]:
-        expected[k] = kwargs[k]
-    for k, v in expected.items():
-        assert file[k] == v
-    if file_format_type:
-        assert file["file_format_type"] == file_format_type
-    else:
-        assert "file_format_type" not in file
-    assert file["genome_annotation"] == "V19"
-    assert "lab" in file
-    assert "award" in file
-
-
-def test_flatten(mock_accession: Accession) -> None:
-    result = mock_accession.flatten([["a", "b"], ["c", "d"]])
-    assert isinstance(result, GeneratorType)
-    assert list(result) == ["a", "b", "c", "d"]
-
-
-def test_get_bio_replicate_str(
-    mock_accession: Accession, mock_encode_file: Dict[str, List[int]]
-) -> None:
-    result = mock_accession.get_bio_replicate(mock_encode_file)
-    assert result == "1"
-
-
-def test_get_bio_replicate_int(
-    mock_accession: Accession, mock_encode_file: Dict[str, List[int]]
-) -> None:
-    result = mock_accession.get_bio_replicate(mock_encode_file, string=False)
-    assert result == 1
-
-
-def mock_queue_qc(qc, *args, **kwargs):
-    return qc
-
-
-@pytest.mark.filesystem
-def test_make_microrna_quantification_qc(mock_replicated_mirna_accession):
-    gs_file = [
-        i
-        for i in mock_replicated_mirna_accession.analysis.get_files(filekey="bam")
-        if "rep1" in i.filename
-    ][0]
-    qc = mock_replicated_mirna_accession.make_microrna_quantification_qc("foo", gs_file)
-    assert qc == {"expressed_mirnas": 393}
-
-
-@pytest.mark.filesystem
-def test_make_microrna_mapping_qc(mock_replicated_mirna_accession):
-    gs_file = [
-        i
-        for i in mock_replicated_mirna_accession.analysis.get_files(filekey="bam")
-        if "rep1" in i.filename
-    ][0]
-    qc = mock_replicated_mirna_accession.make_microrna_mapping_qc("foo", gs_file)
-    assert qc == {"aligned_reads": 5873570}
-
-
-@pytest.mark.filesystem
-def test_make_microrna_correlation_qc_replicated(mock_replicated_mirna_accession):
-    gs_file = [
-        i for i in mock_replicated_mirna_accession.analysis.get_files(filekey="tsv")
-    ][0]
-    qc = mock_replicated_mirna_accession.make_microrna_correlation_qc("foo", gs_file)
-    assert qc == {"Spearman correlation": 0.8885044458946942}
-
-
-@pytest.mark.filesystem
-def test_make_microrna_correlation_qc_unreplicated_returns_none(
-    mocker, mock_accession_unreplicated, mirna_replicated_analysis
-):
-    mocker.patch.object(
-        mock_accession_unreplicated, "analysis", mirna_replicated_analysis
-    )
-    mocker.patch.object(
-        mock_accession_unreplicated, "backend", mirna_replicated_analysis.backend
-    )
-    mocker.patch.object(mock_accession_unreplicated, "file_has_qc", return_value=False)
-    mocker.patch.object(mock_accession_unreplicated, "queue_qc", mock_queue_qc)
-    mocker.patch.object(
-        mock_accession_unreplicated,
-        "get_number_of_biological_replicates",
-        return_value=1,
-    )
-    gs_file = [
-        i for i in mock_accession_unreplicated.analysis.get_files(filekey="tsv")
-    ][0]
-    qc = mock_accession_unreplicated.make_microrna_correlation_qc("foo", gs_file)
-    assert qc is None
-
-
-@pytest.mark.filesystem
-def test_make_star_qc_metric(mock_replicated_mirna_accession):
-    gs_file = [
-        i
-        for i in mock_replicated_mirna_accession.analysis.get_files(filekey="bam")
-        if "rep1" in i.filename
-    ][0]
-    current_dir = Path(__file__).resolve()
-    validation = current_dir.parent / "data" / "validation" / "mirna" / "files.json"
-    with open(validation) as f:
-        data = json.load(f)
-    expected = [i for i in data if i["accession"] == "ENCFF590YAX"][0][
-        "quality_metrics"
-    ][0]
-    qc = mock_replicated_mirna_accession.make_star_qc_metric("foo", gs_file)
-    for k, v in qc.items():
-        assert v == expected[k]
-
-
-@contextmanager
-def does_not_raise():
-    yield
-
-
 @pytest.mark.parametrize(
     "pipeline_type,condition,accessioner_class",
     [
         ("mirna", does_not_raise(), AccessionMicroRna),
         ("long_read_rna", does_not_raise(), AccessionLongReadRna),
+        ("bulk_rna", does_not_raise(), AccessionBulkRna),
         ("not_valid", pytest.raises(RuntimeError), None),
     ],
 )
@@ -426,77 +379,12 @@ def test_accession_factory(
     )
     with condition:
         accessioner = accession_factory(
-            pipeline_type, "metadata.json", "bar", "baz", "qux", backend=mock_gc_backend
+            pipeline_type,
+            "metadata.json",
+            "dev",
+            "baz",
+            "qux",
+            backend=mock_gc_backend,
+            no_log_file=True,
         )
         assert isinstance(accessioner, accessioner_class)
-
-
-@pytest.fixture
-def mock_replicated_mirna_accession(mocker, mirna_replicated_analysis, mock_accession):
-    """
-    Contains a legitimate replicated mirna analysis for purposes of testing mirna qm
-    generation without creating any connections to servers.
-    """
-    mocker.patch.object(mock_accession, "analysis", mirna_replicated_analysis)
-    mocker.patch.object(mock_accession, "backend", mirna_replicated_analysis.backend)
-    mocker.patch.object(mock_accession, "file_has_qc", return_value=False)
-    mocker.patch.object(mock_accession, "queue_qc", mock_queue_qc)
-    mocker.patch.object(
-        mock_accession, "get_number_of_biological_replicates", return_value=2
-    )
-    return mock_accession
-
-
-@pytest.fixture
-def mirna_replicated_analysis(
-    mock_accession_gc_backend: MockFixture
-) -> Analysis:  # noqa: F811
-    current_dir = Path(__file__).resolve()
-    metadata_json_path = current_dir.parent / "data" / "mirna_replicated_metadata.json"
-    analysis = Analysis(MetaData(metadata_json_path), backend=mock_accession_gc_backend)
-    return analysis
-
-
-@pytest.fixture
-def mock_encode_file() -> Dict[str, List[int]]:
-    return {"biological_replicates": [1, 2]}
-
-
-@pytest.fixture
-def mock_accession_unreplicated(
-    mocker: MockFixture,
-    mock_accession_gc_backend: MockGCBackend,
-    mock_metadata: MockMetaData,
-    lab: str,
-    award: str,
-) -> Accession:
-    """
-    Mocked accession instance with dummy __init__ that doesn't do anything and pre-baked
-    assembly property. @properties must be patched before instantiation
-    """
-    mocker.patch.object(
-        Accession, "is_replicated", new_callable=PropertyMock(return_value=False)
-    )
-    mocked_accession = AccessionMicroRna(
-        "imaginary_steps.json",
-        Analysis(mock_metadata, backend=mock_accession_gc_backend),
-        "mock_server.biz",
-        lab,
-        award,
-    )
-    return mocked_accession
-
-
-@pytest.fixture
-def mock_file() -> MockFile:
-    return MockFile("gs://foo/bar", 123, "abc")
-
-
-def test_filter_encode_files_by_status_one_hit():
-    files = [{"status": "foo"}, {"status": "bar"}, {"status": "deleted"}]
-    assert len(Accession.filter_encode_files_by_status(files)) == 2
-
-
-def test_filter_encode_files_by_status_no_hits():
-    files = [{"status": "foo"}]
-    assert len(Accession.filter_encode_files_by_status(files)) == 1

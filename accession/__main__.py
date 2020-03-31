@@ -2,23 +2,14 @@ import argparse
 import os
 from typing import Optional, Tuple
 
-from encode_utils.connection import Connection
-
 from accession import __version__
 from accession.accession import accession_factory
-from accession.helpers import filter_outputs_by_path
 
 
 def get_parser():
     parser = argparse.ArgumentParser(
         description="Accession pipeline outputs, \
                                                  download output metadata for scattering"
-    )
-    parser.add_argument(
-        "--filter-from-path",
-        type=str,
-        default=None,
-        help="path to a folder with pipeline run outputs",
     )
     parser.add_argument(
         "--accession-metadata",
@@ -33,7 +24,29 @@ def get_parser():
         help=f"the type of pipeline run being accessioned, e.g. mirna or long_read_rna",
     )
     parser.add_argument(
+        "-d",
+        "--dry-run",
+        action="store_true",
+        help="Perform a dry run for accessioning, not post anything.",
+    )
+    parser.add_argument(
         "--server", default="dev", help="Server the files will be accessioned to"
+    )
+    parser.add_argument(
+        "--no-log-file",
+        action="store_true",
+        help=(
+            "If this flag is specified, don't log to a log file, will still log to "
+            "stdout. Will not write to file specified by `--log-file-path`"
+        ),
+    )
+    parser.add_argument(
+        "--log-file-path",
+        default="accession.log",
+        help=(
+            "Path to file to write logs to. This will create this file if it does not "
+            "exist and append if it already exists."
+        ),
     )
     parser.add_argument("--lab", type=str, default=None, help="Lab")
     parser.add_argument("--award", type=str, default=None, help="Award")
@@ -67,19 +80,21 @@ def check_or_set_lab_award(lab: Optional[str], award: Optional[str]) -> Tuple[st
     return lab, award
 
 
-def main(args=None):
+def main():
     parser = get_parser()
-    args = parser.parse_args(args)
+    args = parser.parse_args()
     lab, award = check_or_set_lab_award(args.lab, args.award)
-    if args.filter_from_path:
-        filter_outputs_by_path(args.filter_from_path)
-        return
-    connection = Connection(args.server)
-    if all([args.pipeline_type, args.accession_metadata, lab, award, connection]):
+    if all([args.pipeline_type, args.accession_metadata, lab, award, args.server]):
         accessioner = accession_factory(
-            args.pipeline_type, args.accession_metadata, connection, lab, award
+            args.pipeline_type,
+            args.accession_metadata,
+            args.server,
+            lab,
+            award,
+            log_file_path=args.log_file_path,
+            no_log_file=args.no_log_file,
         )
-        accessioner.accession_steps()
+        accessioner.accession_steps(args.dry_run)
         return
     print("Module called without proper arguments")
 

@@ -42,7 +42,7 @@ class GCBackend:
         file_path = file.split("gs://{}/".format(bucket.name))[1]
         return file_path
 
-    # Downloads file as string
+    # Downloads file as bytes (despite the name of blob's method)
     def read_file(self, file):
         blob = self.blob_from_filename(file)
         return blob.download_as_string()

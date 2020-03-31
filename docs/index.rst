@@ -94,8 +94,6 @@ A single step is configured in the following way:
 
 ``quality_metrics`` is a list of methods that will be called in during the accessioning to attach quality metrics to the file
 
-``possible_duplicate`` indicates that there could be files that have an identical content. If the ``possible_duplicate`` flag is set and the current file being accessioned has md5sum that's identical to the md5sum of another file in the same task, the current file will not be accessioned. Optimal IDR peaks and conservative IDR peaks are an example set of files that can have an identical md5sum.
-
 ``derived_from_files`` specifies the list of files the current file being accessioned derives from. The parent files must have been accessioned before the current file can be submitted.
 
 ``derived_from_inputs`` is used when indicating that the parent files were not produced during the pipeline analysis. Instead, these files are initial inputs to the pipeline. Raw fastqs and genome references are examples of such files.

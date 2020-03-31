@@ -145,7 +145,7 @@
         "executionStatus": "Done",
         "inputs": {
           "disk": "local-disk 200 SSD",
-          "fastq": "gs://encode-processing/caper_tmp/meenakshi/encode-public/2017/06/29/5e59f7f5-02aa-482a-bb3e-7e49ab8828e8/ENCFF961HXV.fastq.gz",
+          "fastqs_to_trim": "gs://encode-processing/caper_tmp/meenakshi/encode-public/2017/06/29/5e59f7f5-02aa-482a-bb3e-7e49ab8828e8/ENCFF961HXV.fastq.gz",
           "five_prime_adapters": "gs://encode-processing/caper_tmp/meenakshi/df8acfb115cb667ef5a787093c4115bd/ENCFF642YMX.txt",
           "ncpus": 2,
           "output_prefix": "rep1ENCSR715NEZ",
@@ -335,7 +335,7 @@
         "executionStatus": "Done",
         "inputs": {
           "disk": "local-disk 200 SSD",
-          "fastq": "gs://encode-processing/caper_tmp/meenakshi/encode-public/2017/06/29/9bf53883-a8c2-404b-b9f5-59b3665ea023/ENCFF414HIZ.fastq.gz",
+          "fastqs_to_trim": "gs://encode-processing/caper_tmp/meenakshi/encode-public/2017/06/29/9bf53883-a8c2-404b-b9f5-59b3665ea023/ENCFF414HIZ.fastq.gz",
           "five_prime_adapters": "gs://encode-processing/caper_tmp/meenakshi/df8acfb115cb667ef5a787093c4115bd/ENCFF642YMX.txt",
           "ncpus": 2,
           "output_prefix": "rep2ENCSR715NEZ",

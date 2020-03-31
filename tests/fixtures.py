@@ -4,7 +4,7 @@ import shutil
 from pathlib import Path
 from time import sleep
 from typing import Callable, Dict, Iterator, Tuple
-from unittest.mock import PropertyMock
+from unittest.mock import PropertyMock, create_autospec
 from urllib.parse import urljoin
 
 import attr
@@ -24,6 +24,7 @@ from accession.accession import (
 )
 from accession.analysis import Analysis, MetaData
 from accession.backends import GCBackend
+from accession.encode_models import EncodeCommonMetadata, EncodeExperiment, EncodeFile
 
 
 @pytest.fixture(scope="session")
@@ -100,6 +101,11 @@ def local_encoded_server(
     container.kill()
 
 
+@pytest.fixture
+def server_name() -> str:
+    return "mock_server.biz"
+
+
 @pytest.fixture(scope="session")
 def lab() -> str:
     return "/labs/encode-processing-pipeline/"
@@ -111,6 +117,11 @@ def award() -> str:
     This is the ENC4 award for the DCC
     """
     return "U24HG009397"
+
+
+@pytest.fixture(scope="session")
+def common_metadata(lab, award):
+    return EncodeCommonMetadata(lab, award)
 
 
 @pytest.fixture(scope="session")
@@ -144,6 +155,30 @@ def normal_analysis(
 def metadata_json(metadata_json_path: Path) -> Iterator[dict]:
     with open(metadata_json_path) as json_file:
         yield json.load(json_file)
+
+
+@pytest.fixture
+def mirna_replicated_metadata_path() -> str:
+    current_dir = Path(__file__).resolve()
+    metadata_json_path = current_dir.parent / "data" / "mirna_replicated_metadata.json"
+    return str(metadata_json_path)
+
+
+@pytest.fixture
+def encode_file_no_qc():
+    return EncodeFile({"@id": "/files/foo/", "quality_metrics": []})
+
+
+@attr.s(auto_attribs=True)
+class MockFile:
+    filename: str
+    size: int
+    md5sum: str
+
+
+@pytest.fixture
+def mock_file() -> MockFile:
+    return MockFile("gs://foo/bar", 123, "abc")
 
 
 class MockGCBackend(GCBackend):
@@ -276,10 +311,14 @@ def accessioner_factory(
             return dcc_mode
 
         mocker.patch.object(Connection, "_set_dcc_mode", mock_set_dcc_mode)
-        connection = Connection(local_encoded_server)
 
         accessioner = accession_factory(
-            assay_name, metadata_file, connection, lab, award
+            assay_name,
+            metadata_file,
+            local_encoded_server,
+            lab,
+            award,
+            backend=mock_accession_gc_backend,
         )
 
         mocker.patch.object(
@@ -321,8 +360,8 @@ def mock_accession(
     mock_accession_gc_backend: MockGCBackend,
     mock_metadata: MockMetaData,
     mock_accession_steps: MockAccessionSteps,
-    lab: str,
-    award: str,
+    server_name: str,
+    common_metadata: EncodeCommonMetadata,
 ) -> Accession:
     """
     Mocked accession instance with dummy __init__ that doesn't do anything and pre-baked
@@ -337,16 +376,53 @@ def mock_accession(
         new_callable=PropertyMock(return_value="V19"),
     )
     mocker.patch.object(
-        Accession, "is_replicated", new_callable=PropertyMock(return_value=True)
+        Accession,
+        "experiment",
+        new_callable=PropertyMock(
+            return_value=EncodeExperiment(
+                {
+                    "@id": "foo",
+                    "assay_term_name": "microRNA",
+                    "replicates": [
+                        {"biological_replicate_number": 1},
+                        {"biological_replicate_number": 2},
+                    ],
+                }
+            )
+        ),
     )
+    mocker.patch.object(Accession, "preflight_helper", new_callable=PropertyMock())
     mocked_accession = AccessionMicroRna(
         mock_accession_steps,
         Analysis(mock_metadata, backend=mock_accession_gc_backend),
-        "mock_server.biz",
-        lab,
-        award,
+        create_autospec(Connection, dcc_url=server_name),
+        common_metadata,
+        no_log_file=True,
     )
     return mocked_accession
+
+
+@pytest.fixture
+def mock_accession_not_patched(
+    mocker,
+    mock_accession_gc_backend,
+    mock_metadata,
+    mock_accession_steps,
+    server_name,
+    common_metadata,
+    mock_file,
+):
+    mocker.patch.object(
+        Analysis, "raw_fastqs", new_callable=PropertyMock(return_value=[mock_file])
+    )
+    mock_accession = AccessionMicroRna(
+        mock_accession_steps,
+        Analysis(mock_metadata, backend=mock_accession_gc_backend),
+        create_autospec(Connection, dcc_url=server_name),
+        common_metadata,
+        no_log_file=True,
+    )
+    return mock_accession
 
 
 @pytest.fixture
@@ -355,8 +431,8 @@ def mock_accession_chip(
     mock_accession_gc_backend: MockGCBackend,
     mock_metadata: MockMetaData,
     mock_accession_steps: MockAccessionSteps,
-    lab: str,
-    award: str,
+    server_name: str,
+    common_metadata: EncodeCommonMetadata,
 ) -> Accession:
     """
     Mocked accession instance with dummy __init__ that doesn't do anything and pre-baked
@@ -371,13 +447,61 @@ def mock_accession_chip(
         new_callable=PropertyMock(return_value="V19"),
     )
     mocker.patch.object(
-        Accession, "is_replicated", new_callable=PropertyMock(return_value=True)
+        Accession,
+        "experiment",
+        new_callable=PropertyMock(
+            return_value=EncodeExperiment(
+                {
+                    "@id": "foo",
+                    "assay_term_name": "TF ChIP-seq",
+                    "replicates": [
+                        {"biological_replicate_number": 1},
+                        {"biological_replicate_number": 2},
+                    ],
+                }
+            )
+        ),
     )
     mocked_accession = AccessionChip(
         mock_accession_steps,
         Analysis(mock_metadata, backend=mock_accession_gc_backend),
+        server_name,
+        common_metadata,
+        no_log_file=True,
+    )
+    return mocked_accession
+
+
+@pytest.fixture
+def mock_accession_unreplicated(
+    mocker: MockFixture,
+    mock_accession_gc_backend: MockGCBackend,
+    mock_metadata: MockMetaData,
+    lab: str,
+    award: str,
+) -> Accession:
+    """
+    Mocked accession instance with dummy __init__ that doesn't do anything and pre-baked
+    assembly property. @properties must be patched before instantiation
+    """
+    mocker.patch.object(
+        Accession,
+        "experiment",
+        new_callable=PropertyMock(
+            return_value=EncodeExperiment(
+                {
+                    "@id": "foo",
+                    "assay_term_name": "microRNA",
+                    "replicates": [{"biological_replicate_number": 1}],
+                }
+            )
+        ),
+    )
+    mocked_accession = AccessionMicroRna(
+        "imaginary_steps.json",
+        Analysis(mock_metadata, backend=mock_accession_gc_backend),
         "mock_server.biz",
-        lab,
-        award,
+        EncodeCommonMetadata(lab, award),
+        no_log_file=True,
     )
     return mocked_accession

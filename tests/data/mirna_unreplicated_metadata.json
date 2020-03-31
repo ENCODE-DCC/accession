@@ -140,7 +140,7 @@
         "executionStatus": "Done",
         "inputs": {
           "disk": "local-disk 200 SSD",
-          "fastq": "gs://encode-processing/caper_tmp/meenakshi/encode-public/2017/01/31/5392551f-7bf3-4544-9460-81ac06297868/ENCFF096DFL.fastq.gz",
+          "fastqs_to_trim": "gs://encode-processing/caper_tmp/meenakshi/encode-public/2017/01/31/5392551f-7bf3-4544-9460-81ac06297868/ENCFF096DFL.fastq.gz",
           "five_prime_adapters": "gs://encode-processing/caper_tmp/meenakshi/df8acfb115cb667ef5a787093c4115bd/ENCFF642YMX.txt",
           "ncpus": 2,
           "output_prefix": "rep1ENCSR543MWW",

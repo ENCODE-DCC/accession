@@ -15,7 +15,6 @@
     "schema_version": "9",
     "size_range": "<30",
     "status": "released",
-    "strand_specificity": false,
     "submitted_by": "facilisi.tristique@potenti.vivamus",
     "uuid": "2fbbb5c3-cf4b-4420-b73b-0202f00b631f"
   },
@@ -35,7 +34,6 @@
     "schema_version": "9",
     "size_range": "<30",
     "status": "released",
-    "strand_specificity": false,
     "submitted_by": "facilisi.tristique@potenti.vivamus",
     "uuid": "1abbb5c3-cf4b-4420-b73b-0202f00b631f"
   },
@@ -55,7 +53,6 @@
     "schema_version": "9",
     "size_range": "<30",
     "status": "released",
-    "strand_specificity": false,
     "submitted_by": "facilisi.tristique@potenti.vivamus",
     "uuid": "a6752081-fbcf-41a2-9fdd-09aad04b790c"
   }

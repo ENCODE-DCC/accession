@@ -1,6 +1,7 @@
 import json
 import operator
 from functools import reduce
+from typing import Tuple
 
 from accession.backends import GCBackend
 from accession.file import GSFile
@@ -17,9 +18,9 @@ class MetaData:
         return self._content
 
 
-class Analysis(object):
-    """docstring for Analysis
-        Args: metadata: MetaData object
+class Analysis:
+    """
+    Parses Cromwell workflow metadata into a searchable digraph
     """
 
     def __init__(
@@ -56,7 +57,7 @@ class Analysis(object):
 
     # Makes an instance of task with input and output GSFile instances
     def make_task(self, task_name, task):
-        new_task = Task(task_name.split(".")[1], task, self)
+        new_task = Task(task_name.split(".")[1], task)
         return new_task
 
     # Makes instances of GSFile from input or output section of task
@@ -141,17 +142,44 @@ class Analysis(object):
                 fastqs.append(file)
         return fastqs
 
-    def search_up(self, start_task, task_name, filekey, inputs=False):
-        return list(set(self._search_up(start_task, task_name, filekey, inputs)))
+    def search_up(
+        self,
+        start_task,
+        task_name,
+        filekey,
+        inputs=False,
+        disallow_tasks: Tuple[str, ...] = (),
+    ):
+        return list(
+            set(self._search_up(start_task, task_name, filekey, inputs, disallow_tasks))
+        )
 
     def search_down(self, start_task, task_name, filekey):
         return list(set(self._search_down(start_task, task_name, filekey)))
 
-    # Search the Analysis hirearchy up for a file matching filekey
-    # Returns generator object, access with next() or list()
-    # task parameter specifies the starting point
-    # task_name is target task in which filekey exists
-    def _search_up(self, start_task, task_name, filekey, inputs=False):
+    def _search_up(
+        self,
+        start_task,
+        task_name,
+        filekey,
+        inputs=False,
+        disallow_tasks: Tuple[str, ...] = (),
+    ):
+        """
+        Search the Analysis hirearchy up for a file matching filekey. Returns a
+        generator, access with next() or list() task parameter specifies the starting
+        point, task_name is target task in which filekey exists.
+
+        The disallow_tasks input is designed to avoid conflicts that can occur when
+        there is a diamond dependency of several of a task's inputs on the same parent.
+        This mechanism allows for halting the search up one of those branches, avoiding
+        the reporting of spurious parent files. A ValueError is raised if the task name
+        being searched for is also disallowed.
+        """
+        if task_name in disallow_tasks:
+            raise ValueError(
+                f"Cannot search for files in task {task_name} since this task is disallowed"
+            )
         if task_name == start_task.task_name:
             if inputs and inputs == "true":
                 for file in start_task.input_files:
@@ -161,9 +189,18 @@ class Analysis(object):
                 for file in start_task.output_files:
                     if filekey in file.filekeys:
                         yield file
-        for task_item in set(map(lambda x: x.task, start_task.input_files)):
+        for task_item in set(
+            map(
+                lambda x: x.task
+                if x.task is not None and x.task.task_name not in disallow_tasks
+                else None,
+                start_task.input_files,
+            )
+        ):
             if task_item:
-                yield from self._search_up(task_item, task_name, filekey, inputs)
+                yield from self._search_up(
+                    task_item, task_name, filekey, inputs, disallow_tasks=disallow_tasks
+                )
 
     # Search the Analysis hirearchy down for a file matching filekey
     # Returns generator object, access with next()

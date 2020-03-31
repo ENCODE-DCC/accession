@@ -3,6 +3,7 @@ from contextlib import contextmanager
 import pytest
 
 from accession.accession import AccessionChip
+from accession.encode_models import EncodeFile
 from accession.file import GSFile
 from accession.task import Task
 
@@ -16,7 +17,7 @@ def gsfile():
         },
         "outputs": {},
     }
-    my_task = Task("my_task", task, analysis="qux")
+    my_task = Task("my_task", task)
     return GSFile(
         "foo", "gs://abc/spam.fastq.gz", md5sum="123", size="456", task=my_task
     )
@@ -43,7 +44,6 @@ def mock_accession_patched_qc(mocker, mock_accession_chip, gsfile):
     Performs shared patches to qc metric maker functions. Dependents on this fixture
     should patch mock_accession_chip.backend.read_json() to supply the appropriate qc stub
     """
-    mocker.patch.object(mock_accession_chip, "file_has_qc", return_value=False)
     mocker.patch.object(
         mock_accession_chip.analysis, "get_files", return_value=[gsfile]
     )
@@ -263,11 +263,11 @@ def test_get_chip_pipeline_replication_method(peak_caller, expected):
     "qc,expected",
     [
         (
-            b'{"replication": {"reproducibility": {"idr": {"opt_set": "pooled-pr1_vs_pooled-pr2"}}}}',
+            b'{"general": {"peak_caller": "spp"}, "replication": {"reproducibility": {"idr": {"opt_set": "pooled-pr1_vs_pooled-pr2"}}}}',
             {"preferred_default": True},
         ),
         (
-            b'{"replication": {"reproducibility": {"idr": {"opt_set": "rep1_vs_rep2"}}}}',
+            b'{"general": {"peak_caller": "macs2"}, "replication": {"reproducibility": {"overlap": {"opt_set": "rep1_vs_rep2"}}}}',
             {},
         ),
     ],
@@ -316,7 +316,9 @@ def test_make_chip_alignment_qc(
     if processing_stage == "unfiltered":
         output_type = " ".join([processing_stage, output_type])
         qc_key = "samstat"
-    encode_file = {"output_type": output_type}
+    encode_file = EncodeFile(
+        {"@id": "/files/foo/", "quality_metrics": [], "output_type": output_type}
+    )
     qc = mock_accession_patched_qc.make_chip_alignment_qc(encode_file, gs_file="foo")
     for k, v in qc.items():
         if k == "processing_stage":
@@ -339,18 +341,19 @@ def mock_accession_align_enrich(mocker, mock_accession_patched_qc, gsfile):
     return mock_accession_patched_qc
 
 
-def test_make_chip_align_enrich_qc(mocker, mock_accession_align_enrich, gsfile):
+def test_make_chip_align_enrich_qc(
+    mocker, mock_accession_align_enrich, gsfile, encode_file_no_qc
+):
     mocker.patch.object(
         mock_accession_align_enrich.backend, "read_json", return_value=align_enrich_qc
     )
     task = {"inputs": {"fastqs_R1": ["gs://abc/spam.fastq.gz"]}, "outputs": {}}
-    stub_task = Task("align_R1", task, analysis="qux")
+    stub_task = Task("align_R1", task)
     mocker.patch.object(
         mock_accession_align_enrich.analysis, "get_tasks", return_value=[stub_task]
     )
-    encode_file = {}
     qc = mock_accession_align_enrich.make_chip_align_enrich_qc(
-        encode_file, gs_file=gsfile
+        encode_file_no_qc, gs_file=gsfile
     )
     keys = ["xcor_score", "jsd"]
     for key in keys:
@@ -361,19 +364,27 @@ def test_make_chip_align_enrich_qc(mocker, mock_accession_align_enrich, gsfile):
             assert prop in qc[key]
 
 
-def test_make_chip_align_enrich_qc_raises(mocker, mock_accession_align_enrich, gsfile):
+def test_make_chip_align_enrich_qc_raises(
+    mocker, mock_accession_align_enrich, gsfile, encode_file_no_qc
+):
     mocker.patch.object(
         mock_accession_align_enrich.analysis, "get_tasks", return_value=[]
     )
     with pytest.raises(ValueError):
-        mock_accession_align_enrich.make_chip_align_enrich_qc({}, gs_file=gsfile)
+        mock_accession_align_enrich.make_chip_align_enrich_qc(
+            encode_file_no_qc, gs_file=gsfile
+        )
 
 
-def test_make_chip_library_qc(mocker, mock_accession_patched_qc, gsfile):
+def test_make_chip_library_qc(
+    mocker, mock_accession_patched_qc, gsfile, encode_file_no_qc
+):
     mocker.patch.object(
         mock_accession_patched_qc.backend, "read_json", return_value=library_qc
     )
-    qc = mock_accession_patched_qc.make_chip_library_qc({}, gs_file="foo")
+    qc = mock_accession_patched_qc.make_chip_library_qc(
+        encode_file_no_qc, gs_file="foo"
+    )
     for k, v in library_qc["align"]["dup"][REP].items():
         assert qc[k] == v
     for k, v in library_qc["lib_complexity"]["lib_complexity"][REP].items():
@@ -418,7 +429,12 @@ def test_get_chip_pipeline_replicate_raises(mocker, mock_accession_chip, gsfile)
     ],
 )
 def test_make_chip_replication_qc(
-    mocker, mock_accession_patched_qc, task_name, current_set, reproducible_peaks_source
+    mocker,
+    mock_accession_patched_qc,
+    encode_file_no_qc,
+    task_name,
+    current_set,
+    reproducible_peaks_source,
 ):
     """
     Tests 3 cases each for histone and TF pipelines. Histone QC shouldn't have IDR
@@ -444,11 +460,13 @@ def test_make_chip_replication_qc(
         }
     else:
         task = {"inputs": {"prefix": current_set}, "outputs": []}
-    my_task = Task(task_name, task, analysis="qux")
+    my_task = Task(task_name, task)
     gsfile = GSFile(
         "foo", "gs://abc/spam.fastq.gz", md5sum="123", size="456", task=my_task
     )
-    qc = mock_accession_patched_qc.make_chip_replication_qc({}, gs_file=gsfile)
+    qc = mock_accession_patched_qc.make_chip_replication_qc(
+        encode_file_no_qc, gs_file=gsfile
+    )
     assert (
         qc["reproducible_peaks"]
         == pipeline_qc["replication"]["reproducibility"][method][
@@ -468,7 +486,9 @@ def test_make_chip_replication_qc(
 @pytest.mark.parametrize(
     "current_set", [("pooled-pr1_vs_pooled-pr2"), ("rep1_vs_rep2")]
 )
-def test_make_chip_peak_enrichment_qc(mocker, mock_accession_patched_qc, current_set):
+def test_make_chip_peak_enrichment_qc(
+    mocker, mock_accession_patched_qc, encode_file_no_qc, current_set
+):
     """
     There is not a significant difference between the way this qc is generated between
     histone and tf pipelines. As such, only tf is tested here.
@@ -477,11 +497,13 @@ def test_make_chip_peak_enrichment_qc(mocker, mock_accession_patched_qc, current
         mock_accession_patched_qc.backend, "read_json", return_value=peak_enrichment_qc
     )
     task = {"inputs": {"prefix": current_set}, "outputs": []}
-    my_task = Task("idr", task, analysis="qux")
+    my_task = Task("idr", task)
     gsfile = GSFile(
         "foo", "gs://abc/spam.fastq.gz", md5sum="123", size="456", task=my_task
     )
-    qc = mock_accession_patched_qc.make_chip_peak_enrichment_qc({}, gs_file=gsfile)
+    qc = mock_accession_patched_qc.make_chip_peak_enrichment_qc(
+        encode_file_no_qc, gs_file=gsfile
+    )
     if (
         current_set
         == peak_enrichment_qc["replication"]["reproducibility"]["idr"]["opt_set"]
