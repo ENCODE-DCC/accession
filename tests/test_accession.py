@@ -177,7 +177,7 @@ def test_make_file_matching_md5_record_matches_does_not_return_none(
 def test_accession_patch_experiment_analyses(mock_accession):
     mock_accession.new_files = [EncodeFile({"@id": "/files/foo/"})]
     mock_accession.patch_experiment_analyses()
-    assert mock_accession.conn.patch.mock_calls[0][1][1] == {
+    assert mock_accession.conn.patch.mock_calls[0][1][0] == {
         "_enc_id": "foo",
         "analyses": [{"files": ["/files/foo/"]}],
     }
