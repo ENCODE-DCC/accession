@@ -266,10 +266,11 @@ class EncodeExperiment:
     def make_postable_analyses_from_analysis_payload(
         self, analysis_payload: AnalysisPayload
     ) -> Dict[str, List[AnalysisPayload]]:
-        return {
-            "analyses": [analysis_payload],
-            Connection.ENCID_KEY: self.experiment_id,
-        }
+        """
+        A single analysis is just a `dict`. To be able to patch the property with
+        encode_utils, we need to put it into a list with the `analyses` key.
+        """
+        return {"analyses": [analysis_payload], Connection.ENCID_KEY: self.at_id}
 
 
 class EncodeAttachment:
