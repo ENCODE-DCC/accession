@@ -396,18 +396,18 @@ def test_accession_init(mock_accession: Accession, lab: str, award: str) -> None
     ],
 )
 def test_accession_factory(
-    mocker, mock_gc_backend, pipeline_type, condition, accessioner_class
+    mocker, mock_gc_backend, server_name, pipeline_type, condition, accessioner_class
 ):
     mocker.patch(
         "builtins.open",
         mocker.mock_open(read_data='{"workflowRoot": "gs://foo/bar", "calls": {}}'),
     )
-    mocker.patch("encode_utils.connection.Connection")
+    mocker.patch("accession.accession.Connection")
     with condition:
         accessioner = accession_factory(
             pipeline_type,
             "metadata.json",
-            "dev",
+            server_name,
             "baz",
             "qux",
             backend=mock_gc_backend,
