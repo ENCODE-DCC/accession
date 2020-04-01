@@ -48,6 +48,23 @@ Pipeline Type
   steps JSON to use as the accessioning template, so if you use ``mirna`` as above the
   code will look for the corresponding template at ``accession_steps/mirna_steps.json``.
 
+Dry Run
+-------
+
+| The `--dry-run` flag can be used to determine if any files that would be accessioned
+  have md5sums matching those of files already on the portal. When this flag is
+  specified, nothing will be accessioned, and log messages will be printed indicating
+  files from the WDL metadata with md5 matches on the portal.
+
+Logging Options
+----------------
+
+| The `--no-log-file` flag and `--log-file-path` argument allow for some control over
+  the accessioning code logging. `--no-log-file` will always skip logging to a file,
+  even if a log file path is specified. The code will log to stdout in either case.
+  `--log-file-path` defaults to `accession.log`. Log files are always appended to, never
+  overwritten.
+
 Accession Steps Template Format
 ===============================
 
@@ -64,25 +81,32 @@ A single step is configured in the following way:
 .. code-block:: javascript
 
     {
-        "dcc_step_version":     "/analysis-step-versions/kundaje-lab-atac-seq-trim-align-filter-step-v-1-0/",
-        "dcc_step_run":         "atac-seq-trim-align-filter-step-run-v1",
-        "wdl_task_name":        "filter",
-        "wdl_files":            [
+        "dcc_step_version": "/analysis-step-versions/kundaje-lab-atac-seq-trim-align-filter-step-v-1-0/",
+        "dcc_step_run": "atac-seq-trim-align-filter-step-run-v1",
+        "requires_replication": "true",
+        "wdl_task_name": "filter",
+        "wdl_files": [
             {
-                "filekey":                  "nodup_bam",
-                "output_type":              "alignments",
-                "file_format":              "bam",
-                "quality_metrics":          ["cross_correlation", "samtools_flagstat"],
-                "derived_from_files":       [{
-                    "derived_from_task":        "trim_adapter",
-                    "derived_from_filekey":     "fastqs",
-                    "derived_from_inputs":      "true"
-                }]
+              "callbacks": ["maybe_preferred_default"]
+              "filekey": "nodup_bam",
+              "output_type": "alignments",
+              "file_format": "bam",
+              "quality_metrics": ["cross_correlation", "samtools_flagstat"],
+              "derived_from_files": [
+                {
+                  "derived_from_task": "trim_adapter",
+                  "derived_from_filekey": "fastqs",
+                  "derived_from_inputs": "true",
+                  "disallow_tasks": ["crop"]
+                }
+              ]
             }
         ]
     }
 
 ``dcc_step_version`` and ``dcc_step_run`` must exist on the portal.
+
+``requires_replication`` indicates that a given step and files should only be accessioned if the experiment is replicated.
 
 ``wdl_task_name`` is the name of the task that has the files to be accessioned.
 
@@ -94,11 +118,15 @@ A single step is configured in the following way:
 
 ``quality_metrics`` is a list of methods that will be called in during the accessioning to attach quality metrics to the file
 
+``callbacks`` is an array of strings referencing methods of the appropriate ``Accession`` subclass. This can be used to change or add arbitrary properties on the file.
+
 ``derived_from_files`` specifies the list of files the current file being accessioned derives from. The parent files must have been accessioned before the current file can be submitted.
 
 ``derived_from_inputs`` is used when indicating that the parent files were not produced during the pipeline analysis. Instead, these files are initial inputs to the pipeline. Raw fastqs and genome references are examples of such files.
 
 ``derived_from_output_type`` is required in the case the parent file has a possible duplicate.
+
+``disallow_tasks`` can be used to tell the accessioning code not to search particular branches of the workflow digraph when searching up for parent files. This is useful for situations where the workflow exhibits a diamond dependency leading to unwanted files in the ``derived_from``.
 
 Table of Contents
 ==================
