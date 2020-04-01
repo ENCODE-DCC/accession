@@ -141,9 +141,10 @@ duplicate keys exist.
 
 4. Add the appropriate test inserts to the ``tests/data/inserts folder``. For any given
 experiment, you will likely need to add experiment, replicate, library, file, biosample,
-donor, biosample_type, lab, and award inserts. If you are testing a new assay, you will
-also need to add analysis_step_version, analysis_step, software_version, and software
-inserts. The easiest way to add them is to get the JSON from `the portal <https://www.encodeproject.org>`
+donor, biosample_type, lab, and award inserts. You need only to add raw files (fastqs)
+and reference files. If you are testing a new assay, you will also need to add
+analysis_step_version, analysis_step, software_version, and software inserts. The
+easiest way to add them is to get the JSON from `the portal <https://www.encodeproject.org>`
 with ``frame=edit``, copy that JSON into the the insert, and then copy the UUID from the
 portal into the insert as well. You will want to replcace any "user" properties with the
 dummy user in the inserts, see them for examples. I also delete any instances of the
