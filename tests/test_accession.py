@@ -398,6 +398,10 @@ def test_accession_init(mock_accession: Accession, lab: str, award: str) -> None
 def test_accession_factory(
     mocker, mock_gc_backend, server_name, pipeline_type, condition, accessioner_class
 ):
+    """
+    The Connection class actually tries to make connections to the server within its
+    __init__, so need to mock out.
+    """
     mocker.patch(
         "builtins.open",
         mocker.mock_open(read_data='{"workflowRoot": "gs://foo/bar", "calls": {}}'),
