@@ -237,7 +237,7 @@ def test_encode_file_from_template(encode_common_metadata):
 @pytest.mark.parametrize(
     "other_analysis,expected",
     [
-        (EncodeAnalysis({"files": ["/files/1/", "/files/2/"]}), True),
+        (EncodeAnalysis({"files": ["/files/2/", "/files/1/"]}), True),
         (EncodeAnalysis({"files": ["/files/1/"]}), False),
         ("foo", False),
     ],
@@ -272,9 +272,9 @@ def test_encode_analysis_from_files(encode_file):
         (pytest.raises(ValueError), EncodeAnalysis({}), {}),
     ],
 )
-def test_encode_analysis_into_portal_object(condition, analysis, expected):
+def test_encode_analysis_get_portal_object(condition, analysis, expected):
     with condition:
-        result = analysis.into_portal_object()
+        result = analysis.get_portal_object()
         assert result == expected
 
 

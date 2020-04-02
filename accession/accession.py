@@ -426,7 +426,7 @@ class Accession(ABC):
                     current_analysis,
                 )
                 return
-        analysis_payload = current_analysis.into_portal_object()
+        analysis_payload = current_analysis.get_portal_object()
         payload = self.experiment.make_postable_analyses_from_analysis_payload(
             analysis_payload
         )

@@ -204,7 +204,7 @@ class EncodeAnalysis:
         """
         if type(self) != type(other):
             return False
-        return self.files == other.files
+        return sorted(self.files) == sorted(other.files)
 
     def __str__(self):
         return str(self.files)
@@ -227,7 +227,7 @@ class EncodeAnalysis:
         new_analysis.files = [f.at_id for f in files]
         return new_analysis
 
-    def into_portal_object(self) -> AnalysisPayload:
+    def get_portal_object(self) -> AnalysisPayload:
         """
         Obtain the portal-postable dict representation of the analysis.
         """
