@@ -373,6 +373,27 @@ def test_add_chip_mapped_read_length(
 
 
 @pytest.mark.parametrize(
+    "gsfile_task,expected",
+    [
+        (Task("my_task", {"inputs": {"crop_length": 0}, "outputs": {}}), {}),
+        (
+            Task("my_task", {"inputs": {"crop_length": 10}, "outputs": {}}),
+            {"cropped_read_length": 10},
+        ),
+    ],
+)
+def test_maybe_add_chip_cropped_read_length(
+    mocker, mock_accession_chip, gsfile, gsfile_task, expected
+):
+    mocker.patch.object(gsfile, "task", gsfile_task)
+    mocker.patch.object(
+        mock_accession_chip.analysis, "search_up", return_value=[gsfile]
+    )
+    result = mock_accession_chip.maybe_add_cropped_read_length(gsfile)
+    assert result == expected
+
+
+@pytest.mark.parametrize(
     "processing_stage,align_qc",
     [("unfiltered", align_qc_dup), ("filtered", align_qc_nodup)],
 )
