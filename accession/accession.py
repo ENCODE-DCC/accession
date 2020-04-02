@@ -1204,6 +1204,7 @@ def accession_factory(
         "chip_map_only": AccessionChip,
         "tf_chip_peak_call_only": AccessionChip,
         "histone_chip_peak_call_only": AccessionChip,
+        "mint_chip_peak_call_only": AccessionChip,
     }
     selected_accession: Optional[Type[Accession]] = None
     try:
