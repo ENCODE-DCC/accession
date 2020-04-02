@@ -4,6 +4,7 @@ import pytest
 
 from accession.accession_steps import FileParams
 from accession.encode_models import (
+    EncodeAnalysis,
     EncodeAttachment,
     EncodeCommonMetadata,
     EncodeExperiment,
@@ -39,6 +40,11 @@ def encode_common_metadata():
     return EncodeCommonMetadata("/labs/lab/", "award")
 
 
+@pytest.fixture
+def encode_analysis():
+    return EncodeAnalysis({"files": ["/files/1/", "/files/2/"]})
+
+
 @pytest.fixture(scope="module")
 def encode_experiment():
     properties = {
@@ -48,6 +54,7 @@ def encode_experiment():
             {"biological_replicate_number": 1},
             {"biological_replicate_number": 3},
         ],
+        "analyses": [{"files": ["/files/1/"]}],
     }
     return EncodeExperiment(properties)
 
@@ -227,6 +234,50 @@ def test_encode_file_from_template(encode_common_metadata):
     }
 
 
+@pytest.mark.parametrize(
+    "other_analysis,expected",
+    [
+        (EncodeAnalysis({"files": ["/files/2/", "/files/1/"]}), True),
+        (EncodeAnalysis({"files": ["/files/1/"]}), False),
+        ("foo", False),
+    ],
+)
+def test_encode_analysis_eq(encode_analysis, other_analysis, expected):
+    result = encode_analysis == other_analysis
+    assert result == expected
+
+
+def test_encode_analysis_str(encode_analysis):
+    assert str(encode_analysis) == "['/files/1/', '/files/2/']"
+
+
+def test_encode_analysis_files(encode_analysis):
+    assert encode_analysis.files == ["/files/1/", "/files/2/"]
+
+
+def test_encode_analysis_files_setter(encode_analysis):
+    encode_analysis.files = ["/files/3/"]
+    assert encode_analysis.files == ["/files/3/"]
+
+
+def test_encode_analysis_from_files(encode_file):
+    result = EncodeAnalysis.from_files([encode_file])
+    assert result == EncodeAnalysis({"files": ["1"]})
+
+
+@pytest.mark.parametrize(
+    "condition,analysis,expected",
+    [
+        (does_not_raise(), EncodeAnalysis({"files": ["foo"]}), {"files": ["foo"]}),
+        (pytest.raises(ValueError), EncodeAnalysis({}), {}),
+    ],
+)
+def test_encode_analysis_get_portal_object(condition, analysis, expected):
+    with condition:
+        result = analysis.get_portal_object()
+        assert result == expected
+
+
 def test_encode_experiment_get_number_of_biological_replicates(encode_experiment):
     assert encode_experiment.get_number_of_biological_replicates() == 2
 
@@ -237,6 +288,20 @@ def test_encode_experiment_is_replicated(encode_experiment):
 
 def test_encode_experiment_assay_term_name(encode_experiment):
     assert encode_experiment.assay_term_name == "mirna"
+
+
+def test_encode_experiment_analyses(encode_experiment):
+    result = encode_experiment.analyses
+    assert result == [EncodeAnalysis({"files": ["/files/1/"]})]
+
+
+def test_encode_experiment_make_postable_analyses_from_analysis_payload(
+    encode_experiment
+):
+    result = encode_experiment.make_postable_analyses_from_analysis_payload(
+        {"files": ["foo"]}
+    )
+    assert result == {"analyses": [{"files": ["foo"]}], "_enc_id": "foo"}
 
 
 def test_encode_quality_metric_no_file_id_raises(payload):
