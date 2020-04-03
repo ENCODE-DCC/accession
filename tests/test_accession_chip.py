@@ -1,8 +1,9 @@
-from contextlib import contextmanager
+from contextlib import suppress as does_not_raise
 
 import pytest
 
 from accession.accession import AccessionChip
+from accession.analysis import Analysis
 from accession.encode_models import EncodeFile
 from accession.file import GSFile
 from accession.task import Task
@@ -23,18 +24,6 @@ def gsfile():
     )
 
 
-@contextmanager
-def does_not_raise():
-    """
-    A dummy context manager useful for parametrized tests that may or may not raise
-    an error. Usage of this expectation indicates that the current test parameter set
-    should not raise an error.
-
-    See http://doc.pytest.org/en/latest/example/parametrize.html#parametrizing-conditional-raising
-    """
-    yield
-
-
 REP = "rep1"
 
 
@@ -52,6 +41,29 @@ def mock_accession_patched_qc(mocker, mock_accession_chip, gsfile):
     )
     mocker.patch.object(mock_accession_chip, "queue_qc", lambda output, *args: output)
     return mock_accession_chip
+
+
+@pytest.fixture
+def mock_accession_chip_unpatched_properties(
+    mocker,
+    mock_accession_gc_backend,
+    mock_metadata,
+    mock_accession_steps,
+    server_name,
+    common_metadata,
+):
+    """
+    Mocked accession instance with dummy __init__ that doesn't do anything and pre-baked
+    assembly property. @properties must be patched before instantiation
+    """
+    mocked_accession = AccessionChip(
+        mock_accession_steps,
+        Analysis(mock_metadata, backend=mock_accession_gc_backend),
+        server_name,
+        common_metadata,
+        no_log_file=True,
+    )
+    return mocked_accession
 
 
 """
@@ -249,6 +261,65 @@ peak_enrichment_qc = {
         }
     },
 }
+
+
+def test_assembly_no_files_matching_filekey_raises(
+    mocker, mock_accession_chip_unpatched_properties
+):
+    mocker.patch.object(
+        mock_accession_chip_unpatched_properties.analysis, "get_files", return_value=[]
+    )
+    with pytest.raises(ValueError):
+        _ = mock_accession_chip_unpatched_properties.assembly
+
+
+def test_assembly_portal_index_is_none_raises(
+    mocker, mock_accession_chip_unpatched_properties, gsfile
+):
+    mocker.patch.object(
+        mock_accession_chip_unpatched_properties.analysis,
+        "get_files",
+        return_value=[gsfile],
+    )
+    mocker.patch.object(
+        mock_accession_chip_unpatched_properties,
+        "get_encode_file_matching_md5_of_blob",
+        return_value=None,
+    )
+    with pytest.raises(ValueError):
+        _ = mock_accession_chip_unpatched_properties.assembly
+
+
+def test_assembly_portal_index_assembly_is_none_raises(
+    mocker, mock_accession_chip_unpatched_properties, gsfile
+):
+    mocker.patch.object(
+        mock_accession_chip_unpatched_properties.analysis,
+        "get_files",
+        return_value=[gsfile],
+    )
+    mocker.patch.object(
+        mock_accession_chip_unpatched_properties,
+        "get_encode_file_matching_md5_of_blob",
+        return_value=EncodeFile({"@id": "foo"}),
+    )
+    with pytest.raises(ValueError):
+        _ = mock_accession_chip_unpatched_properties.assembly
+
+
+def test_assembly(mocker, mock_accession_chip_unpatched_properties, gsfile):
+    mocker.patch.object(
+        mock_accession_chip_unpatched_properties.analysis,
+        "get_files",
+        return_value=[gsfile],
+    )
+    mocker.patch.object(
+        mock_accession_chip_unpatched_properties,
+        "get_encode_file_matching_md5_of_blob",
+        return_value=EncodeFile({"@id": "foo", "assembly": "GRCh38"}),
+    )
+    result = mock_accession_chip_unpatched_properties.assembly
+    assert result == "GRCh38"
 
 
 @pytest.mark.parametrize("peak_caller,expected", [("spp", "idr"), ("macs2", "overlap")])

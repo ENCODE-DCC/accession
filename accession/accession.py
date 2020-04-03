@@ -909,11 +909,24 @@ class AccessionChip(Accession):
     }
 
     @property
-    def assembly(self):
-        files = self.analysis.get_files(filekey="ref_fa")
-        if files:
+    def assembly(self) -> str:
+        filekey = "ref_fa"
+        try:
+            files = self.analysis.get_files(filekey)
+            if not files:
+                raise ValueError(f"Could not find any files matching filekey {filekey}")
             portal_index = self.get_encode_file_matching_md5_of_blob(files[0].filename)
-        return portal_index[EncodeFile.ASSEMBLY]
+            if portal_index is None:
+                raise ValueError("Could not find portal index")
+            portal_assembly = portal_index.get(EncodeFile.ASSEMBLY)
+            if portal_assembly is None:
+                raise ValueError(
+                    f"Could not find assembly for portal file {portal_index.at_id}"
+                )
+        except ValueError:
+            self.logger.exception("Could not determine assembly")
+            raise
+        return portal_assembly
 
     @staticmethod
     def get_chip_pipeline_replication_method(qc: Dict[str, Any]) -> str:
