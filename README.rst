@@ -21,22 +21,25 @@ accession
 Installation
 =============
 
+Note: intallation requires Python >= 3.6
+
 .. code-block:: console
 
     $ pip install accession
 
-In addition to installing the module, make sure to provide your API keys from the ENCODE portal:
+Next, provide your API keys from the ENCODE portal:
 
 .. code-block:: console
 
     $ export DCC_API_KEY=XXXXXXXX
     $ export DCC_SECRET_KEY=yyyyyyyyyyy
 
-You will also need `Google Application Credentials <https://cloud.google.com/video-intelligence/docs/common/auth#set_up_a_service_account/>`_ in your environment. Obtain and set your service account credentials:
+You will also need to authenticate with Google Cloud if using WDL metadata from pipeline runs on Google Cloud. Run the following two commands and follow the prompts:
 
 .. code-block:: console
 
-    $ export GOOGLE_APPLICATION_CREDENTIALS=<path_to_service_account_file>
+    $ gcloud auth login --no-launch-browser
+    $ gcloud auth application-default login --no-launch-browser
 
 | Finally, it is highly recommended to set the DCC_LAB and DCC_AWARD environment
   variables for ease of use. These correspond to the lab and award identifiers given by
@@ -54,7 +57,7 @@ Usage
 
     $ accession --accession-metadata metadata.json \
                 --pipeline-type mirna \
-                --server dev \
+                --server dev
 
 Please see the `docs <https://accession.readthedocs.io/en/latest/#detailed-argument-description>`_ for greater detail on these input parameters.
 

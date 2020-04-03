@@ -1,0 +1,296 @@
+{
+  "accession.steps": [
+    {
+      "dcc_step_run": "histone-chip-signal-generation-step-v-1",
+      "dcc_step_version": "/analysis-step-versions/histone-chip-signal-generation-step-v-1-0/",
+      "wdl_files": [
+        {
+          "derived_from_files": [
+            {
+              "derived_from_filekey": "nodup_bam",
+              "derived_from_task": "filter",
+              "disallow_tasks": [
+                "choose_ctl"
+              ]
+            },
+            {
+              "derived_from_filekey": "bam",
+              "derived_from_inputs": "true",
+              "derived_from_task": "bam2ta_ctl"
+            }
+          ],
+          "file_format": "bigWig",
+          "filekey": "pval_bw",
+          "output_type": "signal p-value",
+          "quality_metrics": []
+        },
+        {
+          "derived_from_files": [
+            {
+              "derived_from_filekey": "nodup_bam",
+              "derived_from_task": "filter",
+              "disallow_tasks": [
+                "choose_ctl"
+              ]
+            },
+            {
+              "derived_from_filekey": "bam",
+              "derived_from_inputs": "true",
+              "derived_from_task": "bam2ta_ctl"
+            }
+          ],
+          "file_format": "bigWig",
+          "filekey": "fc_bw",
+          "output_type": "fold change over control",
+          "quality_metrics": []
+        }
+      ],
+      "wdl_task_name": "macs2_signal_track"
+    },
+    {
+      "dcc_step_run": "histone-chip-seq-pooled-signal-generation-step-v-1",
+      "dcc_step_version": "/analysis-step-versions/histone-chip-seq-pooled-signal-generation-step-v-1-0/",
+      "requires_replication": true,
+      "wdl_files": [
+        {
+          "derived_from_files": [
+            {
+              "derived_from_filekey": "nodup_bam",
+              "derived_from_task": "filter",
+              "disallow_tasks": [
+                "choose_ctl"
+              ]
+            },
+            {
+              "derived_from_filekey": "bam",
+              "derived_from_inputs": "true",
+              "derived_from_task": "bam2ta_ctl"
+            }
+          ],
+          "file_format": "bigWig",
+          "filekey": "pval_bw",
+          "output_type": "signal p-value",
+          "quality_metrics": []
+        },
+        {
+          "derived_from_files": [
+            {
+              "derived_from_filekey": "nodup_bam",
+              "derived_from_task": "filter",
+              "disallow_tasks": [
+                "choose_ctl"
+              ]
+            },
+            {
+              "derived_from_filekey": "bam",
+              "derived_from_inputs": "true",
+              "derived_from_task": "bam2ta_ctl"
+            }
+          ],
+          "file_format": "bigWig",
+          "filekey": "fc_bw",
+          "output_type": "fold change over control",
+          "quality_metrics": []
+        }
+      ],
+      "wdl_task_name": "macs2_signal_track_pooled"
+    },
+    {
+      "dcc_step_run": "histone-chip-seq-pseudoreplicated-overlap-step-v-1",
+      "dcc_step_version": "/analysis-step-versions/histone-chip-seq-pseudoreplicated-overlap-step-v-1-0/",
+      "wdl_files": [
+        {
+          "derived_from_files": [
+            {
+              "derived_from_filekey": "nodup_bam",
+              "derived_from_task": "filter",
+              "disallow_tasks": [
+                "choose_ctl"
+              ]
+            },
+            {
+              "derived_from_filekey": "tas",
+              "derived_from_inputs": "true",
+              "derived_from_task": "pool_blacklist"
+            },
+            {
+              "derived_from_filekey": "bam",
+              "derived_from_inputs": "true",
+              "derived_from_task": "bam2ta_ctl"
+            }
+          ],
+          "file_format": "bed",
+          "file_format_type": "narrowPeak",
+          "filekey": "bfilt_overlap_peak",
+          "output_type": "stable peaks",
+          "quality_metrics": [
+            "chip_replication",
+            "chip_peak_enrichment"
+          ]
+        }
+      ],
+      "wdl_task_name": "overlap_pr"
+    },
+    {
+      "dcc_step_run": "histone-chip-seq-pooled-pseudoreplicated-overlap-step-v-1",
+      "dcc_step_version": "/analysis-step-versions/histone-chip-seq-pooled-pseudoreplicated-overlap-step-v-1-0/",
+      "requires_replication": true,
+      "wdl_files": [
+        {
+          "callbacks": [
+            "maybe_preferred_default"
+          ],
+          "derived_from_files": [
+            {
+              "derived_from_filekey": "nodup_bam",
+              "derived_from_task": "filter",
+              "disallow_tasks": [
+                "choose_ctl"
+              ]
+            },
+            {
+              "derived_from_filekey": "tas",
+              "derived_from_inputs": "true",
+              "derived_from_task": "pool_blacklist"
+            },
+            {
+              "derived_from_filekey": "bam",
+              "derived_from_inputs": "true",
+              "derived_from_task": "bam2ta_ctl"
+            }
+          ],
+          "file_format": "bed",
+          "file_format_type": "narrowPeak",
+          "filekey": "bfilt_overlap_peak",
+          "output_type": "stable peaks",
+          "quality_metrics": [
+            "chip_replication",
+            "chip_peak_enrichment"
+          ]
+        }
+      ],
+      "wdl_task_name": "overlap_ppr"
+    },
+    {
+      "dcc_step_run": "histone-chip-seq-replicated-overlap-step-v-1",
+      "dcc_step_version": "/analysis-step-versions/histone-chip-seq-replicated-overlap-step-v-1-0/",
+      "requires_replication": true,
+      "wdl_files": [
+        {
+          "callbacks": [
+            "maybe_preferred_default"
+          ],
+          "derived_from_files": [
+            {
+              "derived_from_filekey": "nodup_bam",
+              "derived_from_task": "filter",
+              "disallow_tasks": [
+                "choose_ctl"
+              ]
+            },
+            {
+              "derived_from_filekey": "tas",
+              "derived_from_inputs": "true",
+              "derived_from_task": "pool_blacklist"
+            },
+            {
+              "derived_from_filekey": "bam",
+              "derived_from_inputs": "true",
+              "derived_from_task": "bam2ta_ctl"
+            }
+          ],
+          "file_format": "bed",
+          "file_format_type": "narrowPeak",
+          "filekey": "bfilt_overlap_peak",
+          "output_type": "replicated peaks",
+          "quality_metrics": [
+            "chip_replication",
+            "chip_peak_enrichment"
+          ]
+        }
+      ],
+      "wdl_task_name": "overlap"
+    },
+    {
+      "dcc_step_run": "histone-chip-seq-pseudoreplicated-overlap-stable-peaks-file-format-conversion-step-v-1",
+      "dcc_step_version": "/analysis-step-versions/histone-chip-seq-pseudoreplicated-overlap-stable-peaks-file-format-conversion-step-v-1-0/",
+      "wdl_files": [
+        {
+          "derived_from_files": [
+            {
+              "derived_from_filekey": "bfilt_overlap_peak",
+              "derived_from_task": "overlap_pr"
+            }
+          ],
+          "file_format": "bigBed",
+          "file_format_type": "narrowPeak",
+          "filekey": "bfilt_overlap_peak_bb",
+          "output_type": "stable peaks",
+          "quality_metrics": [
+            "chip_replication",
+            "chip_peak_enrichment"
+          ]
+        }
+      ],
+      "wdl_task_name": "overlap_pr"
+    },
+    {
+      "dcc_step_run": "histone-chip-seq-pooled-pseudoreplicated-overlap-stable-peaks-file-format-conversion-step-v-1",
+      "dcc_step_version": "/analysis-step-versions/histone-chip-seq-pooled-pseudoreplicated-overlap-stable-peaks-file-format-conversion-step-v-1-0/",
+      "requires_replication": true,
+      "wdl_files": [
+        {
+          "callbacks": [
+            "maybe_preferred_default"
+          ],
+          "derived_from_files": [
+            {
+              "derived_from_filekey": "bfilt_overlap_peak",
+              "derived_from_task": "overlap_ppr"
+            }
+          ],
+          "file_format": "bigBed",
+          "file_format_type": "narrowPeak",
+          "filekey": "bfilt_overlap_peak_bb",
+          "output_type": "stable peaks",
+          "quality_metrics": [
+            "chip_replication",
+            "chip_peak_enrichment"
+          ]
+        }
+      ],
+      "wdl_task_name": "overlap_ppr"
+    },
+    {
+      "dcc_step_run": "histone-chip-seq-replicated-overlap-file-format-conversion-step-v-1",
+      "dcc_step_version": "/analysis-step-versions/histone-chip-seq-replicated-overlap-file-format-conversion-step-v-1-0/",
+      "requires_replication": true,
+      "wdl_files": [
+        {
+          "callbacks": [
+            "maybe_preferred_default"
+          ],
+          "derived_from_files": [
+            {
+              "derived_from_filekey": "bfilt_overlap_peak",
+              "derived_from_task": "overlap"
+            }
+          ],
+          "file_format": "bigBed",
+          "file_format_type": "narrowPeak",
+          "filekey": "bfilt_overlap_peak_bb",
+          "output_type": "replicated peaks",
+          "quality_metrics": [
+            "chip_replication",
+            "chip_peak_enrichment"
+          ]
+        }
+      ],
+      "wdl_task_name": "overlap"
+    }
+  ],
+  "raw_fastqs_keys": [
+    "fastqs_R1",
+    "fastqs_R2"
+  ]
+}
