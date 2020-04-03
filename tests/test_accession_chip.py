@@ -385,9 +385,8 @@ def test_add_chip_mapped_read_length(
 def test_maybe_add_chip_cropped_read_length(
     mocker, mock_accession_chip, gsfile, gsfile_task, expected
 ):
-    mocker.patch.object(gsfile, "task", gsfile_task)
     mocker.patch.object(
-        mock_accession_chip.analysis, "search_up", return_value=[gsfile]
+        mock_accession_chip.analysis, "get_tasks", return_value=[gsfile_task]
     )
     result = mock_accession_chip.maybe_add_cropped_read_length(gsfile)
     assert result == expected

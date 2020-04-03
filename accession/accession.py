@@ -1024,10 +1024,11 @@ class AccessionChip(Accession):
         crop_length input of the ancestor align task in the ChIP-seq pipeline. If the
         crop_length in the pipeline is 0, then no cropping was performed and the
         cropped_read_length will not be posted (return empty dict).
+
+        Note that here we are assuming the crop length will always be the same for all
+        of the align tasks
         """
-        align_task = self.analysis.search_up(
-            gs_file.task, "align", "fastqs_R1", inputs="true"
-        )[0].task
+        align_task = self.analysis.get_tasks(task_name="align")[0]
         crop_length = align_task.inputs["crop_length"]
         if crop_length == 0:
             return {}
