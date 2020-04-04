@@ -45,7 +45,7 @@ class EncodeFile:
     GENOME_ANNOTATION = "genome_annotation"
 
     def __init__(self, portal_file: Dict[str, Any]):
-        self.portal_file = portal_file
+        self._portal_file = portal_file
         self.at_id = portal_file["@id"]
 
     def __eq__(
@@ -58,6 +58,19 @@ class EncodeFile:
         if type(self) != type(other):
             return False
         return self.at_id == other.at_id and self.portal_file == other.portal_file
+
+    @property
+    def portal_file(self) -> Dict[str, Any]:
+        return self._portal_file
+
+    @portal_file.setter
+    def portal_file(self, value) -> None:
+        new_id = value["@id"]
+        if new_id != self.at_id:
+            raise ValueError(
+                f"Cannot update file properties, expected object with an @id of {self.at_id} but received {new_id}"
+            )
+        self._portal_file = value
 
     @property
     def accession(self) -> str:
@@ -100,14 +113,6 @@ class EncodeFile:
         elif isinstance(step_run, dict):
             step_run_id = step_run["@id"]
         return step_run_id
-
-    def update_portal_properties(self, new_portal_properties: Dict[str, Any]) -> None:
-        new_id = new_portal_properties["@id"]
-        if new_id != self.at_id:
-            raise ValueError(
-                f"Cannot update file properties, expected object with an @id of {self.at_id} but received {new_id}"
-            )
-        self.portal_properties = new_portal_properties
 
     def has_qc(self, qc_type: str) -> bool:
         """
