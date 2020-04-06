@@ -21,7 +21,7 @@ def encode_attachment():
     )
 
 
-@pytest.fixture(scope="module")
+@pytest.fixture
 def encode_file():
     return EncodeFile(
         {
@@ -163,10 +163,10 @@ def test_encode_file_step_run_id(condition, file, expected):
     "condition,new_properties",
     [(does_not_raise(), {"@id": "1"}), (pytest.raises(ValueError), {"@id": "new"})],
 )
-def test_encode_file_update_portal_properties(encode_file, condition, new_properties):
+def test_encode_file_portal_file_setter(encode_file, condition, new_properties):
     with condition:
-        encode_file.update_portal_properties(new_properties)
-        assert encode_file.portal_properties == new_properties
+        encode_file.portal_file = new_properties
+        assert encode_file.portal_file == new_properties
 
 
 @pytest.mark.parametrize("qc_type,expected", [("Yes", True), ("No", False)])

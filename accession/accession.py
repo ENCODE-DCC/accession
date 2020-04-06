@@ -480,7 +480,7 @@ class Accession(ABC):
                         updated_properties = self.conn.get(
                             encode_file.at_id, database=True
                         )
-                        encode_file.update_portal_properties(updated_properties)
+                        encode_file.portal_file = updated_properties
                         qc_method(encode_file, wdl_file)
                     accessioned_files.append(encode_file)
         if dry_run:
