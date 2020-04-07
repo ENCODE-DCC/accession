@@ -44,7 +44,7 @@ commands:
           git clone https://github.com/google/jsonnet.git
           cd jsonnet
           make
-          cp ./jsonnetfmt /usr/local/bin
+          sudo cp ./jsonnetfmt /usr/local/bin
           cd .. && rm -rf jsonnet
   run_tox:
     description: "Install and run tox with a given environment"
