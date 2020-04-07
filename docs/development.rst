@@ -59,8 +59,7 @@ Wherever possible, it is recommended to reuse parts of existing Jsonnet template
 can find more information about Jsonnet here: https://jsonnet.org/ On MacOS, install
 with brew via `brew install jsonnet`.
 
-When making changes to the Jsonnet files, run the Jsonnet autoformatter and generate the
-new templates like so:
+When making changes to the Jsonnet files, generate the new templates like so:
 
 .. code-block:: bash
 
