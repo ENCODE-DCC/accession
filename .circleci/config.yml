@@ -37,6 +37,15 @@ commands:
     description: "Install jq"
     steps:
       - run: sudo apt-get install -y jq
+  install_jsonnetfmt:
+    description: "Install Jsonnet formatter jsonnetfmt"
+    steps:
+      - run: |
+          git clone https://github.com/google/jsonnet.git
+          cd jsonnet
+          make
+          sudo cp ./jsonnetfmt /usr/local/bin
+          cd .. && rm -rf jsonnet
   run_tox:
     description: "Install and run tox with a given environment"
     parameters:
@@ -78,6 +87,7 @@ jobs:
     steps:
       - checkout
       - install_shellcheck
+      - install_jsonnetfmt
       - run_tox:
           toxenv: "lint"
   test_py36:

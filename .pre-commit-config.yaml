@@ -21,6 +21,11 @@
       - id: shell-lint
         args: [--severity=warning]
 
+  - repo: https://github.com/p-sud/pre-commit-jsonnetfmt
+    rev: master
+    hooks:
+      - id: jsonnetfmt
+
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v2.2.3
     hooks:
