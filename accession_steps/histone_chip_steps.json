@@ -6,7 +6,8 @@
       "wdl_files": [
         {
           "callbacks": [
-            "add_mapped_read_length"
+            "add_mapped_read_length",
+            "maybe_add_cropped_read_length"
           ],
           "derived_from_files": [
             {
@@ -42,7 +43,8 @@
       "wdl_files": [
         {
           "callbacks": [
-            "add_mapped_read_length"
+            "add_mapped_read_length",
+            "maybe_add_cropped_read_length"
           ],
           "derived_from_files": [
             {
