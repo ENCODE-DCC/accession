@@ -1018,6 +1018,22 @@ class AccessionChip(Accession):
             ) from e
         return {"mapped_read_length": mapped_read_length}
 
+    def maybe_add_cropped_read_length(self, gs_file: GSFile) -> Dict[str, int]:
+        """
+        Obtains the value of mapped_read_length to post for bam files from the
+        crop_length input of the ancestor align task in the ChIP-seq pipeline. If the
+        crop_length in the pipeline is 0, then no cropping was performed and the
+        cropped_read_length will not be posted (return empty dict).
+
+        Note that here we are assuming the crop length will always be the same for all
+        of the align tasks
+        """
+        align_task = self.analysis.get_tasks(task_name="align")[0]
+        crop_length = align_task.inputs["crop_length"]
+        if crop_length == 0:
+            return {}
+        return {"cropped_read_length": crop_length}
+
     def make_chip_alignment_qc(self, encode_file: EncodeFile, gs_file: GSFile) -> None:
         """
         This function typecasts to match the ENCODE schema. Trucated zero values could
@@ -1249,6 +1265,9 @@ def accession_factory(
         "tf_chip_peak_call_only": AccessionChip,
         "histone_chip_peak_call_only": AccessionChip,
         "mint_chip_peak_call_only": AccessionChip,
+        "tf_chip": AccessionChip,
+        "histone_chip": AccessionChip,
+        "mint_chip": AccessionChip,
     }
     selected_accession: Optional[Type[Accession]] = None
     try:
