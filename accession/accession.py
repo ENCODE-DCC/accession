@@ -1081,15 +1081,24 @@ class AccessionChip(Accession):
         ]
         align_r1_tasks = self.analysis.get_tasks("align_R1")
         start_task = [
-            i for i in align_r1_tasks if i.inputs[key_to_match] == parent_fastqs
+            i
+            for i in align_r1_tasks
+            if sorted(i.inputs[key_to_match]) == sorted(parent_fastqs)
         ]
         if len(start_task) != 1:
-            raise ValueError(
-                (
-                    f"Incorrect number of candidate start tasks with {key_to_match}: "
-                    f"expected 1 but found {start_task}"
+            try:
+                raise ValueError(
+                    (
+                        f"Incorrect number of candidate start tasks with {key_to_match}: "
+                        f"expected 1 but found {len(start_task)}"
+                    )
                 )
-            )
+            except ValueError:
+                self.logger.exception(
+                    "Could not make ChipAlignEnrichQualityMetric for file %s",
+                    gs_file.filename,
+                )
+                raise
         cross_corr_plot_pdf = self.analysis.search_down(
             start_task[0], "xcor", "plot_pdf"
         )[0]
