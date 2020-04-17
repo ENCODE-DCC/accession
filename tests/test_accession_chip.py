@@ -24,6 +24,36 @@ def gsfile():
     )
 
 
+@pytest.fixture
+def gsfile_multiple_fastqs():
+    task = {
+        "inputs": {
+            "prefix": "pooled-pr1_vs_pooled-pr2",
+            "fastqs_R1": ["gs://abc/spam.fastq.gz", "gs://cde/eggs.fastq.gz"],
+        },
+        "outputs": {},
+    }
+    my_task = Task("my_task", task)
+    return GSFile(
+        "foo", "gs://abc/spam.fastq.gz", md5sum="123", size="456", task=my_task
+    )
+
+
+@pytest.fixture
+def gsfile_multiple_fastqs_2():
+    task = {
+        "inputs": {
+            "prefix": "pooled-pr1_vs_pooled-pr2",
+            "fastqs_R1": ["gs://abc/spam.fastq.gz", "gs://cde/eggs.fastq.gz"],
+        },
+        "outputs": {},
+    }
+    my_task = Task("my_task", task)
+    return GSFile(
+        "foo", "gs://cde/eggs.fastq.gz", md5sum="123", size="456", task=my_task
+    )
+
+
 REP = "rep1"
 
 
@@ -419,12 +449,18 @@ def test_make_chip_alignment_qc(
 
 
 @pytest.fixture
-def mock_accession_align_enrich(mocker, mock_accession_patched_qc, gsfile):
+def mock_accession_align_enrich(
+    mocker, mock_accession_patched_qc, gsfile_multiple_fastqs, gsfile_multiple_fastqs_2
+):
     mocker.patch.object(
-        mock_accession_patched_qc.analysis, "search_up", return_value=[gsfile]
+        mock_accession_patched_qc.analysis,
+        "search_up",
+        return_value=[gsfile_multiple_fastqs, gsfile_multiple_fastqs_2],
     )
     mocker.patch.object(
-        mock_accession_patched_qc.analysis, "search_down", return_value=[gsfile]
+        mock_accession_patched_qc.analysis,
+        "search_down",
+        return_value=[gsfile_multiple_fastqs],
     )
     mocker.patch.object(
         mock_accession_patched_qc.backend, "read_file", return_value=b"foo"
@@ -433,18 +469,21 @@ def mock_accession_align_enrich(mocker, mock_accession_patched_qc, gsfile):
 
 
 def test_make_chip_align_enrich_qc(
-    mocker, mock_accession_align_enrich, gsfile, encode_file_no_qc
+    mocker, mock_accession_align_enrich, gsfile_multiple_fastqs, encode_file_no_qc
 ):
     mocker.patch.object(
         mock_accession_align_enrich.backend, "read_json", return_value=align_enrich_qc
     )
-    task = {"inputs": {"fastqs_R1": ["gs://abc/spam.fastq.gz"]}, "outputs": {}}
+    task = {
+        "inputs": {"fastqs_R1": ["gs://cde/eggs.fastq.gz", "gs://abc/spam.fastq.gz"]},
+        "outputs": {},
+    }
     stub_task = Task("align_R1", task)
     mocker.patch.object(
         mock_accession_align_enrich.analysis, "get_tasks", return_value=[stub_task]
     )
     qc = mock_accession_align_enrich.make_chip_align_enrich_qc(
-        encode_file_no_qc, gs_file=gsfile
+        encode_file_no_qc, gs_file=gsfile_multiple_fastqs
     )
     keys = ["xcor_score", "jsd"]
     for key in keys:
@@ -456,14 +495,14 @@ def test_make_chip_align_enrich_qc(
 
 
 def test_make_chip_align_enrich_qc_raises(
-    mocker, mock_accession_align_enrich, gsfile, encode_file_no_qc
+    mocker, mock_accession_align_enrich, gsfile_multiple_fastqs, encode_file_no_qc
 ):
     mocker.patch.object(
         mock_accession_align_enrich.analysis, "get_tasks", return_value=[]
     )
     with pytest.raises(ValueError):
         mock_accession_align_enrich.make_chip_align_enrich_qc(
-            encode_file_no_qc, gs_file=gsfile
+            encode_file_no_qc, gs_file=gsfile_multiple_fastqs
         )
 
 
