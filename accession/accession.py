@@ -590,7 +590,7 @@ class AccessionBulkRna(AccessionGenericRna):
         qc_bytes = EncodeAttachment.get_bytes_from_dict(qc)
         modeled_attachment = EncodeAttachment(qc_bytes, gs_file.filename)
         attachment = modeled_attachment.get_portal_object(
-            mime_type="text/plain", extension=".txt"
+            mime_type="application/json", extension=".json"
         )
         star_qc_metric["attachment"] = attachment
         return self.queue_qc(
@@ -624,7 +624,7 @@ class AccessionBulkRna(AccessionGenericRna):
         qc_bytes = EncodeAttachment.get_bytes_from_dict(qc)
         modeled_attachment = EncodeAttachment(qc_bytes, gs_file.filename)
         attachment = modeled_attachment.get_portal_object(
-            mime_type="text/plain", extension=".txt"
+            mime_type="application/json", extension=".json"
         )
         output_qc["attachment"] = attachment
         return self.queue_qc(
@@ -678,7 +678,7 @@ class AccessionBulkRna(AccessionGenericRna):
         qc_bytes = EncodeAttachment.get_bytes_from_dict(qc)
         modeled_attachment = EncodeAttachment(qc_bytes, gs_file.filename)
         attachment = modeled_attachment.get_portal_object(
-            mime_type="text/plain", extension=".txt"
+            mime_type="application/json", extension=".json"
         )
         output_qc["attachment"] = attachment
         return self.queue_qc(
