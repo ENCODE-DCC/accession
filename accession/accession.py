@@ -1277,6 +1277,7 @@ def accession_factory(
         "tf_chip": AccessionChip,
         "histone_chip": AccessionChip,
         "mint_chip": AccessionChip,
+        "control_chip": AccessionChip,
     }
     selected_accession: Optional[Type[Accession]] = None
     try:

@@ -1,7 +1,8 @@
 /*
 File layout:
     - shared template parts
-    - generic ChIP map-only template
+    - experiment ChIP map-only template
+    - control ChIP map-only template (nearly identical except for slighly different QC)
     - TF ChIP peak calling template
     - histone ChIP peak calling template
     - MINT ChIP peak calling template
@@ -9,8 +10,8 @@ File layout:
     - consolidated histone mapping and peak calling template
     - consolidated MINT ChIP mapping and peak calling template
 
-After running `jsonnet`, this will produce 7 JSON files. 1 map only accessioning
-template, 3 pipeline-specific peak calling accessioning templates, and 3
+After running `jsonnet`, this will produce 8 JSON files. 2 map only accessioning
+templates, 3 pipeline-specific peak calling accessioning templates, and 3
 pipeline-specific mapping and peak calling accessioning templates.
 */
 {
@@ -54,7 +55,7 @@ pipeline-specific mapping and peak calling accessioning templates.
       quality_metrics: [],
     },
   ],
-  'chip_map_only_steps.json': {
+  local ChipMapOnlySteps(is_control=false) = {
     local step_run = 'chip-seq-alignment-step-v-2',
     local step_version = '/analysis-step-versions/chip-seq-alignment-step-v-2-0/',
     'accession.steps': [
@@ -101,7 +102,7 @@ pipeline-specific mapping and peak calling accessioning templates.
             output_type: 'alignments',
             quality_metrics: [
               'chip_alignment',
-              'chip_align_enrich',
+            ] + (if !is_control then ['chip_align_enrich'] else []) + [
               'chip_library',
             ],
           },
@@ -114,6 +115,8 @@ pipeline-specific mapping and peak calling accessioning templates.
       'fastqs_R2',
     ],
   },
+  'chip_map_only_steps.json': ChipMapOnlySteps(),
+  'control_chip_steps.json': ChipMapOnlySteps(is_control=true),
   'tf_chip_peak_call_only_steps.json': {
     local file_format_type = 'narrowPeak',
     local shared_file_props = {
