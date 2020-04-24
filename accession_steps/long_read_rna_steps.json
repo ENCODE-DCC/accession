@@ -8,12 +8,12 @@
           "derived_from_files": [
             {
               "derived_from_filekey": "fastq",
-              "derived_from_inputs": "true",
+              "derived_from_inputs": true,
               "derived_from_task": "minimap2"
             },
             {
               "derived_from_filekey": "reference_genome",
-              "derived_from_inputs": "true",
+              "derived_from_inputs": true,
               "derived_from_task": "minimap2"
             }
           ],
@@ -39,18 +39,18 @@
             },
             {
               "derived_from_filekey": "reference_genome",
-              "derived_from_inputs": "true",
+              "derived_from_inputs": true,
               "derived_from_task": "transcriptclean"
             },
             {
               "derived_from_filekey": "splice_junctions",
-              "derived_from_inputs": "true",
+              "derived_from_inputs": true,
               "derived_from_task": "transcriptclean"
             },
             {
               "allow_empty": true,
               "derived_from_filekey": "variants",
-              "derived_from_inputs": "true",
+              "derived_from_inputs": true,
               "derived_from_task": "transcriptclean"
             }
           ],
@@ -70,7 +70,7 @@
           "derived_from_files": [
             {
               "derived_from_filekey": "annotation_gtf",
-              "derived_from_inputs": "true",
+              "derived_from_inputs": true,
               "derived_from_task": "init_talon_db"
             },
             {
@@ -97,7 +97,7 @@
           "derived_from_files": [
             {
               "derived_from_filekey": "annotation_gtf",
-              "derived_from_inputs": "true",
+              "derived_from_inputs": true,
               "derived_from_task": "init_talon_db"
             },
             {

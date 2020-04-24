@@ -12,18 +12,18 @@
           "derived_from_files": [
             {
               "derived_from_filekey": "idx_tar",
-              "derived_from_inputs": "true",
+              "derived_from_inputs": true,
               "derived_from_task": "align"
             },
             {
               "derived_from_filekey": "fastqs_R1",
-              "derived_from_inputs": "true",
+              "derived_from_inputs": true,
               "derived_from_task": "align"
             },
             {
               "allow_empty": true,
               "derived_from_filekey": "fastqs_R2",
-              "derived_from_inputs": "true",
+              "derived_from_inputs": true,
               "derived_from_task": "align"
             }
           ],
@@ -49,18 +49,18 @@
           "derived_from_files": [
             {
               "derived_from_filekey": "idx_tar",
-              "derived_from_inputs": "true",
+              "derived_from_inputs": true,
               "derived_from_task": "align"
             },
             {
               "derived_from_filekey": "fastqs_R1",
-              "derived_from_inputs": "true",
+              "derived_from_inputs": true,
               "derived_from_task": "align"
             },
             {
               "allow_empty": true,
               "derived_from_filekey": "fastqs_R2",
-              "derived_from_inputs": "true",
+              "derived_from_inputs": true,
               "derived_from_task": "align"
             }
           ],

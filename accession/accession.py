@@ -950,7 +950,7 @@ class AccessionChip(Accession):
         parent_fastqs = [
             file.filename
             for file in self.analysis.search_up(
-                gs_file.task, "align", "fastqs_R1", inputs="true"
+                gs_file.task, "align", "fastqs_R1", inputs=True
             )
         ]
         pipeline_rep = None
@@ -1076,7 +1076,7 @@ class AccessionChip(Accession):
         parent_fastqs = [
             file.filename
             for file in self.analysis.search_up(
-                gs_file.task, "align", key_to_match, inputs="true"
+                gs_file.task, "align", key_to_match, inputs=True
             )
         ]
         align_r1_tasks = self.analysis.get_tasks("align_R1")
