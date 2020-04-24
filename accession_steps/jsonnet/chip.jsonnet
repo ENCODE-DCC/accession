@@ -25,7 +25,7 @@ pipeline-specific mapping and peak calling accessioning templates.
     },
     {
       derived_from_filekey: 'bam',
-      derived_from_inputs: 'true',
+      derived_from_inputs: true,
       derived_from_task: 'bam2ta_ctl',
     },
   ],
@@ -36,7 +36,7 @@ pipeline-specific mapping and peak calling accessioning templates.
     derived_from_filekey='blacklist',
   ) = [bed_bigwig_derived_from_files[0]] + [{
     derived_from_filekey: derived_from_filekey,
-    derived_from_inputs: 'true',
+    derived_from_inputs: true,
     derived_from_task: blacklist_derived_from_task,
   }] + [bed_bigwig_derived_from_files[1]],
   local bigwig_wdl_files = [
@@ -71,7 +71,7 @@ pipeline-specific mapping and peak calling accessioning templates.
             derived_from_files: [
               {
                 derived_from_filekey: 'idx_tar',
-                derived_from_inputs: 'true',
+                derived_from_inputs: true,
                 derived_from_task: 'align',
               },
               self.derived_from_files[0] { derived_from_filekey: 'fastqs_R1' },

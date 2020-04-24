@@ -8,17 +8,17 @@
           "derived_from_files": [
             {
               "derived_from_filekey": "fastqs_to_trim",
-              "derived_from_inputs": "true",
+              "derived_from_inputs": true,
               "derived_from_task": "cutadapt"
             },
             {
               "derived_from_filekey": "index",
-              "derived_from_inputs": "true",
+              "derived_from_inputs": true,
               "derived_from_task": "star"
             },
             {
               "derived_from_filekey": "annotation",
-              "derived_from_inputs": "true",
+              "derived_from_inputs": true,
               "derived_from_task": "star"
             }
           ],
@@ -34,17 +34,17 @@
           "derived_from_files": [
             {
               "derived_from_filekey": "fastqs_to_trim",
-              "derived_from_inputs": "true",
+              "derived_from_inputs": true,
               "derived_from_task": "cutadapt"
             },
             {
               "derived_from_filekey": "index",
-              "derived_from_inputs": "true",
+              "derived_from_inputs": true,
               "derived_from_task": "star"
             },
             {
               "derived_from_filekey": "annotation",
-              "derived_from_inputs": "true",
+              "derived_from_inputs": true,
               "derived_from_task": "star"
             }
           ],

@@ -18,7 +18,7 @@ def steps(mocker):
               "derived_from_files": [
                 {
                   "derived_from_filekey": "fastq",
-                  "derived_from_inputs": "true",
+                  "derived_from_inputs": true,
                   "derived_from_task": "minimap2"
                 }
               ],
@@ -83,7 +83,7 @@ def test_derived_from_file(steps):
     file_params = steps.content[0].wdl_files[0].derived_from_files[0]
     assert file_params.allow_empty is False
     assert file_params.derived_from_filekey == "fastq"
-    assert file_params.derived_from_inputs == "true"
+    assert file_params.derived_from_inputs is True
     assert file_params.derived_from_task == "minimap2"
     assert file_params.derived_from_output_type is None
     assert file_params.disallow_tasks == []

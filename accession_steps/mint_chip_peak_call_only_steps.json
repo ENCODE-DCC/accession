@@ -15,7 +15,7 @@
             },
             {
               "derived_from_filekey": "bam",
-              "derived_from_inputs": "true",
+              "derived_from_inputs": true,
               "derived_from_task": "bam2ta_ctl"
             }
           ],
@@ -35,7 +35,7 @@
             },
             {
               "derived_from_filekey": "bam",
-              "derived_from_inputs": "true",
+              "derived_from_inputs": true,
               "derived_from_task": "bam2ta_ctl"
             }
           ],
@@ -63,7 +63,7 @@
             },
             {
               "derived_from_filekey": "bam",
-              "derived_from_inputs": "true",
+              "derived_from_inputs": true,
               "derived_from_task": "bam2ta_ctl"
             }
           ],
@@ -83,7 +83,7 @@
             },
             {
               "derived_from_filekey": "bam",
-              "derived_from_inputs": "true",
+              "derived_from_inputs": true,
               "derived_from_task": "bam2ta_ctl"
             }
           ],
@@ -110,12 +110,12 @@
             },
             {
               "derived_from_filekey": "tas",
-              "derived_from_inputs": "true",
+              "derived_from_inputs": true,
               "derived_from_task": "pool_blacklist"
             },
             {
               "derived_from_filekey": "bam",
-              "derived_from_inputs": "true",
+              "derived_from_inputs": true,
               "derived_from_task": "bam2ta_ctl"
             }
           ],
@@ -150,12 +150,12 @@
             },
             {
               "derived_from_filekey": "tas",
-              "derived_from_inputs": "true",
+              "derived_from_inputs": true,
               "derived_from_task": "pool_blacklist"
             },
             {
               "derived_from_filekey": "bam",
-              "derived_from_inputs": "true",
+              "derived_from_inputs": true,
               "derived_from_task": "bam2ta_ctl"
             }
           ],
@@ -190,12 +190,12 @@
             },
             {
               "derived_from_filekey": "tas",
-              "derived_from_inputs": "true",
+              "derived_from_inputs": true,
               "derived_from_task": "pool_blacklist"
             },
             {
               "derived_from_filekey": "bam",
-              "derived_from_inputs": "true",
+              "derived_from_inputs": true,
               "derived_from_task": "bam2ta_ctl"
             }
           ],
