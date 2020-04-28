@@ -96,7 +96,7 @@ A single step is configured in the following way:
                 {
                   "derived_from_task": "trim_adapter",
                   "derived_from_filekey": "fastqs",
-                  "derived_from_inputs": "true",
+                  "derived_from_inputs": true,
                   "disallow_tasks": ["crop"]
                 }
               ]

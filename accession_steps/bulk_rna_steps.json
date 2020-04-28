@@ -8,17 +8,17 @@
           "derived_from_files": [
             {
               "derived_from_filekey": "fastqs_R1",
-              "derived_from_inputs": "true",
+              "derived_from_inputs": true,
               "derived_from_task": "align"
             },
             {
               "derived_from_filekey": "fastqs_R2",
-              "derived_from_inputs": "true",
+              "derived_from_inputs": true,
               "derived_from_task": "align"
             },
             {
               "derived_from_filekey": "index",
-              "derived_from_inputs": "true",
+              "derived_from_inputs": true,
               "derived_from_task": "align"
             }
           ],
@@ -34,17 +34,17 @@
           "derived_from_files": [
             {
               "derived_from_filekey": "fastqs_R1",
-              "derived_from_inputs": "true",
+              "derived_from_inputs": true,
               "derived_from_task": "align"
             },
             {
               "derived_from_filekey": "fastqs_R2",
-              "derived_from_inputs": "true",
+              "derived_from_inputs": true,
               "derived_from_task": "align"
             },
             {
               "derived_from_filekey": "index",
-              "derived_from_inputs": "true",
+              "derived_from_inputs": true,
               "derived_from_task": "align"
             }
           ],
@@ -68,7 +68,7 @@
           "derived_from_files": [
             {
               "derived_from_filekey": "chrom_sizes",
-              "derived_from_inputs": "true",
+              "derived_from_inputs": true,
               "derived_from_task": "bam_to_signals"
             },
             {
@@ -84,7 +84,7 @@
           "derived_from_files": [
             {
               "derived_from_filekey": "chrom_sizes",
-              "derived_from_inputs": "true",
+              "derived_from_inputs": true,
               "derived_from_task": "bam_to_signals"
             },
             {
@@ -100,7 +100,7 @@
           "derived_from_files": [
             {
               "derived_from_filekey": "chrom_sizes",
-              "derived_from_inputs": "true",
+              "derived_from_inputs": true,
               "derived_from_task": "bam_to_signals"
             },
             {
@@ -116,7 +116,7 @@
           "derived_from_files": [
             {
               "derived_from_filekey": "chrom_sizes",
-              "derived_from_inputs": "true",
+              "derived_from_inputs": true,
               "derived_from_task": "bam_to_signals"
             },
             {
@@ -132,7 +132,7 @@
           "derived_from_files": [
             {
               "derived_from_filekey": "chrom_sizes",
-              "derived_from_inputs": "true",
+              "derived_from_inputs": true,
               "derived_from_task": "bam_to_signals"
             },
             {
@@ -148,7 +148,7 @@
           "derived_from_files": [
             {
               "derived_from_filekey": "chrom_sizes",
-              "derived_from_inputs": "true",
+              "derived_from_inputs": true,
               "derived_from_task": "bam_to_signals"
             },
             {
@@ -171,7 +171,7 @@
           "derived_from_files": [
             {
               "derived_from_filekey": "rsem_index",
-              "derived_from_inputs": "true",
+              "derived_from_inputs": true,
               "derived_from_task": "rsem_quant"
             },
             {
@@ -191,7 +191,7 @@
           "derived_from_files": [
             {
               "derived_from_filekey": "rsem_index",
-              "derived_from_inputs": "true",
+              "derived_from_inputs": true,
               "derived_from_task": "rsem_quant"
             },
             {
@@ -214,17 +214,17 @@
           "derived_from_files": [
             {
               "derived_from_filekey": "fastqs_R1",
-              "derived_from_inputs": "true",
+              "derived_from_inputs": true,
               "derived_from_task": "kallisto"
             },
             {
               "derived_from_filekey": "fastqs_R2",
-              "derived_from_inputs": "true",
+              "derived_from_inputs": true,
               "derived_from_task": "kallisto"
             },
             {
               "derived_from_filekey": "kallisto_index",
-              "derived_from_inputs": "true",
+              "derived_from_inputs": true,
               "derived_from_task": "kallisto"
             }
           ],

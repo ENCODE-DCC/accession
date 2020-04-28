@@ -162,7 +162,7 @@ class Analysis:
         start_task,
         task_name,
         filekey,
-        inputs=False,
+        inputs: bool = False,
         disallow_tasks: Tuple[str, ...] = (),
     ):
         """
@@ -181,7 +181,7 @@ class Analysis:
                 f"Cannot search for files in task {task_name} since this task is disallowed"
             )
         if task_name == start_task.task_name:
-            if inputs and inputs == "true":
+            if inputs is True:
                 for file in start_task.input_files:
                     if filekey in file.filekeys:
                         yield file

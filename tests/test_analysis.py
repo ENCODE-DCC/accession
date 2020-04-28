@@ -210,7 +210,7 @@ def test_search_up_disallow_tasks(
             start_task=start_task,
             task_name="bam2ta",
             filekey="bam",
-            inputs="true",
+            inputs=True,
             disallow_tasks=disallow_tasks,
         )
         result = [i.filename for i in results]
