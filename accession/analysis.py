@@ -202,18 +202,24 @@ class Analysis:
                     task_item, task_name, filekey, inputs, disallow_tasks=disallow_tasks
                 )
 
-    # Search the Analysis hirearchy down for a file matching filekey
-    # Returns generator object, access with next()
-    # task parameter specifies the starting point
-    # task_name is target task in which filekey exists
     def _search_down(self, start_task, task_name, filekey):
+        """
+        Search the Analysis hirearchy down for a file matching filekey. Returns
+        generator object, access with next(). Task parameter specifies the starting
+        point, task_name is target task in which filekey exists.
+
+        The third argument to the reduce provides a default in the case that the task
+        has no output files.
+        """
         if task_name == start_task.task_name:
             for file in start_task.output_files:
                 if filekey in file.filekeys:
                     yield file
         for task_item in set(
             reduce(
-                operator.concat, map(lambda x: x.used_by_tasks, start_task.output_files)
+                operator.concat,
+                map(lambda x: x.used_by_tasks, start_task.output_files),
+                [],
             )
         ):
             if task_item:
