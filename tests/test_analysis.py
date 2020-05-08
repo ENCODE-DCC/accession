@@ -228,6 +228,21 @@ def test_search_down(normal_analysis):
     assert "report" in files2[0].filekeys
 
 
+def test_search_down_no_output_files_does_not_raise(mocker):
+    """
+    Regression test related to PIP-1163. If the current file being searched does not
+    have any output files, then the _search_down should not throw an error in the call
+    to reduce(), and instead yield nothing.
+    """
+    mocker.patch(
+        "builtins.open", mocker.mock_open(read_data='{"workflowRoot": "gs://foo/bar"}')
+    )
+    analysis = Analysis(MetaData("foo"), auto_populate=False, backend="")
+    no_outputs_task = Task("foo", {"inputs": {"bar": "gs://baz"}, "outputs": {}})
+    result = list(analysis._search_down(no_outputs_task, "searching_for", "a_file"))
+    assert result == []
+
+
 @pytest.fixture
 def empty_analysis(mock_gc_backend, metadata_json_path):  # noqa: F811
     empty = Analysis(
