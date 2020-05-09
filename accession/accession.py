@@ -122,8 +122,7 @@ class Accession(ABC):
         """
         Retrieves all files from the portal with an md5sum matching the blob's md5
         """
-        md5sum = self.backend.md5sum(file)
-        search_param = [("md5sum", md5sum), ("type", "File")]
+        search_param = [("md5sum", file.md5sum), ("type", "File")]
         encode_files = self.conn.search(search_param)
         if not encode_files:
             return None

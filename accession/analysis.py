@@ -78,9 +78,8 @@ class Analysis:
                 if used_by_tasks and used_by_tasks not in file.used_by_tasks:
                     file.used_by_tasks.append(used_by_tasks)
                 return file
-        md5sum = self.backend.md5sum(filename)
-        size = self.backend.size(filename)
-        new_file = GSFile(key, filename, md5sum, size, task, used_by_tasks)
+        blob = self.backend.blob_from_filename(filename)
+        new_file = GSFile(key, filename, blob.md5sum, blob.size, task, used_by_tasks)
         self.files.append(new_file)
         return new_file
 
