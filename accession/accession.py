@@ -1,9 +1,9 @@
 import logging
-import os
 from abc import ABC, abstractmethod
 from pathlib import Path
 from typing import Any, Callable, Dict, List, Optional, Type, Union, cast
 
+import boto3
 from encode_utils.connection import Connection
 
 from accession.accession_steps import (
@@ -180,22 +180,49 @@ class Accession(ABC):
     def accession_file(
         self, encode_file: Dict[str, Any], gs_file: GSFile
     ) -> EncodeFile:
+        """
+        First POSTs the file metadata and subsequently uploads the actual data.
+        """
         file_exists = self.get_encode_file_matching_md5_of_blob(gs_file.filename)
-        submitted_file_path = {"submitted_file_name": gs_file.filename}
         if file_exists:
             self.logger.warning(
                 "Attempting to post duplicate file of %s with md5sum %s",
                 file_exists.get("accession"),
                 encode_file.get("md5sum"),
             )
-        local_file = self.backend.download(gs_file.filename)[0]
-        encode_file["submitted_file_name"] = local_file
         encode_posted_file = self.conn.post(encode_file)
-        os.remove(local_file)
-        encode_posted_file = self.patch_file(encode_posted_file, submitted_file_path)
         modeled_encode_file = EncodeFile(encode_posted_file)
+        self.upload_file(modeled_encode_file, gs_file)
         self.new_files.append(modeled_encode_file)
         return modeled_encode_file
+
+    def upload_file(self, encode_file: EncodeFile, gs_file: GSFile) -> None:
+        """
+        At a high level, uploads the file from GCS to S3 by streaming bytes. As the s3
+        client reads chunks they are lazily fetched from GCS.
+
+        In more details, obtains STS credentials to upload to the portal file specified
+        by `encode_file`, creates a s3 client, and uploads the file corresponding to
+        `gs_file` (potentially as multipart). For this to work, the blob acquired by
+        `self.backend.blob_from_filename` must return an object that has a file-like
+        `read` method. For more details see the `boto3` docs:
+        https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/s3.html#S3.Client.upload_fileobj
+        """
+        credentials = self.conn.regenerate_upload_credentials(encode_file.accession)
+        s3 = boto3.client(
+            "s3",
+            aws_access_key_id=credentials["access_key"],
+            aws_secret_access_key=credentials["secret_key"],
+            aws_session_token=credentials["session_token"],
+        )
+        s3_uri = credentials["upload_url"]
+        path_parts = s3_uri.replace("s3://", "").split("/")
+        bucket = path_parts.pop(0)
+        key = "/".join(path_parts)
+        filename = gs_file.filename
+        gcs_blob = self.backend.blob_from_filename(filename)
+        self.logger.info("Uploading file %s to %s", filename, s3_uri)
+        s3.upload_fileobj(gcs_blob, bucket, key)
 
     def patch_file(
         self, encode_file: Dict[str, Any], new_properties: Dict[str, Any]
@@ -347,6 +374,7 @@ class Accession(ABC):
             file_size=file.size,
             file_md5sum=file.md5sum,
             step_run_id=step_run.at_id,
+            submitted_file_name=file.filename,
             genome_annotation=self.genome_annotation,
             extras=extras,
         )
