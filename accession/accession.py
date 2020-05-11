@@ -181,18 +181,27 @@ class Accession(ABC):
         self, encode_file: Dict[str, Any], gs_file: GSFile
     ) -> EncodeFile:
         """
-        First POSTs the file metadata and subsequently uploads the actual data.
+        First POSTs the file metadata and subsequently uploads the actual data. Upload
+        mostly emulates the behavior of encode_utils, wherein the file is only uploaded
+        if there are no 409 conflicts for the posted file metadata. Here however, if
+        there is a conflict and the file has a status of "upload failed", then reupload
+        will be attempted. If there is a 409 conflict and the file status is uploading,
+        then we assume the file is currently being uploaded and do not attempt upload.
         """
-        file_exists = self.get_encode_file_matching_md5_of_blob(gs_file.filename)
+        file_exists = self.get_encode_file_matching_md5_of_blob(gs_file)
         if file_exists:
             self.logger.warning(
                 "Attempting to post duplicate file of %s with md5sum %s",
                 file_exists.get("accession"),
                 encode_file.get("md5sum"),
             )
-        encode_posted_file = self.conn.post(encode_file, upload_file=False)
+        encode_posted_file, status_code = self.conn.post(
+            encode_file, upload_file=False, return_original_status_code=True
+        )
         modeled_encode_file = EncodeFile(encode_posted_file)
-        if modeled_encode_file.status in ("uploading", "upload failed"):
+        if modeled_encode_file.status == "upload failed" or (
+            modeled_encode_file.status == "uploading" and status_code != 409
+        ):
             self.upload_file(modeled_encode_file, gs_file)
         else:
             self.logger.info(
