@@ -108,7 +108,7 @@ class Accession(ABC):
     def experiment(self) -> EncodeExperiment:
         if self._experiment is None:
             encode_file = self.get_encode_file_matching_md5_of_blob(
-                self.analysis.raw_fastqs[0].filename
+                self.analysis.raw_fastqs[0]
             )
             if encode_file is None:
                 raise ValueError("Could not find raw fastqs on the portal")
@@ -135,7 +135,7 @@ class Accession(ABC):
         """Finds an ENCODE File object whose md5sum matches md5 of a blob in URI in backend.
 
         Args:
-            file (str): String representing an URI to an object in the backend.
+            file (GSFile): A GSFile representing object in the backend.
 
         Returns:
             EncodeFile: an instance of EncodeFile, a document-object mapping
@@ -163,7 +163,7 @@ class Accession(ABC):
         preflight helper would be required to know about the method
         `get_all_encode_files_matching_md5_of_blob`.
         """
-        matching = self.get_all_encode_files_matching_md5_of_blob(gs_file.filename)
+        matching = self.get_all_encode_files_matching_md5_of_blob(gs_file)
         if matching is None:
             return None
         record = self.preflight_helper.make_file_matching_md5_record(
@@ -173,7 +173,7 @@ class Accession(ABC):
 
     def raw_files_accessioned(self):
         for file in self.analysis.raw_fastqs:
-            if not self.get_encode_file_matching_md5_of_blob(file.filename):
+            if not self.get_encode_file_matching_md5_of_blob(file):
                 return False
         return True
 
@@ -294,7 +294,7 @@ class Accession(ABC):
         files = self.analysis.get_files(filekey=filekey)
         msg = "Could not find any file with key {} in metadata".format(filekey)
         if files:
-            annotation = self.get_encode_file_matching_md5_of_blob(files[0].filename)
+            annotation = self.get_encode_file_matching_md5_of_blob(files[0])
             if annotation is None:
                 raise KeyError(msg)
             return annotation.get(portal_property, "")
@@ -326,7 +326,7 @@ class Accession(ABC):
             raise
         encode_files = []
         for gs_file in derived_from_files:
-            encode_file = self.get_encode_file_matching_md5_of_blob(gs_file.filename)
+            encode_file = self.get_encode_file_matching_md5_of_blob(gs_file)
             if encode_file is not None:
                 encode_files.append(encode_file)
         accessioned_files = encode_files + self.new_files
@@ -957,7 +957,7 @@ class AccessionChip(Accession):
             files = self.analysis.get_files(filekey)
             if not files:
                 raise ValueError(f"Could not find any files matching filekey {filekey}")
-            portal_index = self.get_encode_file_matching_md5_of_blob(files[0].filename)
+            portal_index = self.get_encode_file_matching_md5_of_blob(files[0])
             if portal_index is None:
                 raise ValueError("Could not find portal index")
             portal_assembly = portal_index.get(EncodeFile.ASSEMBLY)

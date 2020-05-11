@@ -101,7 +101,7 @@ def test_accession_experiment(mocker, mock_accession):
 @pytest.mark.filesystem
 def test_get_encode_file_matching_md5_of_blob(mirna_accessioner):
     fastq = mirna_accessioner.analysis.raw_fastqs[0]
-    portal_file = mirna_accessioner.get_encode_file_matching_md5_of_blob(fastq.filename)
+    portal_file = mirna_accessioner.get_encode_file_matching_md5_of_blob(fastq)
     assert portal_file.get("fastq_signature")
 
 
@@ -229,9 +229,7 @@ def test_get_derived_from(mirna_accessioner):
     bam = [file for file in task.output_files if "bam" in file.filekeys][0]
     raw_fastq_inputs = list(set(mirna_accessioner.raw_fastq_inputs(bam)))
     accession_ids = [
-        mirna_accessioner.get_encode_file_matching_md5_of_blob(file.filename).get(
-            "accession"
-        )
+        mirna_accessioner.get_encode_file_matching_md5_of_blob(file).get("accession")
         for file in raw_fastq_inputs
     ]
     params = bowtie_step.wdl_files[0].derived_from_files[0]
@@ -254,9 +252,7 @@ def test_get_derived_from_all(mirna_accessioner):
     bam = [file for file in task.output_files if "bam" in file.filekeys][0]
     raw_fastq_inputs = list(set(mirna_accessioner.raw_fastq_inputs(bam)))
     accession_ids = [
-        mirna_accessioner.get_encode_file_matching_md5_of_blob(file.filename).get(
-            "accession"
-        )
+        mirna_accessioner.get_encode_file_matching_md5_of_blob(file).get("accession")
         for file in raw_fastq_inputs
     ]
     derived_from_files = bowtie_step.wdl_files[0].derived_from_files
