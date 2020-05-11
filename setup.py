@@ -25,6 +25,8 @@ CLASSIFIERS = [
 ]
 INSTALL_REQUIRES = [
     "requests",
+    # git dependency for encode_utils.connection.Connection.post(..., upload_file=False)
+    # "encode-utils @ git+https://github.com/StanfordBioinformatics/encode_utils.git@EU-18-make-file-upload-optional",
     "encode_utils==2.8.0",
     "google-cloud-storage",
     "attrs",

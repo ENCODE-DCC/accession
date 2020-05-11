@@ -192,7 +192,13 @@ class Accession(ABC):
             )
         encode_posted_file = self.conn.post(encode_file, upload_file=False)
         modeled_encode_file = EncodeFile(encode_posted_file)
-        self.upload_file(modeled_encode_file, gs_file)
+        if modeled_encode_file.status in ("uploading", "upload failed"):
+            self.upload_file(modeled_encode_file, gs_file)
+        else:
+            self.logger.info(
+                "Encode file %s is already uploaded, will not reupload",
+                modeled_encode_file.at_id,
+            )
         self.new_files.append(modeled_encode_file)
         return modeled_encode_file
 
