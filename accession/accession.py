@@ -223,7 +223,7 @@ class Accession(ABC):
         `read` method. For more details see the `boto3` docs:
         https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/s3.html#S3.Client.upload_fileobj
         """
-        credentials = self.conn.regenerate_upload_credentials(encode_file.accession)
+        credentials = self.conn.regenerate_aws_upload_creds(encode_file.accession)
         s3 = boto3.client(
             "s3",
             aws_access_key_id=credentials["access_key"],
