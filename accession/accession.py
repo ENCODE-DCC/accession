@@ -190,7 +190,7 @@ class Accession(ABC):
                 file_exists.get("accession"),
                 encode_file.get("md5sum"),
             )
-        encode_posted_file = self.conn.post(encode_file)
+        encode_posted_file = self.conn.post(encode_file, upload_file=False)
         modeled_encode_file = EncodeFile(encode_posted_file)
         self.upload_file(modeled_encode_file, gs_file)
         self.new_files.append(modeled_encode_file)
