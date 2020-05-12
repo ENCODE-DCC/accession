@@ -241,7 +241,7 @@ class Accession(ABC):
         filename = gs_file.filename
         gcs_blob = self.backend.blob_from_filename(filename)
         self.logger.info("Uploading file %s to %s", filename, s3_uri)
-        s3.upload_fileobj(gcs_blob, bucket, key, config=transfer_config)
+        s3.upload_fileobj(gcs_blob, bucket, key, Config=transfer_config)
 
     def patch_file(
         self, encode_file: Dict[str, Any], new_properties: Dict[str, Any]
