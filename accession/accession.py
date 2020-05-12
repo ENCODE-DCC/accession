@@ -233,7 +233,8 @@ class Accession(ABC):
             aws_secret_access_key=credentials["secret_key"],
             aws_session_token=credentials["session_token"],
         )
-        transfer_config = boto3.s3.transfer.TransferConfig(io_chunksize=4 * 262144)
+        # transfer_config = boto3.s3.transfer.TransferConfig(io_chunksize=4 * 262144)
+        transfer_config = boto3.s3.transfer.TransferConfig(max_concurrency=32)
         s3_uri = credentials["upload_url"]
         path_parts = s3_uri.replace("s3://", "").split("/")
         bucket = path_parts.pop(0)
@@ -242,6 +243,7 @@ class Accession(ABC):
         gcs_blob = self.backend.blob_from_filename(filename)
         self.logger.info("Uploading file %s to %s", filename, s3_uri)
         s3.upload_fileobj(gcs_blob, bucket, key, Config=transfer_config)
+        self.logger.info("Finished uploading file %s", filename)
 
     def patch_file(
         self, encode_file: Dict[str, Any], new_properties: Dict[str, Any]
