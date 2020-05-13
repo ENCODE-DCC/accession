@@ -22,7 +22,6 @@ class GCBackend(BackendBase):
     def __init__(self, bucket):
         self.client = storage.Client()
         self.bucket = self.client.get_bucket(bucket)
-        self.local_mapping = {}
 
     @property
     def scheme(self) -> str:
@@ -58,17 +57,6 @@ class GCBackend(BackendBase):
         Read json file
         """
         return json.loads(self.read_file(file.filename).decode())
-
-    def download(self, file):
-        """
-        Downloads file to local filesystem using a tempfile
-        """
-        blob = self.blob_from_filename(file)
-        temp_file = tempfile.NamedTemporaryFile(delete=False)
-        with open(temp_file.name, "wb"):
-            blob.download_to_filename(temp_file.name)
-        self.local_mapping[file] = [temp_file.name, self.md5_from_blob(blob)]
-        return self.local_mapping[file]
 
 
 class GcsBlob(storage.blob.Blob):
