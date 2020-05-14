@@ -1,5 +1,4 @@
 import json
-import tempfile
 from abc import ABC, abstractmethod
 from base64 import b64decode
 from typing import Optional
@@ -61,9 +60,9 @@ class GCBackend(BackendBase):
 
 class GcsBlob(storage.blob.Blob):
     """
-    Wrapper around GCS blob class to better map to portal metadata. This class is not
-    intended to be initialized directy, instead use `GCBackend.blob_from_filename()` to
-    obtain the blob
+    Wrapper around GCS blob class to better map to portal metadata and provide a read()
+    interface for in-memory transfer to s3. This class is not intended to be initialized
+    directy, instead use `GCBackend.blob_from_filename()` to obtain the blob
     """
 
     def __init__(self, *args, **kwargs):

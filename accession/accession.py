@@ -223,8 +223,8 @@ class Accession(ABC):
         `read` method. For more details see the `boto3` docs:
         https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/s3.html#S3.Client.upload_fileobj
 
-        The io_chunksize used for the TransferConfig is set to be 4x the default, see
-        https://boto3.amazonaws.com/v1/documentation/api/latest/reference/customizations/s3.html#boto3.s3.transfer.TransferConfig
+        Extensive testing revealed that for the boto3 default transfer config performed
+        satisfactorily, see PIP-745
         """
         credentials = self.conn.regenerate_aws_upload_creds(encode_file.accession)
         s3 = boto3.client(
@@ -233,8 +233,6 @@ class Accession(ABC):
             aws_secret_access_key=credentials["secret_key"],
             aws_session_token=credentials["session_token"],
         )
-        # transfer_config = boto3.s3.transfer.TransferConfig(io_chunksize=4 * 262144)
-        # transfer_config = boto3.s3.transfer.TransferConfig(max_concurrency=32)
         s3_uri = credentials["upload_url"]
         path_parts = s3_uri.replace("s3://", "").split("/")
         bucket = path_parts.pop(0)
@@ -243,7 +241,6 @@ class Accession(ABC):
         gcs_blob = self.backend.blob_from_filename(filename)
         self.logger.info("Uploading file %s to %s", filename, s3_uri)
         s3.upload_fileobj(gcs_blob, bucket, key)
-        # s3.upload_fileobj(gcs_blob, bucket, key, Config=transfer_config)
         self.logger.info("Finished uploading file %s", filename)
 
     def patch_file(

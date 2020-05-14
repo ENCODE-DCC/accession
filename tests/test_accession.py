@@ -122,7 +122,6 @@ def test_get_encode_file_matching_md5_of_blob(mirna_accessioner):
 def test_get_encode_file_matching_md5_of_blob_unit(
     mocker, mock_accession, returned_files, expected
 ):
-    mocker.patch.object(mock_accession.backend, "md5sum", return_value="123")
     mocker.patch.object(
         mock_accession,
         "get_all_encode_files_matching_md5_of_blob",
@@ -145,7 +144,6 @@ def test_get_encode_file_matching_md5_of_blob_unit(
 def test_get_all_encode_files_matching_md5_of_blob(
     mocker, mock_accession, returned_files, expected
 ):
-    mocker.patch.object(mock_accession.backend, "md5sum", return_value="123")
     mocker.patch.object(mock_accession.conn, "search", return_value=returned_files)
     gs_file = GSFile(key="bam", name="gs://bam/a.bam", md5sum="123", size=456)
     result = mock_accession.get_all_encode_files_matching_md5_of_blob(gs_file)
@@ -318,7 +316,6 @@ def test_accession_steps_dry_run(mocker: MockFixture, mock_accession: Accession)
     task.output_files = [
         GSFile(key=filekey, name=file_name, md5sum="123", size=456, task=task)
     ]
-    mocker.patch.object(mock_accession.backend, "md5sum", return_value="123")
     mocker.patch.object(mock_accession.analysis, "get_tasks", return_value=[task])
     mocker.patch.object(
         mock_accession.preflight_helper,
