@@ -320,7 +320,7 @@ def accessioner_factory(
         )
 
         mocker.patch.object(
-            accessioner.conn, "upload_file", return_value=None, autospec=True
+            accessioner, "upload_file", return_value=None, autospec=True
         )
         with open(
             current_dir.parent / "data" / "validation" / f"{assay_name}" / "files.json"
