@@ -1,3 +1,4 @@
+from base64 import b64decode
 import json
 import os
 import shutil
@@ -251,7 +252,8 @@ class LocalMockBlob(MockBlob):
 
     @property
     def md5sum(self) -> str:
-        return self.md5_lookup[f"gs://{self.bucket.name}/{self.path}"]
+        b64_md5 = self.md5_lookup[f"gs://{self.bucket.name}/{self.path}"]
+        return b64decode(b64_md5).hex()
 
     def download_as_string(self) -> bytes:
         """
