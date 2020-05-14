@@ -22,7 +22,7 @@ from accession.accession import (
     accession_factory,
 )
 from accession.analysis import Analysis, MetaData
-from accession.backends import GCBackend
+from accession import backends
 from accession.encode_models import EncodeCommonMetadata, EncodeExperiment, EncodeFile
 
 
@@ -180,7 +180,7 @@ def mock_file() -> MockFile:
     return MockFile("gs://foo/bar", 123, "abc")
 
 
-class MockGCBackend(GCBackend):
+class MockGCBackend(backends.GCBackend):
     def __init__(self, bucket: str):
         self.client = MockGCClient()
         self.bucket = self.client.get_bucket(bucket)
@@ -272,7 +272,7 @@ def mock_gc_backend(mocker) -> MockGCBackend:
     mocker fixture can only be used with function-scoped pytest fixtures for now:
     https://github.com/pytest-dev/pytest-mock/issues/136
     """
-    mocker.patch("accession.backends.GcsBlob", MockBlob)
+    mocker.patch.object(backends, "GcsBlob", MockBlob)
     mock_gc_backend = MockGCBackend("accession-test-bucket")
     return mock_gc_backend
 
@@ -283,7 +283,7 @@ def mock_accession_gc_backend(mocker) -> MockGCBackend:
     Similar to mock_gc_backend, except it provides real md5sums and can access real test
     data files.
     """
-    mocker.patch("accession.backends.GcsBlob", LocalMockBlob)
+    mocker.patch.object(backends, "GcsBlob", LocalMockBlob)
     mock_gc_backend = MockGCBackend("encode-processing")
     return mock_gc_backend
 
