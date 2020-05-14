@@ -9,6 +9,7 @@ from unittest.mock import PropertyMock, create_autospec
 from urllib.parse import urljoin
 
 import attr
+import encode_utils as eu
 import pytest
 import requests
 from encode_utils.connection import Connection
@@ -300,6 +301,13 @@ def accessioner_factory(
     def _accessioner_factory(metadata_file: str, assay_name: str) -> Iterator:
         # Setup
         current_dir = Path(__file__).resolve()
+
+        def mock_set_dcc_mode(self, dcc_mode: str) -> str:
+            eu.DCC_MODES[dcc_mode] = {"host": dcc_mode, "url": f"http://{dcc_mode}/"}
+            return dcc_mode
+
+        mocker.patch.object(Connection, "_set_dcc_mode", mock_set_dcc_mode)
+
         accessioner = accession_factory(
             assay_name,
             metadata_file,
