@@ -1,7 +1,7 @@
-from base64 import b64decode
 import json
 import os
 import shutil
+from base64 import b64decode
 from pathlib import Path
 from time import sleep
 from typing import Callable, Dict, Iterator, Tuple
@@ -9,7 +9,6 @@ from unittest.mock import PropertyMock, create_autospec
 from urllib.parse import urljoin
 
 import attr
-import encode_utils as eu
 import pytest
 import requests
 from encode_utils.connection import Connection
@@ -212,8 +211,8 @@ class MockBlob:
 
     @property
     def md5sum(self) -> str:
-        # c8dd0119389ce1e83eca7ecadc15651b in hex
-        return "yN0BGTic4eg+yn7K3BVlGw=="
+        # yN0BGTic4eg+yn7K3BVlGw== in base 64
+        return "c8dd0119389ce1e83eca7ecadc15651b"
 
     @property
     def id(self) -> str:
@@ -229,10 +228,6 @@ class MockBlob:
 
     def download_as_string(self) -> bytes:
         return b'{"foobar": "bazqux"}'
-
-    def download_to_filename(self, file: str) -> None:
-        with open(file, "wb") as f:
-            f.write(b'{"foobar": "bazqux"}')
 
 
 def load_md5_map() -> Dict[str, str]:
@@ -305,13 +300,6 @@ def accessioner_factory(
     def _accessioner_factory(metadata_file: str, assay_name: str) -> Iterator:
         # Setup
         current_dir = Path(__file__).resolve()
-
-        def mock_set_dcc_mode(self, dcc_mode: str) -> str:
-            eu.DCC_MODES[dcc_mode] = {"host": dcc_mode, "url": f"http://{dcc_mode}/"}
-            return dcc_mode
-
-        mocker.patch.object(Connection, "_set_dcc_mode", mock_set_dcc_mode)
-
         accessioner = accession_factory(
             assay_name,
             metadata_file,
@@ -319,6 +307,7 @@ def accessioner_factory(
             lab,
             award,
             backend=mock_accession_gc_backend,
+            no_log_file=True,
         )
 
         mocker.patch.object(
@@ -330,7 +319,6 @@ def accessioner_factory(
             expected_files = json.load(f)
         yield (accessioner, expected_files)
         shutil.rmtree(current_dir.parents[1] / "EU_Logs")
-        os.remove(current_dir.parents[1] / "accession.log")
 
     return _accessioner_factory
 
