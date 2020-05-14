@@ -21,7 +21,7 @@ def get_parser():
         "--pipeline-type",
         type=str,
         default=None,
-        help=f"the type of pipeline run being accessioned, e.g. mirna or long_read_rna",
+        help="the type of pipeline run being accessioned, e.g. mirna or long_read_rna",
     )
     parser.add_argument(
         "-d",
