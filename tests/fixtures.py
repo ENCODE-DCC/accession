@@ -15,6 +15,7 @@ from encode_utils.connection import Connection
 from pytest_mock.plugin import MockFixture
 
 import docker
+from accession import backends
 from accession.accession import (
     Accession,
     AccessionChip,
@@ -22,7 +23,6 @@ from accession.accession import (
     accession_factory,
 )
 from accession.analysis import Analysis, MetaData
-from accession import backends
 from accession.encode_models import EncodeCommonMetadata, EncodeExperiment, EncodeFile
 
 
