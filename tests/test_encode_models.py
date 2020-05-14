@@ -213,7 +213,7 @@ def test_encode_file_from_template(encode_common_metadata):
         step_run_id="step_run_id",
         genome_annotation="V29",
         extras={"extra": "cool"},
-        submitted_file_name="baz"
+        submitted_file_name="baz",
     )
     assert result == {
         "_profile": "file",

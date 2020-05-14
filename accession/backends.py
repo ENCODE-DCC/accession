@@ -78,7 +78,29 @@ class GcsBlob(storage.blob.Blob):
         Returns md5sum of the file in hex. Need to wrap around gcloud API's md5sums,
         which are returned as base64, to match ENCODE portal md5sums.
         """
-        return b64decode(super().md5_hash).hex()
+        return self.b64_to_hex(self.md5_hash)
+
+    @staticmethod
+    def b64_to_hex(value: str) -> str:
+        """
+        Largely split into separate method for testability. Mocking super() is either
+        very difficult or impossible.
+
+        See https://github.com/pytest-dev/pytest-mock/issues/110
+        """
+        return b64decode(value).hex()
+
+    @property
+    def md5_hash(self) -> str:
+        """
+        Return the base64 md5 hash, forwarded from storage.blob.Blob md5_hash. The super
+        call can return None if the blob was not reloaded first, here an error is raised
+        instead to remind the caller they should reload it first.
+        """
+        md5 = super().md5_hash
+        if md5 is None:
+            raise ValueError("Blob md5sum was none, make sure to reload the blob first")
+        return md5
 
     def read(self, num_bytes: Optional[int] = None) -> bytes:
         """
@@ -86,7 +108,8 @@ class GcsBlob(storage.blob.Blob):
         `Blob.download_as_string()` takes `start` and `end` kwargs to specify a byte
         range. These are 0-indexed and inclusive of endpoints. If the position is
         greater than or equal to the size of the object then we treat that as EOF and
-        return an empty byte string `b''`.
+        return an empty byte string `b''`. As per Python convention, when read() is
+        called with no read size then the whole file is returned.
 
         See https://googleapis.dev/python/storage/latest/blobs.html#google.cloud.storage.blob.Blob.download_as_string
         and https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/s3.html#S3.Client.upload_fileobj

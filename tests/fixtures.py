@@ -184,7 +184,6 @@ class MockGCBackend(GCBackend):
     def __init__(self, bucket: str):
         self.client = MockGCClient()
         self.bucket = self.client.get_bucket(bucket)
-        self.local_mapping = {}
 
 
 class MockBucket:
