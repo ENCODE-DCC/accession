@@ -135,7 +135,7 @@ class Accession(ABC):
         """Finds an ENCODE File object whose md5sum matches md5 of a blob in URI in backend.
 
         Args:
-            file (GSFile): A GSFile representing object in the backend.
+            file (GSFile): A GSFile representing an object on the backend.
 
         Returns:
             EncodeFile: an instance of EncodeFile, a document-object mapping

@@ -78,8 +78,12 @@ RUN find ${INSERTS_DIR} -mindepth 1 -maxdepth 1 | grep -v "access_key.json" | xa
 
 COPY tests/data/inserts ${INSERTS_DIR}
 
-# Delete the the base.ini file with one that specifies a specific aws config profile
+# Delete the line in the base.ini that specifies a specific aws config profile
 RUN LINENO=$(grep -n file_upload_profile_name base.ini | cut -f 1 -d :) && sed -i "${LINENO}d" base.ini
+
+# Delete the line in the development.ini (testing = true) that creates testing-only
+# schemas that confuse encode utils
+RUN LINENO=$(grep -n "testing = true" development.ini | cut -f 1 -d :) && sed -i "${LINENO}d" development.ini
 
 # Don't try to connect to s3 when posting files by deleting the body of file.py create()
 # START indicates the line of the function definition, we don't want to delete that. END
