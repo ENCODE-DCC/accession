@@ -261,16 +261,15 @@ def test_get_derived_from_all(mirna_accessioner):
     assert set(accession_ids) == set(ancestor_accessions)
 
 
-def mock_post_step_run(payload):
+def mock_post_step_run(payload, *args, **kwargs):
     payload.update({"@id": "foo", "@type": ["AnalysisStepRun"]})
-    return payload
+    return (payload, 200)
 
 
 @pytest.mark.docker
 @pytest.mark.filesystem
 def test_get_or_make_step_run(mocker, mirna_accessioner):
     mocker.patch.object(mirna_accessioner.conn, "post", mock_post_step_run)
-    mocker.patch.object(mirna_accessioner, "log_if_exists", autospec=True)
     bowtie_step = mirna_accessioner.steps.content[0]
     step_run = mirna_accessioner.get_or_make_step_run(bowtie_step)
     assert "AnalysisStepRun" in step_run.portal_step_run.get("@type")

@@ -1,4 +1,51 @@
-from accession.helpers import flatten, string_to_number
+from accession.helpers import LruCache, flatten, string_to_number
+
+
+def test_lru_cache_get_has_key_should_reorder():
+    cache = LruCache()
+    cache.insert("foo", "bar")
+    cache.insert("baz", "qux")
+    result = cache.get("foo")
+    assert result == "bar"
+    assert list(cache.data.keys()) == ["baz", "foo"]
+
+
+def test_lru_cache_get_does_not_have_key_returns_none():
+    cache = LruCache()
+    cache.insert("foo", "bar")
+    result = cache.get("baz")
+    assert result is None
+
+
+def test_lru_cache_insert():
+    cache = LruCache(max_size=2)
+    cache.insert("foo", "bar")
+    cache.insert("baz", "qux")
+    cache.insert("spam", "eggs")
+    assert cache.get("foo") is None
+
+
+def test_lru_cache_insert_extant_key_updates_value():
+    cache = LruCache(max_size=2)
+    cache.insert("foo", "bar")
+    cache.insert("baz", "qux")
+    cache.insert("foo", "eggs")
+    assert cache.get("foo") == "eggs"
+    assert list(cache.data.keys()) == ["baz", "foo"]
+
+
+def test_lru_cache_invalidate_key_in_cache():
+    cache = LruCache()
+    cache.insert("foo", "bar")
+    cache.invalidate("foo")
+    assert "foo" not in cache.data.keys()
+
+
+def test_lru_cache_invalidate_key_not_in_cache_does_not_raise():
+    cache = LruCache()
+    cache.insert("foo", "bar")
+    cache.invalidate("baz")
+    assert "foo" in cache.data.keys()
 
 
 def test_string_to_number_not_string_return_input():

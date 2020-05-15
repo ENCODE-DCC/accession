@@ -22,9 +22,8 @@ class AccessionStep:
 
     def get_portal_step_run(self, aliases: List[str]) -> Dict[str, Any]:
         """
-        encode_utils.connection.Connection.post() does not fail on alias conflict, and does not
-        expose the response status code, so we need to check for the existence of the object first
-        before attempting to POST it with Accession.log_if_exists().
+        Get the portal's dict representation of the step run with special profile key to
+        enable posting with encode_utils.
         """
         payload = {
             "aliases": aliases,

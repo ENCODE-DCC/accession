@@ -1,4 +1,54 @@
-from typing import Any, List
+from collections import OrderedDict
+from typing import Any, Generic, List, Optional, TypeVar
+
+K = TypeVar("K")
+V = TypeVar("V")
+
+
+class LruCache(Generic[K, V]):
+    """
+    Helper class implementing a LRU cache using an `OrderedDict`. The Generic class it
+    inherits from is purely for type checking. `K` is the type variable for the key,
+    and `V` is the type variable for the value. If you try to insert mixed types, mypy
+    will complain.
+    """
+
+    def __init__(self, max_size: int = 128):
+        """
+        `max_size` is an upper bound on the maximum size of the cache. When the cache is
+        at this size, insertions will result in eviction of the oldest values in the
+        cache.
+        """
+        self.max_size = max_size
+        self.data: OrderedDict[K, V] = OrderedDict()
+
+    def get(self, key: K) -> Optional[V]:
+        """
+        Get the value in the cache corresponding to the the key. Has the side effect of
+        moving the key to the end of the cache to indicate it was recently used.
+        """
+        value = self.data.get(key)
+        if value is not None:
+            self.data.move_to_end(key)
+        return value
+
+    def insert(self, key: K, value: V) -> None:
+        """
+        Add an item to the cache. If the cache is at capacity then the oldest value will
+        be cleared from the cache. If the key is already in the cache, the the value
+        will be updated with the new value, and the item will moved to the end.
+        """
+        if len(self.data) == self.max_size:
+            self.data.popitem(last=False)
+        self.data[key] = value
+
+    def invalidate(self, key: K) -> None:
+        """
+        Delete a given key from the cache. Not currently used in the production code
+        but could be useful in the future, so will keep for now.
+        """
+        if key in self.data.keys():
+            del self.data[key]
 
 
 def string_to_number(string):

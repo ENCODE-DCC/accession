@@ -1,7 +1,7 @@
 import logging
 from abc import ABC, abstractmethod
 from pathlib import Path
-from typing import Any, Callable, Dict, List, Optional, Type, Union, cast
+from typing import Any, Callable, Dict, List, Optional, Tuple, Type, Union, cast
 
 import boto3
 from encode_utils.connection import Connection
@@ -23,7 +23,7 @@ from accession.encode_models import (
     EncodeStepRun,
 )
 from accession.file import GSFile
-from accession.helpers import flatten, string_to_number
+from accession.helpers import LruCache, flatten, string_to_number
 from accession.logger_factory import logger_factory
 from accession.preflight import MatchingMd5Record, PreflightHelper
 
@@ -53,6 +53,9 @@ class Accession(ABC):
         self.raw_qcs: List[EncodeQualityMetric] = []
         self.log_file_path = log_file_path
         self.no_log_file: bool = no_log_file
+        self.search_cache: LruCache[
+            Tuple[Tuple[str, str], Tuple[str, str]], List[Dict[str, Any]]
+        ] = LruCache()
         self._logger: Optional[logging.Logger] = None
         self._experiment: Optional[EncodeExperiment] = None
         self._preflight_helper: Optional[PreflightHelper] = None
@@ -120,10 +123,22 @@ class Accession(ABC):
         self, file: GSFile
     ) -> Optional[List[EncodeFile]]:
         """
-        Retrieves all files from the portal with an md5sum matching the blob's md5
+        Retrieves all files from the portal with an md5sum matching the blob's md5. Will
+        always attempt to use cached results. We need to search with frame=embedded so
+        that the portal will return the full file objects, otherwise they will return
+        with an arbitrary frame that does not include even the md5sum.
         """
-        search_param = [("md5sum", file.md5sum), ("type", "File")]
+        search_param = [("md5sum", file.md5sum), ("type", "File"), ("frame", "embedded")]
         encode_files = self.conn.search(search_param)
+        # You cannot hash lists since they are mutable, but tuples are OK
+        cache_key = (search_param[0], search_param[1])
+        cache_result = self.search_cache.get(cache_key)
+        # Handle cache miss
+        if cache_result is None:
+            encode_files = self.conn.search(search_param)
+            self.search_cache.insert(cache_key, encode_files)
+        else:
+            encode_files = cache_result
         if not encode_files:
             return None
         modeled_encode_files = [EncodeFile(file_props) for file_props in encode_files]
@@ -150,8 +165,7 @@ class Accession(ABC):
                 self.logger.warning(
                     "get_encode_file_matching_md5_of_blob found more than 1 files matching the md5 of the blob."
                 )
-            encode_file = self.conn.get(filtered_encode_files[0].at_id)
-            return EncodeFile(encode_file)
+            return filtered_encode_files[0]
         else:
             return None
 
@@ -249,29 +263,10 @@ class Accession(ABC):
         new_properties[self.conn.ENCID_KEY] = encode_file.get("accession")
         return self.conn.patch(new_properties, extend_array_values=False)
 
-    def log_if_exists(self, payload):
-        """
-        If an object with given aliases already exists, as determined by an additional GET request,
-        then log a warning before attempting to POST the payload. Truthiness of the dict returned by
-        encode_utils.connection.Connection.get() is sufficient to check the object's existence on
-        the portal, since it returns an empty dict when no matching record is found.
-        """
-
-        aliases = payload.get("aliases")
-        profile_key = payload[self.conn.PROFILE_KEY]
-        if aliases:
-            if self.conn.get(aliases, database=True):
-                self.logger.error(
-                    "%s with aliases %s already exists, will not post it",
-                    profile_key.capitalize().replace("_", " "),
-                    aliases,
-                )
-
     def get_or_make_step_run(self, accession_step: AccessionStep) -> EncodeStepRun:
         """
-        encode_utils.connection.Connection.post() does not fail on alias conflict, and does not
-        expose the response status code, so we need to check for the existence of the object first
-        before attempting to POST it with Accession.log_if_exists().
+        encode_utils.connection.Connection.post() does not fail on alias conflict, here
+        we log if there was a 409 conflict.
         """
         docker_tag = self.analysis.get_tasks(accession_step.wdl_task_name)[
             0
@@ -285,8 +280,12 @@ class Accession(ABC):
             )
         ]
         payload = accession_step.get_portal_step_run(aliases)
-        self.log_if_exists(payload)
-        posted = self.conn.post(payload)
+        posted, status_code = self.conn.post(payload, return_original_status_code=True)
+        if status_code == 409:
+            self.logger.warning(
+                "Analysis step run with aliases %s already exists, will not post it",
+                aliases,
+            )
         return EncodeStepRun(posted)
 
     def find_portal_property_from_filekey(
@@ -523,10 +522,6 @@ class Accession(ABC):
 
                     for qc in file_params.quality_metrics:
                         qc_method = getattr(self, type(self).QC_MAP[qc])  # type: ignore
-                        updated_properties = self.conn.get(
-                            encode_file.at_id, database=True
-                        )
-                        encode_file.portal_file = updated_properties
                         qc_method(encode_file, wdl_file)
                     accessioned_files.append(encode_file)
         if dry_run:
