@@ -12,16 +12,20 @@ def get_parser():
                                                  download output metadata for scattering"
     )
     parser.add_argument(
+        "-m",
         "--accession-metadata",
         type=str,
         default=None,
         help="path to a metadata json output file",
+        required=True,
     )
     parser.add_argument(
+        "-p",
         "--pipeline-type",
         type=str,
         default=None,
         help="the type of pipeline run being accessioned, e.g. mirna or long_read_rna",
+        required=True,
     )
     parser.add_argument(
         "-d",
@@ -30,7 +34,11 @@ def get_parser():
         help="Perform a dry run for accessioning, not post anything.",
     )
     parser.add_argument(
-        "--server", default="dev", help="Server the files will be accessioned to"
+        "-s",
+        "--server",
+        default="dev",
+        help="Server the files will be accessioned to",
+        required=True,
     )
     parser.add_argument(
         "--no-log-file",
@@ -96,7 +104,6 @@ def main():
         )
         accessioner.accession_steps(args.dry_run)
         return
-    print("Module called without proper arguments")
 
 
 if __name__ == "__main__":

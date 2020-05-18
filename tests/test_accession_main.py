@@ -2,7 +2,7 @@ import os
 
 import pytest
 
-from accession.__main__ import check_or_set_lab_award
+from accession.__main__ import check_or_set_lab_award, get_parser
 
 
 @pytest.mark.parametrize("lab,award", [("foo", None), (None, "foo")])
@@ -27,3 +27,9 @@ def test_check_or_set_lab_award_from_envrion(
         mocker.patch.dict(os.environ, {environ_prop: "baz"})
     result = check_or_set_lab_award(lab, award)
     assert result == expected
+
+
+def test_parser():
+    parser = get_parser()
+    args = parser.parse_args(["-s", "foo.com", "-m", "meta.json", "-p", "mirna"])
+    assert args.server == "foo.com"
