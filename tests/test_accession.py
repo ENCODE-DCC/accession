@@ -150,6 +150,26 @@ def test_get_all_encode_files_matching_md5_of_blob(
     assert result == expected
 
 
+def test_get_all_encode_files_matching_md5_of_blob_cache_hit(mocker, mock_accession):
+    mocker.patch.object(mock_accession.conn, "search")
+    returned_files = [{"@id": "foo"}]
+    gs_file = GSFile(key="bam", name="gs://bam/a.bam", md5sum="123", size=456)
+    mock_accession.search_cache.insert("123", returned_files)
+    result = mock_accession.get_all_encode_files_matching_md5_of_blob(gs_file)
+    assert not mock_accession.conn.search.mock_calls
+    assert result == [EncodeFile(returned_files[0])]
+
+
+def test_get_all_encode_files_matching_md5_of_blob_cache_hit_no_results_returns_none(mocker, mock_accession):
+    mocker.patch.object(mock_accession.conn, "search")
+    returned_files = []
+    gs_file = GSFile(key="bam", name="gs://bam/a.bam", md5sum="123", size=456)
+    mock_accession.search_cache.insert("123", returned_files)
+    result = mock_accession.get_all_encode_files_matching_md5_of_blob(gs_file)
+    assert not mock_accession.conn.search.mock_calls
+    assert result is None
+
+
 def test_make_file_matching_md5_record_no_matches_returns_none(
     mocker, mock_accession, mock_file
 ):
