@@ -160,7 +160,9 @@ def test_get_all_encode_files_matching_md5_of_blob_cache_hit(mocker, mock_access
     assert result == [EncodeFile(returned_files[0])]
 
 
-def test_get_all_encode_files_matching_md5_of_blob_cache_hit_no_results_returns_none(mocker, mock_accession):
+def test_get_all_encode_files_matching_md5_of_blob_cache_hit_no_results_returns_none(
+    mocker, mock_accession
+):
     mocker.patch.object(mock_accession.conn, "search")
     returned_files = []
     gs_file = GSFile(key="bam", name="gs://bam/a.bam", md5sum="123", size=456)
