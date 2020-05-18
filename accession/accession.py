@@ -1,7 +1,7 @@
 import logging
 from abc import ABC, abstractmethod
 from pathlib import Path
-from typing import Any, Callable, Dict, List, Optional, Tuple, Type, Union, cast
+from typing import Any, Callable, Dict, List, Optional, Type, Union, cast
 
 import boto3
 from encode_utils.connection import Connection
@@ -53,9 +53,8 @@ class Accession(ABC):
         self.raw_qcs: List[EncodeQualityMetric] = []
         self.log_file_path = log_file_path
         self.no_log_file: bool = no_log_file
-        self.search_cache: LruCache[
-            Tuple[Tuple[str, str], Tuple[str, str]], List[Dict[str, Any]]
-        ] = LruCache()
+        # keys are hex md5sums, values are lists of portal objects
+        self.search_cache: LruCache[str, List[Dict[str, Any]]] = LruCache()
         self._logger: Optional[logging.Logger] = None
         self._experiment: Optional[EncodeExperiment] = None
         self._preflight_helper: Optional[PreflightHelper] = None
@@ -128,15 +127,17 @@ class Accession(ABC):
         that the portal will return the full file objects, otherwise they will return
         with an arbitrary frame that does not include even the md5sum.
         """
-        search_param = [("md5sum", file.md5sum), ("type", "File"), ("frame", "embedded")]
-        encode_files = self.conn.search(search_param)
-        # You cannot hash lists since they are mutable, but tuples are OK
-        cache_key = (search_param[0], search_param[1])
-        cache_result = self.search_cache.get(cache_key)
+        file_md5sum = file.md5sum
+        search_param = [
+            ("md5sum", file_md5sum),
+            ("type", "File"),
+            ("frame", "embedded"),
+        ]
+        cache_result = self.search_cache.get(file_md5sum)
         # Handle cache miss
         if cache_result is None:
             encode_files = self.conn.search(search_param)
-            self.search_cache.insert(cache_key, encode_files)
+            self.search_cache.insert(file_md5sum, encode_files)
         else:
             encode_files = cache_result
         if not encode_files:
