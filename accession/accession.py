@@ -1,7 +1,7 @@
 import logging
 from abc import ABC, abstractmethod
 from pathlib import Path
-from typing import Any, Callable, Dict, List, Optional, Type, Union, cast
+from typing import Any, Callable, Dict, List, Optional, Tuple, Type, Union, cast
 
 import boto3
 from encode_utils.connection import Connection
@@ -49,6 +49,7 @@ class Accession(ABC):
         self.conn = connection
         self.common_metadata = common_metadata
         self.new_files: List[EncodeFile] = []
+        self.upload_queue: List[Tuple[EncodeFile, GSFile]] = []
         self.new_qcs: List[Dict[str, Any]] = []
         self.raw_qcs: List[EncodeQualityMetric] = []
         self.log_file_path = log_file_path
@@ -203,12 +204,12 @@ class Accession(ABC):
         self, encode_file: Dict[str, Any], gs_file: GSFile
     ) -> EncodeFile:
         """
-        First POSTs the file metadata and subsequently uploads the actual data. Upload
-        mostly emulates the behavior of encode_utils, wherein the file is only uploaded
-        if there are no 409 conflicts for the posted file metadata. Here however, if
-        there is a conflict and the file has a status of "upload failed", then reupload
-        will be attempted. If there is a 409 conflict and the file status is uploading,
-        then we assume the file is currently being uploaded and do not attempt upload.
+        First POSTs the file metadata and subsequently queues upload of the actual data.
+        The file is queued for upload if there are no 409 conflicts for the posted file
+        metadata. In addition, if there is a conflict and the file has a status of
+        "upload failed", then reupload will be queued. If there is a 409 conflict and
+        the file status is uploading, then we assume the file is currently being
+        uploaded and upload will not be queued.
         """
         file_exists = self.get_encode_file_matching_md5_of_blob(gs_file)
         if file_exists:
@@ -224,7 +225,7 @@ class Accession(ABC):
         if modeled_encode_file.status == "upload failed" or (
             modeled_encode_file.status == "uploading" and status_code != 409
         ):
-            self.upload_file(modeled_encode_file, gs_file)
+            self.upload_queue.append((modeled_encode_file, gs_file))
         else:
             self.logger.info(
                 "Encode file %s is already uploaded, will not reupload",
@@ -264,12 +265,6 @@ class Accession(ABC):
         self.logger.info("Uploading file %s to %s", filename, s3_uri)
         s3.upload_fileobj(gcs_blob, bucket, key)
         self.logger.info("Finished uploading file %s", filename)
-
-    def patch_file(
-        self, encode_file: Dict[str, Any], new_properties: Dict[str, Any]
-    ) -> Dict[str, Any]:
-        new_properties[self.conn.ENCID_KEY] = encode_file.get("accession")
-        return self.conn.patch(new_properties, extend_array_values=False)
 
     def get_or_make_step_run(self, accession_step: AccessionStep) -> EncodeStepRun:
         """
@@ -556,6 +551,8 @@ class Accession(ABC):
                 self.accession_step(step)
             self.post_qcs()
             self.patch_experiment_analyses()
+            for encode_file, gs_file in self.upload_queue:
+                self.upload_file(encode_file, gs_file)
 
 
 class AccessionGenericRna(Accession):
