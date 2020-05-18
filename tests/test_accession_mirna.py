@@ -82,7 +82,7 @@ def test_accession_mirna_unreplicated(accessioner_factory):
 
 
 def validate_accessioning(accessioner, expected_files, expected_num_files, dataset):
-    all_files = accessioner.conn.get(f"/files/", database=True)["@graph"]
+    all_files = accessioner.conn.get("/files/", database=True)["@graph"]
     accessioner.conn.get(f"/files/?dataset=/experiments/{dataset}/", database=True)[
         "@graph"
     ]

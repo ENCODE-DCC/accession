@@ -23,7 +23,13 @@ CLASSIFIERS = [
     "Programming Language :: Python :: 3.7",
     "Programming Language :: Python :: 3.8",
 ]
-INSTALL_REQUIRES = ["requests", "encode_utils==2.8.0", "google-cloud-storage", "attrs"]
+INSTALL_REQUIRES = [
+    "requests",
+    "encode_utils>=2.9.0",
+    "google-cloud-storage",
+    "attrs",
+    "boto3==1.13.5",
+]
 EXTRAS_REQUIRE = {
     "docs": ["sphinx"],
     "tests": ["pytest", "pytest-cov", "pytest-mock", "docker"],

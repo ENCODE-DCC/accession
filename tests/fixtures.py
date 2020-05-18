@@ -1,6 +1,7 @@
 import json
 import os
 import shutil
+from base64 import b64decode
 from pathlib import Path
 from time import sleep
 from typing import Callable, Dict, Iterator, Tuple
@@ -12,10 +13,10 @@ import encode_utils as eu
 import pytest
 import requests
 from encode_utils.connection import Connection
-from google.cloud import storage
 from pytest_mock.plugin import MockFixture
 
 import docker
+from accession import backends
 from accession.accession import (
     Accession,
     AccessionChip,
@@ -23,7 +24,6 @@ from accession.accession import (
     accession_factory,
 )
 from accession.analysis import Analysis, MetaData
-from accession.backends import GCBackend
 from accession.encode_models import EncodeCommonMetadata, EncodeExperiment, EncodeFile
 
 
@@ -181,11 +181,10 @@ def mock_file() -> MockFile:
     return MockFile("gs://foo/bar", 123, "abc")
 
 
-class MockGCBackend(GCBackend):
+class MockGCBackend(backends.GCBackend):
     def __init__(self, bucket: str):
         self.client = MockGCClient()
         self.bucket = self.client.get_bucket(bucket)
-        self.local_mapping = {}
 
 
 class MockBucket:
@@ -212,9 +211,9 @@ class MockBlob:
     size: int = 3
 
     @property
-    def md5_hash(self) -> str:
-        # c8dd0119389ce1e83eca7ecadc15651b in hex
-        return "yN0BGTic4eg+yn7K3BVlGw=="
+    def md5sum(self) -> str:
+        # yN0BGTic4eg+yn7K3BVlGw== in base 64
+        return "c8dd0119389ce1e83eca7ecadc15651b"
 
     @property
     def id(self) -> str:
@@ -230,10 +229,6 @@ class MockBlob:
 
     def download_as_string(self) -> bytes:
         return b'{"foobar": "bazqux"}'
-
-    def download_to_filename(self, file: str) -> None:
-        with open(file, "wb") as f:
-            f.write(b'{"foobar": "bazqux"}')
 
 
 def load_md5_map() -> Dict[str, str]:
@@ -252,8 +247,9 @@ class LocalMockBlob(MockBlob):
     md5_lookup = load_md5_map()
 
     @property
-    def md5_hash(self) -> str:
-        return self.md5_lookup[f"gs://{self.bucket.name}/{self.path}"]
+    def md5sum(self) -> str:
+        b64_md5 = self.md5_lookup[f"gs://{self.bucket.name}/{self.path}"]
+        return b64decode(b64_md5).hex()
 
     def download_as_string(self) -> bytes:
         """
@@ -277,7 +273,7 @@ def mock_gc_backend(mocker) -> MockGCBackend:
     mocker fixture can only be used with function-scoped pytest fixtures for now:
     https://github.com/pytest-dev/pytest-mock/issues/136
     """
-    mocker.patch.object(storage.blob, "Blob", MockBlob)
+    mocker.patch.object(backends, "GcsBlob", MockBlob)
     mock_gc_backend = MockGCBackend("accession-test-bucket")
     return mock_gc_backend
 
@@ -288,7 +284,7 @@ def mock_accession_gc_backend(mocker) -> MockGCBackend:
     Similar to mock_gc_backend, except it provides real md5sums and can access real test
     data files.
     """
-    mocker.patch.object(storage.blob, "Blob", LocalMockBlob)
+    mocker.patch.object(backends, "GcsBlob", LocalMockBlob)
     mock_gc_backend = MockGCBackend("encode-processing")
     return mock_gc_backend
 
@@ -319,10 +315,11 @@ def accessioner_factory(
             lab,
             award,
             backend=mock_accession_gc_backend,
+            no_log_file=True,
         )
 
         mocker.patch.object(
-            accessioner.conn, "upload_file", return_value=None, autospec=True
+            accessioner, "upload_file", return_value=None, autospec=True
         )
         with open(
             current_dir.parent / "data" / "validation" / f"{assay_name}" / "files.json"
@@ -330,7 +327,6 @@ def accessioner_factory(
             expected_files = json.load(f)
         yield (accessioner, expected_files)
         shutil.rmtree(current_dir.parents[1] / "EU_Logs")
-        os.remove(current_dir.parents[1] / "accession.log")
 
     return _accessioner_factory
 

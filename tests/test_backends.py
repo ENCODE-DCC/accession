@@ -1,10 +1,9 @@
-import json
-
 import pytest
 
+from accession.backends import GcsBlob
 from accession.file import GSFile
 
-from .fixtures import MockBlob, MockBucket
+from .fixtures import MockBucket
 
 
 @pytest.mark.parametrize(
@@ -14,23 +13,6 @@ from .fixtures import MockBlob, MockBucket
 def test_blob_from_filename(mock_gc_backend, filename):
     blob = mock_gc_backend.blob_from_filename(filename)
     assert blob.path == "test.txt"
-
-
-def test_md5sum(mock_gc_backend):
-    md5sum = mock_gc_backend.md5sum("gs://different-test-bucket/test.txt")
-    assert md5sum == "c8dd0119389ce1e83eca7ecadc15651b"
-
-
-def test_size(mock_gc_backend):
-    size = mock_gc_backend.size("gs://different-test-bucket/test.txt")
-    assert size == 3
-
-
-def test_md5_from_blob(mock_gc_backend):
-    bucket = MockBucket("baz")
-    blob = MockBlob("qux", bucket)
-    md5sum = mock_gc_backend.md5_from_blob(blob)
-    assert md5sum == "c8dd0119389ce1e83eca7ecadc15651b"
 
 
 def test_file_path(mock_gc_backend):
@@ -51,8 +33,26 @@ def test_read_json(mock_gc_backend):
     assert file == {"foobar": "bazqux"}
 
 
-def test_download(mock_gc_backend):
-    local_filename, md5sum = mock_gc_backend.download("gs://foo/bar")
-    with open(local_filename) as f:
-        assert json.load(f) == {"foobar": "bazqux"}
-    assert md5sum == "c8dd0119389ce1e83eca7ecadc15651b"
+def test_gcs_blob_b64_to_hex():
+    assert (
+        GcsBlob.b64_to_hex("rQproAprtP/Prr1eFZpaHA==")
+        == "ad0a6ba00a6bb4ffcfaebd5e159a5a1c"
+    )
+
+
+def test_gcs_blob_read(mocker):
+    """
+    Mocking super() is hard, so we just mock out the whole __init__ and set the values
+    that we need, see https://github.com/pytest-dev/pytest-mock/issues/110
+    """
+    mocker.patch.object(GcsBlob, "__init__", return_value=None)
+    blob = GcsBlob("key", "bucket")
+    data = b"abc123"
+    mocker.patch.object(
+        blob, "download_as_string", lambda start, end: data[start : end + 1]
+    )
+    blob.pos = 0
+    blob._properties = {"size": len(data)}
+    assert blob.read(3) == b"abc"
+    assert blob.read(3) == b"123"
+    assert blob.read(3) == b""

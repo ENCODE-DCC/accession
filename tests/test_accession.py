@@ -101,7 +101,7 @@ def test_accession_experiment(mocker, mock_accession):
 @pytest.mark.filesystem
 def test_get_encode_file_matching_md5_of_blob(mirna_accessioner):
     fastq = mirna_accessioner.analysis.raw_fastqs[0]
-    portal_file = mirna_accessioner.get_encode_file_matching_md5_of_blob(fastq.filename)
+    portal_file = mirna_accessioner.get_encode_file_matching_md5_of_blob(fastq)
     assert portal_file.get("fastq_signature")
 
 
@@ -122,7 +122,6 @@ def test_get_encode_file_matching_md5_of_blob(mirna_accessioner):
 def test_get_encode_file_matching_md5_of_blob_unit(
     mocker, mock_accession, returned_files, expected
 ):
-    mocker.patch.object(mock_accession.backend, "md5sum", return_value="123")
     mocker.patch.object(
         mock_accession,
         "get_all_encode_files_matching_md5_of_blob",
@@ -145,7 +144,6 @@ def test_get_encode_file_matching_md5_of_blob_unit(
 def test_get_all_encode_files_matching_md5_of_blob(
     mocker, mock_accession, returned_files, expected
 ):
-    mocker.patch.object(mock_accession.backend, "md5sum", return_value="123")
     mocker.patch.object(mock_accession.conn, "search", return_value=returned_files)
     gs_file = GSFile(key="bam", name="gs://bam/a.bam", md5sum="123", size=456)
     result = mock_accession.get_all_encode_files_matching_md5_of_blob(gs_file)
@@ -229,9 +227,7 @@ def test_get_derived_from(mirna_accessioner):
     bam = [file for file in task.output_files if "bam" in file.filekeys][0]
     raw_fastq_inputs = list(set(mirna_accessioner.raw_fastq_inputs(bam)))
     accession_ids = [
-        mirna_accessioner.get_encode_file_matching_md5_of_blob(file.filename).get(
-            "accession"
-        )
+        mirna_accessioner.get_encode_file_matching_md5_of_blob(file).get("accession")
         for file in raw_fastq_inputs
     ]
     params = bowtie_step.wdl_files[0].derived_from_files[0]
@@ -254,9 +250,7 @@ def test_get_derived_from_all(mirna_accessioner):
     bam = [file for file in task.output_files if "bam" in file.filekeys][0]
     raw_fastq_inputs = list(set(mirna_accessioner.raw_fastq_inputs(bam)))
     accession_ids = [
-        mirna_accessioner.get_encode_file_matching_md5_of_blob(file.filename).get(
-            "accession"
-        )
+        mirna_accessioner.get_encode_file_matching_md5_of_blob(file).get("accession")
         for file in raw_fastq_inputs
     ]
     derived_from_files = bowtie_step.wdl_files[0].derived_from_files
@@ -322,7 +316,6 @@ def test_accession_steps_dry_run(mocker: MockFixture, mock_accession: Accession)
     task.output_files = [
         GSFile(key=filekey, name=file_name, md5sum="123", size=456, task=task)
     ]
-    mocker.patch.object(mock_accession.backend, "md5sum", return_value="123")
     mocker.patch.object(mock_accession.analysis, "get_tasks", return_value=[task])
     mocker.patch.object(
         mock_accession.preflight_helper,

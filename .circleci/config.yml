@@ -138,7 +138,7 @@ jobs:
             LATEST_PORTAL_TAG=$(curl -s https://api.github.com/repos/ENCODE-DCC/encoded/tags | jq '.[] | select(.name | test("^v\\d{2,3}\\.\\d(-hotfix-\\d)?$")) | .name ' | tr -d '"' | head -n 1)
             echo "Found latest portal tag from Github: ${LATEST_PORTAL_TAG}"
             # Get the latest accession git tag reachable from current commit
-            LATEST_ACCESSION_GIT_TAG=$(git describe --tags | cut -d '-' -f 1)
+            LATEST_ACCESSION_GIT_TAG=$(python -c "import accession;print(accession.__version__)")
             echo "Found latest accession git tag: ${LATEST_ACCESSION_GIT_TAG}"
             # Set the default tag to cache from
             CACHE_TAG="template"

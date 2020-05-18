@@ -1,9 +1,9 @@
 import logging
-import os
 from abc import ABC, abstractmethod
 from pathlib import Path
 from typing import Any, Callable, Dict, List, Optional, Type, Union, cast
 
+import boto3
 from encode_utils.connection import Connection
 
 from accession.accession_steps import (
@@ -108,7 +108,7 @@ class Accession(ABC):
     def experiment(self) -> EncodeExperiment:
         if self._experiment is None:
             encode_file = self.get_encode_file_matching_md5_of_blob(
-                self.analysis.raw_fastqs[0].filename
+                self.analysis.raw_fastqs[0]
             )
             if encode_file is None:
                 raise ValueError("Could not find raw fastqs on the portal")
@@ -122,8 +122,7 @@ class Accession(ABC):
         """
         Retrieves all files from the portal with an md5sum matching the blob's md5
         """
-        md5sum = self.backend.md5sum(file)
-        search_param = [("md5sum", md5sum), ("type", "File")]
+        search_param = [("md5sum", file.md5sum), ("type", "File")]
         encode_files = self.conn.search(search_param)
         if not encode_files:
             return None
@@ -136,7 +135,7 @@ class Accession(ABC):
         """Finds an ENCODE File object whose md5sum matches md5 of a blob in URI in backend.
 
         Args:
-            file (str): String representing an URI to an object in the backend.
+            file (GSFile): A GSFile representing an object on the backend.
 
         Returns:
             EncodeFile: an instance of EncodeFile, a document-object mapping
@@ -164,7 +163,7 @@ class Accession(ABC):
         preflight helper would be required to know about the method
         `get_all_encode_files_matching_md5_of_blob`.
         """
-        matching = self.get_all_encode_files_matching_md5_of_blob(gs_file.filename)
+        matching = self.get_all_encode_files_matching_md5_of_blob(gs_file)
         if matching is None:
             return None
         record = self.preflight_helper.make_file_matching_md5_record(
@@ -174,29 +173,75 @@ class Accession(ABC):
 
     def raw_files_accessioned(self):
         for file in self.analysis.raw_fastqs:
-            if not self.get_encode_file_matching_md5_of_blob(file.filename):
+            if not self.get_encode_file_matching_md5_of_blob(file):
                 return False
         return True
 
     def accession_file(
         self, encode_file: Dict[str, Any], gs_file: GSFile
     ) -> EncodeFile:
-        file_exists = self.get_encode_file_matching_md5_of_blob(gs_file.filename)
-        submitted_file_path = {"submitted_file_name": gs_file.filename}
+        """
+        First POSTs the file metadata and subsequently uploads the actual data. Upload
+        mostly emulates the behavior of encode_utils, wherein the file is only uploaded
+        if there are no 409 conflicts for the posted file metadata. Here however, if
+        there is a conflict and the file has a status of "upload failed", then reupload
+        will be attempted. If there is a 409 conflict and the file status is uploading,
+        then we assume the file is currently being uploaded and do not attempt upload.
+        """
+        file_exists = self.get_encode_file_matching_md5_of_blob(gs_file)
         if file_exists:
             self.logger.warning(
                 "Attempting to post duplicate file of %s with md5sum %s",
                 file_exists.get("accession"),
                 encode_file.get("md5sum"),
             )
-        local_file = self.backend.download(gs_file.filename)[0]
-        encode_file["submitted_file_name"] = local_file
-        encode_posted_file = self.conn.post(encode_file)
-        os.remove(local_file)
-        encode_posted_file = self.patch_file(encode_posted_file, submitted_file_path)
+        encode_posted_file, status_code = self.conn.post(
+            encode_file, upload_file=False, return_original_status_code=True
+        )
         modeled_encode_file = EncodeFile(encode_posted_file)
+        if modeled_encode_file.status == "upload failed" or (
+            modeled_encode_file.status == "uploading" and status_code != 409
+        ):
+            self.upload_file(modeled_encode_file, gs_file)
+        else:
+            self.logger.info(
+                "Encode file %s is already uploaded, will not reupload",
+                modeled_encode_file.at_id,
+            )
         self.new_files.append(modeled_encode_file)
         return modeled_encode_file
+
+    def upload_file(self, encode_file: EncodeFile, gs_file: GSFile) -> None:
+        """
+        At a high level, uploads the file from GCS to S3 by streaming bytes. As the s3
+        client reads chunks they are lazily fetched from GCS.
+
+        In more details, obtains STS credentials to upload to the portal file specified
+        by `encode_file`, creates a s3 client, and uploads the file corresponding to
+        `gs_file` (potentially as multipart). For this to work, the blob acquired by
+        `self.backend.blob_from_filename` must return an object that has a file-like
+        `read` method. For more details see the `boto3` docs:
+        https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/s3.html#S3.Client.upload_fileobj
+
+        Extensive testing revealed that for the boto3 default transfer config performed
+        satisfactorily, see PIP-745
+        """
+        credentials = self.conn.regenerate_aws_upload_creds(encode_file.accession)
+        s3 = boto3.client(
+            "s3",
+            aws_access_key_id=credentials["access_key"],
+            aws_secret_access_key=credentials["secret_key"],
+            aws_session_token=credentials["session_token"],
+        )
+        s3_uri = credentials["upload_url"]
+        path_parts = s3_uri.replace("s3://", "").split("/")
+        bucket = path_parts.pop(0)
+        key = "/".join(path_parts)
+        filename = gs_file.filename
+        gcs_blob = self.backend.blob_from_filename(filename)
+        self.logger.info("Uploading file %s to %s", filename, s3_uri)
+        s3.upload_fileobj(gcs_blob, bucket, key)
+        self.logger.info("Finished uploading file %s", filename)
 
     def patch_file(
         self, encode_file: Dict[str, Any], new_properties: Dict[str, Any]
@@ -253,7 +298,7 @@ class Accession(ABC):
         files = self.analysis.get_files(filekey=filekey)
         msg = "Could not find any file with key {} in metadata".format(filekey)
         if files:
-            annotation = self.get_encode_file_matching_md5_of_blob(files[0].filename)
+            annotation = self.get_encode_file_matching_md5_of_blob(files[0])
             if annotation is None:
                 raise KeyError(msg)
             return annotation.get(portal_property, "")
@@ -285,7 +330,7 @@ class Accession(ABC):
             raise
         encode_files = []
         for gs_file in derived_from_files:
-            encode_file = self.get_encode_file_matching_md5_of_blob(gs_file.filename)
+            encode_file = self.get_encode_file_matching_md5_of_blob(gs_file)
             if encode_file is not None:
                 encode_files.append(encode_file)
         accessioned_files = encode_files + self.new_files
@@ -348,6 +393,7 @@ class Accession(ABC):
             file_size=file.size,
             file_md5sum=file.md5sum,
             step_run_id=step_run.at_id,
+            submitted_file_name=file.filename,
             genome_annotation=self.genome_annotation,
             extras=extras,
         )
@@ -915,7 +961,7 @@ class AccessionChip(Accession):
             files = self.analysis.get_files(filekey)
             if not files:
                 raise ValueError(f"Could not find any files matching filekey {filekey}")
-            portal_index = self.get_encode_file_matching_md5_of_blob(files[0].filename)
+            portal_index = self.get_encode_file_matching_md5_of_blob(files[0])
             if portal_index is None:
                 raise ValueError("Could not find portal index")
             portal_assembly = portal_index.get(EncodeFile.ASSEMBLY)
