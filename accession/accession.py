@@ -136,9 +136,16 @@ class Accession(ABC):
         cache_result = self.search_cache.get(file_md5sum)
         # Handle cache miss
         if cache_result is None:
+            self.logger.debug(
+                "Could not retrive search result from cache for md5sum %s will search portal",
+                file_md5sum,
+            )
             encode_files = self.conn.search(search_param)
             self.search_cache.insert(file_md5sum, encode_files)
         else:
+            self.logger.debug(
+                "Will use cached search result for file with md5sum %s", file_md5sum
+            )
             encode_files = cache_result
         if not encode_files:
             return None
