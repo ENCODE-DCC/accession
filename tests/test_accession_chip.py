@@ -411,6 +411,11 @@ def test_add_chip_mapped_read_length(
             {"mapped_run_type": "paired-ended"},
         ),
         (
+            {"general": {"seq_endedness": {"rep1": {"paired_end": False}}}},
+            does_not_raise(),
+            {"mapped_run_type": "single-ended"},
+        ),
+        (
             {"general": {"seq_endedness": {"rep1": {"paired_end": "true"}}}},
             pytest.raises(TypeError),
             {},
