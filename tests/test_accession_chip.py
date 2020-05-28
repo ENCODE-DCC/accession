@@ -403,6 +403,39 @@ def test_add_chip_mapped_read_length(
 
 
 @pytest.mark.parametrize(
+    "qc,condition,expected",
+    [
+        (
+            {"general": {"seq_endedness": {"rep1": {"paired_end": True}}}},
+            does_not_raise(),
+            {"mapped_run_type": "paired-ended"},
+        ),
+        (
+            {"general": {"seq_endedness": {"rep1": {"paired_end": False}}}},
+            does_not_raise(),
+            {"mapped_run_type": "single-ended"},
+        ),
+        (
+            {"general": {"seq_endedness": {"rep1": {"paired_end": "true"}}}},
+            pytest.raises(TypeError),
+            {},
+        ),
+    ],
+)
+def test_accession_chip_add_mapped_run_type(
+    mocker, mock_accession_chip, gsfile, qc, condition, expected
+):
+    mocker.patch.object(mock_accession_chip.analysis, "get_files")
+    mocker.patch.object(mock_accession_chip.backend, "read_json", return_value=qc)
+    mocker.patch.object(
+        mock_accession_chip, "get_chip_pipeline_replicate", return_value="rep1"
+    )
+    with condition:
+        result = mock_accession_chip.add_mapped_run_type(gsfile)
+        assert result == expected
+
+
+@pytest.mark.parametrize(
     "gsfile_task,expected",
     [
         (Task("my_task", {"inputs": {"crop_length": 0}, "outputs": {}}), {}),

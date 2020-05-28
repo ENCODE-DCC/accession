@@ -7,6 +7,7 @@
         {
           "callbacks": [
             "add_mapped_read_length",
+            "add_mapped_run_type",
             "maybe_add_cropped_read_length"
           ],
           "derived_from_files": [
@@ -44,6 +45,7 @@
         {
           "callbacks": [
             "add_mapped_read_length",
+            "add_mapped_run_type",
             "maybe_add_cropped_read_length"
           ],
           "derived_from_files": [

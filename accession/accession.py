@@ -1064,6 +1064,22 @@ class AccessionChip(Accession):
             ) from e
         return {"mapped_read_length": mapped_read_length}
 
+    def add_mapped_run_type(self, gs_file: GSFile) -> Dict[str, str]:
+        """
+        Obtains the value of `mapped_run_type` to post for bam files from the read
+        length log in the ancestor align task in the ChIP-seq pipeline, useful for
+        detecting PE data that was mapped as SE on the portal.
+        """
+        replicate = self.get_chip_pipeline_replicate(gs_file)
+        qc = self.backend.read_json(self.analysis.get_files("qc_json")[0])
+        is_paired_end = qc["general"]["seq_endedness"][replicate]["paired_end"]
+        if not isinstance(is_paired_end, bool):
+            raise TypeError(
+                f"Expected boolean for ChIP QC value general.seq_endedness.{replicate}.paired_end, found {is_paired_end}"
+            )
+        mapped_run_type = "paired-ended" if is_paired_end else "single-ended"
+        return {"mapped_run_type": mapped_run_type}
+
     def maybe_add_cropped_read_length(self, gs_file: GSFile) -> Dict[str, int]:
         """
         Obtains the value of mapped_read_length to post for bam files from the
