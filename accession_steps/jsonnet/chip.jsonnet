@@ -68,6 +68,7 @@ pipeline-specific mapping and peak calling accessioning templates.
               'add_mapped_read_length',
               'add_mapped_run_type',
               'maybe_add_cropped_read_length',
+              'maybe_add_cropped_read_length_tolerance',
             ],
             derived_from_files: [
               {
@@ -97,6 +98,7 @@ pipeline-specific mapping and peak calling accessioning templates.
               'add_mapped_read_length',
               'add_mapped_run_type',
               'maybe_add_cropped_read_length',
+              'maybe_add_cropped_read_length_tolerance',
             ],
             derived_from_files: $['chip_map_only_steps.json']['accession.steps'][0].wdl_files[0].derived_from_files,
             file_format: 'bam',

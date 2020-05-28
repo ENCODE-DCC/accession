@@ -1096,6 +1096,26 @@ class AccessionChip(Accession):
             return {}
         return {"cropped_read_length": crop_length}
 
+    def maybe_add_cropped_read_length_tolerance(
+        self, gs_file: GSFile
+    ) -> Dict[str, int]:
+        """
+        Obtains the value of cropped_read_length_tolerance to post for bam files from
+        crop_length input of an arbitrary align task in the pipeline (value will be the
+        same for all align tasks since the tolerance is a global parameter). If the
+        crop_length in the pipeline is 0, then no cropping was performed and the
+        cropped_read_length_tolerance will not be posted (return empty dict).
+
+        Note that here we are assuming the crop length will always be the same for all
+        of the align tasks
+        """
+        align_task = self.analysis.get_tasks(task_name="align")[0]
+        crop_length = align_task.inputs["crop_length"]
+        crop_length_tol = align_task.inputs["crop_length_tol"]
+        if crop_length == 0:
+            return {}
+        return {"cropped_read_length_tolerance": crop_length_tol}
+
     def make_chip_alignment_qc(self, encode_file: EncodeFile, gs_file: GSFile) -> None:
         """
         This function typecasts to match the ENCODE schema. Trucated zero values could
