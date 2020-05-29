@@ -1,0 +1,630 @@
+{
+  "accession.steps": [
+    {
+      "dcc_step_run": "atac-seq-alignment-step-v-2",
+      "dcc_step_version": "/analysis-step-versions/atac-seq-alignment-step-v-2-0/",
+      "wdl_files": [
+        {
+          "callbacks": [
+            "add_mapped_read_length",
+            "add_mapped_run_type"
+          ],
+          "derived_from_files": [
+            {
+              "derived_from_filekey": "idx_tar",
+              "derived_from_inputs": true,
+              "derived_from_task": "align"
+            },
+            {
+              "derived_from_filekey": "fastqs_R1",
+              "derived_from_inputs": true,
+              "derived_from_task": "align"
+            },
+            {
+              "allow_empty": true,
+              "derived_from_filekey": "fastqs_R2",
+              "derived_from_inputs": true,
+              "derived_from_task": "align"
+            }
+          ],
+          "file_format": "bam",
+          "filekey": "bam",
+          "output_type": "unfiltered alignments",
+          "quality_metrics": [
+            "atac_alignment"
+          ]
+        }
+      ],
+      "wdl_task_name": "align"
+    },
+    {
+      "dcc_step_run": "atac-seq-alignment-step-v-2",
+      "dcc_step_version": "/analysis-step-versions/atac-seq-alignment-step-v-2-0/",
+      "wdl_files": [
+        {
+          "callbacks": [
+            "add_mapped_read_length",
+            "add_mapped_run_type"
+          ],
+          "derived_from_files": [
+            {
+              "derived_from_filekey": "idx_tar",
+              "derived_from_inputs": true,
+              "derived_from_task": "align"
+            },
+            {
+              "derived_from_filekey": "fastqs_R1",
+              "derived_from_inputs": true,
+              "derived_from_task": "align"
+            },
+            {
+              "allow_empty": true,
+              "derived_from_filekey": "fastqs_R2",
+              "derived_from_inputs": true,
+              "derived_from_task": "align"
+            }
+          ],
+          "file_format": "bam",
+          "filekey": "nodup_bam",
+          "output_type": "alignments",
+          "quality_metrics": [
+            "atac_alignment",
+            "atac_library",
+            "atac_align_enrich"
+          ]
+        }
+      ],
+      "wdl_task_name": "filter"
+    },
+    {
+      "dcc_step_run": "atac-seq-signal-generation-step-v-1",
+      "dcc_step_version": "/analysis-step-versions/atac-seq-signal-generation-step-v-1-0/",
+      "wdl_files": [
+        {
+          "derived_from_files": [
+            {
+              "derived_from_filekey": "nodup_bam",
+              "derived_from_task": "filter",
+              "disallow_tasks": [
+                "choose_ctl"
+              ]
+            },
+            {
+              "derived_from_filekey": "bam",
+              "derived_from_inputs": true,
+              "derived_from_task": "bam2ta_ctl"
+            }
+          ],
+          "file_format": "bigWig",
+          "filekey": "pval_bw",
+          "output_type": "signal p-value",
+          "quality_metrics": []
+        },
+        {
+          "derived_from_files": [
+            {
+              "derived_from_filekey": "nodup_bam",
+              "derived_from_task": "filter",
+              "disallow_tasks": [
+                "choose_ctl"
+              ]
+            },
+            {
+              "derived_from_filekey": "bam",
+              "derived_from_inputs": true,
+              "derived_from_task": "bam2ta_ctl"
+            }
+          ],
+          "file_format": "bigWig",
+          "filekey": "fc_bw",
+          "output_type": "fold change over control",
+          "quality_metrics": []
+        }
+      ],
+      "wdl_task_name": "macs2_signal_track"
+    },
+    {
+      "dcc_step_run": "atac-seq-pooled-signal-generation-step-v-1",
+      "dcc_step_version": "/analysis-step-versions/atac-seq-pooled-signal-generation-step-v-1-0/",
+      "requires_replication": true,
+      "wdl_files": [
+        {
+          "derived_from_files": [
+            {
+              "derived_from_filekey": "nodup_bam",
+              "derived_from_task": "filter",
+              "disallow_tasks": [
+                "choose_ctl"
+              ]
+            },
+            {
+              "derived_from_filekey": "bam",
+              "derived_from_inputs": true,
+              "derived_from_task": "bam2ta_ctl"
+            }
+          ],
+          "file_format": "bigWig",
+          "filekey": "pval_bw",
+          "output_type": "signal p-value",
+          "quality_metrics": []
+        },
+        {
+          "derived_from_files": [
+            {
+              "derived_from_filekey": "nodup_bam",
+              "derived_from_task": "filter",
+              "disallow_tasks": [
+                "choose_ctl"
+              ]
+            },
+            {
+              "derived_from_filekey": "bam",
+              "derived_from_inputs": true,
+              "derived_from_task": "bam2ta_ctl"
+            }
+          ],
+          "file_format": "bigWig",
+          "filekey": "fc_bw",
+          "output_type": "fold change over control",
+          "quality_metrics": []
+        }
+      ],
+      "wdl_task_name": "macs2_signal_track_pooled"
+    },
+    {
+      "dcc_step_run": "atac-seq-pseudoreplicated-idr-step-v-1",
+      "dcc_step_version": "/analysis-step-versions/atac-seq-pseudoreplicated-idr-step-v-1-0/",
+      "wdl_files": [
+        {
+          "derived_from_files": [
+            {
+              "derived_from_filekey": "nodup_bam",
+              "derived_from_task": "filter",
+              "disallow_tasks": [
+                "choose_ctl"
+              ]
+            },
+            {
+              "derived_from_filekey": "bam",
+              "derived_from_inputs": true,
+              "derived_from_task": "bam2ta_ctl"
+            }
+          ],
+          "file_format": "bed",
+          "file_format_type": "narrowPeak",
+          "filekey": "idr_unthresholded_peak",
+          "output_type": "IDR ranked peaks",
+          "quality_metrics": []
+        },
+        {
+          "derived_from_files": [
+            {
+              "derived_from_filekey": "nodup_bam",
+              "derived_from_task": "filter",
+              "disallow_tasks": [
+                "choose_ctl"
+              ]
+            },
+            {
+              "derived_from_filekey": "blacklist",
+              "derived_from_inputs": true,
+              "derived_from_task": "idr_pr"
+            },
+            {
+              "derived_from_filekey": "bam",
+              "derived_from_inputs": true,
+              "derived_from_task": "bam2ta_ctl"
+            }
+          ],
+          "file_format": "bed",
+          "file_format_type": "narrowPeak",
+          "filekey": "bfilt_idr_peak",
+          "output_type": "IDR thresholded peaks",
+          "quality_metrics": [
+            "atac_replication",
+            "atac_peak_enrichment"
+          ]
+        }
+      ],
+      "wdl_task_name": "idr_pr"
+    },
+    {
+      "dcc_step_run": "atac-seq-pooled-pseudoreplicated-idr-step-v-1",
+      "dcc_step_version": "/analysis-step-versions/atac-seq-pooled-pseudoreplicated-idr-step-v-1-0/",
+      "requires_replication": true,
+      "wdl_files": [
+        {
+          "derived_from_files": [
+            {
+              "derived_from_filekey": "nodup_bam",
+              "derived_from_task": "filter",
+              "disallow_tasks": [
+                "choose_ctl"
+              ]
+            },
+            {
+              "derived_from_filekey": "bam",
+              "derived_from_inputs": true,
+              "derived_from_task": "bam2ta_ctl"
+            }
+          ],
+          "file_format": "bed",
+          "file_format_type": "narrowPeak",
+          "filekey": "idr_unthresholded_peak",
+          "output_type": "IDR ranked peaks",
+          "quality_metrics": []
+        },
+        {
+          "callbacks": [
+            "maybe_preferred_default"
+          ],
+          "derived_from_files": [
+            {
+              "derived_from_filekey": "nodup_bam",
+              "derived_from_task": "filter",
+              "disallow_tasks": [
+                "choose_ctl"
+              ]
+            },
+            {
+              "derived_from_filekey": "blacklist",
+              "derived_from_inputs": true,
+              "derived_from_task": "idr_ppr"
+            },
+            {
+              "derived_from_filekey": "bam",
+              "derived_from_inputs": true,
+              "derived_from_task": "bam2ta_ctl"
+            }
+          ],
+          "file_format": "bed",
+          "file_format_type": "narrowPeak",
+          "filekey": "bfilt_idr_peak",
+          "output_type": "IDR thresholded peaks",
+          "quality_metrics": [
+            "atac_replication",
+            "atac_peak_enrichment"
+          ]
+        }
+      ],
+      "wdl_task_name": "idr_ppr"
+    },
+    {
+      "dcc_step_run": "atac-seq-replicated-idr-step-v-1",
+      "dcc_step_version": "/analysis-step-versions/atac-seq-replicated-idr-step-v-1-0/",
+      "requires_replication": true,
+      "wdl_files": [
+        {
+          "derived_from_files": [
+            {
+              "derived_from_filekey": "nodup_bam",
+              "derived_from_task": "filter",
+              "disallow_tasks": [
+                "choose_ctl"
+              ]
+            },
+            {
+              "derived_from_filekey": "bam",
+              "derived_from_inputs": true,
+              "derived_from_task": "bam2ta_ctl"
+            }
+          ],
+          "file_format": "bed",
+          "file_format_type": "narrowPeak",
+          "filekey": "idr_unthresholded_peak",
+          "output_type": "IDR ranked peaks",
+          "quality_metrics": []
+        },
+        {
+          "callbacks": [
+            "maybe_preferred_default",
+            "maybe_conservative_set"
+          ],
+          "derived_from_files": [
+            {
+              "derived_from_filekey": "nodup_bam",
+              "derived_from_task": "filter",
+              "disallow_tasks": [
+                "choose_ctl"
+              ]
+            },
+            {
+              "derived_from_filekey": "blacklist",
+              "derived_from_inputs": true,
+              "derived_from_task": "idr"
+            },
+            {
+              "derived_from_filekey": "bam",
+              "derived_from_inputs": true,
+              "derived_from_task": "bam2ta_ctl"
+            }
+          ],
+          "file_format": "bed",
+          "file_format_type": "narrowPeak",
+          "filekey": "bfilt_idr_peak",
+          "output_type": "IDR thresholded peaks",
+          "quality_metrics": [
+            "atac_replication",
+            "atac_peak_enrichment"
+          ]
+        }
+      ],
+      "wdl_task_name": "idr"
+    },
+    {
+      "dcc_step_run": "atac-seq-pseudoreplicated-idr-ranked-peaks-file-format-conversion-step-v-1",
+      "dcc_step_version": "/analysis-step-versions/atac-seq-pseudoreplicated-idr-ranked-peaks-file-format-conversion-step-v-1-0/",
+      "wdl_files": [
+        {
+          "derived_from_files": [
+            {
+              "derived_from_filekey": "bfilt_idr_peak",
+              "derived_from_task": "idr_pr"
+            }
+          ],
+          "file_format": "bigBed",
+          "file_format_type": "narrowPeak",
+          "filekey": "bfilt_idr_peak_bb",
+          "output_type": "IDR thresholded peaks",
+          "quality_metrics": [
+            "atac_replication",
+            "atac_peak_enrichment"
+          ]
+        }
+      ],
+      "wdl_task_name": "idr_pr"
+    },
+    {
+      "dcc_step_run": "atac-seq-pooled-pseudoreplicated-idr-thresholded-peaks-file-format-conversion-step-v-1",
+      "dcc_step_version": "/analysis-step-versions/atac-seq-pooled-pseudoreplicated-idr-thresholded-peaks-file-format-conversion-step-v-1-0/",
+      "requires_replication": true,
+      "wdl_files": [
+        {
+          "callbacks": [
+            "maybe_preferred_default"
+          ],
+          "derived_from_files": [
+            {
+              "derived_from_filekey": "bfilt_idr_peak",
+              "derived_from_task": "idr_ppr"
+            }
+          ],
+          "file_format": "bigBed",
+          "file_format_type": "narrowPeak",
+          "filekey": "bfilt_idr_peak_bb",
+          "output_type": "IDR thresholded peaks",
+          "quality_metrics": [
+            "atac_replication",
+            "atac_peak_enrichment"
+          ]
+        }
+      ],
+      "wdl_task_name": "idr_ppr"
+    },
+    {
+      "dcc_step_run": "atac-seq-replicated-idr-thresholded-peaks-file-format-conversion-step-v-1",
+      "dcc_step_version": "/analysis-step-versions/atac-seq-replicated-idr-thresholded-peaks-file-format-conversion-step-v-1-0/",
+      "requires_replication": true,
+      "wdl_files": [
+        {
+          "callbacks": [
+            "maybe_conservative_set",
+            "maybe_preferred_default"
+          ],
+          "derived_from_files": [
+            {
+              "derived_from_filekey": "bfilt_idr_peak",
+              "derived_from_task": "idr"
+            }
+          ],
+          "file_format": "bigBed",
+          "file_format_type": "narrowPeak",
+          "filekey": "bfilt_idr_peak_bb",
+          "output_type": "IDR thresholded peaks",
+          "quality_metrics": [
+            "atac_replication",
+            "atac_peak_enrichment"
+          ]
+        }
+      ],
+      "wdl_task_name": "idr"
+    },
+    {
+      "dcc_step_run": "atac-seq-pseudoreplicated-overlap-step-v-1",
+      "dcc_step_version": "/analysis-step-versions/atac-seq-pseudoreplicated-overlap-step-v-1-0/",
+      "wdl_files": [
+        {
+          "derived_from_files": [
+            {
+              "derived_from_filekey": "nodup_bam",
+              "derived_from_task": "filter",
+              "disallow_tasks": [
+                "choose_ctl"
+              ]
+            },
+            {
+              "derived_from_filekey": "blacklist",
+              "derived_from_inputs": true,
+              "derived_from_task": "overlap_pr"
+            },
+            {
+              "derived_from_filekey": "bam",
+              "derived_from_inputs": true,
+              "derived_from_task": "bam2ta_ctl"
+            }
+          ],
+          "file_format": "bed",
+          "file_format_type": "narrowPeak",
+          "filekey": "bfilt_overlap_peak",
+          "output_type": "stable peaks",
+          "quality_metrics": [
+            "atac_replication",
+            "atac_peak_enrichment"
+          ]
+        }
+      ],
+      "wdl_task_name": "overlap_pr"
+    },
+    {
+      "dcc_step_run": "atac-seq-pooled-pseudoreplicated-overlap-step-v-1",
+      "dcc_step_version": "/analysis-step-versions/atac-seq-pooled-pseudoreplicated-overlap-step-v-1-0/",
+      "requires_replication": true,
+      "wdl_files": [
+        {
+          "callbacks": [
+            "maybe_preferred_default"
+          ],
+          "derived_from_files": [
+            {
+              "derived_from_filekey": "nodup_bam",
+              "derived_from_task": "filter",
+              "disallow_tasks": [
+                "choose_ctl"
+              ]
+            },
+            {
+              "derived_from_filekey": "blacklist",
+              "derived_from_inputs": true,
+              "derived_from_task": "overlap_ppr"
+            },
+            {
+              "derived_from_filekey": "bam",
+              "derived_from_inputs": true,
+              "derived_from_task": "bam2ta_ctl"
+            }
+          ],
+          "file_format": "bed",
+          "file_format_type": "narrowPeak",
+          "filekey": "bfilt_overlap_peak",
+          "output_type": "stable peaks",
+          "quality_metrics": [
+            "atac_replication",
+            "atac_peak_enrichment"
+          ]
+        }
+      ],
+      "wdl_task_name": "overlap_ppr"
+    },
+    {
+      "dcc_step_run": "atac-seq-replicated-overlap-step-v-1",
+      "dcc_step_version": "/analysis-step-versions/atac-seq-replicated-overlap-step-v-1-0/",
+      "requires_replication": true,
+      "wdl_files": [
+        {
+          "callbacks": [
+            "maybe_preferred_default"
+          ],
+          "derived_from_files": [
+            {
+              "derived_from_filekey": "nodup_bam",
+              "derived_from_task": "filter",
+              "disallow_tasks": [
+                "choose_ctl"
+              ]
+            },
+            {
+              "derived_from_filekey": "blacklist",
+              "derived_from_inputs": true,
+              "derived_from_task": "overlap"
+            },
+            {
+              "derived_from_filekey": "bam",
+              "derived_from_inputs": true,
+              "derived_from_task": "bam2ta_ctl"
+            }
+          ],
+          "file_format": "bed",
+          "file_format_type": "narrowPeak",
+          "filekey": "bfilt_overlap_peak",
+          "output_type": "replicated peaks",
+          "quality_metrics": [
+            "atac_replication",
+            "atac_peak_enrichment"
+          ]
+        }
+      ],
+      "wdl_task_name": "overlap"
+    },
+    {
+      "dcc_step_run": "atac-seq-pseudoreplicated-overlap-stable-peaks-file-format-conversion-step-v-1",
+      "dcc_step_version": "/analysis-step-versions/atac-seq-pseudoreplicated-overlap-stable-peaks-file-format-conversion-step-v-1-0/",
+      "wdl_files": [
+        {
+          "derived_from_files": [
+            {
+              "derived_from_filekey": "bfilt_overlap_peak",
+              "derived_from_task": "overlap_pr"
+            }
+          ],
+          "file_format": "bigBed",
+          "file_format_type": "narrowPeak",
+          "filekey": "bfilt_overlap_peak_bb",
+          "output_type": "stable peaks",
+          "quality_metrics": [
+            "atac_replication",
+            "atac_peak_enrichment"
+          ]
+        }
+      ],
+      "wdl_task_name": "overlap_pr"
+    },
+    {
+      "dcc_step_run": "atac-seq-pooled-pseudoreplicated-overlap-stable-peaks-file-format-conversion-step-v-1",
+      "dcc_step_version": "/analysis-step-versions/atac-seq-pooled-pseudoreplicated-overlap-stable-peaks-file-format-conversion-step-v-1-0/",
+      "requires_replication": true,
+      "wdl_files": [
+        {
+          "callbacks": [
+            "maybe_preferred_default"
+          ],
+          "derived_from_files": [
+            {
+              "derived_from_filekey": "bfilt_overlap_peak",
+              "derived_from_task": "overlap_ppr"
+            }
+          ],
+          "file_format": "bigBed",
+          "file_format_type": "narrowPeak",
+          "filekey": "bfilt_overlap_peak_bb",
+          "output_type": "stable peaks",
+          "quality_metrics": [
+            "atac_replication",
+            "atac_peak_enrichment"
+          ]
+        }
+      ],
+      "wdl_task_name": "overlap_ppr"
+    },
+    {
+      "dcc_step_run": "atac-seq-replicated-overlap-file-format-conversion-step-v-1",
+      "dcc_step_version": "/analysis-step-versions/atac-seq-replicated-overlap-file-format-conversion-step-v-1-0/",
+      "requires_replication": true,
+      "wdl_files": [
+        {
+          "callbacks": [
+            "maybe_preferred_default"
+          ],
+          "derived_from_files": [
+            {
+              "derived_from_filekey": "bfilt_overlap_peak",
+              "derived_from_task": "overlap"
+            }
+          ],
+          "file_format": "bigBed",
+          "file_format_type": "narrowPeak",
+          "filekey": "bfilt_overlap_peak_bb",
+          "output_type": "replicated peaks",
+          "quality_metrics": [
+            "atac_replication",
+            "atac_peak_enrichment"
+          ]
+        }
+      ],
+      "wdl_task_name": "overlap"
+    }
+  ],
+  "raw_fastqs_keys": [
+    "fastqs_R1",
+    "fastqs_R2"
+  ]
+}

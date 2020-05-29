@@ -9,10 +9,13 @@ File layout:
     - consolidated TF mapping and peak calling template
     - consolidated histone mapping and peak calling template
     - consolidated MINT ChIP mapping and peak calling template
+    - ATAC template
 
-After running `jsonnet`, this will produce 8 JSON files. 2 map only accessioning
-templates, 3 pipeline-specific peak calling accessioning templates, and 3
-pipeline-specific mapping and peak calling accessioning templates.
+After running `jsonnet`, this will produce 9 JSON files. 2 map only accessioning
+templates, 3 pipeline-specific peak calling accessioning templates, and 4
+pipeline-specific mapping and peak calling accessioning templates. Make sure to run
+linting afterwards `tox -e lint` to pretty-format the JSON, which will make the diffs
+more legible.
 */
 {
   local bed_bigwig_derived_from_files = [
@@ -55,9 +58,9 @@ pipeline-specific mapping and peak calling accessioning templates.
       quality_metrics: [],
     },
   ],
-  local ChipMapOnlySteps(is_control=false) = {
-    local step_run = 'chip-seq-alignment-step-v-2',
-    local step_version = '/analysis-step-versions/chip-seq-alignment-step-v-2-0/',
+  local AtacChipMapOnlySteps(is_control=false, is_atac=false) = {
+    local step_run = if is_atac then 'atac-seq-alignment-step-v-2' else 'chip-seq-alignment-step-v-2',
+    local step_version = if is_atac then '/analysis-step-versions/atac-seq-alignment-step-v-2-0/' else '/analysis-step-versions/chip-seq-alignment-step-v-2-0/',
     'accession.steps': [
       {
         dcc_step_run: step_run,
@@ -67,9 +70,10 @@ pipeline-specific mapping and peak calling accessioning templates.
             callbacks: [
               'add_mapped_read_length',
               'add_mapped_run_type',
-              'maybe_add_cropped_read_length',
-              'maybe_add_cropped_read_length_tolerance',
-            ],
+            ] + (if !is_atac then [
+                   'maybe_add_cropped_read_length',
+                   'maybe_add_cropped_read_length_tolerance',
+                 ] else []),
             derived_from_files: [
               {
                 derived_from_filekey: 'idx_tar',
@@ -82,9 +86,9 @@ pipeline-specific mapping and peak calling accessioning templates.
             file_format: 'bam',
             filekey: 'bam',
             output_type: 'unfiltered alignments',
-            quality_metrics: [
-              'chip_alignment',
-            ],
+            quality_metrics: (if is_atac then ['atac_alignment'] else [
+                                'chip_alignment',
+                              ]),
           },
         ],
         wdl_task_name: 'align',
@@ -97,18 +101,19 @@ pipeline-specific mapping and peak calling accessioning templates.
             callbacks: [
               'add_mapped_read_length',
               'add_mapped_run_type',
-              'maybe_add_cropped_read_length',
-              'maybe_add_cropped_read_length_tolerance',
-            ],
-            derived_from_files: $['chip_map_only_steps.json']['accession.steps'][0].wdl_files[0].derived_from_files,
+            ] + (if !is_atac then [
+                   'maybe_add_cropped_read_length',
+                   'maybe_add_cropped_read_length_tolerance',
+                 ] else []),
+            derived_from_files: (if is_atac then atac_map_only_steps['accession.steps'][0].wdl_files[0].derived_from_files else $['chip_map_only_steps.json']['accession.steps'][0].wdl_files[0].derived_from_files),
             file_format: 'bam',
             filekey: 'nodup_bam',
             output_type: 'alignments',
-            quality_metrics: [
-              'chip_alignment',
-            ] + (if !is_control then ['chip_align_enrich'] else []) + [
-              'chip_library',
-            ],
+            quality_metrics: (if is_atac then ['atac_alignment', 'atac_library', 'atac_align_enrich'] else [
+                                'chip_alignment',
+                              ] + (if !is_control then ['chip_align_enrich'] else []) + [
+                                'chip_library',
+                              ]),
           },
         ],
         wdl_task_name: 'filter',
@@ -119,17 +124,19 @@ pipeline-specific mapping and peak calling accessioning templates.
       'fastqs_R2',
     ],
   },
-  'chip_map_only_steps.json': ChipMapOnlySteps(),
-  'control_chip_steps.json': ChipMapOnlySteps(is_control=true),
-  'tf_chip_peak_call_only_steps.json': {
+  local AtacTfChipPeakCallOnlySteps(is_atac=false) = {
+    local step_prefix = if is_atac then 'atac' else 'tf-chip',
+    // Need a separate prefix for signal generation because TF ChIP signal generation
+    // steps do not include `-seq`
+    local signal_generation_prefix = if is_atac then 'atac-seq' else 'tf-chip',
     local file_format_type = 'narrowPeak',
     local shared_file_props = {
       file_format_type: file_format_type,
       output_type: 'IDR thresholded peaks',
-      quality_metrics: [
-        'chip_replication',
-        'chip_peak_enrichment',
-      ],
+      quality_metrics: (if is_atac then ['atac_replication', 'atac_peak_enrichment'] else [
+                          'chip_replication',
+                          'chip_peak_enrichment',
+                        ]),
     },
     local IdrWdlFiles(blacklist_derived_from_task, callbacks=[],) = [
       {
@@ -164,54 +171,54 @@ pipeline-specific mapping and peak calling accessioning templates.
     ],
     'accession.steps': [
       {
-        dcc_step_run: 'tf-chip-signal-generation-step-v-1',
-        dcc_step_version: '/analysis-step-versions/tf-chip-signal-generation-step-v-1-0/',
+        dcc_step_run: '%s-signal-generation-step-v-1' % signal_generation_prefix,
+        dcc_step_version: '/analysis-step-versions/%s-signal-generation-step-v-1-0/' % signal_generation_prefix,
         wdl_files: bigwig_wdl_files,
         wdl_task_name: 'macs2_signal_track',
       },
       {
-        dcc_step_run: 'tf-chip-pooled-signal-generation-step-v-1',
-        dcc_step_version: '/analysis-step-versions/tf-chip-pooled-signal-generation-step-v-1-0/',
+        dcc_step_run: '%s-pooled-signal-generation-step-v-1' % signal_generation_prefix,
+        dcc_step_version: '/analysis-step-versions/%s-pooled-signal-generation-step-v-1-0/' % signal_generation_prefix,
         requires_replication: true,
         wdl_files: bigwig_wdl_files,
         wdl_task_name: 'macs2_signal_track_pooled',
       },
       {
-        dcc_step_run: 'tf-chip-seq-pseudoreplicated-idr-step-v-1',
-        dcc_step_version: '/analysis-step-versions/tf-chip-seq-pseudoreplicated-idr-step-v-1-0/',
+        dcc_step_run: '%s-seq-pseudoreplicated-idr-step-v-1' % step_prefix,
+        dcc_step_version: '/analysis-step-versions/%s-seq-pseudoreplicated-idr-step-v-1-0/' % step_prefix,
         wdl_files: IdrWdlFiles(self.wdl_task_name),
         wdl_task_name: 'idr_pr',
       },
       {
-        dcc_step_run: 'tf-chip-seq-pooled-pseudoreplicated-idr-step-v-1',
-        dcc_step_version: '/analysis-step-versions/tf-chip-seq-pooled-pseudoreplicated-idr-step-v-1-0/',
+        dcc_step_run: '%s-seq-pooled-pseudoreplicated-idr-step-v-1' % step_prefix,
+        dcc_step_version: '/analysis-step-versions/%s-seq-pooled-pseudoreplicated-idr-step-v-1-0/' % step_prefix,
         requires_replication: true,
         wdl_files: IdrWdlFiles(self.wdl_task_name, callbacks=['maybe_preferred_default']),
         wdl_task_name: 'idr_ppr',
       },
       {
-        dcc_step_run: 'tf-chip-seq-replicated-idr-step-v-1',
-        dcc_step_version: '/analysis-step-versions/tf-chip-seq-replicated-idr-step-v-1-0/',
+        dcc_step_run: '%s-seq-replicated-idr-step-v-1' % step_prefix,
+        dcc_step_version: '/analysis-step-versions/%s-seq-replicated-idr-step-v-1-0/' % step_prefix,
         requires_replication: true,
         wdl_files: IdrWdlFiles(self.wdl_task_name, callbacks=['maybe_preferred_default', 'maybe_conservative_set']),
         wdl_task_name: 'idr',
       },
       {
-        dcc_step_run: 'tf-chip-seq-pseudoreplicated-idr-thresholded-peaks-file-format-conversion-step-v-1',
-        dcc_step_version: '/analysis-step-versions/tf-chip-seq-pseudoreplicated-idr-thresholded-peaks-file-format-conversion-step-v-1-0/',
+        dcc_step_run: '%s-seq-pseudoreplicated-idr-thresholded-peaks-file-format-conversion-step-v-1' % step_prefix,
+        dcc_step_version: '/analysis-step-versions/%s-seq-pseudoreplicated-idr-thresholded-peaks-file-format-conversion-step-v-1-0/' % step_prefix,
         wdl_files: FormatConversionWdlFiles(self.wdl_task_name,),
         wdl_task_name: 'idr_pr',
       },
       {
-        dcc_step_run: 'tf-chip-seq-pooled-pseudoreplicated-idr-thresholded-peaks-file-format-conversion-step-v-1',
-        dcc_step_version: '/analysis-step-versions/tf-chip-seq-pooled-pseudoreplicated-idr-thresholded-peaks-file-format-conversion-step-v-1-0/',
+        dcc_step_run: '%s-seq-pooled-pseudoreplicated-idr-thresholded-peaks-file-format-conversion-step-v-1' % step_prefix,
+        dcc_step_version: '/analysis-step-versions/%s-seq-pooled-pseudoreplicated-idr-thresholded-peaks-file-format-conversion-step-v-1-0/' % step_prefix,
         requires_replication: true,
         wdl_files: FormatConversionWdlFiles(self.wdl_task_name, callbacks=['maybe_preferred_default'],),
         wdl_task_name: 'idr_ppr',
       },
       {
-        dcc_step_run: 'tf-chip-seq-replicated-idr-thresholded-peaks-file-format-conversion-step-v-1',
-        dcc_step_version: '/analysis-step-versions/tf-chip-seq-replicated-idr-thresholded-peaks-file-format-conversion-step-v-1-0/',
+        dcc_step_run: '%s-seq-replicated-idr-thresholded-peaks-file-format-conversion-step-v-1' % step_prefix,
+        dcc_step_version: '/analysis-step-versions/%s-seq-replicated-idr-thresholded-peaks-file-format-conversion-step-v-1-0/' % step_prefix,
         requires_replication: true,
         wdl_files: FormatConversionWdlFiles(
           self.wdl_task_name,
@@ -225,14 +232,15 @@ pipeline-specific mapping and peak calling accessioning templates.
     ],
     raw_fastqs_keys: $['chip_map_only_steps.json'].raw_fastqs_keys,
   },
-  local HistoneMintPeakCallSteps(blacklist_derived_from_task='', blacklist_derived_from_filekey='blacklist') = {
+  local AtacHistoneMintPeakCallSteps(is_atac=false, blacklist_derived_from_task='', blacklist_derived_from_filekey='blacklist') = {
+    local step_prefix = if is_atac then 'atac' else 'histone-chip',
     local has_blacklist_derived_from_task = std.length(blacklist_derived_from_task) > 0,
     local shared_file_props = {
       file_format_type: 'narrowPeak',
-      quality_metrics: [
-        'chip_replication',
-        'chip_peak_enrichment',
-      ],
+      quality_metrics: (if is_atac then ['atac_replication', 'atac_peak_enrichment'] else [
+                          'chip_replication',
+                          'chip_peak_enrichment',
+                        ]),
     },
     local OverlapWdlFiles(blacklist_derived_from_task, blacklist_derived_from_filekey, output_type, callbacks=[],) = [
       (
@@ -259,31 +267,32 @@ pipeline-specific mapping and peak calling accessioning templates.
         output_type: output_type,
       } + shared_file_props,
     ],
-    'accession.steps': [
-      {
-        dcc_step_run: 'histone-chip-signal-generation-step-v-1',
-        dcc_step_version: '/analysis-step-versions/histone-chip-signal-generation-step-v-1-0/',
-        wdl_files: bigwig_wdl_files,
-        wdl_task_name: 'macs2_signal_track',
-      },
-      {
-        dcc_step_run: 'histone-chip-seq-pooled-signal-generation-step-v-1',
-        dcc_step_version: '/analysis-step-versions/histone-chip-seq-pooled-signal-generation-step-v-1-0/',
-        requires_replication: true,
-        wdl_files: bigwig_wdl_files,
-        wdl_task_name: 'macs2_signal_track_pooled',
-      },
+    'accession.steps': (if is_atac then [] else [
+                          {
+                            dcc_step_run: '%s-signal-generation-step-v-1' % step_prefix,
+                            dcc_step_version: '/analysis-step-versions/%s-signal-generation-step-v-1-0/' % step_prefix,
+                            wdl_files: bigwig_wdl_files,
+                            wdl_task_name: 'macs2_signal_track',
+                          },
+                          {
+                            dcc_step_run: '%s-seq-pooled-signal-generation-step-v-1' % step_prefix,
+                            dcc_step_version: '/analysis-step-versions/%s-seq-pooled-signal-generation-step-v-1-0/' % step_prefix,
+                            requires_replication: true,
+                            wdl_files: bigwig_wdl_files,
+                            wdl_task_name: 'macs2_signal_track_pooled',
+                          },
+                        ]) + [
       {
         local _blacklist_derived_from_task = if has_blacklist_derived_from_task then blacklist_derived_from_task else self.wdl_task_name,
-        dcc_step_run: 'histone-chip-seq-pseudoreplicated-overlap-step-v-1',
-        dcc_step_version: '/analysis-step-versions/histone-chip-seq-pseudoreplicated-overlap-step-v-1-0/',
+        dcc_step_run: '%s-seq-pseudoreplicated-overlap-step-v-1' % step_prefix,
+        dcc_step_version: '/analysis-step-versions/%s-seq-pseudoreplicated-overlap-step-v-1-0/' % step_prefix,
         wdl_files: OverlapWdlFiles(_blacklist_derived_from_task, blacklist_derived_from_filekey, 'stable peaks'),
         wdl_task_name: 'overlap_pr',
       },
       {
         local _blacklist_derived_from_task = if has_blacklist_derived_from_task then blacklist_derived_from_task else self.wdl_task_name,
-        dcc_step_run: 'histone-chip-seq-pooled-pseudoreplicated-overlap-step-v-1',
-        dcc_step_version: '/analysis-step-versions/histone-chip-seq-pooled-pseudoreplicated-overlap-step-v-1-0/',
+        dcc_step_run: '%s-seq-pooled-pseudoreplicated-overlap-step-v-1' % step_prefix,
+        dcc_step_version: '/analysis-step-versions/%s-seq-pooled-pseudoreplicated-overlap-step-v-1-0/' % step_prefix,
         requires_replication: true,
         wdl_files: OverlapWdlFiles(_blacklist_derived_from_task, blacklist_derived_from_filekey, 'stable peaks', callbacks=[
           'maybe_preferred_default',
@@ -292,8 +301,8 @@ pipeline-specific mapping and peak calling accessioning templates.
       },
       {
         local _blacklist_derived_from_task = if has_blacklist_derived_from_task then blacklist_derived_from_task else self.wdl_task_name,
-        dcc_step_run: 'histone-chip-seq-replicated-overlap-step-v-1',
-        dcc_step_version: '/analysis-step-versions/histone-chip-seq-replicated-overlap-step-v-1-0/',
+        dcc_step_run: '%s-seq-replicated-overlap-step-v-1' % step_prefix,
+        dcc_step_version: '/analysis-step-versions/%s-seq-replicated-overlap-step-v-1-0/' % step_prefix,
         requires_replication: true,
         wdl_files: OverlapWdlFiles(_blacklist_derived_from_task, blacklist_derived_from_filekey, 'replicated peaks', callbacks=[
           'maybe_preferred_default',
@@ -301,21 +310,21 @@ pipeline-specific mapping and peak calling accessioning templates.
         wdl_task_name: 'overlap',
       },
       {
-        dcc_step_run: 'histone-chip-seq-pseudoreplicated-overlap-stable-peaks-file-format-conversion-step-v-1',
-        dcc_step_version: '/analysis-step-versions/histone-chip-seq-pseudoreplicated-overlap-stable-peaks-file-format-conversion-step-v-1-0/',
+        dcc_step_run: '%s-seq-pseudoreplicated-overlap-stable-peaks-file-format-conversion-step-v-1' % step_prefix,
+        dcc_step_version: '/analysis-step-versions/%s-seq-pseudoreplicated-overlap-stable-peaks-file-format-conversion-step-v-1-0/' % step_prefix,
         wdl_files: FormatConversionWdlFiles(self.wdl_task_name, 'stable peaks'),
         wdl_task_name: 'overlap_pr',
       },
       {
-        dcc_step_run: 'histone-chip-seq-pooled-pseudoreplicated-overlap-stable-peaks-file-format-conversion-step-v-1',
-        dcc_step_version: '/analysis-step-versions/histone-chip-seq-pooled-pseudoreplicated-overlap-stable-peaks-file-format-conversion-step-v-1-0/',
+        dcc_step_run: '%s-seq-pooled-pseudoreplicated-overlap-stable-peaks-file-format-conversion-step-v-1' % step_prefix,
+        dcc_step_version: '/analysis-step-versions/%s-seq-pooled-pseudoreplicated-overlap-stable-peaks-file-format-conversion-step-v-1-0/' % step_prefix,
         requires_replication: true,
         wdl_files: FormatConversionWdlFiles(self.wdl_task_name, 'stable peaks', callbacks=['maybe_preferred_default'],),
         wdl_task_name: 'overlap_ppr',
       },
       {
-        dcc_step_run: 'histone-chip-seq-replicated-overlap-file-format-conversion-step-v-1',
-        dcc_step_version: '/analysis-step-versions/histone-chip-seq-replicated-overlap-file-format-conversion-step-v-1-0/',
+        dcc_step_run: '%s-seq-replicated-overlap-file-format-conversion-step-v-1' % step_prefix,
+        dcc_step_version: '/analysis-step-versions/%s-seq-replicated-overlap-file-format-conversion-step-v-1-0/' % step_prefix,
         requires_replication: true,
         wdl_files: FormatConversionWdlFiles(self.wdl_task_name, 'replicated peaks', callbacks=['maybe_preferred_default'],),
         wdl_task_name: 'overlap',
@@ -323,8 +332,14 @@ pipeline-specific mapping and peak calling accessioning templates.
     ],
     raw_fastqs_keys: $['chip_map_only_steps.json'].raw_fastqs_keys,
   },
-  'histone_chip_peak_call_only_steps.json': HistoneMintPeakCallSteps(),
-  'mint_chip_peak_call_only_steps.json': HistoneMintPeakCallSteps(blacklist_derived_from_task='pool_blacklist', blacklist_derived_from_filekey='tas'),
+  'chip_map_only_steps.json': AtacChipMapOnlySteps(),
+  'control_chip_steps.json': AtacChipMapOnlySteps(is_control=true),
+  local atac_map_only_steps = AtacChipMapOnlySteps(is_atac=true),
+  local atac_idr_peak_call_steps = AtacTfChipPeakCallOnlySteps(is_atac=true),
+  local atac_overlap_peak_call_steps = AtacHistoneMintPeakCallSteps(is_atac=true),
+  'tf_chip_peak_call_only_steps.json': AtacTfChipPeakCallOnlySteps(),
+  'histone_chip_peak_call_only_steps.json': AtacHistoneMintPeakCallSteps(),
+  'mint_chip_peak_call_only_steps.json': AtacHistoneMintPeakCallSteps(blacklist_derived_from_task='pool_blacklist', blacklist_derived_from_filekey='tas'),
   'tf_chip_steps.json': {
     'accession.steps': $['chip_map_only_steps.json']['accession.steps'] + $['tf_chip_peak_call_only_steps.json']['accession.steps'],
     raw_fastqs_keys: $['chip_map_only_steps.json'].raw_fastqs_keys,
@@ -336,5 +351,9 @@ pipeline-specific mapping and peak calling accessioning templates.
   'mint_chip_steps.json': {
     'accession.steps': $['chip_map_only_steps.json']['accession.steps'] + $['mint_chip_peak_call_only_steps.json']['accession.steps'],
     raw_fastqs_keys: $['chip_map_only_steps.json'].raw_fastqs_keys,
+  },
+  'atac_steps.json': {
+    'accession.steps': atac_map_only_steps['accession.steps'] + atac_idr_peak_call_steps['accession.steps'] + atac_overlap_peak_call_steps['accession.steps'],
+    raw_fastqs_keys: atac_map_only_steps.raw_fastqs_keys,
   },
 }
