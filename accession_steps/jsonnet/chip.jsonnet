@@ -197,8 +197,8 @@ pipeline-specific mapping and peak calling accessioning templates.
         wdl_task_name: 'idr',
       },
       {
-        dcc_step_run: 'tf-chip-seq-pseudoreplicated-idr-ranked-peaks-file-format-conversion-step-v-1',
-        dcc_step_version: '/analysis-step-versions/tf-chip-seq-pseudoreplicated-idr-ranked-peaks-file-format-conversion-step-v-1-0/',
+        dcc_step_run: 'tf-chip-seq-pseudoreplicated-idr-thresholded-peaks-file-format-conversion-step-v-1',
+        dcc_step_version: '/analysis-step-versions/tf-chip-seq-pseudoreplicated-idr-thresholded-peaks-file-format-conversion-step-v-1-0/',
         wdl_files: FormatConversionWdlFiles(self.wdl_task_name,),
         wdl_task_name: 'idr_pr',
       },
