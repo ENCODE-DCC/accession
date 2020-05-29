@@ -965,15 +965,11 @@ class AccessionMicroRna(AccessionGenericRna):
         return self.queue_qc(star_qc_metric, encode_bam_file, "star-quality-metric")
 
 
-class AccessionChip(Accession):
-    QC_MAP = {
-        "chip_alignment": "make_chip_alignment_qc",
-        "chip_align_enrich": "make_chip_align_enrich_qc",
-        "chip_library": "make_chip_library_qc",
-        "chip_replication": "make_chip_replication_qc",
-        "chip_peak_enrichment": "make_chip_peak_enrichment_qc",
-    }
-
+class AccessionChipAtac(Accession):
+    """
+    Hold methods shared between ChIP and ATAC accessioning, since the pipelines are very
+    similar.
+    """
     @property
     def assembly(self) -> str:
         filekey = "ref_fa"
@@ -993,18 +989,6 @@ class AccessionChip(Accession):
             self.logger.exception("Could not determine assembly")
             raise
         return portal_assembly
-
-    @staticmethod
-    def get_chip_pipeline_replication_method(qc: Dict[str, Any]) -> str:
-        """
-        Checks the qc report for the pipeline type and returns the appropriate
-        reproducibility criteria, `idr` when using SPP peak caller and `overlap` if the
-        peak caller was MACS2.
-        """
-        peak_caller = qc["general"]["peak_caller"]
-        if peak_caller == "macs2":
-            return "overlap"
-        return "idr"
 
     def get_chip_pipeline_replicate(self, gs_file):
         """
@@ -1032,6 +1016,59 @@ class AccessionChip(Accession):
                 )
             )
         return pipeline_rep
+
+    def add_mapped_read_length(self, gs_file: GSFile) -> Dict[str, int]:
+        """
+        Obtains the value of mapped_read_length to post for bam files from the read
+        length log in the ancestor align task in the ChIP-seq pipeline.
+        """
+        read_len_log = self.analysis.search_up(gs_file.task, "align", "read_len_log")[0]
+        log_contents = self.backend.read_file(read_len_log.filename)
+        try:
+            mapped_read_length = int(log_contents)
+        except ValueError as e:
+            raise RuntimeError(
+                f"Could not parse read length log into integer: tried to parse {log_contents}"
+            ) from e
+        return {"mapped_read_length": mapped_read_length}
+
+    def add_mapped_run_type(self, gs_file: GSFile) -> Dict[str, str]:
+        """
+        Obtains the value of `mapped_run_type` to post for bam files from the read
+        length log in the ancestor align task in the ChIP-seq pipeline, useful for
+        detecting PE data that was mapped as SE on the portal.
+        """
+        replicate = self.get_chip_pipeline_replicate(gs_file)
+        qc = self.backend.read_json(self.analysis.get_files("qc_json")[0])
+        is_paired_end = qc["general"]["seq_endedness"][replicate]["paired_end"]
+        if not isinstance(is_paired_end, bool):
+            raise TypeError(
+                f"Expected boolean for ChIP QC value general.seq_endedness.{replicate}.paired_end, found {is_paired_end}"
+            )
+        mapped_run_type = "paired-ended" if is_paired_end else "single-ended"
+        return {"mapped_run_type": mapped_run_type}
+
+
+class AccessionChip(AccessionChipAtac):
+    QC_MAP = {
+        "chip_alignment": "make_chip_alignment_qc",
+        "chip_align_enrich": "make_chip_align_enrich_qc",
+        "chip_library": "make_chip_library_qc",
+        "chip_replication": "make_chip_replication_qc",
+        "chip_peak_enrichment": "make_chip_peak_enrichment_qc",
+    }
+
+    @staticmethod
+    def get_chip_pipeline_replication_method(qc: Dict[str, Any]) -> str:
+        """
+        Checks the qc report for the pipeline type and returns the appropriate
+        reproducibility criteria, `idr` when using SPP peak caller and `overlap` if the
+        peak caller was MACS2.
+        """
+        peak_caller = qc["general"]["peak_caller"]
+        if peak_caller == "macs2":
+            return "overlap"
+        return "idr"
 
     def maybe_preferred_default(self, gs_file: GSFile) -> Dict[str, bool]:
         """
@@ -1068,37 +1105,6 @@ class AccessionChip(Accession):
         if current_set == consv_set:
             return {"output_type": "conservative IDR thresholded peaks"}
         return {}
-
-    def add_mapped_read_length(self, gs_file: GSFile) -> Dict[str, int]:
-        """
-        Obtains the value of mapped_read_length to post for bam files from the read
-        length log in the ancestor align task in the ChIP-seq pipeline.
-        """
-        read_len_log = self.analysis.search_up(gs_file.task, "align", "read_len_log")[0]
-        log_contents = self.backend.read_file(read_len_log.filename)
-        try:
-            mapped_read_length = int(log_contents)
-        except ValueError as e:
-            raise RuntimeError(
-                f"Could not parse read length log into integer: tried to parse {log_contents}"
-            ) from e
-        return {"mapped_read_length": mapped_read_length}
-
-    def add_mapped_run_type(self, gs_file: GSFile) -> Dict[str, str]:
-        """
-        Obtains the value of `mapped_run_type` to post for bam files from the read
-        length log in the ancestor align task in the ChIP-seq pipeline, useful for
-        detecting PE data that was mapped as SE on the portal.
-        """
-        replicate = self.get_chip_pipeline_replicate(gs_file)
-        qc = self.backend.read_json(self.analysis.get_files("qc_json")[0])
-        is_paired_end = qc["general"]["seq_endedness"][replicate]["paired_end"]
-        if not isinstance(is_paired_end, bool):
-            raise TypeError(
-                f"Expected boolean for ChIP QC value general.seq_endedness.{replicate}.paired_end, found {is_paired_end}"
-            )
-        mapped_run_type = "paired-ended" if is_paired_end else "single-ended"
-        return {"mapped_run_type": mapped_run_type}
 
     def maybe_add_cropped_read_length(self, gs_file: GSFile) -> Dict[str, int]:
         """
@@ -1354,6 +1360,34 @@ class AccessionChip(Accession):
         )
 
 
+class AccessionAtac(Accession):
+    QC_MAP = {
+        "atac_alignment": "make_atac_alignment_qc",
+        "atac_align_enrich": "make_atac_align_enrich_qc",
+        "atac_library": "make_atac_library_qc",
+        "atac_replication": "make_atac_replication_qc",
+        "atac_peak_enrichment": "make_atac_peak_enrichment_qc",
+    }
+
+    def assembly(self):
+        pass
+
+    def make_atac_alignment_qc(self, encode_file: EncodeFile, gs_file: GSFile) -> None:
+        pass
+
+    def make_atac_align_enrich_qc(self, encode_file: EncodeFile, gs_file: GSFile) -> None:
+        pass
+
+    def make_atac_library_qc(self, encode_file: EncodeFile, gs_file: GSFile) -> None:
+        pass
+
+    def make_atac_replication_qc(self, encode_file: EncodeFile, gs_file: GSFile) -> None:
+        pass
+
+    def make_atac_peak_enrichment_qc(self, encode_file: EncodeFile, gs_file: GSFile) -> None:
+        pass
+
+
 def accession_factory(
     pipeline_type: str,
     accession_metadata: str,
@@ -1380,6 +1414,7 @@ def accession_factory(
         "histone_chip": AccessionChip,
         "mint_chip": AccessionChip,
         "control_chip": AccessionChip,
+        "atac": AccessionAtac,
     }
     selected_accession: Optional[Type[Accession]] = None
     try:
