@@ -968,7 +968,8 @@ class AccessionMicroRna(AccessionGenericRna):
 class AccessionChipAtac(Accession):
     """
     Hold methods shared between ChIP and ATAC accessioning, since the pipelines are very
-    similar.
+    similar. In theory this should somehow be an abstract class, but multiple
+    inheritance with ABC is tricky, and overkill to implement here.
     """
     @property
     def assembly(self) -> str:
