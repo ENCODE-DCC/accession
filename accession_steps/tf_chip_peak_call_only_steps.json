@@ -276,8 +276,8 @@
       "wdl_task_name": "idr"
     },
     {
-      "dcc_step_run": "tf-chip-seq-pseudoreplicated-idr-ranked-peaks-file-format-conversion-step-v-1",
-      "dcc_step_version": "/analysis-step-versions/tf-chip-seq-pseudoreplicated-idr-ranked-peaks-file-format-conversion-step-v-1-0/",
+      "dcc_step_run": "tf-chip-seq-pseudoreplicated-idr-thresholded-peaks-file-format-conversion-step-v-1",
+      "dcc_step_version": "/analysis-step-versions/tf-chip-seq-pseudoreplicated-idr-thresholded-peaks-file-format-conversion-step-v-1-0/",
       "wdl_files": [
         {
           "derived_from_files": [
