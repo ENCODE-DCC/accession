@@ -1471,6 +1471,7 @@ class AccessionAtac(AccessionAtacChip):
         )[0]
         output_qc = {}
         output_qc.update(qc["align_enrich"]["jsd"][replicate])
+        output_qc.update(qc["peak_enrich"]["frac_reads_in_annot"][replicate])
         output_qc.update(
             {
                 "tss_enrichment": qc["align_enrich"]["tss_enrich"][replicate][
@@ -1514,14 +1515,16 @@ class AccessionAtac(AccessionAtacChip):
         psuedo-replicates being compared.
 
         IDR cutoff, plot, and log are always reported for all IDR thresholded peaks
-        files. They are not reported for the histone pipeline, which uses overlap.
-        The IDR log file attachment is fudged with a .txt extension so that the portal
-        can guess the mime type correctly and accept the file as valid.
+        files. They are not reported for the files using overlap. The IDR log file
+        attachment is fudged with a .txt extension so that the portal can guess the mime
+        type correctly and accept the file as valid.
         """
-        if encode_file.has_qc("ChipReplicationQualityMetric"):
+        if encode_file.has_qc("AtacReplicationQualityMetric"):
             return
+
         raw_qc = self.backend.read_json(self.analysis.get_files("qc_json")[0])
-        method = self.get_chip_pipeline_replication_method(raw_qc)
+        task_name = gs_file.task.task_name
+        method = task_name.split("_")[0]
         qc = raw_qc["replication"]["reproducibility"][method]
 
         optimal_set = qc["opt_set"]
@@ -1538,7 +1541,6 @@ class AccessionAtac(AccessionAtacChip):
                 }
             )
 
-        task_name = gs_file.task.task_name
         num_peaks = None
         if task_name == f"{method}_ppr":
             num_peaks = qc["Np"]
@@ -1568,7 +1570,7 @@ class AccessionAtac(AccessionAtacChip):
                     )
                 }
             )
-        return self.queue_qc(output_qc, encode_file, "chip-replication-quality-metric")
+        return self.queue_qc(output_qc, encode_file, "atac-replication-quality-metric")
 
     def make_atac_peak_enrichment_qc(
         self, encode_file: EncodeFile, gs_file: GSFile
@@ -1579,11 +1581,11 @@ class AccessionAtac(AccessionAtacChip):
         IDR frip scores are applicable to any pair undergoing IDR, so they are always
         looked for.
         """
-        if encode_file.has_qc("ChipPeakEnrichmentQualityMetric"):
+        if encode_file.has_qc("AtacPeakEnrichmentQualityMetric"):
             return
 
         qc = self.backend.read_json(self.analysis.get_files("qc_json")[0])
-        method = self.get_chip_pipeline_replication_method(qc)
+        method = gs_file.task.task_name.split("_")[0]
 
         optimal_set = qc["replication"]["reproducibility"][method]["opt_set"]
         current_set = gs_file.task.inputs["prefix"]
@@ -1594,14 +1596,14 @@ class AccessionAtac(AccessionAtacChip):
             ]
         }
         if current_set == optimal_set:
-            output_qc.update({**qc["peak_stat"]["peak_region_size"][f"{method}_opt"]})
+            output_qc.update(qc["peak_stat"]["peak_region_size"][f"{method}_opt"])
         for k, v in output_qc.items():
             if k in ["mean", "frip"]:
                 output_qc[k] = float(v)
             else:
                 output_qc[k] = int(v)
         return self.queue_qc(
-            output_qc, encode_file, "chip-peak-enrichment-quality-metric"
+            output_qc, encode_file, "atac-peak-enrichment-quality-metric"
         )
 
 

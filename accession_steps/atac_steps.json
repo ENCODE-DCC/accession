@@ -48,6 +48,18 @@
           ],
           "derived_from_files": [
             {
+              "derived_from_filekey": "blacklist",
+              "derived_from_inputs": true,
+              "derived_from_task": "annot_enrich",
+              "should_search_down": true
+            },
+            {
+              "derived_from_filekey": "dnase",
+              "derived_from_inputs": true,
+              "derived_from_task": "annot_enrich",
+              "should_search_down": true
+            },
+            {
               "derived_from_filekey": "enh",
               "derived_from_inputs": true,
               "derived_from_task": "annot_enrich",
@@ -55,12 +67,6 @@
             },
             {
               "derived_from_filekey": "prom",
-              "derived_from_inputs": true,
-              "derived_from_task": "annot_enrich",
-              "should_search_down": true
-            },
-            {
-              "derived_from_filekey": "blacklist",
               "derived_from_inputs": true,
               "derived_from_task": "annot_enrich",
               "should_search_down": true
