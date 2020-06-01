@@ -4713,7 +4713,7 @@
     ],
     "accession": "ENCFF230QSC",
     "aliases": [
-      "encode-processing-pipeline:encode-processing-caper_out-mirna_seq_pipeline-66d40a16-f046-4af9-963d-f6380f062816-call-star-shard-0-glob-3ba5e3451b86f0c8ab7d8dd3a0ccea4e-rep1ENCSR543MWW.bam"
+      "encode-processing-pipeline:66d40a16-f046-4af9-963d-f6380f062816-encode-processing-caper_out-mirna_seq_pipeline-66d40a16-f046-4af9-963d-f6380f062816-call-star-shard-0-glob-3ba5e3451b86f0c8ab7d8dd3a0ccea4e-rep1ENCSR543MWW.bam"
     ],
     "alternate_accessions": [],
     "analysis_step_version": {
@@ -5153,7 +5153,7 @@
     ],
     "accession": "ENCFF894KUA",
     "aliases": [
-      "encode-processing-pipeline:encode-processing-caper_out-mirna_seq_pipeline-66d40a16-f046-4af9-963d-f6380f062816-call-wigtobigwig-shard-0-glob-f2920e4cd5a28e8c120bd92e7ba31ecf-rep1ENCSR543MWW.signal.all.minus.bigWig"
+      "encode-processing-pipeline:66d40a16-f046-4af9-963d-f6380f062816-encode-processing-caper_out-mirna_seq_pipeline-66d40a16-f046-4af9-963d-f6380f062816-call-wigtobigwig-shard-0-glob-f2920e4cd5a28e8c120bd92e7ba31ecf-rep1ENCSR543MWW.signal.all.minus.bigWig"
     ],
     "alternate_accessions": [],
     "analysis_step_version": {
@@ -5529,7 +5529,7 @@
     ],
     "accession": "ENCFF178QFM",
     "aliases": [
-      "encode-processing-pipeline:encode-processing-caper_out-mirna_seq_pipeline-66d40a16-f046-4af9-963d-f6380f062816-call-wigtobigwig-shard-0-glob-ecf13a1f988469a7767bed84843bd510-rep1ENCSR543MWW.signal.all.plus.bigWig"
+      "encode-processing-pipeline:66d40a16-f046-4af9-963d-f6380f062816-encode-processing-caper_out-mirna_seq_pipeline-66d40a16-f046-4af9-963d-f6380f062816-call-wigtobigwig-shard-0-glob-ecf13a1f988469a7767bed84843bd510-rep1ENCSR543MWW.signal.all.plus.bigWig"
     ],
     "alternate_accessions": [],
     "analysis_step_version": {
@@ -5905,7 +5905,7 @@
     ],
     "accession": "ENCFF413TVF",
     "aliases": [
-      "encode-processing-pipeline:encode-processing-caper_out-mirna_seq_pipeline-66d40a16-f046-4af9-963d-f6380f062816-call-wigtobigwig-shard-0-glob-5d1de83c72d3b961f02eb173e9f6d5a2-rep1ENCSR543MWW.signal.unique.plus.bigWig"
+      "encode-processing-pipeline:66d40a16-f046-4af9-963d-f6380f062816-encode-processing-caper_out-mirna_seq_pipeline-66d40a16-f046-4af9-963d-f6380f062816-call-wigtobigwig-shard-0-glob-5d1de83c72d3b961f02eb173e9f6d5a2-rep1ENCSR543MWW.signal.unique.plus.bigWig"
     ],
     "alternate_accessions": [],
     "analysis_step_version": {
@@ -6281,7 +6281,7 @@
     ],
     "accession": "ENCFF385QYX",
     "aliases": [
-      "encode-processing-pipeline:encode-processing-caper_out-mirna_seq_pipeline-66d40a16-f046-4af9-963d-f6380f062816-call-star-shard-0-glob-ee3cac44669b7460fea102fa893f1b06-rep1ENCSR543MWW.tsv"
+      "encode-processing-pipeline:66d40a16-f046-4af9-963d-f6380f062816-encode-processing-caper_out-mirna_seq_pipeline-66d40a16-f046-4af9-963d-f6380f062816-call-star-shard-0-glob-ee3cac44669b7460fea102fa893f1b06-rep1ENCSR543MWW.tsv"
     ],
     "alternate_accessions": [],
     "analysis_step_version": {
@@ -6672,7 +6672,7 @@
     ],
     "accession": "ENCFF269MMV",
     "aliases": [
-      "encode-processing-pipeline:encode-processing-caper_out-mirna_seq_pipeline-66d40a16-f046-4af9-963d-f6380f062816-call-wigtobigwig-shard-0-glob-e26cce3d0ca522acfdb935f7efeb3e0f-rep1ENCSR543MWW.signal.unique.minus.bigWig"
+      "encode-processing-pipeline:66d40a16-f046-4af9-963d-f6380f062816-encode-processing-caper_out-mirna_seq_pipeline-66d40a16-f046-4af9-963d-f6380f062816-call-wigtobigwig-shard-0-glob-e26cce3d0ca522acfdb935f7efeb3e0f-rep1ENCSR543MWW.signal.unique.minus.bigWig"
     ],
     "alternate_accessions": [],
     "analysis_step_version": {
