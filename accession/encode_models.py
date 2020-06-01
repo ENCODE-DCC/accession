@@ -244,6 +244,9 @@ class EncodeAnalysis:
 
 
 class EncodeExperiment:
+    INTERNAL_STATUS_KEY = "internal_status"
+    INTERNAL_STATUS_POST_ACCESSIONING = "pipeline completed"
+
     def __init__(self, portal_experiment: Dict[str, Any]):
         self.at_id = portal_experiment["@id"]
         self.portal_properties = portal_experiment
@@ -285,6 +288,12 @@ class EncodeExperiment:
         encode_utils, we need to put it into a list with the `analyses` key.
         """
         return {"analyses": [analysis_payload], Connection.ENCID_KEY: self.at_id}
+
+    def get_patchable_internal_status(self):
+        return {
+            self.INTERNAL_STATUS_KEY: self.INTERNAL_STATUS_POST_ACCESSIONING,
+            Connection.ENCID_KEY: self.at_id,
+        }
 
 
 class EncodeAttachment:
