@@ -105,7 +105,22 @@ more legible.
                    'maybe_add_cropped_read_length',
                    'maybe_add_cropped_read_length_tolerance',
                  ] else []),
-            derived_from_files: (if is_atac then atac_map_only_steps['accession.steps'][0].wdl_files[0].derived_from_files else $['chip_map_only_steps.json']['accession.steps'][0].wdl_files[0].derived_from_files),
+            // Python-style array comprension syntax
+            local atac_filtered_bam_derived_from_files = [
+              {
+                derived_from_filekey: filekey,
+                derived_from_inputs: true,
+                derived_from_task: 'annot_enrich',
+                should_search_down: true,
+              }
+              for filekey in ['enh', 'prom', 'blacklist']
+            ] + [{
+              derived_from_filekey: 'nodup_bam',
+              derived_from_inputs: true,
+              derived_from_task: 'tss_enrich',
+              should_search_down: true,
+            }] + atac_map_only_steps['accession.steps'][0].wdl_files[0].derived_from_files,
+            derived_from_files: (if is_atac then atac_filtered_bam_derived_from_files else $['chip_map_only_steps.json']['accession.steps'][0].wdl_files[0].derived_from_files),
             file_format: 'bam',
             filekey: 'nodup_bam',
             output_type: 'alignments',

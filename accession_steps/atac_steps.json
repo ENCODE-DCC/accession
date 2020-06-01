@@ -48,6 +48,30 @@
           ],
           "derived_from_files": [
             {
+              "derived_from_filekey": "enh",
+              "derived_from_inputs": true,
+              "derived_from_task": "annot_enrich",
+              "should_search_down": true
+            },
+            {
+              "derived_from_filekey": "prom",
+              "derived_from_inputs": true,
+              "derived_from_task": "annot_enrich",
+              "should_search_down": true
+            },
+            {
+              "derived_from_filekey": "blacklist",
+              "derived_from_inputs": true,
+              "derived_from_task": "annot_enrich",
+              "should_search_down": true
+            },
+            {
+              "derived_from_filekey": "nodup_bam",
+              "derived_from_inputs": true,
+              "derived_from_task": "tss_enrich",
+              "should_search_down": true
+            },
+            {
               "derived_from_filekey": "idx_tar",
               "derived_from_inputs": true,
               "derived_from_task": "align"
@@ -352,8 +376,8 @@
       "wdl_task_name": "idr"
     },
     {
-      "dcc_step_run": "atac-seq-pseudoreplicated-idr-ranked-peaks-file-format-conversion-step-v-1",
-      "dcc_step_version": "/analysis-step-versions/atac-seq-pseudoreplicated-idr-ranked-peaks-file-format-conversion-step-v-1-0/",
+      "dcc_step_run": "atac-seq-pseudoreplicated-idr-thresholded-peaks-file-format-conversion-step-v-1",
+      "dcc_step_version": "/analysis-step-versions/atac-seq-pseudoreplicated-idr-thresholded-peaks-file-format-conversion-step-v-1-0/",
       "wdl_files": [
         {
           "derived_from_files": [

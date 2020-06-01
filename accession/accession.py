@@ -315,19 +315,31 @@ class Accession(ABC):
             ancestors.append(self.get_derived_from(file, ancestor))
         return list(set(flatten(ancestors)))
 
-    # Returns list of accession ids of files on portal or recently accessioned
     def get_derived_from(self, file: GSFile, ancestor: DerivedFromFile) -> List[str]:
+        """
+        Returns list of accession ids of files on portal or recently accessioned. Will
+        search_down if the ancestor file indicates it should be `search_down`ed for via
+        its `should_search_down` property.
+        """
         try:
-            derived_from_files = self.analysis.search_up(
-                file.task,
-                ancestor.derived_from_task,
-                ancestor.derived_from_filekey,
-                ancestor.derived_from_inputs,
-                disallow_tasks=ancestor.disallow_tasks,
-            )
+            if ancestor.should_search_down:
+                derived_from_files = self.analysis.search_down(
+                    file.task,
+                    ancestor.derived_from_task,
+                    ancestor.derived_from_filekey,
+                    ancestor.derived_from_inputs,
+                )
+            else:
+                derived_from_files = self.analysis.search_up(
+                    file.task,
+                    ancestor.derived_from_task,
+                    ancestor.derived_from_filekey,
+                    ancestor.derived_from_inputs,
+                    disallow_tasks=ancestor.disallow_tasks,
+                )
         except ValueError:
             self.logger.exception(
-                "An error occured searching up for the parent file of %s", file.filename
+                "An error occured searching for the parent file of %s", file.filename
             )
             raise
         encode_files = []
@@ -965,12 +977,13 @@ class AccessionMicroRna(AccessionGenericRna):
         return self.queue_qc(star_qc_metric, encode_bam_file, "star-quality-metric")
 
 
-class AccessionChipAtac(Accession):
+class AccessionAtacChip(Accession):
     """
     Hold methods shared between ChIP and ATAC accessioning, since the pipelines are very
     similar. In theory this should somehow be an abstract class, but multiple
     inheritance with ABC is tricky, and overkill to implement here.
     """
+
     @property
     def assembly(self) -> str:
         filekey = "ref_fa"
@@ -991,7 +1004,7 @@ class AccessionChipAtac(Accession):
             raise
         return portal_assembly
 
-    def get_chip_pipeline_replicate(self, gs_file):
+    def get_atac_chip_pipeline_replicate(self, gs_file):
         """
         Searches for the input fastq array corresponding to the ancestor input fastqs of the current
         file and returns the pipeline replicate number. We only need to check R1, since it will
@@ -1039,7 +1052,7 @@ class AccessionChipAtac(Accession):
         length log in the ancestor align task in the ChIP-seq pipeline, useful for
         detecting PE data that was mapped as SE on the portal.
         """
-        replicate = self.get_chip_pipeline_replicate(gs_file)
+        replicate = self.get_atac_chip_pipeline_replicate(gs_file)
         qc = self.backend.read_json(self.analysis.get_files("qc_json")[0])
         is_paired_end = qc["general"]["seq_endedness"][replicate]["paired_end"]
         if not isinstance(is_paired_end, bool):
@@ -1050,7 +1063,7 @@ class AccessionChipAtac(Accession):
         return {"mapped_run_type": mapped_run_type}
 
 
-class AccessionChip(AccessionChipAtac):
+class AccessionChip(AccessionAtacChip):
     QC_MAP = {
         "chip_alignment": "make_chip_alignment_qc",
         "chip_align_enrich": "make_chip_align_enrich_qc",
@@ -1151,7 +1164,7 @@ class AccessionChip(AccessionChipAtac):
         if encode_file.has_qc("ChipAlignmentQualityMetric"):
             return
         qc = self.backend.read_json(self.analysis.get_files("qc_json")[0])
-        replicate = self.get_chip_pipeline_replicate(gs_file)
+        replicate = self.get_atac_chip_pipeline_replicate(gs_file)
         if "unfiltered" in encode_file.output_type:
             qc_key, processing_stage = "samstat", "unfiltered"
         else:
@@ -1180,7 +1193,7 @@ class AccessionChip(AccessionChipAtac):
         if encode_file.has_qc("ChipAlignmentEnrichmentQualityMetric"):
             return
         qc = self.backend.read_json(self.analysis.get_files("qc_json")[0])
-        replicate = self.get_chip_pipeline_replicate(gs_file)
+        replicate = self.get_atac_chip_pipeline_replicate(gs_file)
         key_to_match = "fastqs_R1"
         parent_fastqs = [
             file.filename
@@ -1247,7 +1260,7 @@ class AccessionChip(AccessionChipAtac):
         if encode_file.has_qc("ChipLibraryQualityMetric"):
             return
         qc = self.backend.read_json(self.analysis.get_files("qc_json")[0])
-        replicate = self.get_chip_pipeline_replicate(gs_file)
+        replicate = self.get_atac_chip_pipeline_replicate(gs_file)
         output_qc = {
             **qc["align"]["dup"][replicate],
             **qc["lib_complexity"]["lib_complexity"][replicate],
@@ -1361,7 +1374,7 @@ class AccessionChip(AccessionChipAtac):
         )
 
 
-class AccessionAtac(Accession):
+class AccessionAtac(AccessionAtacChip):
     QC_MAP = {
         "atac_alignment": "make_atac_alignment_qc",
         "atac_align_enrich": "make_atac_align_enrich_qc",
@@ -1370,23 +1383,226 @@ class AccessionAtac(Accession):
         "atac_peak_enrichment": "make_atac_peak_enrichment_qc",
     }
 
-    def assembly(self):
-        pass
+    @staticmethod
+    def get_atac_pipeline_replication_method(qc: Dict[str, Any]) -> str:
+        """
+        Checks the qc report for the pipeline type and returns the appropriate
+        reproducibility criteria, `idr` when using SPP peak caller and `overlap` if the
+        peak caller was MACS2.
+        """
+        peak_caller = qc["general"]["peak_caller"]
+        if peak_caller == "macs2":
+            return "overlap"
+        return "idr"
+
+    def maybe_preferred_default(self, gs_file: GSFile) -> Dict[str, bool]:
+        """
+        For replicated ChIP-seq experiment, the exact file that is to be labeled with
+        preferred_default=true may vary. As such, this callback is registered for any
+        file that might need to have this value set in the steps JSON, and called at
+        file object generation time (make_file_obj) to fill in (or not) the missing
+        value.
+        """
+        qc = self.backend.read_json(self.analysis.get_files("qc_json")[0])
+        method = self.get_atac_pipeline_replication_method(qc)
+        replication_qc = qc["replication"]["reproducibility"][method]
+
+        optimal_set = replication_qc["opt_set"]
+        current_set = gs_file.task.inputs["prefix"]
+        if current_set == optimal_set:
+            return {"preferred_default": True}
+        return {}
+
+    def maybe_conservative_set(self, gs_file: GSFile) -> Dict[str, str]:
+        """
+        For replicated ChIP-seq experiment, the exact file that is to be labeled as
+        the conservative set may vary. As such, this callback is registered for any
+        file that might need to have this value set in the steps JSON, and called at
+        file object generation time (make_file_obj) to fill in (or not) the missing
+        value.
+        """
+        qc = self.backend.read_json(self.analysis.get_files("qc_json")[0])[
+            "replication"
+        ]["reproducibility"]["idr"]
+
+        consv_set = qc["consv_set"]
+        current_set = gs_file.task.inputs["prefix"]
+        if current_set == consv_set:
+            return {"output_type": "conservative IDR thresholded peaks"}
+        return {}
 
     def make_atac_alignment_qc(self, encode_file: EncodeFile, gs_file: GSFile) -> None:
-        pass
+        """
+        Constructs postable QC from the `samstat` and `nodup_samstat` sections of the
+        ATAC global QC for the raw and filtered bams, respectively, and also adds in
+        `frac_mito` and `frag_len_stat` for both the bams.
+        """
+        if encode_file.has_qc("AtacAlignmentQualityMetric"):
+            return
+        qc = self.backend.read_json(self.analysis.get_files("qc_json")[0])
+        replicate = self.get_atac_chip_pipeline_replicate(gs_file)
+        if "unfiltered" in encode_file.output_type:
+            qc_key, processing_stage = "samstat", "unfiltered"
+        else:
+            qc_key, processing_stage = "nodup_samstat", "filtered"
+        output_qc = {}
+        output_qc["processing_stage"] = processing_stage
+        output_qc.update(qc["align"][qc_key][replicate])
+        output_qc.update(qc["align"]["frac_mito"][replicate])
+        output_qc.update(qc["align"]["frag_len_stat"][replicate])
+        return self.queue_qc(output_qc, encode_file, "atac-alignment-quality-metric")
 
-    def make_atac_align_enrich_qc(self, encode_file: EncodeFile, gs_file: GSFile) -> None:
-        pass
+    def make_atac_align_enrich_qc(
+        self, encode_file: EncodeFile, gs_file: GSFile
+    ) -> None:
+        """
+        Similar to ChIP, except no xcor is needed and ATAC has TSS enrichment.
+        """
+        if encode_file.has_qc("AtacAlignmentEnrichmentQualityMetric"):
+            return
+        qc = self.backend.read_json(self.analysis.get_files("qc_json")[0])
+        replicate = self.get_atac_chip_pipeline_replicate(gs_file)
+        fingerprint_plot_png = self.analysis.search_down(gs_file.task, "jsd", "plot")[0]
+        gc_bias_plot_png = self.analysis.search_down(
+            gs_file.task, "gc_bias", "gc_plot"
+        )[0]
+        tss_enrichment_plot_png = self.analysis.search_down(
+            gs_file.task, "tss_enrich", "tss_large_plot"
+        )[0]
+        output_qc = {}
+        output_qc.update(qc["align_enrich"]["jsd"][replicate])
+        output_qc.update(
+            {
+                "tss_enrichment": qc["align_enrich"]["tss_enrich"][replicate][
+                    "tss_enrich"
+                ]
+            }
+        )
+        output_qc.update(
+            {
+                "jsd_plot": self.get_attachment(fingerprint_plot_png, "image/png"),
+                "gc_bias_plot": self.get_attachment(gc_bias_plot_png, "image/png"),
+                "tss_enrichment_plot": self.get_attachment(
+                    tss_enrichment_plot_png, "image/png"
+                ),
+            }
+        )
+        return self.queue_qc(
+            output_qc, encode_file, "atac-alignment-enrichment-quality-metric"
+        )
 
     def make_atac_library_qc(self, encode_file: EncodeFile, gs_file: GSFile) -> None:
-        pass
+        if encode_file.has_qc("AtacLibraryQualityMetric"):
+            return
+        qc = self.backend.read_json(self.analysis.get_files("qc_json")[0])
+        replicate = self.get_atac_chip_pipeline_replicate(gs_file)
+        output_qc = {
+            **qc["align"]["dup"][replicate],
+            **qc["lib_complexity"]["lib_complexity"][replicate],
+        }
+        return self.queue_qc(output_qc, encode_file, "atac-library-quality-metric")
 
-    def make_atac_replication_qc(self, encode_file: EncodeFile, gs_file: GSFile) -> None:
-        pass
+    def make_atac_replication_qc(
+        self, encode_file: EncodeFile, gs_file: GSFile
+    ) -> None:
+        """
+        Rescue ratio and self-consistency ratio are only reported for optimal set. This
+        set is determined by checking the QC JSON, and comparing to the prefix in the
+        IDR task input in the WDL.
 
-    def make_atac_peak_enrichment_qc(self, encode_file: EncodeFile, gs_file: GSFile) -> None:
-        pass
+        The value of the QC's `reproducible_peaks` depends on the replicates or
+        psuedo-replicates being compared.
+
+        IDR cutoff, plot, and log are always reported for all IDR thresholded peaks
+        files. They are not reported for the histone pipeline, which uses overlap.
+        The IDR log file attachment is fudged with a .txt extension so that the portal
+        can guess the mime type correctly and accept the file as valid.
+        """
+        if encode_file.has_qc("ChipReplicationQualityMetric"):
+            return
+        raw_qc = self.backend.read_json(self.analysis.get_files("qc_json")[0])
+        method = self.get_chip_pipeline_replication_method(raw_qc)
+        qc = raw_qc["replication"]["reproducibility"][method]
+
+        optimal_set = qc["opt_set"]
+        current_set = gs_file.task.inputs["prefix"]
+        output_qc = {}
+
+        if current_set == optimal_set:
+            output_qc.update(
+                {
+                    k: v
+                    for k, v in qc.items()
+                    if k
+                    in ["rescue_ratio", "self_consistency_ratio", "reproducibility"]
+                }
+            )
+
+        task_name = gs_file.task.task_name
+        num_peaks = None
+        if task_name == f"{method}_ppr":
+            num_peaks = qc["Np"]
+        elif task_name in ["idr", "overlap"]:
+            num_peaks = qc["Nt"]
+        elif task_name == f"{method}_pr":
+            rep_num = current_set.split("-")[0][-1]
+            num_peaks = qc[f"N{rep_num}"]
+        if num_peaks is not None:
+            output_qc["reproducible_peaks"] = int(num_peaks)
+
+        if method == "idr":
+            output_qc["idr_cutoff"] = float(gs_file.task.inputs["idr_thresh"])
+            idr_plot_png = self.analysis.get_files(
+                filename=gs_file.task.outputs["idr_plot"]
+            )[0]
+            idr_log = self.analysis.get_files(filename=gs_file.task.outputs["idr_log"])[
+                0
+            ]
+            output_qc.update(
+                {"idr_dispersion_plot": self.get_attachment(idr_plot_png, "image/png")}
+            )
+            output_qc.update(
+                {
+                    "idr_parameters": self.get_attachment(
+                        idr_log, "text/plain", add_ext=".txt"
+                    )
+                }
+            )
+        return self.queue_qc(output_qc, encode_file, "chip-replication-quality-metric")
+
+    def make_atac_peak_enrichment_qc(
+        self, encode_file: EncodeFile, gs_file: GSFile
+    ) -> None:
+        """
+        The peak region stats are only useful for the optimal set, since the ones for
+        rep1 and rep2 are applicable to files that are not posted by to the portal.
+        IDR frip scores are applicable to any pair undergoing IDR, so they are always
+        looked for.
+        """
+        if encode_file.has_qc("ChipPeakEnrichmentQualityMetric"):
+            return
+
+        qc = self.backend.read_json(self.analysis.get_files("qc_json")[0])
+        method = self.get_chip_pipeline_replication_method(qc)
+
+        optimal_set = qc["replication"]["reproducibility"][method]["opt_set"]
+        current_set = gs_file.task.inputs["prefix"]
+
+        output_qc = {
+            "frip": qc["peak_enrich"]["frac_reads_in_peaks"][method][current_set][
+                "frip"
+            ]
+        }
+        if current_set == optimal_set:
+            output_qc.update({**qc["peak_stat"]["peak_region_size"][f"{method}_opt"]})
+        for k, v in output_qc.items():
+            if k in ["mean", "frip"]:
+                output_qc[k] = float(v)
+            else:
+                output_qc[k] = int(v)
+        return self.queue_qc(
+            output_qc, encode_file, "chip-peak-enrichment-quality-metric"
+        )
 
 
 def accession_factory(
