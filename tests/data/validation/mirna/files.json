@@ -7,7 +7,7 @@
     ],
     "accession": "ENCFF525NSB",
     "aliases": [
-      "encode-processing-pipeline:encode-processing-caper_out-mirna_seq_pipeline-ff2a61b1-8708-407f-a075-6a262d7d1ca0-call-wigtobigwig-shard-1-glob-e26cce3d0ca522acfdb935f7efeb3e0f-rep2ENCSR715NEZ.signal.unique.minus.bigWig"
+      "encode-processing-pipeline:ff2a61b1-8708-407f-a075-6a262d7d1ca0-encode-processing-caper_out-mirna_seq_pipeline-ff2a61b1-8708-407f-a075-6a262d7d1ca0-call-wigtobigwig-shard-1-glob-e26cce3d0ca522acfdb935f7efeb3e0f-rep2ENCSR715NEZ.signal.unique.minus.bigWig"
     ],
     "alternate_accessions": [],
     "analysis_step_version": {
@@ -361,7 +361,7 @@
     ],
     "accession": "ENCFF605MAA",
     "aliases": [
-      "encode-processing-pipeline:encode-processing-caper_out-mirna_seq_pipeline-ff2a61b1-8708-407f-a075-6a262d7d1ca0-call-wigtobigwig-shard-1-glob-5d1de83c72d3b961f02eb173e9f6d5a2-rep2ENCSR715NEZ.signal.unique.plus.bigWig"
+      "encode-processing-pipeline:ff2a61b1-8708-407f-a075-6a262d7d1ca0-encode-processing-caper_out-mirna_seq_pipeline-ff2a61b1-8708-407f-a075-6a262d7d1ca0-call-wigtobigwig-shard-1-glob-5d1de83c72d3b961f02eb173e9f6d5a2-rep2ENCSR715NEZ.signal.unique.plus.bigWig"
     ],
     "alternate_accessions": [],
     "analysis_step_version": {
@@ -715,7 +715,7 @@
     ],
     "accession": "ENCFF440MCZ",
     "aliases": [
-      "encode-processing-pipeline:encode-processing-caper_out-mirna_seq_pipeline-ff2a61b1-8708-407f-a075-6a262d7d1ca0-call-wigtobigwig-shard-1-glob-f2920e4cd5a28e8c120bd92e7ba31ecf-rep2ENCSR715NEZ.signal.all.minus.bigWig"
+      "encode-processing-pipeline:ff2a61b1-8708-407f-a075-6a262d7d1ca0-encode-processing-caper_out-mirna_seq_pipeline-ff2a61b1-8708-407f-a075-6a262d7d1ca0-call-wigtobigwig-shard-1-glob-f2920e4cd5a28e8c120bd92e7ba31ecf-rep2ENCSR715NEZ.signal.all.minus.bigWig"
     ],
     "alternate_accessions": [],
     "analysis_step_version": {
@@ -1069,7 +1069,7 @@
     ],
     "accession": "ENCFF895PMT",
     "aliases": [
-      "encode-processing-pipeline:encode-processing-caper_out-mirna_seq_pipeline-ff2a61b1-8708-407f-a075-6a262d7d1ca0-call-wigtobigwig-shard-1-glob-ecf13a1f988469a7767bed84843bd510-rep2ENCSR715NEZ.signal.all.plus.bigWig"
+      "encode-processing-pipeline:ff2a61b1-8708-407f-a075-6a262d7d1ca0-encode-processing-caper_out-mirna_seq_pipeline-ff2a61b1-8708-407f-a075-6a262d7d1ca0-call-wigtobigwig-shard-1-glob-ecf13a1f988469a7767bed84843bd510-rep2ENCSR715NEZ.signal.all.plus.bigWig"
     ],
     "alternate_accessions": [],
     "analysis_step_version": {
@@ -1423,7 +1423,7 @@
     ],
     "accession": "ENCFF603TYA",
     "aliases": [
-      "encode-processing-pipeline:encode-processing-caper_out-mirna_seq_pipeline-ff2a61b1-8708-407f-a075-6a262d7d1ca0-call-wigtobigwig-shard-0-glob-e26cce3d0ca522acfdb935f7efeb3e0f-rep1ENCSR715NEZ.signal.unique.minus.bigWig"
+      "encode-processing-pipeline:ff2a61b1-8708-407f-a075-6a262d7d1ca0-encode-processing-caper_out-mirna_seq_pipeline-ff2a61b1-8708-407f-a075-6a262d7d1ca0-call-wigtobigwig-shard-0-glob-e26cce3d0ca522acfdb935f7efeb3e0f-rep1ENCSR715NEZ.signal.unique.minus.bigWig"
     ],
     "alternate_accessions": [],
     "analysis_step_version": {
@@ -1777,7 +1777,7 @@
     ],
     "accession": "ENCFF527GCC",
     "aliases": [
-      "encode-processing-pipeline:encode-processing-caper_out-mirna_seq_pipeline-ff2a61b1-8708-407f-a075-6a262d7d1ca0-call-wigtobigwig-shard-0-glob-5d1de83c72d3b961f02eb173e9f6d5a2-rep1ENCSR715NEZ.signal.unique.plus.bigWig"
+      "encode-processing-pipeline:ff2a61b1-8708-407f-a075-6a262d7d1ca0-encode-processing-caper_out-mirna_seq_pipeline-ff2a61b1-8708-407f-a075-6a262d7d1ca0-call-wigtobigwig-shard-0-glob-5d1de83c72d3b961f02eb173e9f6d5a2-rep1ENCSR715NEZ.signal.unique.plus.bigWig"
     ],
     "alternate_accessions": [],
     "analysis_step_version": {
@@ -2131,7 +2131,7 @@
     ],
     "accession": "ENCFF206IQT",
     "aliases": [
-      "encode-processing-pipeline:encode-processing-caper_out-mirna_seq_pipeline-ff2a61b1-8708-407f-a075-6a262d7d1ca0-call-wigtobigwig-shard-0-glob-f2920e4cd5a28e8c120bd92e7ba31ecf-rep1ENCSR715NEZ.signal.all.minus.bigWig"
+      "encode-processing-pipeline:ff2a61b1-8708-407f-a075-6a262d7d1ca0-encode-processing-caper_out-mirna_seq_pipeline-ff2a61b1-8708-407f-a075-6a262d7d1ca0-call-wigtobigwig-shard-0-glob-f2920e4cd5a28e8c120bd92e7ba31ecf-rep1ENCSR715NEZ.signal.all.minus.bigWig"
     ],
     "alternate_accessions": [],
     "analysis_step_version": {
@@ -2485,7 +2485,7 @@
     ],
     "accession": "ENCFF763ZUV",
     "aliases": [
-      "encode-processing-pipeline:encode-processing-caper_out-mirna_seq_pipeline-ff2a61b1-8708-407f-a075-6a262d7d1ca0-call-wigtobigwig-shard-0-glob-ecf13a1f988469a7767bed84843bd510-rep1ENCSR715NEZ.signal.all.plus.bigWig"
+      "encode-processing-pipeline:ff2a61b1-8708-407f-a075-6a262d7d1ca0-encode-processing-caper_out-mirna_seq_pipeline-ff2a61b1-8708-407f-a075-6a262d7d1ca0-call-wigtobigwig-shard-0-glob-ecf13a1f988469a7767bed84843bd510-rep1ENCSR715NEZ.signal.all.plus.bigWig"
     ],
     "alternate_accessions": [],
     "analysis_step_version": {
@@ -2839,7 +2839,7 @@
     ],
     "accession": "ENCFF398EBM",
     "aliases": [
-      "encode-processing-pipeline:encode-processing-caper_out-mirna_seq_pipeline-ff2a61b1-8708-407f-a075-6a262d7d1ca0-call-star-shard-1-glob-ee3cac44669b7460fea102fa893f1b06-rep2ENCSR715NEZ.tsv"
+      "encode-processing-pipeline:ff2a61b1-8708-407f-a075-6a262d7d1ca0-encode-processing-caper_out-mirna_seq_pipeline-ff2a61b1-8708-407f-a075-6a262d7d1ca0-call-star-shard-1-glob-ee3cac44669b7460fea102fa893f1b06-rep2ENCSR715NEZ.tsv"
     ],
     "alternate_accessions": [],
     "analysis_step_version": {
@@ -3247,7 +3247,7 @@
     ],
     "accession": "ENCFF924ETV",
     "aliases": [
-      "encode-processing-pipeline:encode-processing-caper_out-mirna_seq_pipeline-ff2a61b1-8708-407f-a075-6a262d7d1ca0-call-star-shard-1-glob-884b52e26475eb0e01d160f1c7e5a9b5-rep2ENCSR715NEZ.bam"
+      "encode-processing-pipeline:ff2a61b1-8708-407f-a075-6a262d7d1ca0-encode-processing-caper_out-mirna_seq_pipeline-ff2a61b1-8708-407f-a075-6a262d7d1ca0-call-star-shard-1-glob-884b52e26475eb0e01d160f1c7e5a9b5-rep2ENCSR715NEZ.bam"
     ],
     "alternate_accessions": [],
     "analysis_step_version": {
@@ -3680,7 +3680,7 @@
     ],
     "accession": "ENCFF065GME",
     "aliases": [
-      "encode-processing-pipeline:encode-processing-caper_out-mirna_seq_pipeline-ff2a61b1-8708-407f-a075-6a262d7d1ca0-call-star-shard-0-glob-ee3cac44669b7460fea102fa893f1b06-rep1ENCSR715NEZ.tsv"
+      "encode-processing-pipeline:ff2a61b1-8708-407f-a075-6a262d7d1ca0-encode-processing-caper_out-mirna_seq_pipeline-ff2a61b1-8708-407f-a075-6a262d7d1ca0-call-star-shard-0-glob-ee3cac44669b7460fea102fa893f1b06-rep1ENCSR715NEZ.tsv"
     ],
     "alternate_accessions": [],
     "analysis_step_version": {
@@ -4088,7 +4088,7 @@
     ],
     "accession": "ENCFF590YAX",
     "aliases": [
-      "encode-processing-pipeline:encode-processing-caper_out-mirna_seq_pipeline-ff2a61b1-8708-407f-a075-6a262d7d1ca0-call-star-shard-0-glob-0d2b4556b219bc41f9a10d12eee46cec-rep1ENCSR715NEZ.bam"
+      "encode-processing-pipeline:ff2a61b1-8708-407f-a075-6a262d7d1ca0-encode-processing-caper_out-mirna_seq_pipeline-ff2a61b1-8708-407f-a075-6a262d7d1ca0-call-star-shard-0-glob-0d2b4556b219bc41f9a10d12eee46cec-rep1ENCSR715NEZ.bam"
     ],
     "alternate_accessions": [],
     "analysis_step_version": {

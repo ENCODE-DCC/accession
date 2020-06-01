@@ -379,6 +379,13 @@ class Accession(ABC):
     def make_file_obj(
         self, file: GSFile, file_params: FileParams, step_run: EncodeStepRun
     ) -> Dict[str, Any]:
+        """
+        Obtains a file object postable to the ENCODE portal. Slashes `/` are not allowed
+        in the aliases, so the file URI can't directly be used as part of the alias.
+
+        Furthermore, the workflow ID is prepended to the file alias so that even
+        call-cached outputs will have unique aliases.
+        """
         derived_from = self.get_derived_from_all(file, file_params.derived_from_files)
         extras: Dict[str, Any] = {}
         for callback in file_params.callbacks:
@@ -386,7 +393,11 @@ class Accession(ABC):
             extras.update(result)
         file_name = file.filename.split(file.SCHEME)[-1].replace("/", "-")
         obj = EncodeFile.from_template(
-            aliases=["{}:{}".format(self.common_metadata.lab_pi, file_name)],
+            aliases=[
+                "{}:{}-{}".format(
+                    self.common_metadata.lab_pi, self.analysis.workflow_id, file_name
+                )
+            ],
             assembly=self.assembly,
             common_metadata=self.common_metadata,
             dataset=self.experiment.at_id,
