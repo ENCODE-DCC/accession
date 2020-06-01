@@ -134,8 +134,7 @@ pipeline-specific mapping and peak calling accessioning templates.
     local IdrWdlFiles(blacklist_derived_from_task, callbacks=[],) = [
       {
         derived_from_files: bed_bigwig_derived_from_files,
-        file_format: 'bed',
-        file_format_type: file_format_type,
+        file_format: 'txt',
         filekey: 'idr_unthresholded_peak',
         output_type: 'IDR ranked peaks',
         quality_metrics: [],
