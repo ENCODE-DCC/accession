@@ -66,7 +66,7 @@ def test_get_or_make_file_normal_analysis(normal_analysis):
 
 @pytest.mark.filesystem
 def test_workflow_id(normal_analysis):
-    expected = "cromwell-2099edd0-0399-46ba-941c-abdcea355c1c"
+    expected = "2099edd0-0399-46ba-941c-abdcea355c1c"
     assert normal_analysis.workflow_id == expected
 
 
