@@ -86,7 +86,7 @@ class Analysis:
     # Cromwell workflow id
     @property
     def workflow_id(self):
-        return self.metadata["labels"]["cromwell-workflow-id"]
+        return self.metadata["id"]
 
     # Files in the 'outputs' of the metadata that are
     # used for filtering out intermediate outputs

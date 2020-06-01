@@ -97,6 +97,7 @@ jobs:
       - run_tox:
           toxenv: "py36"
           docker: true
+          extra_args: -vv
   docs:
     <<: *py37
     steps:
