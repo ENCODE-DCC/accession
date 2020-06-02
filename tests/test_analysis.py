@@ -3,7 +3,8 @@ from pathlib import Path
 
 import pytest
 
-from accession.analysis import Analysis, MetaData
+from accession.analysis import Analysis
+from accession.metadata import FileMetadata
 from accession.task import Task
 
 
@@ -237,7 +238,7 @@ def test_search_down_no_output_files_does_not_raise(mocker):
     mocker.patch(
         "builtins.open", mocker.mock_open(read_data='{"workflowRoot": "gs://foo/bar"}')
     )
-    analysis = Analysis(MetaData("foo"), auto_populate=False, backend="")
+    analysis = Analysis(FileMetadata("foo"), auto_populate=False, backend="")
     no_outputs_task = Task("foo", {"inputs": {"bar": "gs://baz"}, "outputs": {}})
     result = list(analysis._search_down(no_outputs_task, "searching_for", "a_file"))
     assert result == []
@@ -246,6 +247,6 @@ def test_search_down_no_output_files_does_not_raise(mocker):
 @pytest.fixture
 def empty_analysis(mock_gc_backend, metadata_json_path):  # noqa: F811
     empty = Analysis(
-        MetaData(metadata_json_path), auto_populate=False, backend=mock_gc_backend
+        FileMetadata(metadata_json_path), auto_populate=False, backend=mock_gc_backend
     )
     return empty

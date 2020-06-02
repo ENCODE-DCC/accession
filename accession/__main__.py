@@ -14,9 +14,7 @@ def get_parser():
     parser.add_argument(
         "-m",
         "--accession-metadata",
-        type=str,
-        default=None,
-        help="path to a metadata json output file",
+        help="path to a metadata json file or a Caper workflow ID/label",
         required=True,
     )
     parser.add_argument(
@@ -92,18 +90,16 @@ def main():
     parser = get_parser()
     args = parser.parse_args()
     lab, award = check_or_set_lab_award(args.lab, args.award)
-    if all([args.pipeline_type, args.accession_metadata, lab, award, args.server]):
-        accessioner = accession_factory(
-            args.pipeline_type,
-            args.accession_metadata,
-            args.server,
-            lab,
-            award,
-            log_file_path=args.log_file_path,
-            no_log_file=args.no_log_file,
-        )
-        accessioner.accession_steps(args.dry_run)
-        return
+    accessioner = accession_factory(
+        args.pipeline_type,
+        args.accession_metadata,
+        args.server,
+        lab,
+        award,
+        log_file_path=args.log_file_path,
+        no_log_file=args.no_log_file,
+    )
+    accessioner.accession_steps(args.dry_run)
 
 
 if __name__ == "__main__":

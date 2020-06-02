@@ -14,9 +14,9 @@ from accession.accession import (
     accession_factory,
 )
 from accession.accession_steps import AccessionStep, DerivedFromFile
-from accession.analysis import MetaData
 from accession.encode_models import EncodeExperiment, EncodeFile
 from accession.file import GSFile
+from accession.metadata import FileMetadata
 from accession.preflight import MatchingMd5Record
 from accession.task import Task
 
@@ -434,12 +434,20 @@ def test_accession_init(mock_accession: Accession, lab: str, award: str) -> None
     ],
 )
 def test_accession_factory(
-    mocker, mock_gc_backend, server_name, pipeline_type, condition, accessioner_class
+    tmp_path,
+    mocker,
+    mock_gc_backend,
+    server_name,
+    pipeline_type,
+    condition,
+    accessioner_class,
 ):
     """
     The Connection class actually tries to make connections to the server within its
     __init__, so need to mock out.
     """
+    metadata_file = tmp_path / "metadata.json"
+    metadata_file.touch()
     mocker.patch(
         "builtins.open",
         mocker.mock_open(read_data='{"workflowRoot": "gs://foo/bar", "calls": {}}'),
@@ -448,7 +456,7 @@ def test_accession_factory(
     with condition:
         accessioner = accession_factory(
             pipeline_type,
-            "metadata.json",
+            str(metadata_file),
             server_name,
             "baz",
             "qux",
@@ -467,10 +475,10 @@ def test_accession_factory(
     ],
 )
 def test_get_long_read_rna_steps_json_name_prefix_from_metadata(
-    mocker, spikeins, expected
+    tmp_path, mocker, spikeins, expected
 ):
     mocker.patch(
-        "accession.analysis.MetaData.content",
+        "accession.metadata.FileMetadata.content",
         new_callable=mocker.PropertyMock(
             return_value={
                 "workflowRoot": "gs://foo/bar",
@@ -479,6 +487,6 @@ def test_get_long_read_rna_steps_json_name_prefix_from_metadata(
             }
         ),
     )
-    metadata = MetaData("foo")
+    metadata = FileMetadata("foo")
     result = _get_long_read_rna_steps_json_name_prefix_from_metadata(metadata)
     assert result == expected

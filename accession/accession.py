@@ -12,7 +12,7 @@ from accession.accession_steps import (
     DerivedFromFile,
     FileParams,
 )
-from accession.analysis import Analysis, MetaData
+from accession.analysis import Analysis
 from accession.encode_models import (
     EncodeAnalysis,
     EncodeAttachment,
@@ -25,6 +25,7 @@ from accession.encode_models import (
 from accession.file import GSFile
 from accession.helpers import LruCache, flatten, string_to_number
 from accession.logger_factory import logger_factory
+from accession.metadata import Metadata, metadata_factory
 from accession.preflight import MatchingMd5Record, PreflightHelper
 
 
@@ -860,21 +861,6 @@ class AccessionLongReadRna(AccessionGenericRna):
             )
         return portal_gtf
 
-    def _get_spikeins(self) -> List[EncodeFile]:
-        """
-        Rather than try to trace the derived_from for the three different pipeline use
-        cases (no spikeins, one spikein, and two or more spikeins), grab them directly
-        from the workflow-level inputs.
-        """
-        gtf_filename = self.analysis.metadata["inputs"]["annotation"]
-        gtf_file = self.analysis.get_files(filename=gtf_filename)[0]
-        portal_gtf = self.get_encode_file_matching_md5_of_blob(gtf_file)
-        if portal_gtf is None:
-            raise ValueError(
-                f"Could not find annotation GTF for file {gtf_file.filename}"
-            )
-        return portal_gtf
-
     @property
     def assembly(self) -> str:
         """
@@ -1671,6 +1657,9 @@ def accession_factory(
     Matches against the user-specified pipeline_type string and returns an instance of
     the appropriate accession subclass. Usage of this factory has the nice effect of
     automatically supplying the appropriate AccessionSteps based on the pipeline name.
+
+    Uses the value of the MetadataType enum member to determine which concrete class of
+    Metadata to use.
     """
     pipeline_type_map = {
         "bulk_rna": AccessionBulkRna,
@@ -1695,8 +1684,8 @@ def accession_factory(
             f"Could not find pipeline type {pipeline_type}: valid options are {pipeline_type_options}"
         ) from e
     current_dir = Path(__file__).resolve()
-    metadata = MetaData(accession_metadata)
 
+    metadata = metadata_factory(accession_metadata)
     if pipeline_type == "long_read_rna":
         pipeline_type = _get_long_read_rna_steps_json_name_prefix_from_metadata(
             metadata
@@ -1717,7 +1706,7 @@ def accession_factory(
     )
 
 
-def _get_long_read_rna_steps_json_name_prefix_from_metadata(metadata: MetaData) -> str:
+def _get_long_read_rna_steps_json_name_prefix_from_metadata(metadata: Metadata) -> str:
     """
     The JSON template to use for long read RNA depends on the number of spikeins, this
     function determines the appropriate one to use from the metadata.

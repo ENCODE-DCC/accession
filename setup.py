@@ -29,6 +29,7 @@ INSTALL_REQUIRES = [
     "google-cloud-storage",
     "attrs",
     "boto3==1.13.5",
+    "caper==1.0.0",
 ]
 EXTRAS_REQUIRE = {
     "docs": ["sphinx"],
