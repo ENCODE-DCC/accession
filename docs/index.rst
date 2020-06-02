@@ -14,7 +14,11 @@ Detailed Argument Description
 Metadata Json
 --------------
 
-This file is an output of a pipeline analysis run. For details, see `Cromwell documentation <https://cromwell.readthedocs.io/en/stable/api/RESTAPI/#workflowmetadataresponse>`_
+| This is an output of a pipeline analysis run. This can either be an actual JSON file
+  or a Caper workflow ID/label. To use Caper IDs you must have set up access to a Caper
+  server on the machine you are running ``accession`` from. For details on configuring
+  this, see :ref:`installation`. For details about metadata,
+  `Cromwell documentation <https://cromwell.readthedocs.io/en/stable/api/RESTAPI/#workflowmetadataresponse>`_
 
 Server
 ------

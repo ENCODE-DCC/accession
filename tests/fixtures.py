@@ -23,8 +23,9 @@ from accession.accession import (
     AccessionMicroRna,
     accession_factory,
 )
-from accession.analysis import Analysis, MetaData
+from accession.analysis import Analysis
 from accession.encode_models import EncodeCommonMetadata, EncodeExperiment, EncodeFile
+from accession.metadata import FileMetadata
 
 
 @pytest.fixture(scope="session")
@@ -147,7 +148,9 @@ def metadata_json_path() -> Path:
 def normal_analysis(
     mock_gc_backend: MockFixture, metadata_json_path: Path
 ) -> Analysis:  # noqa: F811
-    normal_analysis = Analysis(MetaData(metadata_json_path), backend=mock_gc_backend)
+    normal_analysis = Analysis(
+        FileMetadata(metadata_json_path), backend=mock_gc_backend
+    )
     return normal_analysis
 
 
@@ -331,13 +334,13 @@ def accessioner_factory(
     return _accessioner_factory
 
 
-class MockMetaData:
+class MockMetadata:
     content = {"workflowRoot": "gs://foo/bar", "calls": {}}
 
 
 @pytest.fixture
 def mock_metadata():
-    return MockMetaData()
+    return MockMetadata()
 
 
 class MockAccessionSteps:
@@ -354,7 +357,7 @@ def mock_accession_steps():
 def mock_accession(
     mocker: MockFixture,
     mock_accession_gc_backend: MockGCBackend,
-    mock_metadata: MockMetaData,
+    mock_metadata: MockMetadata,
     mock_accession_steps: MockAccessionSteps,
     server_name: str,
     common_metadata: EncodeCommonMetadata,
@@ -426,7 +429,7 @@ def mock_accession_not_patched(
 def mock_accession_chip(
     mocker: MockFixture,
     mock_accession_gc_backend: MockGCBackend,
-    mock_metadata: MockMetaData,
+    mock_metadata: MockMetadata,
     mock_accession_steps: MockAccessionSteps,
     server_name: str,
     common_metadata: EncodeCommonMetadata,
@@ -473,7 +476,7 @@ def mock_accession_chip(
 def mock_accession_unreplicated(
     mocker: MockFixture,
     mock_accession_gc_backend: MockGCBackend,
-    mock_metadata: MockMetaData,
+    mock_metadata: MockMetadata,
     lab: str,
     award: str,
 ) -> Accession:

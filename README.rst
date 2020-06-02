@@ -18,6 +18,8 @@ accession
 
 ``accession`` is a Python module and command line tool for submitting genomics pipeline analysis output files and metadata to the ENCODE Portal.
 
+.. _installation:
+
 Installation
 =============
 
@@ -41,7 +43,7 @@ You will also need to authenticate with Google Cloud if using WDL metadata from 
     $ gcloud auth login --no-launch-browser
     $ gcloud auth application-default login --no-launch-browser
 
-| Finally, it is highly recommended to set the DCC_LAB and DCC_AWARD environment
+| In addition, it is highly recommended to set the DCC_LAB and DCC_AWARD environment
   variables for ease of use. These correspond to the lab and award identifiers given by
   the ENCODE portal, e.g. ``/labs/foo/`` and ``U00HG123456``, respectively.
 
@@ -50,14 +52,21 @@ You will also need to authenticate with Google Cloud if using WDL metadata from 
     $ export DCC_LAB=XXXXXXXX
     $ export DCC_AWARD=yyyyyyyyyyy
 
+| Finally, if you would like to be able to pass Caper workflow IDs or labels you will
+  need to configure access to the Caper server. If you are invoking ``accession`` from
+  a machine where you already have a Caper set up, and you have the Caper configuration
+  file available at ``~/.caper/default.conf``, then there is no extra setup required.
+  If the Caper server is on another machine, you will need so configure HTTP access to
+  it by setting the ``hostname`` and ``port`` values in the Caper conf file.
+
 Usage
 ======
 
 .. code-block:: console
 
-    $ accession --accession-metadata metadata.json \
-                --pipeline-type mirna \
-                --server dev
+    $ accession -m metadata.json \
+                -p mirna \
+                -s dev
 
 Please see the `docs <https://accession.readthedocs.io/en/latest/#detailed-argument-description>`_ for greater detail on these input parameters.
 
