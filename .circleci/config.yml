@@ -32,7 +32,7 @@ commands:
   install_shellcheck:
     description: "Install shellcheck by downloading the binary, don't want to apt-get update"
     steps:
-      - run: curl -s https://storage.googleapis.com/shellcheck/shellcheck-stable.linux.x86_64.tar.xz | tar xJ && sudo mv shellcheck-stable/shellcheck /usr/local/bin
+      - run: curl -Ls https://github.com/koalaman/shellcheck/releases/download/stable/shellcheck-stable.linux.x86_64.tar.xz | tar xJ && sudo mv shellcheck-stable/shellcheck /usr/local/bin
   install_jq:
     description: "Install jq"
     steps:
