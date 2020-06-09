@@ -313,7 +313,7 @@ class Accession(ABC):
         ancestors = []
         for ancestor in files:
             ancestors.append(self.get_derived_from(file, ancestor))
-        return list(set(latten(ancestors)))
+        return list(set(flatten(ancestors)))
 
     # Returns list of accession ids of files on portal or recently accessioned
     def get_derived_from(self, file: GSFile, ancestor: DerivedFromFile) -> List[str]:
