@@ -116,7 +116,7 @@ more legible.
               }
               for filekey in ['blacklist', 'dnase', 'enh', 'prom']
             ] + [{
-              derived_from_filekey: 'nodup_bam',
+              derived_from_filekey: 'tss',
               derived_from_inputs: true,
               derived_from_task: 'tss_enrich',
               should_search_down: true,
