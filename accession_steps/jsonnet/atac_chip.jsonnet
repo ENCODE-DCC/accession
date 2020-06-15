@@ -60,7 +60,7 @@ more legible.
   ],
   local AtacChipMapOnlySteps(is_control=false, is_atac=false) = {
     local step_run = if is_atac then 'atac-seq-alignment-step-v-2' else 'chip-seq-alignment-step-v-2',
-    local step_version = if is_atac then '/analysis-step-versions/atac-seq-alignment-step-v-2-0/' else '/analysis-step-versions/chip-seq-alignment-step-v-2-0/',
+    local step_version = if is_atac then '/analysis-step-versions/atac-seq-alignment-step-v-2-1/' else '/analysis-step-versions/chip-seq-alignment-step-v-2-0/',
     'accession.steps': [
       {
         dcc_step_run: step_run,

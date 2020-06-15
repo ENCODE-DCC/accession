@@ -2,7 +2,7 @@
   "accession.steps": [
     {
       "dcc_step_run": "atac-seq-alignment-step-v-2",
-      "dcc_step_version": "/analysis-step-versions/atac-seq-alignment-step-v-2-0/",
+      "dcc_step_version": "/analysis-step-versions/atac-seq-alignment-step-v-2-1/",
       "wdl_files": [
         {
           "callbacks": [
@@ -39,7 +39,7 @@
     },
     {
       "dcc_step_run": "atac-seq-alignment-step-v-2",
-      "dcc_step_version": "/analysis-step-versions/atac-seq-alignment-step-v-2-0/",
+      "dcc_step_version": "/analysis-step-versions/atac-seq-alignment-step-v-2-1/",
       "wdl_files": [
         {
           "callbacks": [
