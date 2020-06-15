@@ -18,7 +18,7 @@ linting afterwards `tox -e lint` to pretty-format the JSON, which will make the 
 more legible.
 */
 {
-  local bed_bigwig_derived_from_files = [
+  local BedBigwigDerivedFromFiles(is_atac=false) = [
     {
       derived_from_filekey: 'nodup_bam',
       derived_from_task: 'filter',
@@ -26,32 +26,33 @@ more legible.
         'choose_ctl',
       ],
     },
-    {
-      derived_from_filekey: 'bam',
-      derived_from_inputs: true,
-      derived_from_task: 'bam2ta_ctl',
-    },
-  ],
+  ] + (if is_atac then [] else [{
+         derived_from_filekey: 'bam',
+         derived_from_inputs: true,
+         derived_from_task: 'bam2ta_ctl',
+       }]),
+
   /* We insert the blacklist into the middle of the list so the array order is the same
   as the existing templates */
   local BedBigwigBlacklistDerivedFromFiles(
     blacklist_derived_from_task,
     derived_from_filekey='blacklist',
-  ) = [bed_bigwig_derived_from_files[0]] + [{
+    is_atac=false,
+  ) = [BedBigwigDerivedFromFiles(is_atac)[0]] + [{
     derived_from_filekey: derived_from_filekey,
     derived_from_inputs: true,
     derived_from_task: blacklist_derived_from_task,
-  }] + [bed_bigwig_derived_from_files[1]],
-  local bigwig_wdl_files = [
+  }] + (if is_atac then [] else [BedBigwigDerivedFromFiles(is_atac)[1]]),
+  local BigwigWdlFiles(is_atac=false) = [
     {
-      derived_from_files: bed_bigwig_derived_from_files,
+      derived_from_files: BedBigwigDerivedFromFiles(is_atac),
       file_format: 'bigWig',
       filekey: 'pval_bw',
       output_type: 'signal p-value',
       quality_metrics: [],
     },
     {
-      derived_from_files: bed_bigwig_derived_from_files,
+      derived_from_files: BedBigwigDerivedFromFiles(is_atac),
       file_format: 'bigWig',
       filekey: 'fc_bw',
       output_type: 'fold change over control',
@@ -153,9 +154,9 @@ more legible.
                           'chip_peak_enrichment',
                         ]),
     },
-    local IdrWdlFiles(blacklist_derived_from_task, callbacks=[],) = [
+    local IdrWdlFiles(blacklist_derived_from_task, callbacks=[], is_atac=false) = [
       {
-        derived_from_files: bed_bigwig_derived_from_files,
+        derived_from_files: BedBigwigDerivedFromFiles(is_atac),
         file_format: 'bed',
         file_format_type: 'idr_ranked_peak',
         filekey: 'idr_unthresholded_peak',
@@ -165,7 +166,7 @@ more legible.
       (
         if std.length(callbacks) != 0 then { callbacks: callbacks } else {}
       ) + {
-        derived_from_files: BedBigwigBlacklistDerivedFromFiles(blacklist_derived_from_task),
+        derived_from_files: BedBigwigBlacklistDerivedFromFiles(blacklist_derived_from_task, is_atac=is_atac),
         file_format: 'bed',
         filekey: 'bfilt_idr_peak',
       } + shared_file_props,
@@ -188,34 +189,34 @@ more legible.
       {
         dcc_step_run: '%s-signal-generation-step-v-1' % signal_generation_prefix,
         dcc_step_version: '/analysis-step-versions/%s-signal-generation-step-v-1-0/' % signal_generation_prefix,
-        wdl_files: bigwig_wdl_files,
+        wdl_files: BigwigWdlFiles(is_atac),
         wdl_task_name: 'macs2_signal_track',
       },
       {
         dcc_step_run: '%s-pooled-signal-generation-step-v-1' % signal_generation_prefix,
         dcc_step_version: '/analysis-step-versions/%s-pooled-signal-generation-step-v-1-0/' % signal_generation_prefix,
         requires_replication: true,
-        wdl_files: bigwig_wdl_files,
+        wdl_files: BigwigWdlFiles(is_atac),
         wdl_task_name: 'macs2_signal_track_pooled',
       },
       {
         dcc_step_run: '%s-seq-pseudoreplicated-idr-step-v-1' % step_prefix,
         dcc_step_version: '/analysis-step-versions/%s-seq-pseudoreplicated-idr-step-v-1-0/' % step_prefix,
-        wdl_files: IdrWdlFiles(self.wdl_task_name),
+        wdl_files: IdrWdlFiles(self.wdl_task_name, is_atac=is_atac),
         wdl_task_name: 'idr_pr',
       },
       {
         dcc_step_run: '%s-seq-pooled-pseudoreplicated-idr-step-v-1' % step_prefix,
         dcc_step_version: '/analysis-step-versions/%s-seq-pooled-pseudoreplicated-idr-step-v-1-0/' % step_prefix,
         requires_replication: true,
-        wdl_files: IdrWdlFiles(self.wdl_task_name, callbacks=['maybe_preferred_default']),
+        wdl_files: IdrWdlFiles(self.wdl_task_name, callbacks=['maybe_preferred_default'], is_atac=is_atac),
         wdl_task_name: 'idr_ppr',
       },
       {
         dcc_step_run: '%s-seq-replicated-idr-step-v-1' % step_prefix,
         dcc_step_version: '/analysis-step-versions/%s-seq-replicated-idr-step-v-1-0/' % step_prefix,
         requires_replication: true,
-        wdl_files: IdrWdlFiles(self.wdl_task_name, callbacks=['maybe_preferred_default', 'maybe_conservative_set']),
+        wdl_files: IdrWdlFiles(self.wdl_task_name, callbacks=['maybe_preferred_default', 'maybe_conservative_set'], is_atac=is_atac),
         wdl_task_name: 'idr',
       },
       {
@@ -257,11 +258,11 @@ more legible.
                           'chip_peak_enrichment',
                         ]),
     },
-    local OverlapWdlFiles(blacklist_derived_from_task, blacklist_derived_from_filekey, output_type, callbacks=[],) = [
+    local OverlapWdlFiles(blacklist_derived_from_task, blacklist_derived_from_filekey, output_type, callbacks=[], is_atac=false) = [
       (
         if std.length(callbacks) != 0 then { callbacks: callbacks } else {}
       ) + {
-        derived_from_files: BedBigwigBlacklistDerivedFromFiles(blacklist_derived_from_task, blacklist_derived_from_filekey),
+        derived_from_files: BedBigwigBlacklistDerivedFromFiles(blacklist_derived_from_task, blacklist_derived_from_filekey, is_atac=is_atac),
         file_format: 'bed',
         filekey: 'bfilt_overlap_peak',
         output_type: output_type,
@@ -286,14 +287,14 @@ more legible.
                           {
                             dcc_step_run: '%s-signal-generation-step-v-1' % step_prefix,
                             dcc_step_version: '/analysis-step-versions/%s-signal-generation-step-v-1-0/' % step_prefix,
-                            wdl_files: bigwig_wdl_files,
+                            wdl_files: BigwigWdlFiles(),
                             wdl_task_name: 'macs2_signal_track',
                           },
                           {
                             dcc_step_run: '%s-seq-pooled-signal-generation-step-v-1' % step_prefix,
                             dcc_step_version: '/analysis-step-versions/%s-seq-pooled-signal-generation-step-v-1-0/' % step_prefix,
                             requires_replication: true,
-                            wdl_files: bigwig_wdl_files,
+                            wdl_files: BigwigWdlFiles(),
                             wdl_task_name: 'macs2_signal_track_pooled',
                           },
                         ]) + [
@@ -301,7 +302,7 @@ more legible.
         local _blacklist_derived_from_task = if has_blacklist_derived_from_task then blacklist_derived_from_task else self.wdl_task_name,
         dcc_step_run: '%s-seq-pseudoreplicated-overlap-step-v-1' % step_prefix,
         dcc_step_version: '/analysis-step-versions/%s-seq-pseudoreplicated-overlap-step-v-1-0/' % step_prefix,
-        wdl_files: OverlapWdlFiles(_blacklist_derived_from_task, blacklist_derived_from_filekey, 'stable peaks'),
+        wdl_files: OverlapWdlFiles(_blacklist_derived_from_task, blacklist_derived_from_filekey, 'stable peaks', is_atac=is_atac),
         wdl_task_name: 'overlap_pr',
       },
       {
@@ -311,7 +312,7 @@ more legible.
         requires_replication: true,
         wdl_files: OverlapWdlFiles(_blacklist_derived_from_task, blacklist_derived_from_filekey, 'stable peaks', callbacks=[
           'maybe_preferred_default',
-        ],),
+        ], is_atac=is_atac),
         wdl_task_name: 'overlap_ppr',
       },
       {
@@ -321,7 +322,7 @@ more legible.
         requires_replication: true,
         wdl_files: OverlapWdlFiles(_blacklist_derived_from_task, blacklist_derived_from_filekey, 'replicated peaks', callbacks=[
           'maybe_preferred_default',
-        ],),
+        ], is_atac=is_atac),
         wdl_task_name: 'overlap',
       },
       {

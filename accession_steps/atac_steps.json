@@ -118,11 +118,6 @@
               "disallow_tasks": [
                 "choose_ctl"
               ]
-            },
-            {
-              "derived_from_filekey": "bam",
-              "derived_from_inputs": true,
-              "derived_from_task": "bam2ta_ctl"
             }
           ],
           "file_format": "bigWig",
@@ -138,11 +133,6 @@
               "disallow_tasks": [
                 "choose_ctl"
               ]
-            },
-            {
-              "derived_from_filekey": "bam",
-              "derived_from_inputs": true,
-              "derived_from_task": "bam2ta_ctl"
             }
           ],
           "file_format": "bigWig",
@@ -166,11 +156,6 @@
               "disallow_tasks": [
                 "choose_ctl"
               ]
-            },
-            {
-              "derived_from_filekey": "bam",
-              "derived_from_inputs": true,
-              "derived_from_task": "bam2ta_ctl"
             }
           ],
           "file_format": "bigWig",
@@ -186,11 +171,6 @@
               "disallow_tasks": [
                 "choose_ctl"
               ]
-            },
-            {
-              "derived_from_filekey": "bam",
-              "derived_from_inputs": true,
-              "derived_from_task": "bam2ta_ctl"
             }
           ],
           "file_format": "bigWig",
@@ -213,11 +193,6 @@
               "disallow_tasks": [
                 "choose_ctl"
               ]
-            },
-            {
-              "derived_from_filekey": "bam",
-              "derived_from_inputs": true,
-              "derived_from_task": "bam2ta_ctl"
             }
           ],
           "file_format": "bed",
@@ -239,11 +214,6 @@
               "derived_from_filekey": "blacklist",
               "derived_from_inputs": true,
               "derived_from_task": "idr_pr"
-            },
-            {
-              "derived_from_filekey": "bam",
-              "derived_from_inputs": true,
-              "derived_from_task": "bam2ta_ctl"
             }
           ],
           "file_format": "bed",
@@ -271,11 +241,6 @@
               "disallow_tasks": [
                 "choose_ctl"
               ]
-            },
-            {
-              "derived_from_filekey": "bam",
-              "derived_from_inputs": true,
-              "derived_from_task": "bam2ta_ctl"
             }
           ],
           "file_format": "bed",
@@ -300,11 +265,6 @@
               "derived_from_filekey": "blacklist",
               "derived_from_inputs": true,
               "derived_from_task": "idr_ppr"
-            },
-            {
-              "derived_from_filekey": "bam",
-              "derived_from_inputs": true,
-              "derived_from_task": "bam2ta_ctl"
             }
           ],
           "file_format": "bed",
@@ -332,11 +292,6 @@
               "disallow_tasks": [
                 "choose_ctl"
               ]
-            },
-            {
-              "derived_from_filekey": "bam",
-              "derived_from_inputs": true,
-              "derived_from_task": "bam2ta_ctl"
             }
           ],
           "file_format": "bed",
@@ -362,11 +317,6 @@
               "derived_from_filekey": "blacklist",
               "derived_from_inputs": true,
               "derived_from_task": "idr"
-            },
-            {
-              "derived_from_filekey": "bam",
-              "derived_from_inputs": true,
-              "derived_from_task": "bam2ta_ctl"
             }
           ],
           "file_format": "bed",
@@ -476,11 +426,6 @@
               "derived_from_filekey": "blacklist",
               "derived_from_inputs": true,
               "derived_from_task": "overlap_pr"
-            },
-            {
-              "derived_from_filekey": "bam",
-              "derived_from_inputs": true,
-              "derived_from_task": "bam2ta_ctl"
             }
           ],
           "file_format": "bed",
@@ -516,11 +461,6 @@
               "derived_from_filekey": "blacklist",
               "derived_from_inputs": true,
               "derived_from_task": "overlap_ppr"
-            },
-            {
-              "derived_from_filekey": "bam",
-              "derived_from_inputs": true,
-              "derived_from_task": "bam2ta_ctl"
             }
           ],
           "file_format": "bed",
@@ -556,11 +496,6 @@
               "derived_from_filekey": "blacklist",
               "derived_from_inputs": true,
               "derived_from_task": "overlap"
-            },
-            {
-              "derived_from_filekey": "bam",
-              "derived_from_inputs": true,
-              "derived_from_task": "bam2ta_ctl"
             }
           ],
           "file_format": "bed",
