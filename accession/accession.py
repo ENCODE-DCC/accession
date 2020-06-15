@@ -1501,7 +1501,7 @@ class AccessionAtac(AccessionAtacChip):
             **qc["align"]["dup"][replicate],
             **qc["lib_complexity"]["lib_complexity"][replicate],
         }
-        return self.queue_qc(output_qc, encode_file, "atac-library-quality-metric")
+        return self.queue_qc(output_qc, encode_file, "atac-library-complexity-quality-metric")
 
     def make_atac_replication_qc(
         self, encode_file: EncodeFile, gs_file: GSFile
