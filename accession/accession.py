@@ -327,7 +327,6 @@ class Accession(ABC):
                     file.task,
                     ancestor.derived_from_task,
                     ancestor.derived_from_filekey,
-                    ancestor.derived_from_inputs,
                 )
             else:
                 derived_from_files = self.analysis.search_up(
