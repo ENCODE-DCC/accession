@@ -324,7 +324,7 @@ class Accession(ABC):
         try:
             if ancestor.should_search_down:
                 derived_from_files = self.analysis.search_down(
-                    file.task, ancestor.derived_from_task, ancestor.derived_from_filekey
+                    file.task, ancestor.derived_from_task, ancestor.derived_from_filekey, ancestor.derived_from_inputs
                 )
             else:
                 derived_from_files = self.analysis.search_up(
