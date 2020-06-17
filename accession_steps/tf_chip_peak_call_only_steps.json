@@ -114,7 +114,8 @@
               "derived_from_task": "bam2ta_ctl"
             }
           ],
-          "file_format": "txt",
+          "file_format": "bed",
+          "file_format_type": "idr_ranked_peak",
           "filekey": "idr_unthresholded_peak",
           "output_type": "IDR ranked peaks",
           "quality_metrics": []
@@ -171,7 +172,8 @@
               "derived_from_task": "bam2ta_ctl"
             }
           ],
-          "file_format": "txt",
+          "file_format": "bed",
+          "file_format_type": "idr_ranked_peak",
           "filekey": "idr_unthresholded_peak",
           "output_type": "IDR ranked peaks",
           "quality_metrics": []
@@ -231,7 +233,8 @@
               "derived_from_task": "bam2ta_ctl"
             }
           ],
-          "file_format": "txt",
+          "file_format": "bed",
+          "file_format_type": "idr_ranked_peak",
           "filekey": "idr_unthresholded_peak",
           "output_type": "IDR ranked peaks",
           "quality_metrics": []
