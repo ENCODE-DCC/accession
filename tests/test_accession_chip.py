@@ -588,8 +588,8 @@ def test_get_atac_chip_pipeline_replicate(mocker, mock_accession_chip, gsfile):
         mock_accession_chip.analysis, "search_up", return_value=[gsfile]
     )
     mocker.patch.object(
-        mock_accession_chip.analysis,
-        "metadata",
+        mock_accession_chip.analysis.metadata,
+        "content",
         {"inputs": {"fastqs_rep1_R1": ["gs://abc/spam.fastq.gz"]}},
     )
     rep = mock_accession_chip.get_atac_chip_pipeline_replicate(gsfile)
@@ -601,8 +601,8 @@ def test_get_atac_chip_pipeline_replicate_raises(mocker, mock_accession_chip, gs
         mock_accession_chip.analysis, "search_up", return_value=[gsfile]
     )
     mocker.patch.object(
-        mock_accession_chip.analysis,
-        "metadata",
+        mock_accession_chip.analysis.metadata,
+        "content",
         {"inputs": {"fastqs_rep1_R1": ["gs://abc/eggs.fastq.gz"]}},
     )
     with pytest.raises(ValueError):

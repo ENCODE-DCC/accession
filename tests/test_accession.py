@@ -14,7 +14,7 @@ from accession.accession import (
     accession_factory,
 )
 from accession.accession_steps import AccessionStep, DerivedFromFile
-from accession.encode_models import EncodeExperiment, EncodeFile
+from accession.encode_models import EncodeExperiment, EncodeFile, EncodeGenericObject
 from accession.file import GSFile
 from accession.metadata import FileMetadata
 from accession.preflight import MatchingMd5Record
@@ -236,29 +236,59 @@ def test_make_file_matching_md5_record_matches_does_not_return_none(
     assert mock_accession.preflight_helper.make_file_matching_md5_record.mock_calls
 
 
-def test_accession_patch_experiment_analyses(mock_accession):
-    mock_accession.new_files = [EncodeFile({"@id": "/files/foo/"})]
-    mock_accession.patch_experiment_analyses()
-    assert mock_accession.conn.patch.mock_calls[0][1][0] == {
-        "_enc_id": "foo",
-        "analyses": [{"files": ["/files/foo/"]}],
-    }
-    assert mock_accession.conn.patch.mock_calls[0][2]["extend_array_values"] is True
+def test_accession_post_document(mocker, mock_accession, encode_document):
+    mocker.patch.object(encode_document, "get_portal_object", return_value={})
+    mocker.patch.object(mock_accession.conn, "post", return_value=({"@id": "bar"}, 200))
+    result = mock_accession.post_document(encode_document)
+    assert result.at_id == "bar"
 
 
-def test_accession_patch_experiment_analyses_noop_when_analysis_already_exists(
-    capsys, mock_accession
+def test_accession_post_document_log_on_alias_conflict(
+    mocker, mock_accession, encode_document
 ):
-    mock_accession.new_files = [EncodeFile({"@id": "/files/1/"})]
-    mock_accession.patch_experiment_analyses()
-    captured = capsys.readouterr()
-    assert captured.out.endswith(
-        (
-            "Will not patch analyses for experiment foo, found analysis ['/files/1/'] "
-            "matching the current set of accessioned files ['/files/1/']\n"
-        )
+    mocker.patch.object(encode_document, "get_portal_object", return_value={})
+    mocker.patch.object(mock_accession.conn, "post", return_value=({"@id": "baz"}, 409))
+    mocker.patch.object(mock_accession.logger, "warning")
+    mock_accession.post_document(encode_document)
+    mock_accession.logger.warning.assert_called_once()
+
+
+def test_accession_post_analysis(mocker, mock_accession):
+    mocker.patch.object(mock_accession.conn, "post", return_value=({}, 200))
+    mocker.patch.object(
+        mock_accession.analysis.metadata, "get_as_attachment", create=True
     )
-    assert not mock_accession.conn.patch.mock_calls
+    mocker.patch.object(
+        mock_accession,
+        "post_document",
+        return_value=EncodeGenericObject({"@id": "doc"}),
+    )
+    mocker.patch.object(
+        mock_accession, "new_files", [EncodeFile({"@id": "/files/foo/"})]
+    )
+    mock_accession.post_analysis()
+    assert mock_accession.conn.post.mock_calls[0][1][0] == {
+        "_profile": "analysis",
+        "files": ["/files/foo/"],
+        "aliases": ["encode-processing-pipeline:123"],
+        "documents": ["doc"],
+    }
+
+
+def test_accession_post_analysis_log_on_alias_conflict(mocker, mock_accession):
+    mocker.patch.object(mock_accession.conn, "post", return_value=({"@id": "bar"}, 409))
+    mocker.patch.object(
+        mock_accession.analysis.metadata, "get_as_attachment", create=True
+    )
+    mocker.patch.object(
+        mock_accession,
+        "post_document",
+        return_value=EncodeGenericObject({"@id": "doc"}),
+    )
+    mocker.patch.object(mock_accession.logger, "warning")
+    mocker.patch.object(mock_accession, "new_files", [EncodeFile({"@id": "/files/1/"})])
+    mock_accession.post_analysis()
+    mock_accession.logger.warning.assert_called_once()
 
 
 @pytest.mark.docker
@@ -464,6 +494,7 @@ def test_accession_steps_matches_with_force(
         mock_accession, "_get_dry_run_matches", return_value=[matching_md5_record]
     )
     mocker.patch.object(mock_accession, "accession_step")
+    mocker.patch.object(mock_accession, "post_analysis")
     mock_accession.accession_steps(force=True)
     assert "continuing accessioning" in caplog.text
     mock_accession.accession_step.assert_called()

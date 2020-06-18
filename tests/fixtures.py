@@ -24,7 +24,14 @@ from accession.accession import (
     accession_factory,
 )
 from accession.analysis import Analysis
-from accession.encode_models import EncodeCommonMetadata, EncodeExperiment, EncodeFile
+from accession.encode_models import (
+    EncodeAttachment,
+    EncodeCommonMetadata,
+    EncodeDocument,
+    EncodeDocumentType,
+    EncodeExperiment,
+    EncodeFile,
+)
 from accession.metadata import FileMetadata
 
 
@@ -97,7 +104,6 @@ def local_encoded_server(
             continue
         container.kill()
         raise RuntimeError("Elasticsearch took too long to index")
-    sleep(10)
     yield server_address
     container.kill()
 
@@ -170,6 +176,28 @@ def mirna_replicated_metadata_path() -> str:
 @pytest.fixture
 def encode_file_no_qc():
     return EncodeFile({"@id": "/files/foo/", "quality_metrics": []})
+
+
+@pytest.fixture(scope="module")
+def encode_attachment():
+    return EncodeAttachment(
+        filename="/my/dir/haz/my_text_file", contents=b"foo bar baz"
+    )
+
+
+@pytest.fixture(scope="module")
+def encode_common_metadata():
+    return EncodeCommonMetadata("/labs/lab/", "award")
+
+
+@pytest.fixture
+def encode_document(encode_attachment, encode_common_metadata):
+    return EncodeDocument(
+        encode_attachment,
+        encode_common_metadata,
+        EncodeDocumentType.WorkflowMetadata,
+        aliases=["encode:foo"],
+    )
 
 
 @attr.s(auto_attribs=True)
@@ -335,7 +363,8 @@ def accessioner_factory(
 
 
 class MockMetadata:
-    content = {"workflowRoot": "gs://foo/bar", "calls": {}}
+    content = {"id": "foo", "workflowRoot": "gs://foo/bar", "calls": {}}
+    workflow_id = "123"
 
 
 @pytest.fixture
@@ -386,7 +415,6 @@ def mock_accession(
                         {"biological_replicate_number": 1},
                         {"biological_replicate_number": 2},
                     ],
-                    "analyses": [{"files": ["/files/1/"]}],
                 }
             )
         ),

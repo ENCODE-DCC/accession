@@ -81,7 +81,7 @@ To run the local app, map your desired host port (must not be in use, here using
 
 .. code-block:: bash
 
-   $ docker run -d -p 8000:8000 encoded-docker:test
+   $ docker run --rm -d -p 8000:8000 encoded-docker:test
 
 Writing tests
 ======================================
