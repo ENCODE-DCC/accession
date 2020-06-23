@@ -491,6 +491,14 @@ class Accession(ABC):
         )
         self.conn.patch(payload, extend_array_values=True)
 
+    def patch_experiment_internal_status(self) -> None:
+        """
+        Patches the internal_status of the experiment being accessioned to indicate
+        accessioning has completed.
+        """
+        payload = self.experiment.get_patchable_internal_status()
+        self.conn.patch(payload)
+
     def accession_step(
         self, single_step_params: AccessionStep, dry_run: bool = False
     ) -> Union[List[Optional[MatchingMd5Record]], List[EncodeFile], None]:
@@ -562,6 +570,7 @@ class Accession(ABC):
                 self.accession_step(step)
             self.post_qcs()
             self.patch_experiment_analyses()
+            self.patch_experiment_internal_status()
             for encode_file, gs_file in self.upload_queue:
                 self.upload_file(encode_file, gs_file)
 
