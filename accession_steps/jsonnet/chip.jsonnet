@@ -135,7 +135,7 @@ pipeline-specific mapping and peak calling accessioning templates.
       {
         derived_from_files: bed_bigwig_derived_from_files,
         file_format: 'bed',
-        file_format_type: file_format_type,
+        file_format_type: 'idr_ranked_peak',
         filekey: 'idr_unthresholded_peak',
         output_type: 'IDR ranked peaks',
         quality_metrics: [],
