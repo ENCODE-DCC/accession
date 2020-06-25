@@ -23,26 +23,29 @@ CLASSIFIERS = [
     "Programming Language :: Python :: 3.8",
 ]
 INSTALL_REQUIRES = [
-    "requests",
-    "encode_utils==2.10.0",
-    "flatdict==4.0.1",
-    "google-cloud-storage==1.28.1",
     "attrs",
     "boto3==1.13.5",
     "caper==1.0.0",
-    "google-cloud-tasks==1.5.0",
-    "google-auth==1.18.0",
+    "encode_utils==2.10.0",
+    "encode_utils==2.10.0",
+    "flatdict==4.0.1",
     "google-api-core==1.21.0",
+    "google-auth==1.18.0",
+    "google-cloud-storage==1.28.1",
+    "google-cloud-tasks==1.5.0",
     "qc_utils==20.9.1",
+    "SQLAlchemy==1.3.17",
     "typing-extensions==3.7.4.2",
     "miniwdl==0.8.2",
 ]
 EXTRAS_REQUIRE = {
     "docs": ["sphinx"],
-    "tests": ["pytest", "pytest-cov", "pytest-mock>=3.3.0", "docker"],
+    "tests": ["pytest", "pytest-cov", "pytest-mock==3.2.0", "docker", "requests"],
 }
 EXTRAS_REQUIRE["dev"] = (
-    EXTRAS_REQUIRE["docs"] + EXTRAS_REQUIRE["tests"] + ["pre-commit", "boto3-stubs[s3]"]
+    EXTRAS_REQUIRE["docs"]
+    + EXTRAS_REQUIRE["tests"]
+    + ["pre-commit", "sqlalchemy-stubs==0.3", "boto3-stubs[s3]"]
 )
 HERE = os.path.abspath(os.path.dirname(__file__))
 

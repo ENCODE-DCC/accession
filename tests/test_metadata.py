@@ -29,6 +29,25 @@ def test_metadata_backend_name(file_metadata):
     assert file_metadata.backend_name == "Local"
 
 
+def test_metadata_get_filtered_labels(mocker):
+    mocker.patch.object(
+        FileMetadata,
+        "content",
+        new_callable=mocker.PropertyMock(
+            return_value={
+                "labels": {
+                    "my": "label",
+                    "caper-str-label": "cool",
+                    "cromwell-workflow-id": "123",
+                }
+            }
+        ),
+    )
+    metadata = FileMetadata("foo.json")
+    result = metadata.get_filtered_labels()
+    assert result == {"my": "label", "caper-str-label": "cool"}
+
+
 @pytest.mark.parametrize(
     "prefix,expected", [("", "foo_metadata.json"), ("cool", "cool_foo_metadata.json")]
 )

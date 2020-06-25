@@ -12,6 +12,7 @@ from accession.encode_models import (
     EncodeGenericObject,
     EncodeQualityMetric,
     EncodeStepRun,
+    FileStatus,
 )
 
 
@@ -20,7 +21,7 @@ def encode_file():
     return EncodeFile(
         {
             "@id": "1",
-            "status": "foo",
+            "status": "released",
             "output_type": "reads",
             "dataset": "chip",
             "md5sum": "123",
@@ -121,7 +122,7 @@ def test_encode_attachment_get_portal_object(encode_attachment):
             EncodeFile(
                 {
                     "@id": "1",
-                    "status": "foo",
+                    "status": "released",
                     "output_type": "reads",
                     "dataset": "chip",
                     "md5sum": "123",
@@ -134,7 +135,7 @@ def test_encode_attachment_get_portal_object(encode_attachment):
             EncodeFile(
                 {
                     "@id": "1",
-                    "status": "foo",
+                    "status": "released",
                     "output_type": "reads",
                     "dataset": "atac",
                     "md5sum": "123",
@@ -152,13 +153,13 @@ def test_encode_file_eq(encode_file, other_file, expected):
 
 def test_encode_file_properties(encode_file):
     assert encode_file.at_id == "1"
-    assert encode_file.status == "foo"
+    assert encode_file.status == FileStatus.Released
     assert encode_file.md5sum == "123"
     assert encode_file.output_type == "reads"
     assert encode_file.dataset == "chip"
 
 
-@pytest.mark.parametrize("key,expected", [("status", "foo"), ("name", None)])
+@pytest.mark.parametrize("key,expected", [("status", "released"), ("name", None)])
 def test_encode_file_get(encode_file, key, expected):
     assert encode_file.get(key) == expected
 
@@ -196,13 +197,13 @@ def test_encode_file_has_qc(encode_file, qc_type, expected):
     [
         (
             [
-                EncodeFile({"@id": 1, "status": "foo"}),
-                EncodeFile({"@id": 2, "status": "bar"}),
+                EncodeFile({"@id": 1, "status": "released"}),
+                EncodeFile({"@id": 2, "status": "in progress"}),
                 EncodeFile({"@id": 3, "status": "deleted"}),
             ],
             2,
         ),
-        ([EncodeFile({"@id": 1, "status": "foo"})], 1),
+        ([EncodeFile({"@id": 1, "status": "released"})], 1),
     ],
 )
 def test_encode_file_filter_encode_files_by_status(files, expected):
@@ -396,19 +397,14 @@ def test_encode_experiment_get_patchable_analyses(encode_experiment):
     }
 
 
-def test_encode_quality_metric_no_file_id_raises(payload):
-    with pytest.raises(Exception):
-        EncodeQualityMetric(payload, file_id=None)
-
-
 def test_encode_quality_metric_init(payload):
-    qm = EncodeQualityMetric(payload, "my_id")
+    qm = EncodeQualityMetric(payload, ["my_id"])
     assert qm.files == ["my_id"]
     assert qm.payload == payload
 
 
 def test_encode_quality_metric_get_portal_object(payload):
-    qm = EncodeQualityMetric(payload, "my_id")
+    qm = EncodeQualityMetric(payload, ["my_id"])
     result = qm.get_portal_object()
     assert result == {"foo": "bar", "quality_metric_of": ["my_id"]}
 

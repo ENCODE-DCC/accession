@@ -11,6 +11,12 @@ from accession.encode_models import EncodeAttachment
 
 
 class Metadata(ABC):
+    UNNECESSARY_WORKFLOW_LABELS = (
+        "caper-backend",
+        "caper-user",
+        "cromwell-workflow-id",
+    )
+
     @property
     @abstractmethod
     def content(self) -> Dict[str, Any]:
@@ -23,6 +29,10 @@ class Metadata(ABC):
     @property
     def backend_name(self) -> str:
         return self.content["labels"][CaperLabels.KEY_CAPER_BACKEND]
+
+    @property
+    def labels(self) -> Dict[str, str]:
+        return self.content["labels"]
 
     def get_filename(self, prefix: str = "") -> str:
         """
@@ -47,6 +57,16 @@ class Metadata(ABC):
 
     def get_parsed_workflow(self) -> WDL.Tree.Document:
         return WDL.parse_document(self.content["submittedFiles"]["workflow"])
+
+    def get_filtered_labels(self) -> Dict[str, str]:
+        """
+        Filters out labels that are either fairly constant, irrelevant, or redundant.
+        """
+        return {
+            k: v
+            for k, v in self.labels.items()
+            if k not in self.UNNECESSARY_WORKFLOW_LABELS
+        }
 
 
 class FileMetadata(Metadata):

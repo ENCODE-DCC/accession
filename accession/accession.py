@@ -29,6 +29,8 @@ from accession.cloud_tasks import (
     QueueInfo,
     UploadPayload,
 )
+from accession.database.connection import DbSession
+from accession.database.models import File, QualityMetric, Run, RunStatus, WorkflowLabel
 from accession.encode_models import (
     EncodeAnalysis,
     EncodeAttachment,
@@ -40,6 +42,7 @@ from accession.encode_models import (
     EncodeGenericObject,
     EncodeQualityMetric,
     EncodeStepRun,
+    FileStatus,
 )
 from accession.file import File, GSFile, S3File
 from accession.helpers import (
@@ -73,14 +76,19 @@ class Accession(ABC):
         no_log_file: bool = False,
         queue_info: Optional[QueueInfo] = None,
         private_filenames: bool = False,
+        use_in_memory_db: bool = False,
     ) -> None:
         self.analysis = analysis
         self.steps = steps
         self.conn = connection
         self.common_metadata = common_metadata
+        if use_in_memory_db:
+            self.db_session = DbSession.with_in_memory_db()
+        else:
+            self.db_session = DbSession.with_home_dir_db_path()
         self.new_files: List[EncodeFile] = []
         self.upload_queue: List[Tuple[EncodeFile, File]] = []
-        self.new_qcs: List[Dict[str, Any]] = []
+        self.new_qcs: List[EncodeQualityMetric] = []
         self.raw_qcs: List[EncodeQualityMetric] = []
         self.log_file_path = log_file_path
         self.no_log_file = no_log_file
@@ -290,8 +298,8 @@ class Accession(ABC):
             truncate_long_strings_in_payload_log=True,
         )
         modeled_encode_file = EncodeFile(encode_posted_file)
-        if modeled_encode_file.status == "upload failed" or (
-            modeled_encode_file.status == "uploading"
+        if modeled_encode_file.status == FileStatus.UploadFailed or (
+            modeled_encode_file.status == FileStatus.Uploading
             and status_code != HTTPStatus.CONFLICT
         ):
             self.upload_queue.append((modeled_encode_file, file))
@@ -625,13 +633,12 @@ class Accession(ABC):
 
     def post_qcs(self) -> None:
         for qc in self.raw_qcs:
-            self.new_qcs.append(
-                self.conn.post(
-                    qc.get_portal_object(),
-                    require_aliases=False,
-                    truncate_long_strings_in_payload_log=True,
-                )
+            posted_qc = self.conn.post(
+                qc.get_portal_object(),
+                require_aliases=False,
+                truncate_long_strings_in_payload_log=True,
             )
+            self.new_qcs.append(EncodeQualityMetric.from_portal_object(posted_qc))
 
     def queue_qc(
         self,
@@ -652,7 +659,7 @@ class Accession(ABC):
                 **self.common_metadata,
             }
         )
-        modeled_qc = EncodeQualityMetric(qc, encode_file.at_id)
+        modeled_qc = EncodeQualityMetric.from_payload_and_file_id(qc, encode_file.at_id)
         if shared:
             for item in self.raw_qcs:
                 if item.payload == modeled_qc.payload:
@@ -798,6 +805,37 @@ class Accession(ABC):
             payload = preferred_default_file_patch.get_portal_patch()
             self.conn.patch(payload)
 
+    def add_run_to_db(self, run_status: RunStatus) -> None:
+        workflow_labels = [
+            WorkflowLabel(key=key, value=value)
+            for key, value in self.analysis.metadata.get_filtered_labels().items()
+        ]
+        files = []
+        for file in self.new_files:
+            # Enum interpreted as string, so ignore types
+            # https://github.com/dropbox/sqlalchemy-stubs/issues/114
+            db_file = File(portal_at_id=file.at_id, status=file.status)  # type: ignore
+            file_qcs = []
+            for qc in self.new_qcs:
+                if qc.files is None:
+                    raise ValueError(f"Could not determine files for QC {qc.at_id}")
+                if file.at_id in qc.files:
+                    # We know here that the QC has an ID, since we initialized the
+                    # object with the response we got back from the portal on POST
+                    qc_id = cast(str, qc.at_id)
+                    file_qcs.append(QualityMetric(portal_at_id=qc_id))
+            db_file.quality_metrics = file_qcs
+            files.append(db_file)
+        run = Run(  # type: ignore
+            experiment_at_id=self.experiment.at_id,
+            workflow_id=self.analysis.workflow_id,
+            status=run_status,
+            workflow_labels=workflow_labels,
+            files=files,
+        )
+        self.db_session.session.add(run)
+        self.db_session.session.commit()
+
     def accession_step(
         self, single_step_params: AccessionStep, dry_run: bool = False
     ) -> Union[List[Optional[MatchingMd5Record]], List[EncodeFile], None]:
@@ -916,15 +954,22 @@ class Accession(ABC):
                 )
             )
 
-        for step in self.steps.content:
-            self.accession_step(step)
-        self.patch_preferred_default_files()
-        self.post_qcs()
-        analysis = self.post_analysis()
-        for encode_file, file in self.upload_queue:
-            self.upload_file(encode_file, file)
-        self.patch_experiment_analyses(analysis)
-        self.patch_experiment_internal_status()
+        try:
+            for step in self.steps.content:
+                self.accession_step(step)
+            self.patch_preferred_default_files()
+            self.post_qcs()
+            analysis = self.post_analysis()
+            for encode_file, file in self.upload_queue:
+                self.upload_file(encode_file, file)
+            self.patch_experiment_analyses(analysis)
+            self.patch_experiment_internal_status()
+        except Exception:
+            self.logger.exception("Failed to complete accessioning")
+            self.add_run_to_db(run_status=RunStatus.Failed)
+            raise
+        else:
+            self.add_run_to_db(run_status=RunStatus.Succeeded)
 
 
 class AccessionGenericRna(Accession):

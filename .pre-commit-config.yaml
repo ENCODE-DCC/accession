@@ -23,6 +23,7 @@ repos:
       - id: mypy
         additional_dependencies:
           - boto3-stubs[s3]==1.17.90
+          - sqlalchemy-stubs==0.3
 
   - repo: git://github.com/detailyang/pre-commit-shell
     rev: v1.0.6
