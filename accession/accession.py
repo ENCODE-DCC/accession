@@ -570,9 +570,9 @@ class Accession(ABC):
                 self.accession_step(step)
             self.post_qcs()
             self.patch_experiment_analyses()
-            self.patch_experiment_internal_status()
             for encode_file, gs_file in self.upload_queue:
                 self.upload_file(encode_file, gs_file)
+            self.patch_experiment_internal_status()
 
 
 class AccessionGenericRna(Accession):
