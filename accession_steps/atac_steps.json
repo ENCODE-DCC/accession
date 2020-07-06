@@ -196,7 +196,7 @@
             }
           ],
           "file_format": "bed",
-          "file_format_type": "narrowPeak",
+          "file_format_type": "idr_ranked_peak",
           "filekey": "idr_unthresholded_peak",
           "output_type": "IDR ranked peaks",
           "quality_metrics": []
@@ -244,15 +244,12 @@
             }
           ],
           "file_format": "bed",
-          "file_format_type": "narrowPeak",
+          "file_format_type": "idr_ranked_peak",
           "filekey": "idr_unthresholded_peak",
           "output_type": "IDR ranked peaks",
           "quality_metrics": []
         },
         {
-          "callbacks": [
-            "maybe_preferred_default"
-          ],
           "derived_from_files": [
             {
               "derived_from_filekey": "nodup_bam",
@@ -295,14 +292,13 @@
             }
           ],
           "file_format": "bed",
-          "file_format_type": "narrowPeak",
+          "file_format_type": "idr_ranked_peak",
           "filekey": "idr_unthresholded_peak",
           "output_type": "IDR ranked peaks",
           "quality_metrics": []
         },
         {
           "callbacks": [
-            "maybe_preferred_default",
             "maybe_conservative_set"
           ],
           "derived_from_files": [
@@ -360,9 +356,6 @@
       "requires_replication": true,
       "wdl_files": [
         {
-          "callbacks": [
-            "maybe_preferred_default"
-          ],
           "derived_from_files": [
             {
               "derived_from_filekey": "bfilt_idr_peak",
@@ -388,8 +381,7 @@
       "wdl_files": [
         {
           "callbacks": [
-            "maybe_conservative_set",
-            "maybe_preferred_default"
+            "maybe_conservative_set"
           ],
           "derived_from_files": [
             {

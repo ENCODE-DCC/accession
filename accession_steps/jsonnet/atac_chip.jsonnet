@@ -18,6 +18,7 @@ linting afterwards `tox -e lint` to pretty-format the JSON, which will make the 
 more legible.
 */
 {
+  local MAYBE_PREFERRED_DEFAULT = 'maybe_preferred_default',
   local BedBigwigDerivedFromFiles(is_atac=false) = [
     {
       derived_from_filekey: 'nodup_bam',
@@ -209,14 +210,16 @@ more legible.
         dcc_step_run: '%s-seq-pooled-pseudoreplicated-idr-step-v-1' % step_prefix,
         dcc_step_version: '/analysis-step-versions/%s-seq-pooled-pseudoreplicated-idr-step-v-1-0/' % step_prefix,
         requires_replication: true,
-        wdl_files: IdrWdlFiles(self.wdl_task_name, callbacks=['maybe_preferred_default'], is_atac=is_atac),
+        local callbacks = if is_atac then [] else [MAYBE_PREFERRED_DEFAULT],
+        wdl_files: IdrWdlFiles(self.wdl_task_name, callbacks=callbacks, is_atac=is_atac),
         wdl_task_name: 'idr_ppr',
       },
       {
         dcc_step_run: '%s-seq-replicated-idr-step-v-1' % step_prefix,
         dcc_step_version: '/analysis-step-versions/%s-seq-replicated-idr-step-v-1-0/' % step_prefix,
         requires_replication: true,
-        wdl_files: IdrWdlFiles(self.wdl_task_name, callbacks=['maybe_preferred_default', 'maybe_conservative_set'], is_atac=is_atac),
+        local callbacks = (if is_atac then [] else [MAYBE_PREFERRED_DEFAULT]) + ['maybe_conservative_set'],
+        wdl_files: IdrWdlFiles(self.wdl_task_name, callbacks=callbacks, is_atac=is_atac),
         wdl_task_name: 'idr',
       },
       {
@@ -229,19 +232,18 @@ more legible.
         dcc_step_run: '%s-seq-pooled-pseudoreplicated-idr-thresholded-peaks-file-format-conversion-step-v-1' % step_prefix,
         dcc_step_version: '/analysis-step-versions/%s-seq-pooled-pseudoreplicated-idr-thresholded-peaks-file-format-conversion-step-v-1-0/' % step_prefix,
         requires_replication: true,
-        wdl_files: FormatConversionWdlFiles(self.wdl_task_name, callbacks=['maybe_preferred_default'],),
+        local callbacks = if is_atac then [] else [MAYBE_PREFERRED_DEFAULT],
+        wdl_files: FormatConversionWdlFiles(self.wdl_task_name, callbacks=callbacks,),
         wdl_task_name: 'idr_ppr',
       },
       {
         dcc_step_run: '%s-seq-replicated-idr-thresholded-peaks-file-format-conversion-step-v-1' % step_prefix,
         dcc_step_version: '/analysis-step-versions/%s-seq-replicated-idr-thresholded-peaks-file-format-conversion-step-v-1-0/' % step_prefix,
         requires_replication: true,
+        local callbacks = ['maybe_conservative_set'] + (if is_atac then [] else [MAYBE_PREFERRED_DEFAULT]),
         wdl_files: FormatConversionWdlFiles(
           self.wdl_task_name,
-          callbacks=[
-            'maybe_conservative_set',
-            'maybe_preferred_default',
-          ],
+          callbacks=callbacks,
         ),
         wdl_task_name: 'idr',
       },
@@ -311,7 +313,7 @@ more legible.
         dcc_step_version: '/analysis-step-versions/%s-seq-pooled-pseudoreplicated-overlap-step-v-1-0/' % step_prefix,
         requires_replication: true,
         wdl_files: OverlapWdlFiles(_blacklist_derived_from_task, blacklist_derived_from_filekey, 'stable peaks', callbacks=[
-          'maybe_preferred_default',
+          MAYBE_PREFERRED_DEFAULT,
         ], is_atac=is_atac),
         wdl_task_name: 'overlap_ppr',
       },
@@ -321,7 +323,7 @@ more legible.
         dcc_step_version: '/analysis-step-versions/%s-seq-replicated-overlap-step-v-1-0/' % step_prefix,
         requires_replication: true,
         wdl_files: OverlapWdlFiles(_blacklist_derived_from_task, blacklist_derived_from_filekey, 'replicated peaks', callbacks=[
-          'maybe_preferred_default',
+          MAYBE_PREFERRED_DEFAULT,
         ], is_atac=is_atac),
         wdl_task_name: 'overlap',
       },
@@ -335,14 +337,14 @@ more legible.
         dcc_step_run: '%s-seq-pooled-pseudoreplicated-overlap-stable-peaks-file-format-conversion-step-v-1' % step_prefix,
         dcc_step_version: '/analysis-step-versions/%s-seq-pooled-pseudoreplicated-overlap-stable-peaks-file-format-conversion-step-v-1-0/' % step_prefix,
         requires_replication: true,
-        wdl_files: FormatConversionWdlFiles(self.wdl_task_name, 'stable peaks', callbacks=['maybe_preferred_default'],),
+        wdl_files: FormatConversionWdlFiles(self.wdl_task_name, 'stable peaks', callbacks=[MAYBE_PREFERRED_DEFAULT],),
         wdl_task_name: 'overlap_ppr',
       },
       {
         dcc_step_run: '%s-seq-replicated-overlap-file-format-conversion-step-v-1' % step_prefix,
         dcc_step_version: '/analysis-step-versions/%s-seq-replicated-overlap-file-format-conversion-step-v-1-0/' % step_prefix,
         requires_replication: true,
-        wdl_files: FormatConversionWdlFiles(self.wdl_task_name, 'replicated peaks', callbacks=['maybe_preferred_default'],),
+        wdl_files: FormatConversionWdlFiles(self.wdl_task_name, 'replicated peaks', callbacks=[MAYBE_PREFERRED_DEFAULT],),
         wdl_task_name: 'overlap',
       },
     ],
