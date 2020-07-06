@@ -1471,7 +1471,7 @@ class AccessionAtac(AccessionAtacChip):
         )[0]
         output_qc = {}
         output_qc.update(qc["align_enrich"]["jsd"][replicate])
-        output_qc.update(qc["peak_enrich"]["frac_reads_in_annot"][replicate])
+        output_qc.update(qc["align"]["frac_reads_in_annot"][replicate])
         output_qc.update(
             {
                 "tss_enrichment": qc["align_enrich"]["tss_enrich"][replicate][
