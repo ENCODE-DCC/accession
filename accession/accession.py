@@ -1493,6 +1493,11 @@ class AccessionAtac(AccessionAtacChip):
         )
 
     def make_atac_library_qc(self, encode_file: EncodeFile, gs_file: GSFile) -> None:
+        """
+        The ATAC pipeline only produces fragment length distribution plots for paired
+        end data, so we need to check the bam endedness before searching the analysis
+        for the plot.
+        """
         if encode_file.has_qc("AtacLibraryQualityMetric"):
             return
         qc = self.backend.read_json(self.analysis.get_files("qc_json")[0])
@@ -1501,6 +1506,13 @@ class AccessionAtac(AccessionAtacChip):
             **qc["align"]["dup"][replicate],
             **qc["lib_complexity"]["lib_complexity"][replicate],
         }
+        if gs_file.task.inputs["paired_end"] is True:
+            fragment_length_plot_png = self.analysis.search_down(
+                gs_file.task, "fraglen_stat_pe", "fraglen_dist_plot"
+            )[0]
+            output_qc["fragment_length_distribution_plot"] = (
+                self.get_attachment(fragment_length_plot_png, "image/png"),
+            )
         return self.queue_qc(
             output_qc, encode_file, "atac-library-complexity-quality-metric"
         )
