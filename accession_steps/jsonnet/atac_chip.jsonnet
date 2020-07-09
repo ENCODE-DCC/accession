@@ -23,6 +23,7 @@ more legible.
     {
       derived_from_filekey: 'nodup_bam',
       derived_from_task: 'filter',
+    } + if is_atac then {} else {
       disallow_tasks: [
         'choose_ctl',
       ],
