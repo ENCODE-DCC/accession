@@ -67,7 +67,7 @@ def mock_accession_patched_qc(mocker, mock_accession_chip, gsfile):
         mock_accession_chip.analysis, "get_files", return_value=[gsfile]
     )
     mocker.patch.object(
-        mock_accession_chip, "get_chip_pipeline_replicate", return_value=REP
+        mock_accession_chip, "get_atac_chip_pipeline_replicate", return_value=REP
     )
     mocker.patch.object(mock_accession_chip, "queue_qc", lambda output, *args: output)
     return mock_accession_chip
@@ -428,7 +428,7 @@ def test_accession_chip_add_mapped_run_type(
     mocker.patch.object(mock_accession_chip.analysis, "get_files")
     mocker.patch.object(mock_accession_chip.backend, "read_json", return_value=qc)
     mocker.patch.object(
-        mock_accession_chip, "get_chip_pipeline_replicate", return_value="rep1"
+        mock_accession_chip, "get_atac_chip_pipeline_replicate", return_value="rep1"
     )
     with condition:
         result = mock_accession_chip.add_mapped_run_type(gsfile)
@@ -583,7 +583,7 @@ def test_make_chip_library_qc(
         assert qc[k] == v
 
 
-def test_get_chip_pipeline_replicate(mocker, mock_accession_chip, gsfile):
+def test_get_atac_chip_pipeline_replicate(mocker, mock_accession_chip, gsfile):
     mocker.patch.object(
         mock_accession_chip.analysis, "search_up", return_value=[gsfile]
     )
@@ -592,11 +592,11 @@ def test_get_chip_pipeline_replicate(mocker, mock_accession_chip, gsfile):
         "metadata",
         {"inputs": {"fastqs_rep1_R1": ["gs://abc/spam.fastq.gz"]}},
     )
-    rep = mock_accession_chip.get_chip_pipeline_replicate(gsfile)
+    rep = mock_accession_chip.get_atac_chip_pipeline_replicate(gsfile)
     assert rep == "rep1"
 
 
-def test_get_chip_pipeline_replicate_raises(mocker, mock_accession_chip, gsfile):
+def test_get_atac_chip_pipeline_replicate_raises(mocker, mock_accession_chip, gsfile):
     mocker.patch.object(
         mock_accession_chip.analysis, "search_up", return_value=[gsfile]
     )
@@ -606,7 +606,7 @@ def test_get_chip_pipeline_replicate_raises(mocker, mock_accession_chip, gsfile)
         {"inputs": {"fastqs_rep1_R1": ["gs://abc/eggs.fastq.gz"]}},
     )
     with pytest.raises(ValueError):
-        mock_accession_chip.get_chip_pipeline_replicate(gsfile)
+        mock_accession_chip.get_atac_chip_pipeline_replicate(gsfile)
 
 
 @pytest.mark.parametrize(

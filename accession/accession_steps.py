@@ -66,6 +66,11 @@ class AccessionSteps:
 
 class DerivedFromFile:
     def __init__(self, derived_from_file: Dict[str, Any]):
+        """
+        Use `"search_down": true` to search down the task heirarchy for derived_from
+        files. This is used by ATAC, where we need the filtered bam to be derived from
+        the reference annotation files, but they aren't anywhere upstream of the bam.
+        """
         self.allow_empty: bool = derived_from_file.get("allow_empty", False)
         self.derived_from_filekey: str = derived_from_file["derived_from_filekey"]
         self.derived_from_inputs: bool = derived_from_file.get(
@@ -76,6 +81,9 @@ class DerivedFromFile:
             "derived_from_output_type"
         )
         self.disallow_tasks: List[str] = derived_from_file.get("disallow_tasks", [])
+        self.should_search_down: bool = derived_from_file.get(
+            "should_search_down", False
+        )
 
 
 class FileParams:

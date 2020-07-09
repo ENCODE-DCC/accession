@@ -153,8 +153,8 @@ class Analysis:
             set(self._search_up(start_task, task_name, filekey, inputs, disallow_tasks))
         )
 
-    def search_down(self, start_task, task_name, filekey):
-        return list(set(self._search_down(start_task, task_name, filekey)))
+    def search_down(self, start_task, task_name, filekey, inputs: bool = False):
+        return list(set(self._search_down(start_task, task_name, filekey, inputs)))
 
     def _search_up(
         self,
@@ -201,7 +201,7 @@ class Analysis:
                     task_item, task_name, filekey, inputs, disallow_tasks=disallow_tasks
                 )
 
-    def _search_down(self, start_task, task_name, filekey):
+    def _search_down(self, start_task, task_name, filekey, inputs: bool = False):
         """
         Search the Analysis hirearchy down for a file matching filekey. Returns
         generator object, access with next(). Task parameter specifies the starting
@@ -211,9 +211,14 @@ class Analysis:
         has no output files.
         """
         if task_name == start_task.task_name:
-            for file in start_task.output_files:
-                if filekey in file.filekeys:
-                    yield file
+            if inputs is True:
+                for file in start_task.input_files:
+                    if filekey in file.filekeys:
+                        yield file
+            else:
+                for file in start_task.output_files:
+                    if filekey in file.filekeys:
+                        yield file
         for task_item in set(
             reduce(
                 operator.concat,
@@ -222,4 +227,4 @@ class Analysis:
             )
         ):
             if task_item:
-                yield from self._search_down(task_item, task_name, filekey)
+                yield from self._search_down(task_item, task_name, filekey, inputs)
