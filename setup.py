@@ -30,6 +30,10 @@ INSTALL_REQUIRES = [
     "attrs",
     "boto3==1.13.5",
     "caper==1.0.0",
+    "google-cloud-tasks==1.5.0",
+    "google-auth==1.18.0",
+    "google-api-core==1.21.0",
+    "typing-extensions==3.7.4.2",
 ]
 EXTRAS_REQUIRE = {
     "docs": ["sphinx"],
