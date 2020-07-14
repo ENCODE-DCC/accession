@@ -25,15 +25,21 @@ Task = TypedDict(
 
 
 @attr.s(auto_attribs=True)
+class QueueInfo:
+    name: str
+    region: str
+
+
+@attr.s(auto_attribs=True)
 class AwsCredentials:
     aws_access_key_id: str
-    aws_secret_key: str
+    aws_secret_access_key: str
     aws_session_token: str
 
     def get_dict(self) -> Dict[str, str]:
         return {
             "aws_access_key_id": self.aws_access_key_id,
-            "aws_secret_key": self.aws_secret_key,
+            "aws_secret_access_key": self.aws_secret_access_key,
             "aws_session_token": self.aws_session_token,
         }
 
@@ -66,7 +72,7 @@ class UploadPayload:
         {
             "aws_credentials": {
                 "aws_access_key_id": "foo",
-                "aws_secret_key": "bar",
+                "aws_secret_access_key": "bar",
                 "aws_session_token": "baz",
             },
             "aws_s3_object": {"bucket": "s3", "key": "object"},
@@ -104,16 +110,14 @@ class CloudTasksUploadClient:
 
     def __init__(
         self,
-        location: str,
-        queue: str,
+        queue_info: QueueInfo,
         log_file_path="accession.log",
         no_log_file=False,
     ) -> None:
         """
         `location` and `queue` refer to the region and name of the queue, respectively.
         """
-        self.location = location
-        self.queue = queue
+        self.queue_info = queue_info
         self._client = None
         self._project_id: Optional[str] = None
         self._logger: Optional[logging.Logger] = None
@@ -163,7 +167,7 @@ class CloudTasksUploadClient:
         """
         Return the fully qualified path to the queue.
         """
-        return self.client.queue_path(self.project_id, self.location, self.queue)
+        return self.client.queue_path(project=self.project_id, location=self.queue_info.region, queue=self.queue_info.name)
 
     def upload(self, payload: UploadPayload) -> None:
         """

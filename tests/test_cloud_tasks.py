@@ -13,7 +13,7 @@ from accession.cloud_tasks import (
 @pytest.fixture
 def aws_credentials():
     return AwsCredentials(
-        aws_access_key_id="foo", aws_secret_key="bar", aws_session_token="baz"
+        aws_access_key_id="foo", aws_secret_access_key="bar", aws_session_token="baz"
     )
 
 
@@ -59,7 +59,7 @@ def test_aws_credentials_get_dict(aws_credentials):
     result = aws_credentials.get_dict()
     assert result == {
         "aws_access_key_id": "foo",
-        "aws_secret_key": "bar",
+        "aws_secret_access_key": "bar",
         "aws_session_token": "baz",
     }
 
