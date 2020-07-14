@@ -13,7 +13,13 @@ from accession.accession_steps import (
     FileParams,
 )
 from accession.analysis import Analysis
-from accession.cloud_tasks import QueueInfo, CloudTasksUploadClient, UploadPayload, AwsS3Object, AwsCredentials
+from accession.cloud_tasks import (
+    AwsCredentials,
+    AwsS3Object,
+    CloudTasksUploadClient,
+    QueueInfo,
+    UploadPayload,
+)
 from accession.encode_models import (
     EncodeAnalysis,
     EncodeAttachment,
@@ -65,7 +71,11 @@ class Accession(ABC):
 
         self.cloud_tasks_upload_client: Optional[CloudTasksUploadClient] = None
         if queue_info is not None:
-            self.cloud_tasks_upload_client = CloudTasksUploadClient(queue_info=queue_info, log_file_path=log_file_path, no_log_file=no_log_file)
+            self.cloud_tasks_upload_client = CloudTasksUploadClient(
+                queue_info=queue_info,
+                log_file_path=log_file_path,
+                no_log_file=no_log_file,
+            )
 
     @property
     @abstractmethod
@@ -242,7 +252,18 @@ class Accession(ABC):
         return modeled_encode_file
 
     def upload_file(self, encode_file: EncodeFile, gs_file: GSFile) -> None:
+        """
+        If there is a Cloud Tasks upload client (i.e. successfully read the config from
+        the environment) then will upload using Cloud Tasks, otherwise will fallback
+        to local file upload.
+        """
         if self.cloud_tasks_upload_client is None:
+            self.logger.info(
+                (
+                    "Could not find Cloud Tasks client (is the environment configured "
+                    "correctly?), will use local upload"
+                )
+            )
             self._upload_file_locally(encode_file, gs_file)
             return
         self._upload_file_using_cloud_tasks(encode_file, gs_file)
@@ -280,7 +301,9 @@ class Accession(ABC):
         s3.upload_fileobj(gcs_blob, bucket, key)
         self.logger.info("Finished uploading file %s", filename)
 
-    def _upload_file_using_cloud_tasks(self, encode_file: EncodeFile, gs_file: GSFile) -> None:
+    def _upload_file_using_cloud_tasks(
+        self, encode_file: EncodeFile, gs_file: GSFile
+    ) -> None:
         """
         Submits file for upload to the Cloud Tasks queue. Unlike `_upload_file_locally`
         this returns before the file upload completes, and returns when the task gets
@@ -300,7 +323,17 @@ class Accession(ABC):
         key = "/".join(path_parts)
         aws_s3_object = AwsS3Object(bucket=bucket, key=key)
         gcs_blob = self.backend.blob_from_filename(gs_file.filename)
-        upload_payload = UploadPayload(aws_credentials=aws_credentials, aws_s3_object=aws_s3_object, gcs_blob=gcs_blob)
+        upload_payload = UploadPayload(
+            aws_credentials=aws_credentials,
+            aws_s3_object=aws_s3_object,
+            gcs_blob=gcs_blob,
+        )
+        self.logger.info(
+            "Submitting file %s for upload to %s using queue %s",
+            gs_file.filename,
+            s3_uri,
+            self.cloud_tasks_upload_client.get_queue_path(),
+        )
         try:
             self.cloud_tasks_upload_client.upload(upload_payload)
         except Exception:

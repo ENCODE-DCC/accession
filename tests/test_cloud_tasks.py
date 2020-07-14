@@ -6,6 +6,7 @@ from accession.cloud_tasks import (
     AwsCredentials,
     AwsS3Object,
     CloudTasksUploadClient,
+    QueueInfo,
     UploadPayload,
 )
 
@@ -50,7 +51,7 @@ def cloud_tasks_upload_client(mocker):
         new_callable=mocker.PropertyMock(),
     )
     client = CloudTasksUploadClient(
-        location="us-west1", queue="queue", no_log_file=True
+        QueueInfo(region="us-west1", name="queue"), no_log_file=True
     )
     return client
 
@@ -84,7 +85,7 @@ def test_upload_payload_get_bytes(upload_payload):
 
 def test_upload_payload_get_name(upload_payload):
     result = upload_payload.get_name()
-    assert result == "7b3dfa9f664ff3d032333b903c716b77"
+    assert result == "127ba03ad0ee8f4fcfe64a9172507e66"
 
 
 def test_cloud_tasks_upload_client_project_id(mocker, cloud_tasks_upload_client):
@@ -101,9 +102,9 @@ def test_cloud_tasks_upload_client_project_id_google_auth_returns_none_raises(
         _ = cloud_tasks_upload_client.project_id
 
 
-def test_cloud_tasks_upload_client_get_queue_path(mocker, cloud_tasks_upload_client):
+def test_cloud_tasks_upload_clientget_queue_path(mocker, cloud_tasks_upload_client):
     mocker.patch("google.auth.default", return_value=("foo", "project-id"))
-    cloud_tasks_upload_client._get_queue_path()
+    cloud_tasks_upload_client.get_queue_path()
     assert cloud_tasks_upload_client.client.queue_path.called_once_with(
         "project-id", "us-west1", "queue"
     )
@@ -123,7 +124,7 @@ def test_cloud_tasks_upload_client_submit_task(
     mocker, cloud_tasks_upload_client, upload_payload
 ):
     mocker.patch.object(
-        cloud_tasks_upload_client, "_get_queue_path", return_value="queue-path"
+        cloud_tasks_upload_client, "get_queue_path", return_value="queue-path"
     )
     cloud_tasks_upload_client._submit_task("/endpoint", upload_payload)
     assert cloud_tasks_upload_client.client.create_task.called_once_with(
@@ -136,7 +137,7 @@ def test_cloud_tasks_upload_client_submit_task_value_error(
     mocker, cloud_tasks_upload_client, upload_payload
 ):
     mocker.patch.object(
-        cloud_tasks_upload_client, "_get_queue_path", return_value="queue-path"
+        cloud_tasks_upload_client, "get_queue_path", return_value="queue-path"
     )
     mocker.patch.object(
         cloud_tasks_upload_client.client, "create_task", side_effect=ValueError("error")
@@ -152,7 +153,7 @@ def test_cloud_tasks_upload_client_submit_task_google_api_call_error(
     mocker, cloud_tasks_upload_client, upload_payload
 ):
     mocker.patch.object(
-        cloud_tasks_upload_client, "_get_queue_path", return_value="queue-path"
+        cloud_tasks_upload_client, "get_queue_path", return_value="queue-path"
     )
     mocker.patch.object(
         cloud_tasks_upload_client.client,
@@ -170,7 +171,7 @@ def test_cloud_tasks_upload_client_submit_task_retry_error(
     mocker, cloud_tasks_upload_client, upload_payload
 ):
     mocker.patch.object(
-        cloud_tasks_upload_client, "_get_queue_path", return_value="queue-path"
+        cloud_tasks_upload_client, "get_queue_path", return_value="queue-path"
     )
     mocker.patch.object(
         cloud_tasks_upload_client.client,

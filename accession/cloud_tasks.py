@@ -109,10 +109,7 @@ class CloudTasksUploadClient:
     """
 
     def __init__(
-        self,
-        queue_info: QueueInfo,
-        log_file_path="accession.log",
-        no_log_file=False,
+        self, queue_info: QueueInfo, log_file_path="accession.log", no_log_file=False
     ) -> None:
         """
         `location` and `queue` refer to the region and name of the queue, respectively.
@@ -163,11 +160,15 @@ class CloudTasksUploadClient:
             self._client = tasks_v2.CloudTasksClient()
         return self._client
 
-    def _get_queue_path(self) -> str:
+    def get_queue_path(self) -> str:
         """
         Return the fully qualified path to the queue.
         """
-        return self.client.queue_path(project=self.project_id, location=self.queue_info.region, queue=self.queue_info.name)
+        return self.client.queue_path(
+            project=self.project_id,
+            location=self.queue_info.region,
+            queue=self.queue_info.name,
+        )
 
     def upload(self, payload: UploadPayload) -> None:
         """
@@ -182,7 +183,7 @@ class CloudTasksUploadClient:
         submits the task. It is asssumed here that the task is triggered via a POST
         request to an App Engine endpoint.
         """
-        parent = self._get_queue_path()
+        parent = self.get_queue_path()
         task: Task = {
             "name": payload.get_name(),
             "app_engine_http_request": {
