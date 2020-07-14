@@ -1476,8 +1476,8 @@ class AccessionAtac(AccessionAtacChip):
             fragment_length_plot_png = self.analysis.search_down(
                 gs_file.task, "fraglen_stat_pe", "fraglen_dist_plot"
             )[0]
-            output_qc["fragment_length_distribution_plot"] = (
-                self.get_attachment(fragment_length_plot_png, "image/png"),
+            output_qc["fragment_length_distribution_plot"] = self.get_attachment(
+                fragment_length_plot_png, "image/png"
             )
         return self.queue_qc(
             output_qc, encode_file, "atac-library-complexity-quality-metric"
