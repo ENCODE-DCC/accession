@@ -16,7 +16,7 @@ APP_ENGINE_UPLOAD_ENDPOINT = "/upload"
 
 AppEngineHttpRequest = TypedDict(
     "AppEngineHttpRequest",
-    {"http_method": str, "relative_uri": str, "body": bytes},
+    {"http_method": str, "relative_uri": str, "body": str},
     total=False,
 )
 Task = TypedDict(
@@ -92,18 +92,18 @@ class UploadPayload:
             },
         }
 
-    def get_bytes(self) -> bytes:
+    def get_json_string(self) -> str:
         """
         Return the encoded, JSON-serialized representation of the object
         """
-        return json.dumps(self.get_dict()).encode()
+        return json.dumps(self.get_dict())
 
     def get_task_id(self) -> str:
         """
         Returns the md5 hash of the payload as a serialized JSON string. This is useful
         for task deduplication on the queue.
         """
-        return md5(self.get_bytes()).hexdigest()
+        return md5(self.get_json_string().encode()).hexdigest()
 
 
 class CloudTasksUploadClient:
@@ -198,7 +198,7 @@ class CloudTasksUploadClient:
         task: Task = {
             "name": self._get_task_name(payload),
             "app_engine_http_request": {
-                "body": payload.get_bytes(),
+                "body": payload.get_json_string(),
                 "http_method": "POST",
                 "relative_uri": task_endpoint,
             },
