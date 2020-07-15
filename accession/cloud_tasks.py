@@ -16,7 +16,7 @@ APP_ENGINE_UPLOAD_ENDPOINT = "/upload"
 
 AppEngineHttpRequest = TypedDict(
     "AppEngineHttpRequest",
-    {"http_method": str, "relative_uri": str, "body": str},
+    {"headers": Dict[str, str], "http_method": str, "relative_uri": str, "body": str},
     total=False,
 )
 Task = TypedDict(
@@ -196,12 +196,13 @@ class CloudTasksUploadClient:
         """
         parent = self.get_queue_path()
         task: Task = {
-            "name": self._get_task_name(payload),
             "app_engine_http_request": {
                 "body": payload.get_json_string(),
+                "headers": {"Content-Type": "application/json"},
                 "http_method": "POST",
                 "relative_uri": task_endpoint,
             },
+            "name": self._get_task_name(payload),
         }
 
         try:
