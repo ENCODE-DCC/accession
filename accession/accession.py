@@ -329,10 +329,11 @@ class Accession(ABC):
             gcs_blob=gcs_blob,
         )
         self.logger.info(
-            "Submitting file %s for upload to %s using queue %s",
+            "Submitting file %s for upload to %s using queue %s and payload %s",
             gs_file.filename,
             s3_uri,
             self.cloud_tasks_upload_client.get_queue_path(),
+            upload_payload,
         )
         try:
             self.cloud_tasks_upload_client.upload(upload_payload)

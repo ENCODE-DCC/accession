@@ -64,6 +64,9 @@ class UploadPayload:
         self.aws_s3_object = aws_s3_object
         self.gcs_blob = gcs_blob
 
+    def __str__(self) -> str:
+        return json.dumps(self.get_dict())
+
     def get_dict(self) -> Dict[str, Dict[str, str]]:
         """
         Gets the `dict` payload to use as the request body when submitting the task,
