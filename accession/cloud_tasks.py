@@ -95,7 +95,7 @@ class UploadPayload:
         """
         return json.dumps(self.get_dict()).encode()
 
-    def get_name(self) -> str:
+    def get_task_id(self) -> str:
         """
         Returns the md5 hash of the payload as a serialized JSON string. This is useful
         for task deduplication on the queue.
@@ -170,6 +170,14 @@ class CloudTasksUploadClient:
             queue=self.queue_info.name,
         )
 
+    def _get_task_name(self, payload: UploadPayload) -> str:
+        """
+        Return the properly formatted name of the task using the task's id. This isn't
+        a method of UploadPayload because it's not a part of the request body that is
+        sent to the upload endpoint and because knowledge of the queue info is required.
+        """
+        return f"{self.get_queue_path()}/tasks/{payload.get_task_id()}"
+
     def upload(self, payload: UploadPayload) -> None:
         """
         Wrapper to submit the payload to the upload endpoint, assumed to be `/upload`
@@ -185,7 +193,7 @@ class CloudTasksUploadClient:
         """
         parent = self.get_queue_path()
         task: Task = {
-            "name": payload.get_name(),
+            "name": self._get_task_name(payload),
             "app_engine_http_request": {
                 "body": payload.get_bytes(),
                 "http_method": "POST",

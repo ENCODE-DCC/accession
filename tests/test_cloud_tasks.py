@@ -83,8 +83,8 @@ def test_upload_payload_get_bytes(upload_payload):
     assert result.startswith(b'{"aws_credentials"')
 
 
-def test_upload_payload_get_name(upload_payload):
-    result = upload_payload.get_name()
+def test_upload_payload_get_task_id(upload_payload):
+    result = upload_payload.get_task_id()
     assert result == "127ba03ad0ee8f4fcfe64a9172507e66"
 
 
@@ -102,12 +102,21 @@ def test_cloud_tasks_upload_client_project_id_google_auth_returns_none_raises(
         _ = cloud_tasks_upload_client.project_id
 
 
-def test_cloud_tasks_upload_clientget_queue_path(mocker, cloud_tasks_upload_client):
+def test_cloud_tasks_upload_client_get_queue_path(mocker, cloud_tasks_upload_client):
     mocker.patch("google.auth.default", return_value=("foo", "project-id"))
     cloud_tasks_upload_client.get_queue_path()
     assert cloud_tasks_upload_client.client.queue_path.called_once_with(
         "project-id", "us-west1", "queue"
     )
+
+
+def test_cloud_tasks_upload_client_get_task_name(
+    mocker, cloud_tasks_upload_client, upload_payload
+):
+    mocker.patch.object(cloud_tasks_upload_client, "get_queue_path", return_value="foo")
+    mocker.patch.object(upload_payload, "get_task_id", return_value="123")
+    result = cloud_tasks_upload_client._get_task_name(upload_payload)
+    assert result == "foo/tasks/123"
 
 
 def test_cloud_tasks_upload_client_upload(
