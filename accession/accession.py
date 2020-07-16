@@ -824,13 +824,13 @@ class AccessionLongReadRna(AccessionGenericRna):
         cannot get it via `self.analysis.get_files` and instead need to go via the
         tasks.
         """
-        decompressed_gtf_task = self.analysis.get_tasks(task_name="decompressed_gtf")[0]
-        compressed_gtf = [
-            i for i in decompressed_gtf_task.input_files if "input_file" in i.filekeys
-        ][0]
-        portal_gtf = self.get_encode_file_matching_md5_of_blob(compressed_gtf)
+        gtf_filename = self.analysis.metadata.inputs["annotation"]
+        gtf_file = self.analysis.get_files(filename=gtf_filename)
+        portal_gtf = self.get_encode_file_matching_md5_of_blob(gtf_file)
         if portal_gtf is None:
-            raise ValueError(f"Could not find annotation GTF for file {compressed_gtf.filename}")
+            raise ValueError(
+                f"Could not find annotation GTF for file {gtf_file.filename}"
+            )
         return portal_gtf
 
     @property
