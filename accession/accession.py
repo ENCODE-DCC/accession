@@ -818,17 +818,41 @@ class AccessionLongReadRna(AccessionGenericRna):
         "long_read_rna_correlation": "make_long_read_rna_correlation_qc",
     }
 
-    @property
-    def assembly(self):
-        filekey = "annotation_gtf"
-        return self.find_portal_property_from_filekey(filekey, EncodeFile.ASSEMBLY)
+    def _get_annotation_gtf(self) -> EncodeFile:
+        """
+        The name of the annotation file in the WDL task is not globally unique, so we
+        cannot get it via `self.analysis.get_files` and instead need to go via the
+        tasks.
+        """
+        decompressed_gtf_task = self.analysis.get_tasks(task_name="decompressed_gtf")[0]
+        compressed_gtf = decompressed_gtf_task.inputs["input_file"]
+        portal_gtf = self.get_encode_file_matching_md5_of_blob(compressed_gtf)
+        if portal_gtf is None:
+            raise ValueError("Could not find annotation GTF")
+        return portal_gtf
 
     @property
-    def genome_annotation(self):
-        filekey = "annotation_gtf"
-        return self.find_portal_property_from_filekey(
-            filekey, EncodeFile.GENOME_ANNOTATION
-        )
+    def assembly(self) -> str:
+        annotation_gtf = self._get_annotation_gtf()
+        assembly = annotation_gtf.get(EncodeFile.ASSEMBLY)
+        if assembly is None:
+            raise ValueError(
+                f"Could not get assembly from annotation GTF {annotation_gtf.accession}"
+            )
+        return assembly
+
+    @property
+    def genome_annotation(self) -> str:
+        """
+        Gets the annotation version from the portal
+        """
+        annotation_gtf = self._get_annotation_gtf()
+        genome_annotation = annotation_gtf.get(EncodeFile.GENOME_ANNOTATION)
+        if genome_annotation is None:
+            raise ValueError(
+                f"Could not get genome annotation from annotation GTF {annotation_gtf.accession}"
+            )
+        return genome_annotation
 
     def make_long_read_rna_correlation_qc(self, encode_file, gs_file):
         """
