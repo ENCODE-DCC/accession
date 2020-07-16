@@ -830,7 +830,7 @@ class AccessionLongReadRna(AccessionGenericRna):
         ][0]
         portal_gtf = self.get_encode_file_matching_md5_of_blob(compressed_gtf)
         if portal_gtf is None:
-            raise ValueError("Could not find annotation GTF")
+            raise ValueError(f"Could not find annotation GTF for file {compressed_gtf.filename}")
         return portal_gtf
 
     @property
