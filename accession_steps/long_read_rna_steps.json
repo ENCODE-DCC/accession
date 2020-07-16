@@ -1,8 +1,8 @@
 {
   "accession.steps": [
     {
-      "dcc_step_run": "/analysis-steps/long-read-rna-seq-alignments-step-v-1/",
-      "dcc_step_version": "/analysis-step-versions/long-read-rna-seq-alignments-step-v-1-0/",
+      "dcc_step_run": "/analysis-steps/long-read-rna-seq-alignments-step-v-2/",
+      "dcc_step_version": "/analysis-step-versions/long-read-rna-seq-alignments-step-v-2-0/",
       "wdl_files": [
         {
           "derived_from_files": [
@@ -28,8 +28,8 @@
       "wdl_task_name": "minimap2"
     },
     {
-      "dcc_step_run": "/analysis-steps/long-read-rna-seq-filtering-step-v-1/",
-      "dcc_step_version": "/analysis-step-versions/long-read-rna-seq-filtering-step-v-1-1/",
+      "dcc_step_run": "/analysis-steps/long-read-rna-seq-filtering-step-v-2/",
+      "dcc_step_version": "/analysis-step-versions/long-read-rna-seq-filtering-step-v-2-1/",
       "wdl_files": [
         {
           "derived_from_files": [
@@ -55,16 +55,16 @@
             }
           ],
           "file_format": "bam",
-          "filekey": "corrected_bam",
+          "filekey": "labeled_bam",
           "output_type": "alignments",
           "quality_metrics": []
         }
       ],
-      "wdl_task_name": "transcriptclean"
+      "wdl_task_name": "talon_label_reads"
     },
     {
-      "dcc_step_run": "/analysis-steps/long-read-rna-seq-quantification-step-v-1/",
-      "dcc_step_version": "/analysis-step-versions/long-read-rna-seq-quantification-step-v-1-0/",
+      "dcc_step_run": "/analysis-steps/long-read-rna-seq-quantification-step-v-2/",
+      "dcc_step_version": "/analysis-step-versions/long-read-rna-seq-quantification-step-v-2-0/",
       "wdl_files": [
         {
           "derived_from_files": [
@@ -74,8 +74,8 @@
               "derived_from_task": "init_talon_db"
             },
             {
-              "derived_from_filekey": "corrected_bam",
-              "derived_from_task": "transcriptclean"
+              "derived_from_filekey": "labeled_bam",
+              "derived_from_task": "talon_label_reads"
             }
           ],
           "file_format": "tsv",
@@ -90,8 +90,8 @@
       "wdl_task_name": "create_abundance_from_talon_db"
     },
     {
-      "dcc_step_run": "/analysis-steps/long-read-rna-seq-quantification-step-v-1/",
-      "dcc_step_version": "/analysis-step-versions/long-read-rna-seq-quantification-step-v-1-0/",
+      "dcc_step_run": "/analysis-steps/long-read-rna-seq-quantification-step-v-2/",
+      "dcc_step_version": "/analysis-step-versions/long-read-rna-seq-quantification-step-v-2-0/",
       "wdl_files": [
         {
           "derived_from_files": [
@@ -101,8 +101,8 @@
               "derived_from_task": "init_talon_db"
             },
             {
-              "derived_from_filekey": "corrected_bam",
-              "derived_from_task": "transcriptclean"
+              "derived_from_filekey": "labeled_bam",
+              "derived_from_task": "talon_label_reads"
             }
           ],
           "file_format": "gtf",
