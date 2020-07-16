@@ -12,9 +12,9 @@
               "derived_from_task": "minimap2"
             },
             {
-              "derived_from_filekey": "reference_genome",
+              "derived_from_filekey": "files",
               "derived_from_inputs": true,
-              "derived_from_task": "minimap2"
+              "derived_from_task": "combined_reference"
             }
           ],
           "file_format": "bam",
@@ -38,9 +38,9 @@
               "derived_from_task": "minimap2"
             },
             {
-              "derived_from_filekey": "input_file",
+              "derived_from_filekey": "files",
               "derived_from_inputs": true,
-              "derived_from_task": "decompressed_reference_genome"
+              "derived_from_task": "combined_reference"
             },
             {
               "derived_from_filekey": "splice_junctions",
