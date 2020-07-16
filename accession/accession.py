@@ -825,7 +825,7 @@ class AccessionLongReadRna(AccessionGenericRna):
         tasks.
         """
         gtf_filename = self.analysis.metadata["inputs"]["annotation"]
-        gtf_file = self.analysis.get_files(filename=gtf_filename)
+        gtf_file = self.analysis.get_files(filename=gtf_filename)[0]
         portal_gtf = self.get_encode_file_matching_md5_of_blob(gtf_file)
         if portal_gtf is None:
             raise ValueError(
