@@ -825,7 +825,9 @@ class AccessionLongReadRna(AccessionGenericRna):
         tasks.
         """
         decompressed_gtf_task = self.analysis.get_tasks(task_name="decompressed_gtf")[0]
-        compressed_gtf = decompressed_gtf_task.inputs["input_file"]
+        compressed_gtf = [
+            i for i in decompressed_gtf_task.input_files if "input_file" in i.filekeys
+        ][0]
         portal_gtf = self.get_encode_file_matching_md5_of_blob(compressed_gtf)
         if portal_gtf is None:
             raise ValueError("Could not find annotation GTF")
@@ -833,6 +835,9 @@ class AccessionLongReadRna(AccessionGenericRna):
 
     @property
     def assembly(self) -> str:
+        """
+        Gets the assembly from the annotation GTF on the portal
+        """
         annotation_gtf = self._get_annotation_gtf()
         assembly = annotation_gtf.get(EncodeFile.ASSEMBLY)
         if assembly is None:
@@ -844,7 +849,7 @@ class AccessionLongReadRna(AccessionGenericRna):
     @property
     def genome_annotation(self) -> str:
         """
-        Gets the annotation version from the portal
+        Gets the annotation version from the annotation GTF on the portal
         """
         annotation_gtf = self._get_annotation_gtf()
         genome_annotation = annotation_gtf.get(EncodeFile.GENOME_ANNOTATION)
