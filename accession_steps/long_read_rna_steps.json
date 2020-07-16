@@ -38,9 +38,9 @@
               "derived_from_task": "minimap2"
             },
             {
-              "derived_from_filekey": "reference_genome",
+              "derived_from_filekey": "input_file",
               "derived_from_inputs": true,
-              "derived_from_task": "transcriptclean"
+              "derived_from_task": "decompressed_reference_genome"
             },
             {
               "derived_from_filekey": "splice_junctions",
