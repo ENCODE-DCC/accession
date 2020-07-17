@@ -9,12 +9,18 @@
             {
               "derived_from_filekey": "files",
               "derived_from_inputs": true,
-              "derived_from_task": "combined_annotation"
+              "derived_from_task": "combined_annotation",
+              "workflow_inputs_to_match": [
+                "annotation"
+              ]
             },
             {
               "derived_from_filekey": "files",
               "derived_from_inputs": true,
-              "derived_from_task": "combined_reference"
+              "derived_from_task": "combined_reference",
+              "workflow_inputs_to_match": [
+                "reference_genome"
+              ]
             }
           ],
           "file_format": "txt",
@@ -38,7 +44,10 @@
             {
               "derived_from_filekey": "files",
               "derived_from_inputs": true,
-              "derived_from_task": "combined_reference"
+              "derived_from_task": "combined_reference",
+              "workflow_inputs_to_match": [
+                "reference_genome"
+              ]
             },
             {
               "derived_from_filekey": "files",
@@ -69,7 +78,10 @@
             {
               "derived_from_filekey": "files",
               "derived_from_inputs": true,
-              "derived_from_task": "combined_reference"
+              "derived_from_task": "combined_reference",
+              "workflow_inputs_to_match": [
+                "reference_genome"
+              ]
             },
             {
               "derived_from_filekey": "splice_junctions",
@@ -99,7 +111,10 @@
             {
               "derived_from_filekey": "files",
               "derived_from_inputs": true,
-              "derived_from_task": "combined_annotation"
+              "derived_from_task": "combined_annotation",
+              "workflow_inputs_to_match": [
+                "annotation"
+              ]
             },
             {
               "derived_from_filekey": "labeled_bam",
@@ -126,7 +141,10 @@
             {
               "derived_from_filekey": "files",
               "derived_from_inputs": true,
-              "derived_from_task": "combined_annotation"
+              "derived_from_task": "combined_annotation",
+              "workflow_inputs_to_match": [
+                "annotation"
+              ]
             },
             {
               "derived_from_filekey": "labeled_bam",

@@ -16,6 +16,7 @@ three possible locations that they could appear.
       derived_from_filekey: 'files',
       derived_from_inputs: true,
       derived_from_task: 'combined_reference',
+      workflow_inputs_to_match: ['reference_genome'],
     },
 
     local reference_annotation = if num_spikeins == 0 then {
@@ -26,6 +27,7 @@ three possible locations that they could appear.
       derived_from_filekey: 'files',
       derived_from_inputs: true,
       derived_from_task: 'combined_annotation',
+      workflow_inputs_to_match: ['annotation'],
     },
 
     local spikeins = if num_spikeins == 1 then [{

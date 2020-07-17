@@ -343,6 +343,21 @@ class Accession(ABC):
             )
             raise
         encode_files = []
+
+        # Do the filtering before getting md5sums to avoid unnecessary searches
+        if ancestor.workflow_inputs_to_match:
+            new = []
+            potential_filenames = flatten(
+                [
+                    self.analysis.metadata["inputs"][key]
+                    for key in ancestor.workflow_inputs_to_match
+                ]
+            )
+            for gs_file in derived_from_files:
+                if gs_file.filename in potential_filenames:
+                    new.append(gs_file)
+
+            derived_from_files = new
         for gs_file in derived_from_files:
             encode_file = self.get_encode_file_matching_md5_of_blob(gs_file)
             if encode_file is not None:

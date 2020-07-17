@@ -70,6 +70,9 @@ class DerivedFromFile:
         Use `"search_down": true` to search down the task heirarchy for derived_from
         files. This is used by ATAC, where we need the filtered bam to be derived from
         the reference annotation files, but they aren't anywhere upstream of the bam.
+
+        `workflow_inputs_to_match` can be used to indicate that only files with
+        filenames matching the workflow input keys given should be considered.
         """
         self.allow_empty: bool = derived_from_file.get("allow_empty", False)
         self.derived_from_filekey: str = derived_from_file["derived_from_filekey"]
@@ -83,6 +86,9 @@ class DerivedFromFile:
         self.disallow_tasks: List[str] = derived_from_file.get("disallow_tasks", [])
         self.should_search_down: bool = derived_from_file.get(
             "should_search_down", False
+        )
+        self.workflow_inputs_to_match: List[str] = derived_from_file.get(
+            "workflow_inputs_to_match", []
         )
 
 
