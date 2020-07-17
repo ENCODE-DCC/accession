@@ -99,7 +99,7 @@ three possible locations that they could appear.
                 derived_from_inputs: true,
                 derived_from_task: 'transcriptclean',
               },
-            ] + spikeins,
+            ],
             file_format: 'bam',
             filekey: 'labeled_bam',
             output_type: 'alignments',

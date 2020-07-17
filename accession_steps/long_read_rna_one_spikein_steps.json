@@ -80,11 +80,6 @@
               "derived_from_filekey": "variants",
               "derived_from_inputs": true,
               "derived_from_task": "transcriptclean"
-            },
-            {
-              "derived_from_filekey": "spikein_fasta",
-              "derived_from_inputs": true,
-              "derived_from_task": "make_gtf_from_spikein_fasta"
             }
           ],
           "file_format": "bam",

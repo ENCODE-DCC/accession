@@ -80,11 +80,6 @@
               "derived_from_filekey": "variants",
               "derived_from_inputs": true,
               "derived_from_task": "transcriptclean"
-            },
-            {
-              "derived_from_filekey": "files",
-              "derived_from_inputs": true,
-              "derived_from_task": "combined_spikeins"
             }
           ],
           "file_format": "bam",

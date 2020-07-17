@@ -76,8 +76,7 @@
               "derived_from_filekey": "variants",
               "derived_from_inputs": true,
               "derived_from_task": "transcriptclean"
-            },
-            {}
+            }
           ],
           "file_format": "bam",
           "filekey": "labeled_bam",
