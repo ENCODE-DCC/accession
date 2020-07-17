@@ -404,7 +404,7 @@ def test_accession_init(mock_accession: Accession, lab: str, award: str) -> None
     "pipeline_type,condition,accessioner_class",
     [
         ("mirna", does_not_raise(), AccessionMicroRna),
-        ("long_read_rna", does_not_raise(), AccessionLongReadRna),
+        ("long_read_rna_no_spikeins", does_not_raise(), AccessionLongReadRna),
         ("bulk_rna", does_not_raise(), AccessionBulkRna),
         ("not_valid", pytest.raises(RuntimeError), None),
     ],

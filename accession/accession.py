@@ -1648,7 +1648,9 @@ def accession_factory(
     pipeline_type_map = {
         "bulk_rna": AccessionBulkRna,
         "mirna": AccessionMicroRna,
-        "long_read_rna": AccessionLongReadRna,
+        "long_read_rna_no_spikeins": AccessionLongReadRna,
+        "long_read_rna_one_spikein": AccessionLongReadRna,
+        "long_read_rna_two_or_more_spikeins": AccessionLongReadRna,
         "chip_map_only": AccessionChip,
         "tf_chip_peak_call_only": AccessionChip,
         "histone_chip_peak_call_only": AccessionChip,
