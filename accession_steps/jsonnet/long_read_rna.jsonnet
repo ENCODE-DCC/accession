@@ -19,9 +19,9 @@ three possible locations that they could appear.
     },
 
     local reference_annotation = if num_spikeins == 0 then {
-      derived_from_filekey: 'reference_fasta',
+      derived_from_filekey: 'input_file',
       derived_from_inputs: true,
-      derived_from_task: 'clean_reference',
+      derived_from_task: 'decompressed_gtf',
     } else {
       derived_from_filekey: 'files',
       derived_from_inputs: true,
