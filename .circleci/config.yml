@@ -133,12 +133,14 @@ jobs:
           toxenv: "conf"
       - run_tox:
           toxenv: "lint-ignore-exit-code"
-      - run: |
-          git diff --quiet
-          if [[ $? -ne 0 ]]; then
-            echo "Freshly generated config is different than what was checked in. Make sure to run `tox -e conf` and `tox -e lint` before pushing."
-            exit 1
-          fi
+      - run:
+          name: verify checked-in steps JSONs are up to date
+          command: |
+            git diff --quiet
+            if [[ $? -ne 0 ]]; then
+              echo "Freshly generated config is different than what was checked in. Make sure to run `tox -e conf` and `tox -e lint` before pushing."
+              exit 1
+            fi
   build:
     <<: *defaults
     steps:
