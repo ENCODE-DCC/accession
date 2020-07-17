@@ -400,7 +400,7 @@ class Accession(ABC):
             )
         if len(derived_from_accession_ids) != len(derived_from_files):
             raise Exception(
-                f"Missing some of the derived_from files on the portal: {missing}"
+                f"Missing some of the derived_from files on the portal, found ids {derived_from_accession_ids}, expected: {missing}"
             )
         return derived_from_accession_ids
 
