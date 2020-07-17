@@ -132,7 +132,7 @@ jobs:
       - run_tox:
           toxenv: "conf"
       - run_tox:
-          toxenv: "lint"
+          toxenv: "lint-ignore-exit-code"
       - run: |
           git diff --quiet
           if [[ $? -ne 0 ]]; then
