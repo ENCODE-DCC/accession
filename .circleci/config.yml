@@ -122,6 +122,20 @@ jobs:
       - checkout
       - run: sudo pip install --upgrade setuptools wheel twine
       - run: ./release_to_pypi.sh https://upload.pypi.org/legacy/
+  conf:
+    <<: *py37
+    description: Generates the templated JSON, and exit with non-zero code if the new files are different than what was checked into the repo.
+    steps:
+      - checkout
+      - install_shellcheck
+      - install_jsonnetfmt
+      - run_tox:
+          toxenv: "conf"
+      - run_tox:
+          toxenv: "lint"
+      - run: |
+          git diff --quiet
+          if [[ $? -ne 0 ]]; then exit 1; fi
   build:
     <<: *defaults
     steps:
