@@ -90,7 +90,8 @@
             },
             {
               "derived_from_filekey": "splice_junctions",
-              "derived_from_task": "get_splice_junctions"
+              "derived_from_task": "get_splice_junctions",
+              "ignore_existing": true
             },
             {
               "allow_empty": true,

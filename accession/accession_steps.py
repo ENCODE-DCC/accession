@@ -65,7 +65,7 @@ class AccessionSteps:
 
 
 class DerivedFromFile:
-    def __init__(self, derived_from_file: Dict[str, Any]):
+    def __init__(self, derived_from_file: Dict[str, Any]) -> None:
         """
         Use `"search_down": true` to search down the task heirarchy for derived_from
         files. This is used by ATAC, where we need the filtered bam to be derived from
@@ -90,6 +90,7 @@ class DerivedFromFile:
         self.workflow_inputs_to_match: List[str] = derived_from_file.get(
             "workflow_inputs_to_match", []
         )
+        self.ignore_existing: bool = derived_from_file.get("ignore_existing", False)
 
 
 class FileParams:

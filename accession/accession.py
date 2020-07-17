@@ -363,7 +363,10 @@ class Accession(ABC):
             encode_file = self.get_encode_file_matching_md5_of_blob(gs_file)
             if encode_file is not None:
                 encode_files.append(encode_file)
-        accessioned_files = encode_files + self.new_files
+        if ancestor.ignore_existing:
+            accessioned_files = self.new_files
+        else:
+            accessioned_files = encode_files + self.new_files
         derived_from_accession_ids = []
         for gs_file in derived_from_files:
             for encode_file in accessioned_files:
@@ -400,7 +403,7 @@ class Accession(ABC):
             )
         if len(derived_from_accession_ids) != len(derived_from_files):
             raise Exception(
-                f"Missing some of the derived_from files on the portal, found ids {derived_from_accession_ids}, expected: {missing}"
+                f"Missing some of the derived_from files on the portal, found ids {derived_from_accession_ids}, still missing {missing}"
             )
         return derived_from_accession_ids
 

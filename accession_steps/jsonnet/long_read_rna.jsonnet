@@ -95,6 +95,10 @@ three possible locations that they could appear.
               {
                 derived_from_filekey: 'splice_junctions',
                 derived_from_task: 'get_splice_junctions',
+                // Don't hook the derived from to files not in this workflow. The splice
+                // junctions are likely to conflict with existing splice junctions on the
+                // portal.
+                ignore_existing: true,
               },
               {
                 allow_empty: true,
