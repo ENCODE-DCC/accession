@@ -23,7 +23,7 @@
               ]
             }
           ],
-          "file_format": "txt",
+          "file_format": "tsv",
           "filekey": "splice_junctions",
           "output_type": "splice junctions"
         }

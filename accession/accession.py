@@ -358,6 +358,7 @@ class Accession(ABC):
                     new.append(gs_file)
 
             derived_from_files = new
+
         for gs_file in derived_from_files:
             encode_file = self.get_encode_file_matching_md5_of_blob(gs_file)
             if encode_file is not None:

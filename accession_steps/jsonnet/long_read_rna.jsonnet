@@ -50,7 +50,7 @@ three possible locations that they could appear.
               reference_annotation,
               reference_genome,
             ],
-            file_format: 'txt',
+            file_format: 'tsv',
             filekey: 'splice_junctions',
             output_type: 'splice junctions',
           },
