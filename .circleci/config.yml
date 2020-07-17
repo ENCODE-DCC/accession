@@ -135,7 +135,10 @@ jobs:
           toxenv: "lint"
       - run: |
           git diff --quiet
-          if [[ $? -ne 0 ]]; then exit 1; fi
+          if [[ $? -ne 0 ]]; then
+            echo "Freshly generated config is different than what was checked in. Make sure to run `tox -e conf` and `tox -e lint` before pushing."
+            exit 1
+          fi
   build:
     <<: *defaults
     steps:
@@ -219,6 +222,7 @@ workflows:
       - pypi-description
       - docs
       - build
+      - conf
       - test_py36:
           requires:
             - build
