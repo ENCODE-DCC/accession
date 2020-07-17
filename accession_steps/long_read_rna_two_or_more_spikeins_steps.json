@@ -21,6 +21,11 @@
               "workflow_inputs_to_match": [
                 "reference_genome"
               ]
+            },
+            {
+              "derived_from_filekey": "files",
+              "derived_from_inputs": true,
+              "derived_from_task": "combined_spikeins"
             }
           ],
           "file_format": "tsv",

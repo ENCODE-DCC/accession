@@ -31,14 +31,15 @@ three possible locations that they could appear.
     },
 
     local spikeins = if num_spikeins == 1 then [{
-      derived_from_filekey: 'spikein_fasta',
+      derived_from_filekey: 'files',
       derived_from_inputs: true,
-      derived_from_task: 'make_gtf_from_spikein_fasta',
+      derived_from_task: 'combined_reference',
+      workflow_inputs_to_match: ['spikeins'],
     }] else if num_spikeins >= 2 then [{
       derived_from_filekey: 'files',
       derived_from_inputs: true,
       derived_from_task: 'combined_spikeins',
-    }] else [{}],
+    }] else [],
 
     'accession.steps': [
       {
@@ -49,7 +50,7 @@ three possible locations that they could appear.
             derived_from_files: [
               reference_annotation,
               reference_genome,
-            ],
+            ] + spikeins,
             file_format: 'tsv',
             filekey: 'splice_junctions',
             output_type: 'splice junctions',

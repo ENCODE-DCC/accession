@@ -39,8 +39,7 @@
               "derived_from_filekey": "reference_fasta",
               "derived_from_inputs": true,
               "derived_from_task": "clean_reference"
-            },
-            {}
+            }
           ],
           "file_format": "bam",
           "filekey": "bam",

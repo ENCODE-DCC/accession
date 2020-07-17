@@ -21,6 +21,14 @@
               "workflow_inputs_to_match": [
                 "reference_genome"
               ]
+            },
+            {
+              "derived_from_filekey": "files",
+              "derived_from_inputs": true,
+              "derived_from_task": "combined_reference",
+              "workflow_inputs_to_match": [
+                "spikeins"
+              ]
             }
           ],
           "file_format": "tsv",
@@ -50,9 +58,12 @@
               ]
             },
             {
-              "derived_from_filekey": "spikein_fasta",
+              "derived_from_filekey": "files",
               "derived_from_inputs": true,
-              "derived_from_task": "make_gtf_from_spikein_fasta"
+              "derived_from_task": "combined_reference",
+              "workflow_inputs_to_match": [
+                "spikeins"
+              ]
             }
           ],
           "file_format": "bam",
