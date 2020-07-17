@@ -273,13 +273,13 @@ class Accession(ABC):
         """
         docker_tag = self.analysis.get_tasks(accession_step.wdl_task_name)[
             0
-        ].docker_image.split(":")[1]
+        ].docker_image
         aliases = [
             "{}:{}-{}-{}".format(
                 self.common_metadata.lab_pi,
                 accession_step.step_run,
                 self.analysis.workflow_id,
-                docker_tag,
+                docker_tag.split(":")[1] if docker_tag is not None else "",
             )
         ]
         payload = accession_step.get_portal_step_run(aliases)
