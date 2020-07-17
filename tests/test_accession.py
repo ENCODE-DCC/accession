@@ -9,11 +9,12 @@ from requests import Response
 from accession.accession import (
     Accession,
     AccessionBulkRna,
-    AccessionLongReadRna,
     AccessionMicroRna,
+    _get_long_read_rna_steps_json_name_prefix_from_metadata,
     accession_factory,
 )
 from accession.accession_steps import AccessionStep
+from accession.analysis import MetaData
 from accession.encode_models import EncodeExperiment, EncodeFile
 from accession.file import GSFile
 from accession.preflight import MatchingMd5Record
@@ -404,7 +405,6 @@ def test_accession_init(mock_accession: Accession, lab: str, award: str) -> None
     "pipeline_type,condition,accessioner_class",
     [
         ("mirna", does_not_raise(), AccessionMicroRna),
-        ("long_read_rna_no_spikeins", does_not_raise(), AccessionLongReadRna),
         ("bulk_rna", does_not_raise(), AccessionBulkRna),
         ("not_valid", pytest.raises(RuntimeError), None),
     ],
@@ -432,3 +432,29 @@ def test_accession_factory(
             no_log_file=True,
         )
         assert isinstance(accessioner, accessioner_class)
+
+
+@pytest.mark.parametrize(
+    "spikeins,expected",
+    [
+        ([], "long_read_rna_no_spikeins"),
+        (["foo"], "long_read_rna_one_spikein"),
+        (["foo", "bar"], "long_read_rna_two_or_more_spikeins"),
+    ],
+)
+def test_get_long_read_rna_steps_json_name_prefix_from_metadata(
+    mocker, spikeins, expected
+):
+    mocker.patch(
+        "accession.analysis.MetaData.content",
+        new_callable=mocker.PropertyMock(
+            return_value={
+                "workflowRoot": "gs://foo/bar",
+                "calls": {},
+                "inputs": {"spikeins": spikeins},
+            }
+        ),
+    )
+    metadata = MetaData("foo")
+    result = _get_long_read_rna_steps_json_name_prefix_from_metadata(metadata)
+    assert result == expected

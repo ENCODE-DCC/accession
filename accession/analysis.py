@@ -1,7 +1,7 @@
 import json
 import operator
 from functools import reduce
-from typing import Tuple
+from typing import Any, Dict, Optional, Tuple
 
 from accession.backends import GCBackend
 from accession.file import GSFile
@@ -9,12 +9,15 @@ from accession.task import Task
 
 
 class MetaData:
-    def __init__(self, metadata_filepath):
-        with open(metadata_filepath) as fp:
-            self._content = json.load(fp)
+    def __init__(self, metadata_filepath: str) -> None:
+        self._metadata_filepath = metadata_filepath
+        self._content: Optional[Dict[str, Any]] = None
 
     @property
-    def content(self):
+    def content(self) -> Dict[str, Any]:
+        if self._content is None:
+            with open(self._metadata_filepath) as fp:
+                self._content = json.load(fp)
         return self._content
 
 

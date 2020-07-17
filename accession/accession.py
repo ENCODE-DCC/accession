@@ -1667,9 +1667,7 @@ def accession_factory(
     pipeline_type_map = {
         "bulk_rna": AccessionBulkRna,
         "mirna": AccessionMicroRna,
-        "long_read_rna_no_spikeins": AccessionLongReadRna,
-        "long_read_rna_one_spikein": AccessionLongReadRna,
-        "long_read_rna_two_or_more_spikeins": AccessionLongReadRna,
+        "long_read_rna": AccessionLongReadRna,
         "chip_map_only": AccessionChip,
         "tf_chip_peak_call_only": AccessionChip,
         "histone_chip_peak_call_only": AccessionChip,
@@ -1689,11 +1687,17 @@ def accession_factory(
             f"Could not find pipeline type {pipeline_type}: valid options are {pipeline_type_options}"
         ) from e
     current_dir = Path(__file__).resolve()
+    metadata = MetaData(accession_metadata)
+
+    if pipeline_type == "long_read_rna":
+        pipeline_type = _get_long_read_rna_steps_json_name_prefix_from_metadata(
+            metadata
+        )
+
     steps_json_path = (
         current_dir.parents[1] / "accession_steps" / f"{pipeline_type}_steps.json"
     )
     accession_steps = AccessionSteps(steps_json_path)
-    metadata = MetaData(accession_metadata)
     backend = kwargs.pop("backend", None)
     analysis = Analysis(
         metadata, raw_fastqs_keys=accession_steps.raw_fastqs_keys, backend=backend
@@ -1703,3 +1707,16 @@ def accession_factory(
     return selected_accession(
         accession_steps, analysis, connection, common_metadata, *args, **kwargs
     )
+
+
+def _get_long_read_rna_steps_json_name_prefix_from_metadata(metadata: MetaData) -> str:
+    """
+    The JSON template to use for long read RNA depends on the number of spikeins, this
+    function determines the appropriate one to use from the metadata.
+    """
+    num_spikeins = len(metadata.content["inputs"]["spikeins"])
+    if num_spikeins == 0:
+        return "long_read_rna_no_spikeins"
+    if num_spikeins == 1:
+        return "long_read_rna_one_spikein"
+    return "long_read_rna_two_or_more_spikeins"
