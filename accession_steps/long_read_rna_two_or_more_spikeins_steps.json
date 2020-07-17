@@ -7,14 +7,14 @@
             {
                "derived_from_files": [
                   {
-                     "derived_from_filekey": "reference_fasta",
+                     "derived_from_filekey": "files",
                      "derived_from_inputs": true,
-                     "derived_from_task": "clean_reference"
+                     "derived_from_task": "combined_annotation"
                   },
                   {
-                     "derived_from_filekey": "reference_fasta",
+                     "derived_from_filekey": "files",
                      "derived_from_inputs": true,
-                     "derived_from_task": "clean_reference"
+                     "derived_from_task": "combined_reference"
                   }
                ],
                "file_format": "txt",
@@ -36,11 +36,15 @@
                      "derived_from_task": "minimap2"
                   },
                   {
-                     "derived_from_filekey": "reference_fasta",
+                     "derived_from_filekey": "files",
                      "derived_from_inputs": true,
-                     "derived_from_task": "clean_reference"
+                     "derived_from_task": "combined_reference"
                   },
-                  { }
+                  {
+                     "derived_from_filekey": "files",
+                     "derived_from_inputs": true,
+                     "derived_from_task": "combined_spikeins"
+                  }
                ],
                "file_format": "bam",
                "filekey": "bam",
@@ -63,9 +67,9 @@
                      "derived_from_task": "minimap2"
                   },
                   {
-                     "derived_from_filekey": "reference_fasta",
+                     "derived_from_filekey": "files",
                      "derived_from_inputs": true,
-                     "derived_from_task": "clean_reference"
+                     "derived_from_task": "combined_reference"
                   },
                   {
                      "derived_from_filekey": "splice_junctions",
@@ -77,7 +81,11 @@
                      "derived_from_inputs": true,
                      "derived_from_task": "transcriptclean"
                   },
-                  { }
+                  {
+                     "derived_from_filekey": "files",
+                     "derived_from_inputs": true,
+                     "derived_from_task": "combined_spikeins"
+                  }
                ],
                "file_format": "bam",
                "filekey": "labeled_bam",
@@ -94,9 +102,9 @@
             {
                "derived_from_files": [
                   {
-                     "derived_from_filekey": "reference_fasta",
+                     "derived_from_filekey": "files",
                      "derived_from_inputs": true,
-                     "derived_from_task": "clean_reference"
+                     "derived_from_task": "combined_annotation"
                   },
                   {
                      "derived_from_filekey": "labeled_bam",
@@ -121,9 +129,9 @@
             {
                "derived_from_files": [
                   {
-                     "derived_from_filekey": "reference_fasta",
+                     "derived_from_filekey": "files",
                      "derived_from_inputs": true,
-                     "derived_from_task": "clean_reference"
+                     "derived_from_task": "combined_annotation"
                   },
                   {
                      "derived_from_filekey": "labeled_bam",

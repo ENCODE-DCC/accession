@@ -833,6 +833,21 @@ class AccessionLongReadRna(AccessionGenericRna):
             )
         return portal_gtf
 
+    def _get_spikeins(self) -> List[EncodeFile]:
+        """
+        Rather than try to trace the derived_from for the three different pipeline use
+        cases (no spikeins, one spikein, and two or more spikeins), grab them directly
+        from the workflow-level inputs.
+        """
+        gtf_filename = self.analysis.metadata["inputs"]["annotation"]
+        gtf_file = self.analysis.get_files(filename=gtf_filename)[0]
+        portal_gtf = self.get_encode_file_matching_md5_of_blob(gtf_file)
+        if portal_gtf is None:
+            raise ValueError(
+                f"Could not find annotation GTF for file {gtf_file.filename}"
+            )
+        return portal_gtf
+
     @property
     def assembly(self) -> str:
         """
