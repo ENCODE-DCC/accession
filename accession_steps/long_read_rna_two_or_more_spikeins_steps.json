@@ -1,41 +1,6 @@
 {
   "accession.steps": [
     {
-      "dcc_step_run": "/analysis-steps/long-read-rna-seq-splice-junction-extraction-step-v-2/",
-      "dcc_step_version": "/analysis-step-versions/long-read-rna-seq-splice-junction-extraction-step-v-2-0/",
-      "wdl_files": [
-        {
-          "derived_from_files": [
-            {
-              "derived_from_filekey": "files",
-              "derived_from_inputs": true,
-              "derived_from_task": "combined_annotation",
-              "workflow_inputs_to_match": [
-                "annotation"
-              ]
-            },
-            {
-              "derived_from_filekey": "files",
-              "derived_from_inputs": true,
-              "derived_from_task": "combined_reference",
-              "workflow_inputs_to_match": [
-                "reference_genome"
-              ]
-            },
-            {
-              "derived_from_filekey": "files",
-              "derived_from_inputs": true,
-              "derived_from_task": "combined_spikeins"
-            }
-          ],
-          "file_format": "tsv",
-          "filekey": "splice_junctions",
-          "output_type": "splice junctions"
-        }
-      ],
-      "wdl_task_name": "get_splice_junctions"
-    },
-    {
       "dcc_step_run": "/analysis-steps/long-read-rna-seq-alignments-step-v-2/",
       "dcc_step_version": "/analysis-step-versions/long-read-rna-seq-alignments-step-v-2-0/",
       "wdl_files": [
@@ -87,11 +52,6 @@
               "workflow_inputs_to_match": [
                 "reference_genome"
               ]
-            },
-            {
-              "derived_from_filekey": "splice_junctions",
-              "derived_from_task": "get_splice_junctions",
-              "ignore_existing": true
             },
             {
               "allow_empty": true,
