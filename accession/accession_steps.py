@@ -87,9 +87,10 @@ class DerivedFromFile:
         self.should_search_down: bool = derived_from_file.get(
             "should_search_down", False
         )
-        self.workflow_inputs_to_match: List[str] = derived_from_file.get(
-            "workflow_inputs_to_match", []
-        )
+        workflow_inputs_to_match = derived_from_file.get("workflow_inputs_to_match", [])
+        if not isinstance(workflow_inputs_to_match, list):
+            raise ValueError("`workflow_inputs_to_match` must be an array")
+        self.workflow_inputs_to_match: List[str] = workflow_inputs_to_match
 
 
 class FileParams:

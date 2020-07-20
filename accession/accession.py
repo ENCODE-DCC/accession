@@ -346,18 +346,9 @@ class Accession(ABC):
 
         # Do the filtering before getting md5sums to avoid unnecessary searches
         if ancestor.workflow_inputs_to_match:
-            new = []
-            potential_filenames = flatten(
-                [
-                    self.analysis.metadata["inputs"][key]
-                    for key in ancestor.workflow_inputs_to_match
-                ]
+            derived_from_files = self._filter_derived_from_files_by_workflow_inputs(
+                derived_from_files, ancestor
             )
-            for gs_file in derived_from_files:
-                if gs_file.filename in potential_filenames:
-                    new.append(gs_file)
-
-            derived_from_files = new
 
         for gs_file in derived_from_files:
             encode_file = self.get_encode_file_matching_md5_of_blob(gs_file)
@@ -403,6 +394,26 @@ class Accession(ABC):
                 f"Missing some of the derived_from files on the portal, found ids {derived_from_accession_ids}, still missing {missing}"
             )
         return derived_from_accession_ids
+
+    def _filter_derived_from_files_by_workflow_inputs(
+        self, derived_from_files: List[GSFile], ancestor: DerivedFromFile
+    ) -> List[GSFile]:
+        """
+        Filter the list of candidate derived_from files on the condition that the
+        filename matches or is present in a workflow input. Used in
+        `self.get_derived_from`
+        """
+        new = []
+        potential_filenames = flatten(
+            [
+                self.analysis.metadata["inputs"][key]
+                for key in ancestor.workflow_inputs_to_match
+            ]
+        )
+        for gs_file in derived_from_files:
+            if gs_file.filename in potential_filenames:
+                new.append(gs_file)
+        return new
 
     def make_file_obj(
         self, file: GSFile, file_params: FileParams, step_run: EncodeStepRun

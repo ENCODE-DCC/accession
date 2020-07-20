@@ -13,7 +13,7 @@ from accession.accession import (
     _get_long_read_rna_steps_json_name_prefix_from_metadata,
     accession_factory,
 )
-from accession.accession_steps import AccessionStep
+from accession.accession_steps import AccessionStep, DerivedFromFile
 from accession.analysis import MetaData
 from accession.encode_models import EncodeExperiment, EncodeFile
 from accession.file import GSFile
@@ -171,6 +171,30 @@ def test_get_all_encode_files_matching_md5_of_blob_cache_hit_no_results_returns_
     result = mock_accession.get_all_encode_files_matching_md5_of_blob(gs_file)
     assert not mock_accession.conn.search.mock_calls
     assert result is None
+
+
+def test_filter_derived_from_files_by_workflow_inputs(mocker, mock_accession):
+    mocker.patch.object(
+        mock_accession.analysis,
+        "metadata",
+        new_callable=mocker.PropertyMock(
+            return_value={"inputs": {"foo": ["gs://bar/baz"]}}
+        ),
+    )
+    ancestor = DerivedFromFile(
+        {
+            "workflow_inputs_to_match": ["foo"],
+            "derived_from_filekey": "foo",
+            "derived_from_task": "task",
+        }
+    )
+    file_to_match = GSFile(key="foo", name="gs://bar/baz", md5sum="123", size=456)
+    file_to_ignore = GSFile(key="baz", name="gs://bar/qux", md5sum="123", size=456)
+    derived_from_files = [file_to_match, file_to_ignore]
+    result = mock_accession._filter_derived_from_files_by_workflow_inputs(
+        derived_from_files, ancestor
+    )
+    assert result == [file_to_match]
 
 
 def test_make_file_matching_md5_record_no_matches_returns_none(
