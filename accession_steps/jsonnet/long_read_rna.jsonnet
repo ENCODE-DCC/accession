@@ -43,22 +43,6 @@ three possible locations that they could appear.
 
     'accession.steps': [
       {
-        dcc_step_run: '/analysis-steps/long-read-rna-seq-splice-junction-extraction-step-v-2/',
-        dcc_step_version: '/analysis-step-versions/long-read-rna-seq-splice-junction-extraction-step-v-2-0/',
-        wdl_files: [
-          {
-            derived_from_files: [
-              reference_annotation,
-              reference_genome,
-            ] + spikeins,
-            file_format: 'tsv',
-            filekey: 'splice_junctions',
-            output_type: 'splice junctions',
-          },
-        ],
-        wdl_task_name: 'get_splice_junctions',
-      },
-      {
         dcc_step_run: '/analysis-steps/long-read-rna-seq-alignments-step-v-2/',
         dcc_step_version: '/analysis-step-versions/long-read-rna-seq-alignments-step-v-2-0/',
         wdl_files: [
@@ -92,14 +76,6 @@ three possible locations that they could appear.
                 derived_from_task: 'minimap2',
               },
               reference_genome,
-              {
-                derived_from_filekey: 'splice_junctions',
-                derived_from_task: 'get_splice_junctions',
-                // Don't hook the derived from to files not in this workflow. The splice
-                // junctions are likely to conflict with existing splice junctions on the
-                // portal.
-                ignore_existing: true,
-              },
               {
                 allow_empty: true,
                 derived_from_filekey: 'variants',

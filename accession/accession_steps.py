@@ -90,7 +90,6 @@ class DerivedFromFile:
         self.workflow_inputs_to_match: List[str] = derived_from_file.get(
             "workflow_inputs_to_match", []
         )
-        self.ignore_existing: bool = derived_from_file.get("ignore_existing", False)
 
 
 class FileParams:
