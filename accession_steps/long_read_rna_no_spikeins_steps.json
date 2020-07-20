@@ -7,14 +7,14 @@
         {
           "derived_from_files": [
             {
-              "derived_from_filekey": "fastq",
-              "derived_from_inputs": true,
-              "derived_from_task": "minimap2"
-            },
-            {
               "derived_from_filekey": "reference_fasta",
               "derived_from_inputs": true,
               "derived_from_task": "clean_reference"
+            },
+            {
+              "derived_from_filekey": "fastq",
+              "derived_from_inputs": true,
+              "derived_from_task": "minimap2"
             }
           ],
           "file_format": "bam",
@@ -34,13 +34,18 @@
         {
           "derived_from_files": [
             {
-              "derived_from_filekey": "bam",
-              "derived_from_task": "minimap2"
+              "derived_from_filekey": "input_file",
+              "derived_from_inputs": true,
+              "derived_from_task": "decompressed_gtf"
             },
             {
               "derived_from_filekey": "reference_fasta",
               "derived_from_inputs": true,
               "derived_from_task": "clean_reference"
+            },
+            {
+              "derived_from_filekey": "bam",
+              "derived_from_task": "minimap2"
             },
             {
               "allow_empty": true,

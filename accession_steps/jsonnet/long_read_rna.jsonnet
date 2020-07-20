@@ -48,12 +48,12 @@ three possible locations that they could appear.
         wdl_files: [
           {
             derived_from_files: [
+              reference_genome,
               {
                 derived_from_filekey: 'fastq',
                 derived_from_inputs: true,
                 derived_from_task: 'minimap2',
               },
-              reference_genome,
             ] + spikeins,
             file_format: 'bam',
             filekey: 'bam',
@@ -71,11 +71,12 @@ three possible locations that they could appear.
         wdl_files: [
           {
             derived_from_files: [
+              reference_annotation,
+              reference_genome,
               {
                 derived_from_filekey: 'bam',
                 derived_from_task: 'minimap2',
               },
-              reference_genome,
               {
                 allow_empty: true,
                 derived_from_filekey: 'variants',

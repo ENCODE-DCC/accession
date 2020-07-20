@@ -7,17 +7,17 @@
         {
           "derived_from_files": [
             {
-              "derived_from_filekey": "fastq",
-              "derived_from_inputs": true,
-              "derived_from_task": "minimap2"
-            },
-            {
               "derived_from_filekey": "files",
               "derived_from_inputs": true,
               "derived_from_task": "combined_reference",
               "workflow_inputs_to_match": [
                 "reference_genome"
               ]
+            },
+            {
+              "derived_from_filekey": "fastq",
+              "derived_from_inputs": true,
+              "derived_from_task": "minimap2"
             },
             {
               "derived_from_filekey": "files",
@@ -45,8 +45,12 @@
         {
           "derived_from_files": [
             {
-              "derived_from_filekey": "bam",
-              "derived_from_task": "minimap2"
+              "derived_from_filekey": "files",
+              "derived_from_inputs": true,
+              "derived_from_task": "combined_annotation",
+              "workflow_inputs_to_match": [
+                "annotation"
+              ]
             },
             {
               "derived_from_filekey": "files",
@@ -55,6 +59,10 @@
               "workflow_inputs_to_match": [
                 "reference_genome"
               ]
+            },
+            {
+              "derived_from_filekey": "bam",
+              "derived_from_task": "minimap2"
             },
             {
               "allow_empty": true,
