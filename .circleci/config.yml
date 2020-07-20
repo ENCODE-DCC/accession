@@ -40,12 +40,7 @@ commands:
   install_jsonnet:
     description: "Install Jsonnet including formatter jsonnetfmt"
     steps:
-      - run: |
-          git clone https://github.com/google/jsonnet.git
-          cd jsonnet
-          make
-          sudo cp ./jsonnetfmt ./jsonnet /usr/local/bin
-          cd .. && rm -rf jsonnet
+      - run: curl -Ls https://github.com/google/jsonnet/releases/download/v0.16.0/jsonnet-bin-v0.16.0-linux.tar.gz | tar x && sudo mv jsonnet jsonnetfmt /usr/local/bin
   run_tox:
     description: "Install and run tox with a given environment"
     parameters:
