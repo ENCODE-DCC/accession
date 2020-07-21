@@ -78,9 +78,9 @@ def test_upload_payload_get_dict(upload_payload):
     assert result["gcs_blob"]["name"] == "name"
 
 
-def test_upload_payload_get_json_string(upload_payload):
-    result = upload_payload.get_json_string()
-    assert result.startswith('{"aws_credentials"')
+def test_upload_payload_get_bytes(upload_payload):
+    result = upload_payload.get_bytes()
+    assert result.startswith(b'{"aws_credentials"')
 
 
 def test_upload_payload_get_task_id(upload_payload):
