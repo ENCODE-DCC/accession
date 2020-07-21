@@ -1,0 +1,137 @@
+{
+  "accession.steps": [
+    {
+      "dcc_step_run": "/analysis-steps/long-read-rna-seq-alignments-step-v-2/",
+      "dcc_step_version": "/analysis-step-versions/long-read-rna-seq-alignments-step-v-2-0/",
+      "wdl_files": [
+        {
+          "derived_from_files": [
+            {
+              "derived_from_filekey": "files",
+              "derived_from_inputs": true,
+              "derived_from_task": "combined_reference",
+              "workflow_inputs_to_match": [
+                "reference_genome"
+              ]
+            },
+            {
+              "derived_from_filekey": "fastq",
+              "derived_from_inputs": true,
+              "derived_from_task": "minimap2"
+            },
+            {
+              "derived_from_filekey": "files",
+              "derived_from_inputs": true,
+              "derived_from_task": "combined_spikeins"
+            }
+          ],
+          "file_format": "bam",
+          "filekey": "bam",
+          "output_type": "unfiltered alignments",
+          "quality_metrics": [
+            "long_read_rna_mapping"
+          ]
+        }
+      ],
+      "wdl_task_name": "minimap2"
+    },
+    {
+      "dcc_step_run": "/analysis-steps/long-read-rna-seq-filtering-step-v-2/",
+      "dcc_step_version": "/analysis-step-versions/long-read-rna-seq-filtering-step-v-2-0/",
+      "wdl_files": [
+        {
+          "derived_from_files": [
+            {
+              "derived_from_filekey": "files",
+              "derived_from_inputs": true,
+              "derived_from_task": "combined_annotation",
+              "workflow_inputs_to_match": [
+                "annotation"
+              ]
+            },
+            {
+              "derived_from_filekey": "files",
+              "derived_from_inputs": true,
+              "derived_from_task": "combined_reference",
+              "workflow_inputs_to_match": [
+                "reference_genome"
+              ]
+            },
+            {
+              "derived_from_filekey": "bam",
+              "derived_from_task": "minimap2"
+            },
+            {
+              "allow_empty": true,
+              "derived_from_filekey": "variants",
+              "derived_from_inputs": true,
+              "derived_from_task": "transcriptclean"
+            }
+          ],
+          "file_format": "bam",
+          "filekey": "labeled_bam",
+          "output_type": "alignments",
+          "quality_metrics": []
+        }
+      ],
+      "wdl_task_name": "talon_label_reads"
+    },
+    {
+      "dcc_step_run": "/analysis-steps/long-read-rna-seq-quantification-step-v-2/",
+      "dcc_step_version": "/analysis-step-versions/long-read-rna-seq-quantification-step-v-2-0/",
+      "wdl_files": [
+        {
+          "derived_from_files": [
+            {
+              "derived_from_filekey": "files",
+              "derived_from_inputs": true,
+              "derived_from_task": "combined_annotation",
+              "workflow_inputs_to_match": [
+                "annotation"
+              ]
+            },
+            {
+              "derived_from_filekey": "labeled_bam",
+              "derived_from_task": "talon_label_reads"
+            }
+          ],
+          "file_format": "tsv",
+          "filekey": "talon_abundance",
+          "output_type": "transcript quantifications",
+          "quality_metrics": [
+            "long_read_rna_quantification",
+            "long_read_rna_correlation"
+          ]
+        }
+      ],
+      "wdl_task_name": "create_abundance_from_talon_db"
+    },
+    {
+      "dcc_step_run": "/analysis-steps/long-read-rna-seq-quantification-step-v-2/",
+      "dcc_step_version": "/analysis-step-versions/long-read-rna-seq-quantification-step-v-2-0/",
+      "wdl_files": [
+        {
+          "derived_from_files": [
+            {
+              "derived_from_filekey": "files",
+              "derived_from_inputs": true,
+              "derived_from_task": "combined_annotation",
+              "workflow_inputs_to_match": [
+                "annotation"
+              ]
+            },
+            {
+              "derived_from_filekey": "labeled_bam",
+              "derived_from_task": "talon_label_reads"
+            }
+          ],
+          "file_format": "gtf",
+          "filekey": "gtf",
+          "output_type": "transcriptome annotations",
+          "quality_metrics": []
+        }
+      ],
+      "wdl_task_name": "create_gtf_from_talon_db"
+    }
+  ]
+}

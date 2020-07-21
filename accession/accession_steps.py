@@ -65,11 +65,14 @@ class AccessionSteps:
 
 
 class DerivedFromFile:
-    def __init__(self, derived_from_file: Dict[str, Any]):
+    def __init__(self, derived_from_file: Dict[str, Any]) -> None:
         """
         Use `"search_down": true` to search down the task heirarchy for derived_from
         files. This is used by ATAC, where we need the filtered bam to be derived from
         the reference annotation files, but they aren't anywhere upstream of the bam.
+
+        `workflow_inputs_to_match` can be used to indicate that only files with
+        filenames matching the workflow input keys given should be considered.
         """
         self.allow_empty: bool = derived_from_file.get("allow_empty", False)
         self.derived_from_filekey: str = derived_from_file["derived_from_filekey"]
@@ -84,6 +87,10 @@ class DerivedFromFile:
         self.should_search_down: bool = derived_from_file.get(
             "should_search_down", False
         )
+        workflow_inputs_to_match = derived_from_file.get("workflow_inputs_to_match", [])
+        if not isinstance(workflow_inputs_to_match, list):
+            raise ValueError("`workflow_inputs_to_match` must be an array")
+        self.workflow_inputs_to_match: List[str] = workflow_inputs_to_match
 
 
 class FileParams:

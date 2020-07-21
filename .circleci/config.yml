@@ -37,15 +37,10 @@ commands:
     description: "Install jq"
     steps:
       - run: sudo apt-get install -y jq
-  install_jsonnetfmt:
-    description: "Install Jsonnet formatter jsonnetfmt"
+  install_jsonnet:
+    description: "Install Jsonnet including formatter jsonnetfmt"
     steps:
-      - run: |
-          git clone https://github.com/google/jsonnet.git
-          cd jsonnet
-          make
-          sudo cp ./jsonnetfmt /usr/local/bin
-          cd .. && rm -rf jsonnet
+      - run: curl -Ls https://github.com/google/jsonnet/releases/download/v0.16.0/jsonnet-bin-v0.16.0-linux.tar.gz | tar xz && sudo mv jsonnet jsonnetfmt /usr/local/bin
   run_tox:
     description: "Install and run tox with a given environment"
     parameters:
@@ -87,7 +82,7 @@ jobs:
     steps:
       - checkout
       - install_shellcheck
-      - install_jsonnetfmt
+      - install_jsonnet
       - run_tox:
           toxenv: "lint"
   test_py36:
@@ -122,6 +117,25 @@ jobs:
       - checkout
       - run: sudo pip install --upgrade setuptools wheel twine
       - run: ./release_to_pypi.sh https://upload.pypi.org/legacy/
+  conf:
+    <<: *py37
+    description: Generates the templated JSON, and exit with non-zero code if the new files are different than what was checked into the repo.
+    steps:
+      - checkout
+      - install_shellcheck
+      - install_jsonnet
+      - run_tox:
+          toxenv: "conf"
+      - run_tox:
+          toxenv: "lint-ignore-exit-code"
+      - run:
+          name: verify checked-in steps JSONs are up to date
+          command: |
+            git diff --quiet
+            if [[ $? -ne 0 ]]; then
+              echo "Freshly generated config is different than what was checked in. Make sure to run `tox -e conf` and `tox -e lint` before pushing."
+              exit 1
+            fi
   build:
     <<: *defaults
     steps:
@@ -205,6 +219,7 @@ workflows:
       - pypi-description
       - docs
       - build
+      - conf
       - test_py36:
           requires:
             - build

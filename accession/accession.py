@@ -273,13 +273,13 @@ class Accession(ABC):
         """
         docker_tag = self.analysis.get_tasks(accession_step.wdl_task_name)[
             0
-        ].docker_image.split(":")[1]
+        ].docker_image
         aliases = [
             "{}:{}-{}-{}".format(
                 self.common_metadata.lab_pi,
                 accession_step.step_run,
                 self.analysis.workflow_id,
-                docker_tag,
+                docker_tag.split(":")[1] if docker_tag is not None else "",
             )
         ]
         payload = accession_step.get_portal_step_run(aliases)
@@ -343,6 +343,13 @@ class Accession(ABC):
             )
             raise
         encode_files = []
+
+        # Do the filtering before getting md5sums to avoid unnecessary searches
+        if ancestor.workflow_inputs_to_match:
+            derived_from_files = self._filter_derived_from_files_by_workflow_inputs(
+                derived_from_files, ancestor
+            )
+
         for gs_file in derived_from_files:
             encode_file = self.get_encode_file_matching_md5_of_blob(gs_file)
             if encode_file is not None:
@@ -384,9 +391,29 @@ class Accession(ABC):
             )
         if len(derived_from_accession_ids) != len(derived_from_files):
             raise Exception(
-                f"Missing some of the derived_from files on the portal: {missing}"
+                f"Missing some of the derived_from files on the portal, found ids {derived_from_accession_ids}, still missing {missing}"
             )
         return derived_from_accession_ids
+
+    def _filter_derived_from_files_by_workflow_inputs(
+        self, derived_from_files: List[GSFile], ancestor: DerivedFromFile
+    ) -> List[GSFile]:
+        """
+        Filter the list of candidate derived_from files on the condition that the
+        filename matches or is present in a workflow input. Used in
+        `self.get_derived_from`
+        """
+        new = []
+        potential_filenames = flatten(
+            [
+                self.analysis.metadata["inputs"][key]
+                for key in ancestor.workflow_inputs_to_match
+            ]
+        )
+        for gs_file in derived_from_files:
+            if gs_file.filename in potential_filenames:
+                new.append(gs_file)
+        return new
 
     def make_file_obj(
         self, file: GSFile, file_params: FileParams, step_run: EncodeStepRun
@@ -818,17 +845,61 @@ class AccessionLongReadRna(AccessionGenericRna):
         "long_read_rna_correlation": "make_long_read_rna_correlation_qc",
     }
 
-    @property
-    def assembly(self):
-        filekey = "annotation_gtf"
-        return self.find_portal_property_from_filekey(filekey, EncodeFile.ASSEMBLY)
+    def _get_annotation_gtf(self) -> EncodeFile:
+        """
+        The name of the annotation file in the WDL task is not globally unique, so we
+        cannot get it via `self.analysis.get_files` and instead need to go via the
+        tasks.
+        """
+        gtf_filename = self.analysis.metadata["inputs"]["annotation"]
+        gtf_file = self.analysis.get_files(filename=gtf_filename)[0]
+        portal_gtf = self.get_encode_file_matching_md5_of_blob(gtf_file)
+        if portal_gtf is None:
+            raise ValueError(
+                f"Could not find annotation GTF for file {gtf_file.filename}"
+            )
+        return portal_gtf
+
+    def _get_spikeins(self) -> List[EncodeFile]:
+        """
+        Rather than try to trace the derived_from for the three different pipeline use
+        cases (no spikeins, one spikein, and two or more spikeins), grab them directly
+        from the workflow-level inputs.
+        """
+        gtf_filename = self.analysis.metadata["inputs"]["annotation"]
+        gtf_file = self.analysis.get_files(filename=gtf_filename)[0]
+        portal_gtf = self.get_encode_file_matching_md5_of_blob(gtf_file)
+        if portal_gtf is None:
+            raise ValueError(
+                f"Could not find annotation GTF for file {gtf_file.filename}"
+            )
+        return portal_gtf
 
     @property
-    def genome_annotation(self):
-        filekey = "annotation_gtf"
-        return self.find_portal_property_from_filekey(
-            filekey, EncodeFile.GENOME_ANNOTATION
-        )
+    def assembly(self) -> str:
+        """
+        Gets the assembly from the annotation GTF on the portal
+        """
+        annotation_gtf = self._get_annotation_gtf()
+        assembly = annotation_gtf.get(EncodeFile.ASSEMBLY)
+        if assembly is None:
+            raise ValueError(
+                f"Could not get assembly from annotation GTF {annotation_gtf.accession}"
+            )
+        return assembly
+
+    @property
+    def genome_annotation(self) -> str:
+        """
+        Gets the annotation version from the annotation GTF on the portal
+        """
+        annotation_gtf = self._get_annotation_gtf()
+        genome_annotation = annotation_gtf.get(EncodeFile.GENOME_ANNOTATION)
+        if genome_annotation is None:
+            raise ValueError(
+                f"Could not get genome annotation from annotation GTF {annotation_gtf.accession}"
+            )
+        return genome_annotation
 
     def make_long_read_rna_correlation_qc(self, encode_file, gs_file):
         """
@@ -1624,11 +1695,17 @@ def accession_factory(
             f"Could not find pipeline type {pipeline_type}: valid options are {pipeline_type_options}"
         ) from e
     current_dir = Path(__file__).resolve()
+    metadata = MetaData(accession_metadata)
+
+    if pipeline_type == "long_read_rna":
+        pipeline_type = _get_long_read_rna_steps_json_name_prefix_from_metadata(
+            metadata
+        )
+
     steps_json_path = (
         current_dir.parents[1] / "accession_steps" / f"{pipeline_type}_steps.json"
     )
     accession_steps = AccessionSteps(steps_json_path)
-    metadata = MetaData(accession_metadata)
     backend = kwargs.pop("backend", None)
     analysis = Analysis(
         metadata, raw_fastqs_keys=accession_steps.raw_fastqs_keys, backend=backend
@@ -1638,3 +1715,16 @@ def accession_factory(
     return selected_accession(
         accession_steps, analysis, connection, common_metadata, *args, **kwargs
     )
+
+
+def _get_long_read_rna_steps_json_name_prefix_from_metadata(metadata: MetaData) -> str:
+    """
+    The JSON template to use for long read RNA depends on the number of spikeins, this
+    function determines the appropriate one to use from the metadata.
+    """
+    num_spikeins = len(metadata.content["inputs"]["spikeins"])
+    if num_spikeins == 0:
+        return "long_read_rna_no_spikeins"
+    if num_spikeins == 1:
+        return "long_read_rna_one_spikein"
+    return "long_read_rna_two_or_more_spikeins"
