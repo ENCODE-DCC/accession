@@ -200,6 +200,7 @@ class CloudTasksUploadClient:
                 "body": payload.get_bytes(),
                 "http_method": "POST",
                 "relative_uri": task_endpoint,
+                "headers": {"Content-Type": "application/json"},
             },
             "name": self._get_task_name(payload),
         }
