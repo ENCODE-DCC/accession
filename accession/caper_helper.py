@@ -19,7 +19,7 @@ class CaperHelper:
     def client(self) -> CromwellRestAPI:
         if self._client is None:
             _, conf = get_parser_and_defaults(conf_file=DEFAULT_CAPER_CONF)
-            self._client = CromwellRestAPI(hostname=conf["ip"], port=conf["port"])
+            self._client = CromwellRestAPI(hostname=conf["hostname"], port=conf["port"])
         return self._client
 
     def metadata(self, workflow_ids_or_labels: List[str]) -> List[Dict[str, Any]]:
