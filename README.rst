@@ -57,7 +57,7 @@ You will also need to authenticate with Google Cloud if using WDL metadata from 
   a machine where you already have a Caper set up, and you have the Caper configuration
   file available at ``~/.caper/default.conf``, then there is no extra setup required.
   If the Caper server is on another machine, you will need so configure HTTP access to
-  it by setting the ``ip`` and ``port`` values in the Caper conf file.
+  it by setting the ``hostname`` and ``port`` values in the Caper conf file.
 
 Usage
 ======
