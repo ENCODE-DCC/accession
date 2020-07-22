@@ -38,5 +38,9 @@ class CaperHelper:
 
 
 def caper_conf_exists() -> bool:
+    """
+    The DEFAULT_CAPER_CONF looks like `~/.caper/default.conf`, need to expand to the
+    user's home directory.
+    """
     caper_conf = Path(DEFAULT_CAPER_CONF)
-    return caper_conf.exists()
+    return caper_conf.expanduser().exists()
