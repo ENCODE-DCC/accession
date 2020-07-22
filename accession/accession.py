@@ -1657,9 +1657,6 @@ def accession_factory(
     Matches against the user-specified pipeline_type string and returns an instance of
     the appropriate accession subclass. Usage of this factory has the nice effect of
     automatically supplying the appropriate AccessionSteps based on the pipeline name.
-
-    Uses the value of the MetadataType enum member to determine which concrete class of
-    Metadata to use.
     """
     pipeline_type_map = {
         "bulk_rna": AccessionBulkRna,
