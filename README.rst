@@ -52,12 +52,23 @@ You will also need to authenticate with Google Cloud if using WDL metadata from 
     $ export DCC_LAB=XXXXXXXX
     $ export DCC_AWARD=yyyyyyyyyyy
 
-| Finally, if you would like to be able to pass Caper workflow IDs or labels you will
+| If you would like to be able to pass Caper workflow IDs or labels you will
   need to configure access to the Caper server. If you are invoking ``accession`` from
   a machine where you already have a Caper set up, and you have the Caper configuration
   file available at ``~/.caper/default.conf``, then there is no extra setup required.
   If the Caper server is on another machine, you will need so configure HTTP access to
   it by setting the ``hostname`` and ``port`` values in the Caper conf file.
+
+| (Optional) Finally, to enable using Cloud Tasks to upload files from Google Cloud
+  Storage to AWS S3, set the following two environment variables. If one or more of them
+  is not set, then files will be uploaded using the same machine that the accessioning
+  code is run from. For more information on how to set up Cloud Tasks and the upload
+  service, see the docs for the `gcs-s3-transfer-service <https://github.com/ENCODE-DCC/gcs-s3-transfer-service/>`_
+
+.. code-block:: console
+
+    $ export ACCESSION_CLOUD_TASKS_QUEUE_NAME=my-queue
+    $ export ACCESSION_CLOUD_TASKS_QUEUE_REGION=us-west1
 
 Usage
 ======

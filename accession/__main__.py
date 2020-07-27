@@ -4,6 +4,7 @@ from typing import Optional, Tuple
 
 from accession import __version__
 from accession.accession import accession_factory
+from accession.cloud_tasks import QueueInfo
 
 
 def get_parser():
@@ -86,10 +87,19 @@ def check_or_set_lab_award(lab: Optional[str], award: Optional[str]) -> Tuple[st
     return lab, award
 
 
+def get_queue_info_from_env() -> Optional[QueueInfo]:
+    name = os.environ.get("ACCESSION_CLOUD_TASKS_QUEUE_NAME")
+    region = os.environ.get("ACCESSION_CLOUD_TASKS_QUEUE_REGION")
+    if name is None or region is None:
+        return None
+    return QueueInfo(name=name, region=region)
+
+
 def main():
     parser = get_parser()
     args = parser.parse_args()
     lab, award = check_or_set_lab_award(args.lab, args.award)
+    queue_info = get_queue_info_from_env()
     accessioner = accession_factory(
         args.pipeline_type,
         args.accession_metadata,
@@ -98,6 +108,7 @@ def main():
         award,
         log_file_path=args.log_file_path,
         no_log_file=args.no_log_file,
+        queue_info=queue_info,
     )
     accessioner.accession_steps(args.dry_run)
 
