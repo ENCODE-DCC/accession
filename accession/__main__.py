@@ -30,7 +30,16 @@ def get_parser():
         "-d",
         "--dry-run",
         action="store_true",
-        help="Perform a dry run for accessioning, not post anything.",
+        help=(
+            "Perform a dry run for accessioning, not posting anything. Has precedence "
+            "over -f/--force"
+        ),
+    )
+    parser.add_argument(
+        "-f",
+        "--force",
+        action="store_true",
+        help="Force accessioning to post files even if there is md5 duplication",
     )
     parser.add_argument(
         "-s",
@@ -110,7 +119,7 @@ def main():
         no_log_file=args.no_log_file,
         queue_info=queue_info,
     )
-    accessioner.accession_steps(args.dry_run)
+    accessioner.accession_steps(args.dry_run, force=args.force)
 
 
 if __name__ == "__main__":

@@ -55,10 +55,19 @@ Pipeline Type
 Dry Run
 -------
 
-| The `--dry-run` flag can be used to determine if any files that would be accessioned
+| The ``--dry-run`` flag can be used to determine if any files that would be accessioned
   have md5sums matching those of files already on the portal. When this flag is
   specified, nothing will be accessioned, and log messages will be printed indicating
-  files from the WDL metadata with md5 matches on the portal.
+  files from the WDL metadata with md5 matches on the portal. Specifying this flag
+  overrides the ``--force`` option, as such nothing will be accessioned if both flags
+  are specified.
+
+Force Accessioning of MD5-Identical Files
+------------------------------------------
+
+| The ``-f/--force`` flag can be used to force accessioning even if there are
+  md5-identical files already on the portal. The default behavior is to not accession
+  anything if md5 duplicates are detected.
 
 Logging Options
 ----------------

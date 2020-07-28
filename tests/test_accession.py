@@ -55,6 +55,23 @@ def ok_response():
     return r
 
 
+@pytest.fixture
+def matching_md5_record():
+    record = MatchingMd5Record(
+        "gs://file/a",
+        [
+            EncodeFile(
+                {
+                    "@id": "/files/ENCFFABC123/",
+                    "status": "released",
+                    "dataset": "ENCSRCBA321",
+                }
+            )
+        ],
+    )
+    return record
+
+
 def test_accession_genome_annotation(mock_accession):
     assert super(AccessionMicroRna, mock_accession).genome_annotation is None
 
@@ -410,6 +427,46 @@ def test_accession_steps_dry_run(mocker: MockFixture, mock_accession: Accession)
             ],
         )
     ]
+
+
+@pytest.mark.parametrize(
+    "kwargs", [{"dry_run": True}, {"dry_run": True, "force": True}]
+)
+def test_accession_steps_matches_dry_run(
+    caplog, mocker, mock_accession, matching_md5_record, kwargs
+):
+    """
+    Dry run shouldn't accession anything and has precendence over `force`
+    """
+    mocker.patch.object(mock_accession, "_get_dry_run_matches", return_value=[])
+    mocker.patch.object(mock_accession, "accession_step")
+    mock_accession.accession_steps(**kwargs)
+    assert "Dry run finished" in caplog.text
+    mock_accession.accession_step.assert_not_called()
+
+
+def test_accession_steps_matches_no_force(
+    caplog, mocker, mock_accession, matching_md5_record
+):
+    mocker.patch.object(
+        mock_accession, "_get_dry_run_matches", return_value=[matching_md5_record]
+    )
+    mocker.patch.object(mock_accession, "accession_step")
+    mock_accession.accession_steps(force=False)
+    assert "stopping accessioning" in caplog.text
+    mock_accession.accession_step.assert_not_called()
+
+
+def test_accession_steps_matches_with_force(
+    caplog, mocker, mock_accession, matching_md5_record
+):
+    mocker.patch.object(
+        mock_accession, "_get_dry_run_matches", return_value=[matching_md5_record]
+    )
+    mocker.patch.object(mock_accession, "accession_step")
+    mock_accession.accession_steps(force=True)
+    assert "continuing accessioning" in caplog.text
+    mock_accession.accession_step.assert_called()
 
 
 def test_accession_init(mock_accession: Accession, lab: str, award: str) -> None:
