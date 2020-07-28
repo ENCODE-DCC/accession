@@ -16,7 +16,7 @@ BRANCH="v${VERSION}"
 echo "Creating and checking out new branch ${BRANCH}"
 git checkout -b "${BRANCH}"
 
-echo "Updating version in ${INIT_PY}"
+echo "Updating version in ${INIT_PY} and adding change"
 sed "/__version__/s/\".*\"/\"${VERSION}\"/" "${INIT_PY}"
 git add "${INIT_PY}"
 
@@ -25,7 +25,7 @@ git commit -m "update to ${VERSION}"
 git tag "${VERSION}"
 
 
-echo "Pushing branch to remote"
+echo "Pushing branch and tag to remote"
 git push -u origin "${BRANCH}"
 # open $(git push -u origin "${BRANCH}" 2>&1 | grep "https" | awk '{ print $2 }')
 git push --tags
