@@ -61,7 +61,7 @@ def test_accession_mirna_replicated(
         metadata_file=mirna_replicated_metadata_path, assay_name="mirna"
     )
     accessioner, expected_files = next(factory)
-    accessioner.accession_steps()
+    accessioner.accession_steps(force=True)
     validate_accessioning(
         accessioner, expected_files, expected_num_files=12, dataset="ENCSR715NEZ"
     )
@@ -76,7 +76,7 @@ def test_accession_mirna_unreplicated(accessioner_factory):
     )
     factory = accessioner_factory(metadata_file=metadata_json_path, assay_name="mirna")
     accessioner, expected_files = next(factory)
-    accessioner.accession_steps()
+    accessioner.accession_steps(force=True)
     validate_accessioning(
         accessioner, expected_files, expected_num_files=6, dataset="ENCSR543MWW"
     )

@@ -30,7 +30,10 @@ def get_parser():
         "-d",
         "--dry-run",
         action="store_true",
-        help="Perform a dry run for accessioning, not post anything.",
+        help=(
+            "Perform a dry run for accessioning, not posting anything. Has precedence "
+            "over -f/--force"
+        ),
     )
     parser.add_argument(
         "-f",
