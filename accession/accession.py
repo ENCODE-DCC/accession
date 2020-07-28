@@ -663,29 +663,59 @@ class Accession(ABC):
             return matching_records
         return accessioned_files
 
-    def accession_steps(self, dry_run: bool = False) -> None:
+    def _get_dry_run_matches(self) -> List[Optional[MatchingMd5Record]]:
+        """
+        Performs a dry run accessioning and reports back files that would be posted that
+        have md5 conflicts.
+        """
+        accumulated_matches: List[Optional[MatchingMd5Record]] = []
+        for step in self.steps.content:
+            step_matches = self.accession_step(step, dry_run=True)
+            # Cast to silence mypy complaining about not handling all invariants in
+            # the Union returned above
+            step_matches = cast(
+                Union[List[Optional[MatchingMd5Record]], None], step_matches
+            )
+            if step_matches is None:
+                continue
+            accumulated_matches.extend(step_matches)
+        return accumulated_matches
+
+    def accession_steps(self, dry_run: bool = False, force: bool = False) -> None:
+        """
+        First executes a dry run, checking for md5 duplicates. If `dry_run` is `True`
+        or if duplicates were detected and `force_accession` is `False` then will
+        return, otherwise the experiment will subsequently actually be accessioned.
+        """
+        self.logger.info("Currently performing dry run, will not post to server.")
+        accumulated_matches = self._get_dry_run_matches()
+        self.preflight_helper.report_dry_run(accumulated_matches)
+
         if dry_run:
-            self.logger.info("Currently in dry run mode, will NOT post to server.")
-            accumulated_matches: List[Optional[MatchingMd5Record]] = []
-            for step in self.steps.content:
-                step_matches = self.accession_step(step, dry_run)
-                # Cast to silence mypy complaining about not handling all invariants in
-                # the Union returned above
-                step_matches = cast(
-                    Union[List[Optional[MatchingMd5Record]], None], step_matches
+            self.logger.info("Dry run finished")
+            return
+
+        if accumulated_matches:
+            if not force:
+                self.logger.critical(
+                    "One or more md5 duplicates detected, stopping accessioning"
                 )
-                if step_matches is None:
-                    continue
-                accumulated_matches.extend(step_matches)
-            self.preflight_helper.report_dry_run(accumulated_matches)
-        else:
-            for step in self.steps.content:
-                self.accession_step(step)
-            self.post_qcs()
-            self.patch_experiment_analyses()
-            for encode_file, gs_file in self.upload_queue:
-                self.upload_file(encode_file, gs_file)
-            self.patch_experiment_internal_status()
+                return
+
+            self.logger.warning(
+                (
+                    "One or more md5 duplicates detected, but `--force` is set so "
+                    "continuing accessioning"
+                )
+            )
+
+        for step in self.steps.content:
+            self.accession_step(step)
+        self.post_qcs()
+        self.patch_experiment_analyses()
+        for encode_file, gs_file in self.upload_queue:
+            self.upload_file(encode_file, gs_file)
+        self.patch_experiment_internal_status()
 
 
 class AccessionGenericRna(Accession):
