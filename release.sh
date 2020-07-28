@@ -17,7 +17,8 @@ echo "Creating and checking out new branch ${BRANCH}"
 git checkout -b "${BRANCH}"
 
 echo "Updating version in ${INIT_PY} and adding change"
-sed "/__version__/s/\".*\"/\"${VERSION}\"/" "${INIT_PY}"
+# MacOS sed is weird , need dummy -e, see https://stackoverflow.com/a/28206710/13501789
+sed -i '' -e "/__version__/s/\".*\"/\"${VERSION}\"/" "${INIT_PY}"
 git add "${INIT_PY}"
 
 echo "Commiting changes and adding tag"
@@ -51,12 +52,24 @@ curl \
     -d "{\"commit_title\":\"update to ${VERSION}\",\"merge_method\":\"squash\"}"
 
 echo "Creating draft release on GitHub"
-BODY_TEMPLATE="##New Features\n*\n*\n\n##Bugfixes\n*\n*\n\n"
+BODY_TEMPLATE="## New Features\n*\n*\n\n## Bugfixes\n*\n*\n\n"
 curl \
     -u "${GITHUB_USERNAME}:${GITHUB_TOKEN}" \
     -X POST \
     -H "Accept: application/vnd.github.v3+json" \
     https://api.github.com/repos/ENCODE-DCC/accession/releases \
     -d "{\"tag_name\":\"${VERSION}\",\"draft\":true,\"name\":\"Release version ${VERSION}\",\"body\":\"${BODY_TEMPLATE}\"}"
+
+echo "Cleaning up"
+echo "Deleting release branch on remote"
+curl \
+    -u "${GITHUB_USERNAME}:${GITHUB_TOKEN}" \
+    -X DELETE \
+    -H "Accept: application/vnd.github.v3+json" \
+    "https://api.github.com/repos/ENCODE-DCC/accession/git/refs/heads/v${VERSION}"
+
+echo "Deleting release branch locally"
+git checkout dev
+git branch -D "v${VERSION}"
 
 echo "All done. Make sure to fill out and publish the draft release on Github."
