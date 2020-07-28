@@ -2,15 +2,9 @@
 set -euo pipefail
 
 VERSION="${1}"
-USAGE="./release.sh VERSION"
 INIT_PY="accession/__init__.py"
 
-if [[ -z "${VERSION}" ]]; then
-    echo "${USAGE}"
-    exit 1
-fi
-
-echo "${VERSION}" | grep -qP "^\d{1,3}\.\d{1,2}\.\d{1,2}$" || echo "Version is not in correct format, should be something like 1.2.3 or 123.4.56"
+echo "${VERSION}" | grep -qP "^\d{1,3}\.\d{1,2}\.\d{1,2}$" || echo "Version is not in correct format, should be something like 1.2.3 or 123.4.56" && exit 1
 
 CURRENT_VERSION=$(grep __version__ ${INIT_PY} | tr -d '"' | awk '{print $3}')
 if [[ ! "${CURRENT_VERSION}" < "${VERSION}" ]]; then
