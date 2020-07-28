@@ -63,7 +63,7 @@ Dry Run
   are specified.
 
 Force Accessioning of MD5-Identical Files
--------
+------------------------------------------
 
 | The ``-f/--force`` flag can be used to force accessioning even if there are
   md5-identical files already on the portal. The default behavior is to not accession
