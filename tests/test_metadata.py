@@ -1,8 +1,14 @@
 from contextlib import suppress as does_not_raise
+from io import StringIO
 
 import pytest
 
-from accession.metadata import CaperMetadata, FileMetadata, metadata_factory
+from accession.metadata import (
+    CaperMetadata,
+    FileMetadata,
+    metadata_factory,
+    parse_metadata_list,
+)
 
 
 def test_file_metadata(mocker):
@@ -41,3 +47,21 @@ def test_metadata_factory_caper_metadata(mocker):
     mocker.patch("accession.metadata.caper_conf_exists", return_value=True)
     result = metadata_factory("foo")
     assert isinstance(result, CaperMetadata)
+
+
+def test_parse_metadata_list():
+    metadata_list = StringIO("   foo   \n\n\tbar")
+    result = parse_metadata_list(metadata_list)
+    assert result == ["foo", "bar"]
+
+
+def test_parse_metadata_list_invalid_list_raises():
+    metadata_list = StringIO("foo\tbar\n")
+    with pytest.raises(ValueError):
+        parse_metadata_list(metadata_list)
+
+
+def test_parse_metadata_list_empty_list_raises():
+    metadata_list = StringIO("\t\n\n\n\t\t  \n")
+    with pytest.raises(ValueError):
+        parse_metadata_list(metadata_list)

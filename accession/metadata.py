@@ -1,7 +1,7 @@
 import json
 from abc import ABC, abstractmethod
 from pathlib import Path
-from typing import Any, Dict, Optional, Union
+from typing import Any, Dict, List, Optional, TextIO, Union
 
 from accession.caper_helper import CaperHelper, caper_conf_exists
 
@@ -55,3 +55,24 @@ def metadata_factory(path_or_caper_id: str) -> Metadata:
     if caper_conf_exists():
         return CaperMetadata(path_or_caper_id)
     raise ValueError("Could not initialize metadata")
+
+
+def parse_metadata_list(metadata_list_fp: TextIO) -> List[str]:
+    """
+    Parsed the given list of metadata paths/Caper IDs. Caper labels cannot have spaces
+    so we assume that multiple entries present on a line is an error. Empty lines are
+    skipped.
+    """
+    parsed = []
+    for i, line in enumerate(metadata_list_fp):
+        split = line.strip().split()
+        if len(split) > 1:
+            raise ValueError(
+                f"Invalid metadata list, found multiple entries in line {i + 1}"
+            )
+        if len(split) == 0:
+            continue
+        parsed.append(split[0])
+    if not parsed:
+        raise ValueError("Metadata list is empty")
+    return parsed
