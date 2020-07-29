@@ -1,10 +1,11 @@
 import argparse
 import os
-from typing import Optional, Tuple
+from typing import List, Optional, Tuple
 
 from accession import __version__
 from accession.accession import accession_factory
 from accession.cloud_tasks import QueueInfo
+from accession.metadata import parse_metadata_list
 
 
 def get_parser():
@@ -12,11 +13,16 @@ def get_parser():
         description="Accession pipeline outputs, \
                                                  download output metadata for scattering"
     )
-    parser.add_argument(
+    metadata_group = parser.add_mutually_exclusive_group(required=True)
+    metadata_group.add_argument(
         "-m",
         "--accession-metadata",
         help="path to a metadata json file or a Caper workflow ID/label",
-        required=True,
+    )
+    metadata_group.add_argument(
+        "-l",
+        "--metadata-list",
+        help="A file containing one or more paths to metadata JSON files or Caper workflow IDs/labels, one per line.",
     )
     parser.add_argument(
         "-p",
@@ -104,22 +110,38 @@ def get_queue_info_from_env() -> Optional[QueueInfo]:
     return QueueInfo(name=name, region=region)
 
 
+def get_metadatas_from_args(args: argparse.Namespace) -> List[str]:
+    """
+    If there was only one metadata file/label provided, then returns a list containing
+    just that one metadata item, otherwise parses the metadata list file returning the
+    list of workflow IDs/labels.
+    """
+    if args.metadata_list:
+        with open(args.metadata_list) as f:
+            metadatas = parse_metadata_list(f)
+    else:
+        metadatas = [args.accession_metadata]
+    return metadatas
+
+
 def main():
     parser = get_parser()
     args = parser.parse_args()
     lab, award = check_or_set_lab_award(args.lab, args.award)
     queue_info = get_queue_info_from_env()
-    accessioner = accession_factory(
-        args.pipeline_type,
-        args.accession_metadata,
-        args.server,
-        lab,
-        award,
-        log_file_path=args.log_file_path,
-        no_log_file=args.no_log_file,
-        queue_info=queue_info,
-    )
-    accessioner.accession_steps(args.dry_run, force=args.force)
+    metadatas = get_metadatas_from_args(args)
+    for metadata in metadatas:
+        accessioner = accession_factory(
+            args.pipeline_type,
+            metadata,
+            args.server,
+            lab,
+            award,
+            log_file_path=args.log_file_path,
+            no_log_file=args.no_log_file,
+            queue_info=queue_info,
+        )
+        accessioner.accession_steps(args.dry_run, force=args.force)
 
 
 if __name__ == "__main__":
