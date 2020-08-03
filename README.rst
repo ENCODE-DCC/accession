@@ -81,6 +81,14 @@ Usage
 
 Please see the `docs <https://accession.readthedocs.io/en/latest/#detailed-argument-description>`_ for greater detail on these input parameters.
 
+Deploying on Google Cloud
+=========================
+
+| First authenticate with Google Cloud via `gcloud auth login`. Then make sure you have
+  the API client installed, if not run `pip install --upgrade google-api-python-client`.
+  Finally, create the firewall rule and deploy the instance by running
+  `python deploy.py --project $PROJECT`.
+
 .. short-intro-end
 
 Project Information
