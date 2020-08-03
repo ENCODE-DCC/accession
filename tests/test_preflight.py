@@ -1,5 +1,5 @@
 from logging import Logger
-from typing import List, Optional
+from typing import List
 
 import pytest
 
@@ -48,7 +48,6 @@ def preflight_helper(mocker):
                         )
                     ],
                 ),
-                None,
             ],
             [
                 ("Found files with duplicate md5sums",),
@@ -66,12 +65,12 @@ def preflight_helper(mocker):
                 ),
             ],
         ),
-        ([None], [("No MD5 conflicts found.",)]),
+        ([], [("No MD5 conflicts found.",)]),
     ],
 )
 def test_report_dry_run(
     preflight_helper: PreflightHelper,
-    matches: List[Optional[MatchingMd5Record]],
+    matches: List[MatchingMd5Record],
     expected: List[str],
 ):
     """

@@ -68,7 +68,7 @@ class PreflightHelper:
         messages = [template.format(*row) for row in rows]
         return messages
 
-    def report_dry_run(self, records: List[Optional[MatchingMd5Record]]) -> None:
+    def report_dry_run(self, matches: List[MatchingMd5Record]) -> None:
         """
         Print the report for the dry run. We use a format string to control the width
         for each column by adding padding where appropriate. The column width is
@@ -76,10 +76,7 @@ class PreflightHelper:
         When there is more than one file at the portal that had a matching md5sum, the
         file path is not printed for subsequent report rows after the first match for
         visual clarity.
-
-        Note that the match records are an Optional type, thus we need to remove Nones
         """
-        matches = [i for i in records if i is not None]
         if not matches:
             self.logger.info("No MD5 conflicts found.")
             return
