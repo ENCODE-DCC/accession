@@ -663,7 +663,7 @@ class Accession(ABC):
             return matching_records
         return accessioned_files
 
-    def _get_dry_run_matches(self) -> List[Optional[MatchingMd5Record]]:
+    def _get_dry_run_matches(self) -> List[MatchingMd5Record]:
         """
         Performs a dry run accessioning and reports back files that would be posted that
         have md5 conflicts.
@@ -679,7 +679,8 @@ class Accession(ABC):
             if step_matches is None:
                 continue
             accumulated_matches.extend(step_matches)
-        return accumulated_matches
+        matches = [i for i in accumulated_matches if i is not None]
+        return matches
 
     def accession_steps(self, dry_run: bool = False, force: bool = False) -> None:
         """
