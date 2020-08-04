@@ -1,3 +1,4 @@
+---
   - repo: https://github.com/psf/black
     rev: 19.3b0
     hooks:
@@ -29,7 +30,7 @@
   - repo: https://gitlab.com/pycqa/flake8
     rev: 3.7.9
     hooks:
-      -  id: flake8
+      - id: flake8
 
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v2.5.0
@@ -42,3 +43,9 @@
         args:
           - --autofix
       - id: check-yaml
+
+  - repo: https://github.com/jumanjihouse/pre-commit-hook-yamlfmt
+    rev: 0.0.11
+    hooks:
+      - id: yamlfmt
+        args: [--mapping, '2', --sequence, '4', --offset, '2']

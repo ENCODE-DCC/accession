@@ -1,3 +1,4 @@
+---
 version: 2.1
 
 py37: &py37
@@ -30,31 +31,33 @@ only_dev_and_master: &only_dev_and_master
 
 commands:
   install_shellcheck:
-    description: "Install shellcheck by downloading the binary, don't want to apt-get update"
+    description: Install shellcheck by downloading the binary, don't want to apt-get update
     steps:
-      - run: curl -Ls https://github.com/koalaman/shellcheck/releases/download/stable/shellcheck-stable.linux.x86_64.tar.xz | tar xJ && sudo mv shellcheck-stable/shellcheck /usr/local/bin
+      - run: curl -Ls https://github.com/koalaman/shellcheck/releases/download/stable/shellcheck-stable.linux.x86_64.tar.xz | tar xJ && sudo mv shellcheck-stable/shellcheck
+          /usr/local/bin
   install_jq:
-    description: "Install jq"
+    description: Install jq
     steps:
       - run: sudo apt-get install -y jq
   install_jsonnet:
-    description: "Install Jsonnet including formatter jsonnetfmt"
+    description: Install Jsonnet including formatter jsonnetfmt
     steps:
-      - run: curl -Ls https://github.com/google/jsonnet/releases/download/v0.16.0/jsonnet-bin-v0.16.0-linux.tar.gz | tar xz && sudo mv jsonnet jsonnetfmt /usr/local/bin
+      - run: curl -Ls https://github.com/google/jsonnet/releases/download/v0.16.0/jsonnet-bin-v0.16.0-linux.tar.gz | tar xz && sudo mv jsonnet jsonnetfmt
+          /usr/local/bin
   run_tox:
-    description: "Install and run tox with a given environment"
+    description: Install and run tox with a given environment
     parameters:
       toxenv:
-        description: "The name of the environment as per tox.ini, e.g. py36 or lint"
+        description: The name of the environment as per tox.ini, e.g. py36 or lint
         type: string
       docker:
-        description: "Determines if the test needs to use --docker"
+        description: Determines if the test needs to use --docker
         type: boolean
         default: false
       extra_args:
-        description: "Extra arguments that are consumed only when running pytest"
+        description: Extra arguments that are consumed only when running pytest
         type: string
-        default: ""
+        default: ''
     steps:
       - when:
           condition: <<parameters.docker>>
@@ -84,13 +87,13 @@ jobs:
       - install_shellcheck
       - install_jsonnet
       - run_tox:
-          toxenv: "lint"
+          toxenv: lint
   test_py36:
     <<: *machine_defaults
     steps:
       - checkout
       - run_tox:
-          toxenv: "py36"
+          toxenv: py36
           docker: true
           extra_args: -vv
   docs:
@@ -98,19 +101,19 @@ jobs:
     steps:
       - checkout
       - run_tox:
-          toxenv: "docs"
+          toxenv: docs
   pypi-description:
     <<: *py37
     steps:
       - checkout
       - run_tox:
-          toxenv: "pypi-description"
+          toxenv: pypi-description
   coverage-report:
     <<: *py37
     steps:
       - checkout
       - run_tox:
-          toxenv: "coverage-report"
+          toxenv: coverage-report
   release_to_pypi:
     <<: *py37
     steps:
@@ -125,9 +128,9 @@ jobs:
       - install_shellcheck
       - install_jsonnet
       - run_tox:
-          toxenv: "conf"
+          toxenv: conf
       - run_tox:
-          toxenv: "lint-ignore-exit-code"
+          toxenv: lint-ignore-exit-code
       - run:
           name: verify checked-in steps JSONs are up to date
           command: |
