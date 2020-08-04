@@ -1,9 +1,8 @@
 import argparse
 import logging
 import textwrap
-import time
 
-from googleapiclient import Resource, discovery
+from googleapiclient import discovery
 from googleapiclient.http import HttpError
 
 DEBIAN_10_IMAGE = "projects/debian-cloud/global/images/debian-10-buster-v20200714"
@@ -15,7 +14,7 @@ class GcloudClient:
         self._compute = None
 
     @property
-    def compute(self) -> Resource:
+    def compute(self) -> discovery.Resource:
         if self._compute is None:
             self._compute = discovery.build("compute", "v1")
         return self._compute
@@ -61,48 +60,58 @@ class GcloudClient:
                     "initializeParams": {"sourceImage": DEBIAN_10_IMAGE},
                 }
             ],
-            "networkInterfaces": [{"network": "global/networks/default"}],
+            "networkInterfaces": [
+                {
+                    "network": "global/networks/default",
+                    "accessConfigs": [
+                        {"type": "ONE_TO_ONE_NAT", "name": "External NAT"}
+                    ],
+                }
+            ],
+            "serviceAccounts": [
+                {
+                    "email": "default",
+                    "scopes": ["https://www.googleapis.com/auth/logging.write"],
+                }
+            ],
             "metadata": {"items": [{"key": "startup-script", "value": startup_script}]},
+            "tags": {"items": ["accessioning"]},
         }
 
         self.compute.instances().insert(
             project=self.project, zone=zone, body=config
         ).execute()
 
-    def _wait_for_operation(self, zone: str, operation: str) -> None:
-        logging.info("Waiting for operation to finish...")
-        while True:
-            result = (
-                self.compute.zoneOperations()
-                .get(project=self.project, zone=zone, operation=operation)
-                .execute()
-            )
-
-            if result["status"] == "DONE":
-                if "error" in result:
-                    raise Exception(result["error"])
-                return
-
-            time.sleep(1)
-
 
 def main() -> None:
-    logging.basicConfig(level=logging.INFO)
+    logging.basicConfig(
+        level=logging.INFO, format="%(asctime)s %(name)s %(levelname)s %(message)s"
+    )
     parser = get_parser()
     args = parser.parse_args()
-    client = GcloudClient(args.project_id)
+    client = GcloudClient(args.project)
     client.create_firewall_rule()
     client.create_instance(args.zone, args.instance_name)
 
 
 def get_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser()
-    parser.add_argument("project", help="Your Google Cloud project ID.")
     parser.add_argument(
-        "--zone", default="us-west1-a", help="Compute Engine zone to deploy to."
+        "-p",
+        "--project",
+        help="The Google Cloud project ID in which the instance will be deployed",
     )
     parser.add_argument(
-        "--instance-name", default="accession", help="The name for the new instance."
+        "-z",
+        "--zone",
+        default="us-west1-a",
+        help="The Compute Engine zone to deploy to.",
+    )
+    parser.add_argument(
+        "-n",
+        "--instance-name",
+        default="accession",
+        help="The name for the new instance.",
     )
     return parser
 

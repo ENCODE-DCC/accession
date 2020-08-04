@@ -84,10 +84,18 @@ Please see the `docs <https://accession.readthedocs.io/en/latest/#detailed-argum
 Deploying on Google Cloud
 =========================
 
-| First authenticate with Google Cloud via `gcloud auth login`. Then make sure you have
-  the API client installed, if not run `pip install --upgrade google-api-python-client`.
-  Finally, create the firewall rule and deploy the instance by running
-  `python deploy.py --project $PROJECT`.
+| First authenticate with Google Cloud via `gcloud auth login` if needed. Then install
+  the API client with `pip install google-api-python-client`, it is recommended to do
+  this inside of a `venv`. Finally, create the firewall rule and deploy the instance by
+  running `python deploy.py --project $PROJECT`. This will also install the `accession`
+  package. Finally, SSH onto the new instance and run `gcloud auth login` to
+  authenticate on the instance.
+
+| For Caper integration, once the instance is up, SSH onto it and create the Caper conf
+  file at `~/.caper/default.conf`, use the private IP of the Caper VM instance as the
+  `hostname` and use `8000` for the `port`. For the connection to work the Caper VM
+  will need to have the tag `caper-server`. Also note that the deployment assumes the
+  Cromwell server port is set to `8000`.
 
 .. short-intro-end
 
