@@ -25,7 +25,7 @@ CLASSIFIERS = [
 ]
 INSTALL_REQUIRES = [
     "requests",
-    "encode_utils>=2.9.0",
+    "encode_utils==2.10.0",
     "google-cloud-storage",
     "attrs",
     "boto3==1.13.5",

@@ -236,7 +236,10 @@ class Accession(ABC):
                 encode_file.get("md5sum"),
             )
         encode_posted_file, status_code = self.conn.post(
-            encode_file, upload_file=False, return_original_status_code=True
+            encode_file,
+            upload_file=False,
+            return_original_status_code=True,
+            truncate_long_strings_in_payload_log=True,
         )
         modeled_encode_file = EncodeFile(encode_posted_file)
         if modeled_encode_file.status == "upload failed" or (
@@ -357,7 +360,11 @@ class Accession(ABC):
             )
         ]
         payload = accession_step.get_portal_step_run(aliases)
-        posted, status_code = self.conn.post(payload, return_original_status_code=True)
+        posted, status_code = self.conn.post(
+            payload,
+            return_original_status_code=True,
+            truncate_long_strings_in_payload_log=True,
+        )
         if status_code == 409:
             self.logger.warning(
                 "Analysis step run with aliases %s already exists, will not post it",
@@ -528,7 +535,11 @@ class Accession(ABC):
     def post_qcs(self):
         for qc in self.raw_qcs:
             self.new_qcs.append(
-                self.conn.post(qc.get_portal_object(), require_aliases=False)
+                self.conn.post(
+                    qc.get_portal_object(),
+                    require_aliases=False,
+                    truncate_long_strings_in_payload_log=True,
+                )
             )
 
     def queue_qc(
@@ -1800,7 +1811,7 @@ def accession_factory(
     analysis = Analysis(
         metadata, raw_fastqs_keys=accession_steps.raw_fastqs_keys, backend=backend
     )
-    connection = Connection(server)
+    connection = Connection(server, no_log_file=True)
     common_metadata = EncodeCommonMetadata(lab, award)
     return selected_accession(
         accession_steps, analysis, connection, common_metadata, *args, **kwargs
