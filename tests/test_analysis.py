@@ -8,6 +8,18 @@ from accession.metadata import FileMetadata
 from accession.task import Task
 
 
+class StubMetadata:
+    content = {
+        "workflowRoot": "gs://foo/bar",
+        "calls": {
+            "wf.a": [
+                {"executionStatus": "RetryableFailure"},
+                {"executionStatus": "Done", "inputs": {}, "outputs": {}},
+            ]
+        },
+    }
+
+
 def test_invalid_metadata_raises():
     """
     Trying to create an Analysis from invalid JSON should raise an error.
@@ -24,6 +36,14 @@ def test_make_tasks(empty_analysis):
     empty_analysis.tasks = empty_analysis.make_tasks()
     assert len(empty_analysis.files) == 208
     assert len(empty_analysis.tasks) == 38
+
+
+def test_make_tasks_does_not_add_failed_tasks(mocker, mock_gc_backend):
+    mocker.patch("accession.analysis.Analysis.get_or_make_files")
+    metadata = StubMetadata()
+    analysis = Analysis(metadata, backend=mock_gc_backend)
+    result = analysis.make_tasks()
+    assert len(result) == 1
 
 
 @pytest.mark.filesystem
@@ -155,6 +175,7 @@ def test_search_up_disallow_tasks(
         "calls": {
             "chip.bam2ta": [
                 {
+                    "executionStatus": "Done",
                     "dockerImageUsed": "arch:latest",
                     "inputs": {"bam": "gs://foo/bar/ENCFF295YVN.nodup.bam"},
                     "outputs": {
@@ -162,6 +183,7 @@ def test_search_up_disallow_tasks(
                     },
                 },
                 {
+                    "executionStatus": "Done",
                     "dockerImageUsed": "arch:latest",
                     "inputs": {"bam": "gs://foo/bar/ENCFF279HDE.nodup.bam"},
                     "outputs": {
@@ -171,6 +193,7 @@ def test_search_up_disallow_tasks(
             ],
             "chip.macs2_signal_track": [
                 {
+                    "executionStatus": "Done",
                     "dockerImageUsed": "arch:latest",
                     "inputs": {
                         "tas": [
@@ -186,6 +209,7 @@ def test_search_up_disallow_tasks(
             ],
             "chip.choose_ctl": [
                 {
+                    "executionStatus": "Done",
                     "dockerImageUsed": "arch:latest",
                     "inputs": {
                         "tas": [

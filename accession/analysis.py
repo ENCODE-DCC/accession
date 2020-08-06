@@ -30,12 +30,16 @@ class Analysis:
         if auto_populate:
             self.tasks = self.make_tasks()
 
-    # Makes instances of Task
     def make_tasks(self):
+        """
+        Makes instances of Task. If the task did not succeed then will not add it to the
+        call graph.
+        """
         tasks = []
         for key, value in self.metadata["calls"].items():
             for task in value:
-                tasks.append(self.make_task(key, task))
+                if task["executionStatus"] == "Done":
+                    tasks.append(self.make_task(key, task))
         for task in tasks:
             task.output_files = self.get_or_make_files(task.outputs, task)
         # Making input files after making output files avoids creating
