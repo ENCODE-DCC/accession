@@ -15,12 +15,18 @@ class Analysis:
     """
 
     def __init__(
-        self, metadata, raw_fastqs_keys=None, auto_populate=True, backend=None
+        self,
+        metadata,
+        raw_fastqs_keys=None,
+        raw_fastqs_can_have_task=False,
+        auto_populate=True,
+        backend=None,
     ):
         self.files = []
         self.tasks = []
         self.metadata = metadata
         self.raw_fastqs_keys = raw_fastqs_keys
+        self.raw_fastqs_can_have_task = raw_fastqs_can_have_task
         if self.metadata:
             if backend is None:
                 bucket = (
@@ -134,7 +140,10 @@ class Analysis:
         if self.raw_fastqs_keys is not None:
             raw_fastqs_keys = self.raw_fastqs_keys
         for file in self.files:
-            if any([k in file.filekeys for k in raw_fastqs_keys]) and file.task is None:
+            if any([k in file.filekeys for k in raw_fastqs_keys]):
+                if not self.raw_fastqs_can_have_task:
+                    if file.task is not None:
+                        continue
                 fastqs.append(file)
         return fastqs
 

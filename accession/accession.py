@@ -1034,6 +1034,15 @@ class AccessionBulkRna(AccessionGenericRna):
         return mad_qc
 
 
+class AccessionDnase(Accession):
+    QC_MAP = {}  # type: ignore
+
+    @property
+    def assembly(self) -> str:
+        filekey = "nuclear_chroms_gz"
+        return self.find_portal_property_from_filekey(filekey, EncodeFile.ASSEMBLY)
+
+
 class AccessionLongReadRna(AccessionGenericRna):
     QC_MAP = {
         "long_read_rna_mapping": "make_long_read_rna_mapping_qc",
@@ -1866,6 +1875,7 @@ def accession_factory(
         "mint_chip": AccessionChip,
         "control_chip": AccessionChip,
         "atac": AccessionAtac,
+        "dnase": AccessionDnase,
     }
     selected_accession: Optional[Type[Accession]] = None
     try:
@@ -1889,7 +1899,10 @@ def accession_factory(
     accession_steps = AccessionSteps(steps_json_path)
     backend = kwargs.pop("backend", None)
     analysis = Analysis(
-        metadata, raw_fastqs_keys=accession_steps.raw_fastqs_keys, backend=backend
+        metadata,
+        raw_fastqs_keys=accession_steps.raw_fastqs_keys,
+        raw_fastqs_can_have_task=accession_steps.raw_fastqs_can_have_task,
+        backend=backend,
     )
     connection = Connection(server, no_log_file=True)
     common_metadata = EncodeCommonMetadata(lab, award)

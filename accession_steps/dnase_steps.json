@@ -1,0 +1,230 @@
+{
+  "accession.steps": [
+    {
+      "dcc_step_run": "/analysis-steps/dnase-alignment-step-v-1/",
+      "dcc_step_version": "/analysis-step-versions/dnase-alignment-step-v-1-0/",
+      "wdl_files": [
+        {
+          "derived_from_files": [
+            {
+              "allow_empty": true,
+              "derived_from_filekey": "replicate.se_fastqs",
+              "derived_from_inputs": true,
+              "derived_from_task": "dnase_replicate"
+            },
+            {
+              "allow_empty": true,
+              "derived_from_filekey": "replicate.pe_fastqs",
+              "derived_from_inputs": true,
+              "derived_from_task": "dnase_replicate"
+            }
+          ],
+          "file_format": "bam",
+          "filekey": "analysis.unfiltered_bam",
+          "output_type": "unfiltered alignments",
+          "quality_metrics": []
+        }
+      ],
+      "wdl_task_name": "dnase_replicate"
+    },
+    {
+      "dcc_step_run": "/analysis-steps/dnase-alignment-filtering-step-v-1/",
+      "dcc_step_version": "/analysis-step-versions/dnase-alignment-filtering-step-v-1-0/",
+      "wdl_files": [
+        {
+          "derived_from_files": [
+            {
+              "derived_from_filekey": "analysis.unfiltered_bam",
+              "derived_from_task": "dnase_replicate"
+            }
+          ],
+          "file_format": "bam",
+          "filekey": "analysis.nuclear_bam",
+          "output_type": "alignments",
+          "quality_metrics": []
+        }
+      ],
+      "wdl_task_name": "dnase_replicate"
+    },
+    {
+      "dcc_step_run": "/analysis-steps/dnase-footprinting-step-v-1/",
+      "dcc_step_version": "/analysis-step-versions/dnase-footprinting-step-v-1-0/",
+      "wdl_files": [
+        {
+          "derived_from_files": [
+            {
+              "derived_from_filekey": "analysis.nuclear_bam",
+              "derived_from_task": "dnase_replicate"
+            },
+            {
+              "derived_from_filekey": "analysis.five_percent_allcalls_bed_gz",
+              "derived_from_task": "dnase_replicate"
+            }
+          ],
+          "file_format": "bed",
+          "filekey": "analysis.one_percent_footprints_bed_gz",
+          "output_type": "footprints",
+          "quality_metrics": []
+        }
+      ],
+      "wdl_task_name": "dnase_replicate"
+    },
+    {
+      "dcc_step_run": "/analysis-steps/dnase-footprints-file-format-conversion-step-v-1/",
+      "dcc_step_version": "/analysis-step-versions/dnase-footprints-file-format-conversion-step-v-1-0/",
+      "wdl_files": [
+        {
+          "derived_from_files": [
+            {
+              "derived_from_filekey": "analysis.one_percent_footprints_bed_gz",
+              "derived_from_task": "dnase_replicate"
+            }
+          ],
+          "file_format": "bigBed",
+          "filekey": "one_percent_footprints_bigbed",
+          "output_type": "footprints",
+          "quality_metrics": []
+        }
+      ],
+      "wdl_task_name": "dnase_replicate"
+    },
+    {
+      "dcc_step_run": "/analysis-steps/dnase-peak-calling-step-v-1/",
+      "dcc_step_version": "/analysis-step-versions/dnase-peak-calling-step-v-1-0/",
+      "wdl_files": [
+        {
+          "derived_from_files": [
+            {
+              "derived_from_filekey": "analysis.nuclear_bam",
+              "derived_from_task": "dnase_replicate"
+            }
+          ],
+          "file_format": "bigWig",
+          "filekey": "analysis.normalized_density_bw",
+          "output_type": "read-depth normalized signal",
+          "quality_metrics": []
+        }
+      ],
+      "wdl_task_name": "dnase_replicate"
+    },
+    {
+      "dcc_step_run": "/analysis-steps/dnase-peak-calling-step-v-1/",
+      "dcc_step_version": "/analysis-step-versions/dnase-peak-calling-step-v-1-0/",
+      "wdl_files": [
+        {
+          "derived_from_files": [
+            {
+              "derived_from_filekey": "analysis.nuclear_bam",
+              "derived_from_task": "dnase_replicate"
+            }
+          ],
+          "file_format": "bed",
+          "filekey": "analysis.five_percent_allcalls_bed_gz",
+          "output_type": "FDR cut rate",
+          "quality_metrics": []
+        }
+      ],
+      "wdl_task_name": "dnase_replicate"
+    },
+    {
+      "dcc_step_run": "/analysis-steps/dnase-fdr-cut-rate-file-format-conversion-step-v-1/",
+      "dcc_step_version": "/analysis-step-versions/dnase-fdr-cut-rate-file-format-conversion-step-v-1-0/",
+      "wdl_files": [
+        {
+          "derived_from_files": [
+            {
+              "derived_from_filekey": "analysis.five_percent_allcalls_bed_gz",
+              "derived_from_task": "dnase_replicate"
+            }
+          ],
+          "file_format": "bigBed",
+          "filekey": "analysis.five_percent_allcalls_bigbed",
+          "output_type": "FDR cut rate",
+          "quality_metrics": []
+        }
+      ],
+      "wdl_task_name": "dnase_replicate"
+    },
+    {
+      "dcc_step_run": "/analysis-steps/dnase-peak-calling-step-v-1/",
+      "dcc_step_version": "/analysis-step-versions/dnase-peak-calling-step-v-1-0/",
+      "wdl_files": [
+        {
+          "derived_from_files": [
+            {
+              "derived_from_filekey": "analysis.nuclear_bam",
+              "derived_from_task": "dnase_replicate"
+            }
+          ],
+          "file_format": "bed",
+          "filekey": "analysis.five_percent_narrowpeaks_bed_gz",
+          "output_type": "peaks",
+          "quality_metrics": []
+        }
+      ],
+      "wdl_task_name": "dnase_replicate"
+    },
+    {
+      "dcc_step_run": "/analysis-steps/dnase-peak-calling-step-v-1/",
+      "dcc_step_version": "/analysis-step-versions/dnase-peak-calling-step-v-1-0/",
+      "wdl_files": [
+        {
+          "derived_from_files": [
+            {
+              "derived_from_filekey": "analysis.nuclear_bam",
+              "derived_from_task": "dnase_replicate"
+            }
+          ],
+          "file_format": "bed",
+          "filekey": "analysis.tenth_of_one_percent_narrowpeaks_bed_gz",
+          "output_type": "peaks",
+          "quality_metrics": []
+        }
+      ],
+      "wdl_task_name": "dnase_replicate"
+    },
+    {
+      "dcc_step_run": "/analysis-steps/dnase-tenth-of-percent-peaks-file-format-conversion-step-v-1/",
+      "dcc_step_version": "/analysis-step-versions/dnase-tenth-of-percent-peaks-file-format-conversion-step-v-1-0/",
+      "wdl_files": [
+        {
+          "derived_from_files": [
+            {
+              "derived_from_filekey": "analysis.tenth_of_one_percent_narrowpeaks_bed_gz",
+              "derived_from_task": "dnase_replicate"
+            }
+          ],
+          "file_format": "bigBed",
+          "filekey": "analysis.tenth_of_one_percent_narrowpeaks_bigbed",
+          "output_type": "peaks",
+          "quality_metrics": []
+        }
+      ],
+      "wdl_task_name": "dnase_replicate"
+    },
+    {
+      "dcc_step_run": "/analysis-steps/dnase-five-percent-peaks-file-format-conversion-step-v-1/",
+      "dcc_step_version": "/analysis-step-versions/dnase-five-percent-peaks-file-format-conversion-step-v-1-0/",
+      "wdl_files": [
+        {
+          "derived_from_files": [
+            {
+              "derived_from_filekey": "analysis.five_percent_narrowpeaks_bed_gz",
+              "derived_from_task": "dnase_replicate"
+            }
+          ],
+          "file_format": "bigBed",
+          "filekey": "analysis.five_percent_narrowpeaks_bigbed",
+          "output_type": "peaks",
+          "quality_metrics": []
+        }
+      ],
+      "wdl_task_name": "dnase_replicate"
+    }
+  ],
+  "raw_fastqs_can_have_task": true,
+  "raw_fastqs_keys": [
+    "replicate.pe_fastqs",
+    "replicate.se_fastqs"
+  ]
+}
