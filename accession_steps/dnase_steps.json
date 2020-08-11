@@ -2,7 +2,7 @@
     "accession.steps": [
         {
             "dcc_step_run": "/analysis-steps/dnase-alignment-step-v1/",
-            "dcc_step_version": "",
+            "dcc_step_version": "/analysis-step-versions/dnase-alignment-step-v-1-0/",
             "wdl_files": [
                 {
                     "derived_from_files": [
@@ -22,7 +22,7 @@
         },
         {
             "dcc_step_run": "/analysis-steps/dnase-alignment-filtering-step-v1/",
-            "dcc_step_version": "",
+            "dcc_step_version": "/analysis-step-versions/dnase-alignment-filtering-step-v-1-0/",
             "wdl_files": [
                 {
                     "derived_from_files": [
@@ -42,7 +42,7 @@
         },
         {
             "dcc_step_run": "/analysis-steps/dnase-footprinting-step-v1/",
-            "dcc_step_version": "",
+            "dcc_step_version": "/analysis-step-versions/dnase-footprinting-step-v-1-0/",
             "wdl_files": [
                 {
                     "derived_from_files": [
@@ -62,7 +62,7 @@
         },
         {
             "dcc_step_run": "/analysis-steps/dnase-footprints-file-format-conversion-step-v1/",
-            "dcc_step_version": "",
+            "dcc_step_version": "/analysis-step-versions/dnase-footprints-file-format-conversion-step-v-1-0/",
             "wdl_files": [
                 {
                     "derived_from_files": [
@@ -82,7 +82,7 @@
         },
         {
             "dcc_step_run": "/analysis-steps/dnase-peak-calling-step-v1/",
-            "dcc_step_version": "",
+            "dcc_step_version": "/analysis-step-versions/dnase-peak-calling-step-v-1-0/",
             "wdl_files": [
                 {
                     "derived_from_files": [
@@ -102,7 +102,7 @@
         },
         {
             "dcc_step_run": "/analysis-steps/dnase-peak-calling-step-v1/",
-            "dcc_step_version": "",
+            "dcc_step_version": "/analysis-step-versions/dnase-peak-calling-step-v-1-0/",
             "wdl_files": [
                 {
                     "derived_from_files": [
@@ -142,7 +142,7 @@
         },
         {
             "dcc_step_run": "/analysis-steps/dnase-tenth-of-percent-peaks-file-format-conversion-step-v1",
-            "dcc_step_version": "",
+            "dcc_step_version": "/analysis-step-versions/dnase-tenth-of-percent-peaks-file-format-conversion-step-v-1-0/",
             "wdl_files": [
                 {
                     "derived_from_files": [
@@ -162,7 +162,7 @@
         },
         {
             "dcc_step_run": "/analysis-steps/dnase-five-percent-peaks-file-format-conversion-step-v1",
-            "dcc_step_version": "",
+            "dcc_step_version": "/analysis-step-versions/dnase-five-percent-peaks-file-format-conversion-step-v-1-0/",
             "wdl_files": [
                 {
                     "derived_from_files": [
