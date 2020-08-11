@@ -1,0 +1,184 @@
+{
+    "accession.steps": [
+        {
+            "dcc_step_run": "/analysis-steps/dnase-alignment-step-v1/",
+            "dcc_step_version": "",
+            "wdl_files": [
+                {
+                    "derived_from_files": [
+                        {
+                            "derived_from_filekey": "",
+                            "derived_from_inputs": true,
+                            "derived_from_task": ""
+                        }
+                    ],
+                    "file_format": "bam",
+                    "filekey": "",
+                    "output_type": "unfiltered alignments",
+                    "quality_metrics": []
+                }
+            ],
+            "wdl_task_name": ""
+        },
+        {
+            "dcc_step_run": "/analysis-steps/dnase-alignment-filtering-step-v1/",
+            "dcc_step_version": "",
+            "wdl_files": [
+                {
+                    "derived_from_files": [
+                        {
+                            "derived_from_filekey": "",
+                            "derived_from_inputs": true,
+                            "derived_from_task": ""
+                        }
+                    ],
+                    "file_format": "bam",
+                    "filekey": "",
+                    "output_type": "alignments",
+                    "quality_metrics": []
+                }
+            ],
+            "wdl_task_name": ""
+        },
+        {
+            "dcc_step_run": "/analysis-steps/dnase-footprinting-step-v1/",
+            "dcc_step_version": "",
+            "wdl_files": [
+                {
+                    "derived_from_files": [
+                        {
+                            "derived_from_filekey": "",
+                            "derived_from_inputs": false,
+                            "derived_from_task": ""
+                        }
+                    ],
+                    "file_format": "bed",
+                    "filekey": "",
+                    "output_type": "footprints",
+                    "quality_metrics": []
+                }
+            ],
+            "wdl_task_name": ""
+        },
+        {
+            "dcc_step_run": "/analysis-steps/dnase-footprints-file-format-conversion-step-v1/",
+            "dcc_step_version": "",
+            "wdl_files": [
+                {
+                    "derived_from_files": [
+                        {
+                            "derived_from_filekey": "",
+                            "derived_from_inputs": false,
+                            "derived_from_task": ""
+                        }
+                    ],
+                    "file_format": "bigBed",
+                    "filekey": "",
+                    "output_type": "footprints",
+                    "quality_metrics": []
+                }
+            ],
+            "wdl_task_name": ""
+        },
+        {
+            "dcc_step_run": "/analysis-steps/dnase-peak-calling-step-v1/",
+            "dcc_step_version": "",
+            "wdl_files": [
+                {
+                    "derived_from_files": [
+                        {
+                            "derived_from_filekey": "",
+                            "derived_from_inputs": false,
+                            "derived_from_task": ""
+                        }
+                    ],
+                    "file_format": "bigWig",
+                    "filekey": "",
+                    "output_type": "read-depth normalized signal",
+                    "quality_metrics": []
+                }
+            ],
+            "wdl_task_name": ""
+        },
+        {
+            "dcc_step_run": "/analysis-steps/dnase-peak-calling-step-v1/",
+            "dcc_step_version": "",
+            "wdl_files": [
+                {
+                    "derived_from_files": [
+                        {
+                            "derived_from_filekey": "",
+                            "derived_from_inputs": false,
+                            "derived_from_task": ""
+                        }
+                    ],
+                    "file_format": "bed",
+                    "filekey": "",
+                    "output_type": "FDR cut rate",
+                    "quality_metrics": []
+                }
+            ],
+            "wdl_task_name": ""
+        },
+        {
+            "dcc_step_run": "/analysis-steps/dnase-allcalls-file-format-conversion-step-v1/",
+            "dcc_step_version": "",
+            "wdl_files": [
+                {
+                    "derived_from_files": [
+                        {
+                            "derived_from_filekey": "",
+                            "derived_from_inputs": false,
+                            "derived_from_task": ""
+                        }
+                    ],
+                    "file_format": "bigBed",
+                    "filekey": "",
+                    "output_type": "FDR cut rate",
+                    "quality_metrics": []
+                }
+            ],
+            "wdl_task_name": ""
+        },
+        {
+            "dcc_step_run": "/analysis-steps/dnase-tenth-of-percent-peaks-file-format-conversion-step-v1",
+            "dcc_step_version": "",
+            "wdl_files": [
+                {
+                    "derived_from_files": [
+                        {
+                            "derived_from_filekey": "",
+                            "derived_from_inputs": false,
+                            "derived_from_task": ""
+                        }
+                    ],
+                    "file_format": "bigBed",
+                    "filekey": "",
+                    "output_type": "peaks",
+                    "quality_metrics": []
+                }
+            ],
+            "wdl_task_name": ""
+        },
+        {
+            "dcc_step_run": "/analysis-steps/dnase-five-percent-peaks-file-format-conversion-step-v1",
+            "dcc_step_version": "",
+            "wdl_files": [
+                {
+                    "derived_from_files": [
+                        {
+                            "derived_from_filekey": "",
+                            "derived_from_inputs": true,
+                            "derived_from_task": ""
+                        }
+                    ],
+                    "file_format": "bigBed",
+                    "filekey": "",
+                    "output_type": "peaks",
+                    "quality_metrics": []
+                }
+            ],
+            "wdl_task_name": ""
+        }
+    ]
+}
