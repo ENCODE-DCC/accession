@@ -121,7 +121,7 @@
             "wdl_task_name": ""
         },
         {
-            "dcc_step_run": "/analysis-steps/dnase-allcalls-file-format-conversion-step-v1/",
+            "dcc_step_run": "/analysis-steps//analysis-steps/dnase-fdr-cut-rate-file-format-conversion-step-v-1//",
             "dcc_step_version": "",
             "wdl_files": [
                 {
