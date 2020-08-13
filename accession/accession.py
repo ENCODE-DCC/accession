@@ -954,6 +954,15 @@ class AccessionBulkRna(AccessionGenericRna):
         return mad_qc
 
 
+class AccessionDnase(Accession):
+    QC_MAP = {}
+
+    @property
+    def assembly(self) -> str:
+        filekey = "nuclear_chroms_gz"
+        return self.find_portal_property_from_filekey(filekey, EncodeFile.ASSEMBLY)
+
+
 class AccessionLongReadRna(AccessionGenericRna):
     QC_MAP = {
         "long_read_rna_mapping": "make_long_read_rna_mapping_qc",
@@ -1786,6 +1795,7 @@ def accession_factory(
         "mint_chip": AccessionChip,
         "control_chip": AccessionChip,
         "atac": AccessionAtac,
+        "dnase": AccessionDnase,
     }
     selected_accession: Optional[Type[Accession]] = None
     try:
