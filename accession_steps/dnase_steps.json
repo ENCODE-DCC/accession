@@ -7,9 +7,16 @@
                 {
                     "derived_from_files": [
                         {
-                            "derived_from_filekey": "",
+                            "derived_from_filekey": "pe_fastqs",
                             "derived_from_inputs": true,
-                            "derived_from_task": ""
+                            "derived_from_task": "replicate",
+                            "allow_empty": true
+                        },
+                        {
+                            "derived_from_filekey": "se_fastqs",
+                            "derived_from_inputs": true,
+                            "derived_from_task": "replicate",
+                            "allow_empty": true
                         }
                     ],
                     "file_format": "bam",
@@ -18,7 +25,7 @@
                     "quality_metrics": []
                 }
             ],
-            "wdl_task_name": ""
+            "wdl_task_name": "replicate"
         },
         {
             "dcc_step_run": "/analysis-steps/dnase-alignment-filtering-step-v1/",
@@ -27,9 +34,9 @@
                 {
                     "derived_from_files": [
                         {
-                            "derived_from_filekey": "",
-                            "derived_from_inputs": true,
-                            "derived_from_task": ""
+                            "derived_from_filekey": "unfiltered_bam",
+                            "derived_from_inputs": false,
+                            "derived_from_task": "replicate"
                         }
                     ],
                     "file_format": "bam",
@@ -38,7 +45,7 @@
                     "quality_metrics": []
                 }
             ],
-            "wdl_task_name": ""
+            "wdl_task_name": "replicate"
         },
         {
             "dcc_step_run": "/analysis-steps/dnase-footprinting-step-v1/",
@@ -58,7 +65,7 @@
                     "quality_metrics": []
                 }
             ],
-            "wdl_task_name": ""
+            "wdl_task_name": "replicate"
         },
         {
             "dcc_step_run": "/analysis-steps/dnase-footprints-file-format-conversion-step-v1/",
@@ -78,7 +85,7 @@
                     "quality_metrics": []
                 }
             ],
-            "wdl_task_name": ""
+            "wdl_task_name": "replicate"
         },
         {
             "dcc_step_run": "/analysis-steps/dnase-peak-calling-step-v1/",
@@ -98,7 +105,7 @@
                     "quality_metrics": []
                 }
             ],
-            "wdl_task_name": ""
+            "wdl_task_name": "replicate"
         },
         {
             "dcc_step_run": "/analysis-steps/dnase-peak-calling-step-v1/",
@@ -118,7 +125,7 @@
                     "quality_metrics": []
                 }
             ],
-            "wdl_task_name": ""
+            "wdl_task_name": "replicate"
         },
         {
             "dcc_step_run": "/analysis-steps//analysis-steps/dnase-fdr-cut-rate-file-format-conversion-step-v-1//",
@@ -138,7 +145,7 @@
                     "quality_metrics": []
                 }
             ],
-            "wdl_task_name": ""
+            "wdl_task_name": "replicate"
         },
         {
             "dcc_step_run": "/analysis-steps/dnase-tenth-of-percent-peaks-file-format-conversion-step-v1",
@@ -158,7 +165,7 @@
                     "quality_metrics": []
                 }
             ],
-            "wdl_task_name": ""
+            "wdl_task_name": "replicate"
         },
         {
             "dcc_step_run": "/analysis-steps/dnase-five-percent-peaks-file-format-conversion-step-v1",
@@ -178,7 +185,7 @@
                     "quality_metrics": []
                 }
             ],
-            "wdl_task_name": ""
+            "wdl_task_name": "replicate"
         }
     ]
 }
