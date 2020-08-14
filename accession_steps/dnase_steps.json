@@ -13,7 +13,7 @@
                         }
                     ],
                     "file_format": "bam",
-                    "filekey": "",
+                    "filekey": "unfiltered_bam",
                     "output_type": "unfiltered alignments",
                     "quality_metrics": []
                 }
@@ -33,7 +33,7 @@
                         }
                     ],
                     "file_format": "bam",
-                    "filekey": "",
+                    "filekey": "nuclear_bam",
                     "output_type": "alignments",
                     "quality_metrics": []
                 }
@@ -53,7 +53,7 @@
                         }
                     ],
                     "file_format": "bed",
-                    "filekey": "",
+                    "filekey": "one_percent_footprints_bed_gz",
                     "output_type": "footprints",
                     "quality_metrics": []
                 }
@@ -73,7 +73,7 @@
                         }
                     ],
                     "file_format": "bigBed",
-                    "filekey": "",
+                    "filekey": "one_percent_footprints_bigbed",
                     "output_type": "footprints",
                     "quality_metrics": []
                 }
@@ -93,7 +93,7 @@
                         }
                     ],
                     "file_format": "bigWig",
-                    "filekey": "",
+                    "filekey": "normalized_density_bw",
                     "output_type": "read-depth normalized signal",
                     "quality_metrics": []
                 }
@@ -113,7 +113,7 @@
                         }
                     ],
                     "file_format": "bed",
-                    "filekey": "",
+                    "filekey": "five_percent_allcalls_bed_gz",
                     "output_type": "FDR cut rate",
                     "quality_metrics": []
                 }
@@ -133,7 +133,7 @@
                         }
                     ],
                     "file_format": "bigBed",
-                    "filekey": "",
+                    "filekey": "five_percent_allcalls_bigbed",
                     "output_type": "FDR cut rate",
                     "quality_metrics": []
                 }
@@ -153,7 +153,7 @@
                         }
                     ],
                     "file_format": "bigBed",
-                    "filekey": "",
+                    "filekey": "tenth_of_one_percent_narrowpeaks_bigbed",
                     "output_type": "peaks",
                     "quality_metrics": []
                 }
@@ -173,7 +173,7 @@
                         }
                     ],
                     "file_format": "bigBed",
-                    "filekey": "",
+                    "filekey": "five_percent_narrowpeaks_bed_gz",
                     "output_type": "peaks",
                     "quality_metrics": []
                 }
