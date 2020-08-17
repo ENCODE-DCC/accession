@@ -9,13 +9,13 @@
                         {
                             "derived_from_filekey": "pe_fastqs",
                             "derived_from_inputs": true,
-                            "derived_from_task": "replicate",
+                            "derived_from_task": "dnase_replicate",
                             "allow_empty": true
                         },
                         {
                             "derived_from_filekey": "se_fastqs",
                             "derived_from_inputs": true,
-                            "derived_from_task": "replicate",
+                            "derived_from_task": "dnase_replicate",
                             "allow_empty": true
                         }
                     ],
@@ -25,7 +25,7 @@
                     "quality_metrics": []
                 }
             ],
-            "wdl_task_name": "replicate"
+            "wdl_task_name": "dnase_replicate"
         },
         {
             "dcc_step_run": "/analysis-steps/dnase-alignment-filtering-step-v1/",
@@ -36,7 +36,7 @@
                         {
                             "derived_from_filekey": "unfiltered_bam",
                             "derived_from_inputs": false,
-                            "derived_from_task": "replicate"
+                            "derived_from_task": "dnase_replicate"
                         }
                     ],
                     "file_format": "bam",
@@ -45,7 +45,7 @@
                     "quality_metrics": []
                 }
             ],
-            "wdl_task_name": "replicate"
+            "wdl_task_name": "dnase_replicate"
         },
         {
             "dcc_step_run": "/analysis-steps/dnase-footprinting-step-v1/",
@@ -54,9 +54,14 @@
                 {
                     "derived_from_files": [
                         {
-                            "derived_from_filekey": "",
+                            "derived_from_filekey": "nuclear_bam",
                             "derived_from_inputs": false,
-                            "derived_from_task": ""
+                            "derived_from_task": "dnase_replicate"
+                        },
+                        {
+                            "derived_from_filekey": "five_percent_allcalls_bed_gz",
+                            "derived_from_inputs": false,
+                            "derived_from_task": "dnase_replicate"
                         }
                     ],
                     "file_format": "bed",
@@ -65,7 +70,7 @@
                     "quality_metrics": []
                 }
             ],
-            "wdl_task_name": "replicate"
+            "wdl_task_name": "dnase_replicate"
         },
         {
             "dcc_step_run": "/analysis-steps/dnase-footprints-file-format-conversion-step-v1/",
@@ -74,9 +79,9 @@
                 {
                     "derived_from_files": [
                         {
-                            "derived_from_filekey": "",
+                            "derived_from_filekey": "one_percent_footprints_bed_gz",
                             "derived_from_inputs": false,
-                            "derived_from_task": ""
+                            "derived_from_task": "dnase_replicate"
                         }
                     ],
                     "file_format": "bigBed",
@@ -85,7 +90,7 @@
                     "quality_metrics": []
                 }
             ],
-            "wdl_task_name": "replicate"
+            "wdl_task_name": "dnase_replicate"
         },
         {
             "dcc_step_run": "/analysis-steps/dnase-peak-calling-step-v1/",
@@ -94,9 +99,9 @@
                 {
                     "derived_from_files": [
                         {
-                            "derived_from_filekey": "",
+                            "derived_from_filekey": "nuclear_bam",
                             "derived_from_inputs": false,
-                            "derived_from_task": ""
+                            "derived_from_task": "dnase_replicate"
                         }
                     ],
                     "file_format": "bigWig",
@@ -105,7 +110,7 @@
                     "quality_metrics": []
                 }
             ],
-            "wdl_task_name": "replicate"
+            "wdl_task_name": "dnase_replicate"
         },
         {
             "dcc_step_run": "/analysis-steps/dnase-peak-calling-step-v1/",
@@ -114,9 +119,9 @@
                 {
                     "derived_from_files": [
                         {
-                            "derived_from_filekey": "",
+                            "derived_from_filekey": "nuclear_bam",
                             "derived_from_inputs": false,
-                            "derived_from_task": ""
+                            "derived_from_task": "dnase_replicate"
                         }
                     ],
                     "file_format": "bed",
@@ -125,7 +130,7 @@
                     "quality_metrics": []
                 }
             ],
-            "wdl_task_name": "replicate"
+            "wdl_task_name": "dnase_replicate"
         },
         {
             "dcc_step_run": "/analysis-steps//analysis-steps/dnase-fdr-cut-rate-file-format-conversion-step-v-1//",
@@ -134,9 +139,9 @@
                 {
                     "derived_from_files": [
                         {
-                            "derived_from_filekey": "",
+                            "derived_from_filekey": "five_percent_allcalls_bed_gz",
                             "derived_from_inputs": false,
-                            "derived_from_task": ""
+                            "derived_from_task": "dnase_replicate"
                         }
                     ],
                     "file_format": "bigBed",
@@ -145,7 +150,47 @@
                     "quality_metrics": []
                 }
             ],
-            "wdl_task_name": "replicate"
+            "wdl_task_name": "dnase_replicate"
+        },
+        {
+            "dcc_step_run": "/analysis-steps/dnase-peak-calling-step-v1/",
+            "dcc_step_version": "/analysis-step-versions/dnase-peak-calling-step-v-1-0/",
+            "wdl_files": [
+                {
+                    "derived_from_files": [
+                        {
+                            "derived_from_filekey": "nuclear_bam",
+                            "derived_from_inputs": false,
+                            "derived_from_task": "dnase_replicate"
+                        }
+                    ],
+                    "file_format": "bed",
+                    "filekey": "five_percent_narrowpeaks_bed_gz",
+                    "output_type": "peaks",
+                    "quality_metrics": []
+                }
+            ],
+            "wdl_task_name": "dnase_replicate"
+        },
+        {
+            "dcc_step_run": "/analysis-steps/dnase-peak-calling-step-v1/",
+            "dcc_step_version": "/analysis-step-versions/dnase-peak-calling-step-v-1-0/",
+            "wdl_files": [
+                {
+                    "derived_from_files": [
+                        {
+                            "derived_from_filekey": "nuclear_bam",
+                            "derived_from_inputs": false,
+                            "derived_from_task": "dnase_replicate"
+                        }
+                    ],
+                    "file_format": "bed",
+                    "filekey": "tenth_of_one_percent_narrowpeaks_bed_gz",
+                    "output_type": "peaks",
+                    "quality_metrics": []
+                }
+            ],
+            "wdl_task_name": "dnase_replicate"
         },
         {
             "dcc_step_run": "/analysis-steps/dnase-tenth-of-percent-peaks-file-format-conversion-step-v1",
@@ -154,9 +199,9 @@
                 {
                     "derived_from_files": [
                         {
-                            "derived_from_filekey": "",
+                            "derived_from_filekey": "tenth_of_one_percent_narrowpeaks_bed_gz",
                             "derived_from_inputs": false,
-                            "derived_from_task": ""
+                            "derived_from_task": "dnase_replicate"
                         }
                     ],
                     "file_format": "bigBed",
@@ -165,7 +210,7 @@
                     "quality_metrics": []
                 }
             ],
-            "wdl_task_name": "replicate"
+            "wdl_task_name": "dnase_replicate"
         },
         {
             "dcc_step_run": "/analysis-steps/dnase-five-percent-peaks-file-format-conversion-step-v1",
@@ -174,18 +219,18 @@
                 {
                     "derived_from_files": [
                         {
-                            "derived_from_filekey": "",
+                            "derived_from_filekey": "five_percent_narrowpeaks_bed_gz",
                             "derived_from_inputs": true,
-                            "derived_from_task": ""
+                            "derived_from_task": "dnase_replicate"
                         }
                     ],
                     "file_format": "bigBed",
-                    "filekey": "five_percent_narrowpeaks_bed_gz",
+                    "filekey": "five_percent_narrowpeaks_bigbed",
                     "output_type": "peaks",
                     "quality_metrics": []
                 }
             ],
-            "wdl_task_name": "replicate"
+            "wdl_task_name": "dnase_replicate"
         }
     ]
 }
