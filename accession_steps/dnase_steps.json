@@ -234,6 +234,7 @@
     }
   ],
   "raw_fastqs_keys": [
+    "replicates",
     "se_fastqs",
     "pe_fastqs",
     "R1",
