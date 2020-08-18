@@ -8,13 +8,13 @@
           "derived_from_files": [
             {
               "allow_empty": true,
-              "derived_from_filekey": "pe_fastqs",
+              "derived_from_filekey": "R1",
               "derived_from_inputs": true,
               "derived_from_task": "dnase_replicate"
             },
             {
               "allow_empty": true,
-              "derived_from_filekey": "se_fastqs",
+              "derived_from_filekey": "R2",
               "derived_from_inputs": true,
               "derived_from_task": "dnase_replicate"
             }
