@@ -130,7 +130,9 @@ class Analysis:
         if self.raw_fastqs_keys is not None:
             raw_fastqs_keys = self.raw_fastqs_keys
         for file in self.files:
-            if any([k in file.filekeys for k in raw_fastqs_keys]) and file.task is None:
+            if any([k in file.filekeys for k in raw_fastqs_keys]) and (
+                file.task is None or file.task == "dnase_replicate"
+            ):
                 fastqs.append(file)
         return fastqs
 
