@@ -7,9 +7,16 @@
         {
           "derived_from_files": [
             {
-              "derived_from_filekey": "replicates",
+              "derived_from_filekey": "R1",
               "derived_from_inputs": true,
-              "derived_from_task": "dnase_replicate"
+              "derived_from_task": "dnase_replicate",
+              "allow_empty": true
+            },
+            {
+              "derived_from_filekey": "R2",
+              "derived_from_inputs": true,
+              "derived_from_task": "dnase_replicate",
+              "allow_empty": true
             }
           ],
           "file_format": "bam",
