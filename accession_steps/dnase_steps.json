@@ -225,8 +225,5 @@
       ],
       "wdl_task_name": "dnase_replicate"
     }
-  ],
-  "raw_fastqs_keys": [
-    "replicates"
   ]
 }

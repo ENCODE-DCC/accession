@@ -962,6 +962,23 @@ class AccessionDnase(Accession):
         filekey = "nuclear_chroms_gz"
         return self.find_portal_property_from_filekey(filekey, EncodeFile.ASSEMBLY)
 
+    def find_raw_fastq(self) -> GSFile:
+        for f in self.analysis.files:
+            if f.filename.endswith(".fastq.gz"):
+                return f
+
+    # Need to override because replicate task on several levels makes raw_fastqs search bork
+    @property
+    def experiment(self) -> EncodeExperiment:
+        if self._experiment is None:
+            raw_fastq = self.find_raw_fastq()
+            encode_file = self.get_encode_file_matching_md5_of_blob(raw_fastq)
+            if encode_file is None:
+                raise ValueError(f"File matching {raw_fastq} not found on portal")
+            experiment_obj = self.conn.get(encode_file.dataset, frame="embedded")
+            self._experiment = EncodeExperiment(experiment_obj)
+        return self._experiment
+
 
 class AccessionLongReadRna(AccessionGenericRna):
     QC_MAP = {
