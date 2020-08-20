@@ -656,7 +656,9 @@ class Accession(ABC):
         payload = self.experiment.get_patchable_internal_status()
         self.conn.patch(payload)
 
-    def patch_experiment_analysis_objects(self, analysis_object: EncodeGenericObject) -> None:
+    def patch_experiment_analysis_objects(
+        self, analysis_object: EncodeGenericObject
+    ) -> None:
         payload = self.experiment.get_patchable_analysis_object(analysis_object.at_id)
         self.conn.patch(payload, extend_array_values=True)
 
