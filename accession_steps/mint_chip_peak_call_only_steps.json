@@ -122,7 +122,7 @@
           "file_format": "bed",
           "file_format_type": "narrowPeak",
           "filekey": "bfilt_overlap_peak",
-          "output_type": "stable peaks",
+          "output_type": "pseudo-replicated peaks",
           "quality_metrics": [
             "chip_replication",
             "chip_peak_enrichment"
@@ -162,7 +162,7 @@
           "file_format": "bed",
           "file_format_type": "narrowPeak",
           "filekey": "bfilt_overlap_peak",
-          "output_type": "stable peaks",
+          "output_type": "pseudo-replicated peaks",
           "quality_metrics": [
             "chip_replication",
             "chip_peak_enrichment"
@@ -225,7 +225,7 @@
           "file_format": "bigBed",
           "file_format_type": "narrowPeak",
           "filekey": "bfilt_overlap_peak_bb",
-          "output_type": "stable peaks",
+          "output_type": "pseudo-replicated peaks",
           "quality_metrics": [
             "chip_replication",
             "chip_peak_enrichment"
@@ -252,7 +252,7 @@
           "file_format": "bigBed",
           "file_format_type": "narrowPeak",
           "filekey": "bfilt_overlap_peak_bb",
-          "output_type": "stable peaks",
+          "output_type": "pseudo-replicated peaks",
           "quality_metrics": [
             "chip_replication",
             "chip_peak_enrichment"
