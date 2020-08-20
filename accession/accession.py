@@ -602,7 +602,9 @@ class Accession(ABC):
         """
         postable_document = document.get_portal_object()
         response, status_code = self.conn.post(
-            postable_document, return_original_status_code=True
+            postable_document,
+            return_original_status_code=True,
+            truncate_long_strings_in_payload_log=True,
         )
         posted_document = EncodeGenericObject(response)
         if status_code == HTTPStatus.CONFLICT:
@@ -638,7 +640,9 @@ class Accession(ABC):
         )
         payload = current_analysis.get_portal_object()
         response, status_code = self.conn.post(
-            payload, return_original_status_code=True
+            payload,
+            return_original_status_code=True,
+            truncate_long_strings_in_payload_log=True,
         )
         modeled_analysis = EncodeGenericObject(response)
         if status_code == HTTPStatus.CONFLICT:

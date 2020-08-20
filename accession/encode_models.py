@@ -303,6 +303,7 @@ class EncodeExperiment:
         return {
             "analysis_objects": [analysis_object_at_id],
             Connection.ENCID_KEY: self.at_id,
+            Connection.PROFILE_KEY: "experiment",
         }
 
 
