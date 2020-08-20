@@ -4,6 +4,7 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional, TextIO, Union
 
 from accession.caper_helper import CaperHelper, caper_conf_exists
+from accession.encode_models import EncodeAttachment
 
 
 class Metadata(ABC):
@@ -11,6 +12,28 @@ class Metadata(ABC):
     @abstractmethod
     def content(self):
         raise NotImplementedError
+
+    @property
+    def workflow_id(self) -> str:
+        return self.content["id"]
+
+    def get_filename(self) -> str:
+        """
+        Construct an artificial filename for the metadata JSON. We do this because it
+        could be possible in the future that the metadata is not actually in a file, for
+        instance if we pull them directly from Caper.
+        """
+        return f"{self.workflow_id}_metadata.json"
+
+    def get_as_attachment(self) -> EncodeAttachment:
+        """
+        Get the representation of the attachment on the portal
+        """
+        metadata_bytes = EncodeAttachment.get_bytes_from_dict(self.content)
+        attachment = EncodeAttachment(
+            metadata_bytes, self.get_filename(), mime_type="application/json"
+        )
+        return attachment
 
 
 class FileMetadata(Metadata):

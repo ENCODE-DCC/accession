@@ -17,10 +17,12 @@ class Analysis:
     ):
         self.files = []
         self.tasks = []
-        self.metadata = metadata.content
+        self.metadata = metadata
         self.raw_fastqs_keys = raw_fastqs_keys
         if self.metadata:
-            bucket = self.metadata["workflowRoot"].split("gs://")[1].split("/")[0]
+            bucket = (
+                self.metadata.content["workflowRoot"].split("gs://")[1].split("/")[0]
+            )
             if backend is None:
                 self.backend = GCBackend(bucket)
             else:
@@ -36,7 +38,7 @@ class Analysis:
         call graph.
         """
         tasks = []
-        for key, value in self.metadata["calls"].items():
+        for key, value in self.metadata.content["calls"].items():
             for task in value:
                 if task["executionStatus"] == "Done":
                     tasks.append(self.make_task(key, task))
@@ -79,19 +81,19 @@ class Analysis:
     # Cromwell workflow id
     @property
     def workflow_id(self):
-        return self.metadata["id"]
+        return self.metadata.workflow_id
 
     # Files in the 'outputs' of the metadata that are
     # used for filtering out intermediate outputs
     @property
     def outputs_whitelist(self):
-        return list(self.extract_files(self.metadata["outputs"]))
+        return list(self.extract_files(self.metadata.content["outputs"]))
 
     # Files in the 'inputs' of the metadata that are
     # used for filtering out intermediate inputs
     @property
     def inputs_whitelist(self):
-        return list(self.extract_files(self.metadata["inputs"]))
+        return list(self.extract_files(self.metadata.content["inputs"]))
 
     # Extracts file names from dict values
     def extract_files(self, outputs):
@@ -212,9 +214,9 @@ class Analysis:
                 for file in start_task.output_files:
                     if filekey in file.filekeys:
                         yield file
-        for task_item in set(
+        for task_item in set(  # type: ignore
             reduce(
-                operator.concat,
+                operator.concat,  # type: ignore
                 map(lambda x: x.used_by_tasks, start_task.output_files),
                 [],
             )

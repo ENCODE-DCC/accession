@@ -1,7 +1,8 @@
 import json
 from base64 import b64encode
 from collections import UserDict
-from typing import Any, Dict, List, Optional, Tuple, Type, TypeVar, Union
+from enum import Enum
+from typing import Any, Dict, List, Optional, Tuple, TypeVar, Union
 
 from encode_utils.connection import Connection
 
@@ -10,8 +11,15 @@ from accession.accession_steps import FileParams
 T = TypeVar("T")
 U = TypeVar("U")
 V = TypeVar("V", bound="EncodeFile")
-W = TypeVar("W", bound="EncodeAnalysis")
-AnalysisPayload = Dict[str, List[str]]
+
+
+class EncodeGenericObject:
+    def __init__(self, portal_properties: Dict[str, Any]) -> None:
+        self.portal_properties = portal_properties
+
+    @property
+    def at_id(self) -> str:
+        return self.portal_properties["@id"]
 
 
 class EncodeCommonMetadata(UserDict):
@@ -48,16 +56,17 @@ class EncodeFile:
         self._portal_file = portal_file
         self.at_id = portal_file["@id"]
 
-    def __eq__(
-        self, other
-    ):  # type: ignore  # https://github.com/python/mypy/issues/2783
+    def __eq__(self, other):  # noqa: E821 # type: ignore[override]
         """
-        Helpful for pytest assertions. Should use # type: ignore[override], but flake8
-        gets confused by that, raises F821.
+        Helpful for pytest assertions. See https://github.com/python/mypy/issues/2783
+        for rationale for ignoring type.
         """
         if type(self) != type(other):
             return False
         return self.at_id == other.at_id and self.portal_file == other.portal_file
+
+    def __str__(self):
+        return self.at_id
 
     @property
     def portal_file(self) -> Dict[str, Any]:
@@ -196,51 +205,65 @@ class EncodeFile:
 
 
 class EncodeAnalysis:
-    def __init__(self, portal_properties: Optional[Dict[str, Any]] = None):
-        self.portal_properties = portal_properties
-        self._files: Optional[List[str]] = None
-        if self.portal_properties:
-            self.files = self.portal_properties["files"]
+    """
+    Class representing a nascent Analysis object. Not intended to be used to represent
+    existing analyses.
+    """
+
+    PROFILE = "analysis"
+
+    def __init__(
+        self,
+        files: List[EncodeFile],
+        documents: List[EncodeGenericObject],
+        lab_pi: str,
+        workflow_id: str,
+        pipeline_version: Optional[str] = None,
+    ) -> None:
+        """
+        `documents` is a list of `EncodeGenericObject` that gives no access to the
+        document internals except for the `@id`.
+        """
+        self.files = files
+        self.aliases = self.get_aliases(lab_pi, workflow_id)
+        self.documents = documents
+        self.pipeline_version = pipeline_version
 
     def __eq__(
         self, other
-    ):  # type: ignore  # https://github.com/python/mypy/issues/2783
+    ) -> bool:  # type: ignore  # https://github.com/python/mypy/issues/2783
         """
         Helpful for pytest assertions. Should use # type: ignore[override], but flake8
         gets confused by that, raises F821.
         """
         if type(self) != type(other):
             return False
-        return sorted(self.files) == sorted(other.files)
+        return sorted([f.at_id for f in self.files]) == sorted(
+            [f.at_id for f in other.files]
+        )
 
-    def __str__(self):
-        return str(self.files)
+    def __str__(self) -> str:
+        return str([str(f) for f in self.files])
 
-    @property
-    def files(self) -> Optional[List[str]]:
-        return self._files
+    @staticmethod
+    def get_aliases(lab: str, workflow_id: str) -> List[str]:
+        return [f"{lab}:{workflow_id}"]
 
-    @files.setter
-    def files(self, new_files: List[str]) -> None:
-        self._files = new_files
-
-    @classmethod
-    def from_files(cls: Type[W], files: List[EncodeFile]) -> W:
-        """
-        This type signature is somewhat heinous. W can be thought of as an instance of
-        EncodeAnalysis, the Type[W] is the class itself.
-        """
-        new_analysis = cls()
-        new_analysis.files = [f.at_id for f in files]
-        return new_analysis
-
-    def get_portal_object(self) -> AnalysisPayload:
+    def get_portal_object(self) -> Dict[str, Any]:
         """
         Obtain the portal-postable dict representation of the analysis.
         """
         if self.files is None:
             raise ValueError("Cannot create payload for analysis without files")
-        return {"files": self.files}
+        payload = {
+            Connection.PROFILE_KEY: self.PROFILE,
+            "aliases": self.aliases,
+            "documents": [d.at_id for d in self.documents],
+            "files": [f.at_id for f in self.files],
+        }
+        if self.pipeline_version is not None:
+            payload["pipeline_version"] = self.pipeline_version
+        return payload
 
 
 class EncodeExperiment:
@@ -250,7 +273,6 @@ class EncodeExperiment:
     def __init__(self, portal_experiment: Dict[str, Any]):
         self.at_id = portal_experiment["@id"]
         self.portal_properties = portal_experiment
-        self._analyses: List[EncodeAnalysis] = []
 
     @property
     def assay_term_name(self) -> str:
@@ -269,37 +291,39 @@ class EncodeExperiment:
         )
         return len(bio_reps)
 
-    @property
-    def analyses(self) -> List[EncodeAnalysis]:
-        """
-        The portal does not embed the files in the analysis, it is just a list of @ids
-        """
-        if not self._analyses:
-            analyses = self.portal_properties.get("analyses", [])
-            for analysis in analyses:
-                self._analyses.append(EncodeAnalysis(portal_properties=analysis))
-        return self._analyses
-
-    def make_postable_analyses_from_analysis_payload(
-        self, analysis_payload: AnalysisPayload
-    ) -> Dict[str, List[AnalysisPayload]]:
-        """
-        A single analysis is just a `dict`. To be able to patch the property with
-        encode_utils, we need to put it into a list with the `analyses` key.
-        """
-        return {"analyses": [analysis_payload], Connection.ENCID_KEY: self.at_id}
-
     def get_patchable_internal_status(self):
         return {
             self.INTERNAL_STATUS_KEY: self.INTERNAL_STATUS_POST_ACCESSIONING,
             Connection.ENCID_KEY: self.at_id,
         }
 
+    def get_patchable_analysis_object(
+        self, analysis_object_at_id: str
+    ) -> Dict[str, Union[str, List[str]]]:
+        return {
+            "analysis_objects": [analysis_object_at_id],
+            Connection.ENCID_KEY: self.at_id,
+            Connection.PROFILE_KEY: "experiment",
+        }
+
 
 class EncodeAttachment:
-    def __init__(self, contents: bytes, filename: str):
+    def __init__(
+        self,
+        contents: bytes,
+        filename: str,
+        mime_type: Optional[str] = None,
+        additional_extension: Optional[str] = None,
+    ):
+        """
+        Filename is not technically required, but if you don't specify the attachment
+        will say "file not available" when you view it on the portal, so we require one
+        here.
+        """
         self.contents = contents
         self.filename = filename
+        self.mime_type = mime_type
+        self.additional_extension = additional_extension
 
     @staticmethod
     def encode_attachment_data(data: bytes) -> str:
@@ -317,13 +341,27 @@ class EncodeAttachment:
         """
         return json.dumps(input_dict).encode(encoding)
 
-    def make_download_link(self, extension: str) -> str:
-        return self.filename.split("/")[-1] + extension
+    def make_download_link(self, additional_extension: str) -> str:
+        return self.filename.split("/")[-1] + additional_extension
 
-    def get_portal_object(self, mime_type: str, extension: str) -> Dict[str, str]:
+    def get_portal_object(
+        self, mime_type: Optional[str] = None, additional_extension: str = ""
+    ) -> Dict[str, str]:
+        """
+        Obtain the postable representation of the attachment. If `mime_type` or
+        `extension` are specified here they will override any values specified during
+        instantiation. `extension` is a string that will be appended to the download
+        link to trick the mime validation code in certain cases.
+        """
+        if mime_type is None:
+            if self.mime_type is None:
+                raise ValueError("Must specify mime type for attachment via __init__")
+            mime_type = self.mime_type
+        if self.additional_extension is not None:
+            additional_extension = self.additional_extension
         attachment_object = {
             "type": mime_type,
-            "download": self.make_download_link(extension),
+            "download": self.make_download_link(additional_extension),
             "href": "data:{};base64,{}".format(
                 mime_type, self.encode_attachment_data(self.contents)
             ),
@@ -349,3 +387,39 @@ class EncodeStepRun:
     def __init__(self, portal_step_run: Dict[str, Any]):
         self.at_id = portal_step_run["@id"]
         self.portal_step_run = portal_step_run
+
+
+class EncodeDocumentType(Enum):
+    WorkflowMetadata = "workflow metadata"
+
+
+class EncodeDocument:
+    PROFILE = "document"
+
+    def __init__(
+        self,
+        attachment: EncodeAttachment,
+        common_metadata: EncodeCommonMetadata,
+        document_type: EncodeDocumentType,
+        aliases: Optional[List[str]] = None,
+    ) -> None:
+        """
+        Instatiates a document from the appropriate metadata. Note that document_type is
+        a member of an enum, see `EncodeDocumentType` for possible variants.
+        """
+        self.attachment = attachment
+        self.common_metadata = common_metadata
+        self.document_type = document_type
+        self.aliases = aliases
+
+    def get_portal_object(self) -> Dict[str, Any]:
+        attachment = self.attachment.get_portal_object()
+        payload = {
+            Connection.PROFILE_KEY: self.PROFILE,
+            "document_type": self.document_type.value,
+            "attachment": attachment,
+        }
+        payload.update(self.common_metadata)
+        if self.aliases is not None:
+            payload["aliases"] = self.aliases
+        return payload

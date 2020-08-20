@@ -6,19 +6,12 @@ from accession.accession_steps import FileParams
 from accession.encode_models import (
     EncodeAnalysis,
     EncodeAttachment,
-    EncodeCommonMetadata,
     EncodeExperiment,
     EncodeFile,
+    EncodeGenericObject,
     EncodeQualityMetric,
     EncodeStepRun,
 )
-
-
-@pytest.fixture(scope="module")
-def encode_attachment():
-    return EncodeAttachment(
-        filename="/my/dir/haz/my_text_file", contents=b"foo bar baz"
-    )
 
 
 @pytest.fixture
@@ -35,14 +28,14 @@ def encode_file():
     )
 
 
-@pytest.fixture(scope="module")
-def encode_common_metadata():
-    return EncodeCommonMetadata("/labs/lab/", "award")
-
-
 @pytest.fixture
 def encode_analysis():
-    return EncodeAnalysis({"files": ["/files/1/", "/files/2/"]})
+    return EncodeAnalysis(
+        files=[EncodeFile({"@id": "/files/1/"}), EncodeFile({"@id": "/files/2/"})],
+        documents=[],
+        lab_pi="encode",
+        workflow_id="123",
+    )
 
 
 @pytest.fixture(scope="module")
@@ -54,7 +47,6 @@ def encode_experiment():
             {"biological_replicate_number": 1},
             {"biological_replicate_number": 3},
         ],
-        "analyses": [{"files": ["/files/1/"]}],
     }
     return EncodeExperiment(properties)
 
@@ -62,6 +54,11 @@ def encode_experiment():
 @pytest.fixture
 def payload():
     return {"foo": "bar"}
+
+
+def test_encode_generic_object():
+    encode_generic_object = EncodeGenericObject({"@id": "foo"})
+    assert encode_generic_object.at_id == "foo"
 
 
 def test_encode_common_metadata_lab_pi(encode_common_metadata):
@@ -82,12 +79,15 @@ def test_encode_attachment_encode_attachment_data_string_input():
 
 
 def test_encode_attachment_make_download_link(encode_attachment):
-    assert encode_attachment.make_download_link(extension=".txt") == "my_text_file.txt"
+    assert (
+        encode_attachment.make_download_link(additional_extension=".txt")
+        == "my_text_file.txt"
+    )
 
 
 def test_encode_attachment_get_portal_object(encode_attachment):
     result = encode_attachment.get_portal_object(
-        mime_type="text/plain", extension=".txt"
+        mime_type="text/plain", additional_extension=".txt"
     )
     assert result == {
         "type": "text/plain",
@@ -239,8 +239,27 @@ def test_encode_file_from_template(encode_common_metadata):
 @pytest.mark.parametrize(
     "other_analysis,expected",
     [
-        (EncodeAnalysis({"files": ["/files/2/", "/files/1/"]}), True),
-        (EncodeAnalysis({"files": ["/files/1/"]}), False),
+        (
+            EncodeAnalysis(
+                files=[
+                    EncodeFile({"@id": "/files/2/"}),
+                    EncodeFile({"@id": "/files/1/"}),
+                ],
+                documents=[],
+                lab_pi="/lab_pies/foo/",
+                workflow_id="123",
+            ),
+            True,
+        ),
+        (
+            EncodeAnalysis(
+                files=[EncodeFile({"@id": "/files/1/"})],
+                documents=[],
+                lab_pi="/labs/foo/",
+                workflow_id="123",
+            ),
+            False,
+        ),
         ("foo", False),
     ],
 )
@@ -253,31 +272,52 @@ def test_encode_analysis_str(encode_analysis):
     assert str(encode_analysis) == "['/files/1/', '/files/2/']"
 
 
-def test_encode_analysis_files(encode_analysis):
-    assert encode_analysis.files == ["/files/1/", "/files/2/"]
-
-
-def test_encode_analysis_files_setter(encode_analysis):
-    encode_analysis.files = ["/files/3/"]
-    assert encode_analysis.files == ["/files/3/"]
-
-
-def test_encode_analysis_from_files(encode_file):
-    result = EncodeAnalysis.from_files([encode_file])
-    assert result == EncodeAnalysis({"files": ["1"]})
+def test_encode_analysis_from_files_and_metadata(encode_file):
+    result = EncodeAnalysis(
+        files=[encode_file], lab_pi="foo", workflow_id="bar", documents=[]
+    )
+    assert result.aliases == ["foo:bar"]
+    assert result.pipeline_version is None
 
 
 @pytest.mark.parametrize(
-    "condition,analysis,expected",
+    "analysis,expected",
     [
-        (does_not_raise(), EncodeAnalysis({"files": ["foo"]}), {"files": ["foo"]}),
-        (pytest.raises(ValueError), EncodeAnalysis({}), {}),
+        (
+            EncodeAnalysis(
+                files=[EncodeFile({"@id": "foo"})],
+                documents=[],
+                lab_pi="encode",
+                workflow_id="123",
+            ),
+            {
+                "files": ["foo"],
+                "_profile": "analysis",
+                "aliases": ["encode:123"],
+                "documents": [],
+            },
+        ),
+        (
+            EncodeAnalysis(
+                files=[EncodeFile({"@id": "foo"})],
+                documents=[EncodeGenericObject({"@id": "bar"})],
+                lab_pi="encode",
+                workflow_id="baz",
+                pipeline_version="1.0",
+            ),
+            {
+                "_profile": "analysis",
+                "aliases": ["encode:baz"],
+                "documents": ["bar"],
+                "files": ["foo"],
+                "pipeline_version": "1.0",
+            },
+        ),
     ],
 )
-def test_encode_analysis_get_portal_object(condition, analysis, expected):
-    with condition:
-        result = analysis.get_portal_object()
-        assert result == expected
+def test_encode_analysis_get_portal_object(analysis, expected):
+    result = analysis.get_portal_object()
+    assert result == expected
 
 
 def test_encode_experiment_get_number_of_biological_replicates(encode_experiment):
@@ -292,23 +332,18 @@ def test_encode_experiment_assay_term_name(encode_experiment):
     assert encode_experiment.assay_term_name == "mirna"
 
 
-def test_encode_experiment_analyses(encode_experiment):
-    result = encode_experiment.analyses
-    assert result == [EncodeAnalysis({"files": ["/files/1/"]})]
-
-
-def test_encode_experiment_make_postable_analyses_from_analysis_payload(
-    encode_experiment
-):
-    result = encode_experiment.make_postable_analyses_from_analysis_payload(
-        {"files": ["foo"]}
-    )
-    assert result == {"analyses": [{"files": ["foo"]}], "_enc_id": "foo"}
-
-
 def test_encode_experiment_get_patchable_internal_status(encode_experiment):
     result = encode_experiment.get_patchable_internal_status()
     assert result == {"internal_status": "pipeline completed", "_enc_id": "foo"}
+
+
+def test_encode_experiment_get_patchable_analysis_object(encode_experiment):
+    result = encode_experiment.get_patchable_analysis_object("foo")
+    assert result == {
+        "analysis_objects": ["foo"],
+        "_enc_id": "foo",
+        "_profile": "experiment",
+    }
 
 
 def test_encode_quality_metric_no_file_id_raises(payload):
@@ -335,3 +370,13 @@ def test_encode_quality_metric_get_portal_object(payload):
 def test_encode_step_run_init():
     run = EncodeStepRun({"@id": "1", "name": "foo"})
     assert run.at_id == "1"
+
+
+def test_encode_document_get_portal_object(mocker, encode_document):
+    mocker.patch.object(encode_document.attachment, "get_portal_object")
+    result = encode_document.get_portal_object()
+    assert result["_profile"] == "document"
+    assert result["document_type"] == "workflow metadata"
+    assert result["aliases"] == ["encode:foo"]
+    assert result["lab"] == "/labs/lab/"
+    assert result["award"] == "award"

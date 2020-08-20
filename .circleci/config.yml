@@ -153,7 +153,7 @@ jobs:
             docker login -u=${QUAY_ROBOT_USER} -p=${QUAY_ROBOT_USER_TOKEN} quay.io
             # We use a regex to filter out RC tags like v90rc2 that don't end up on prod
             # Parsing encodeproject.org metadata (GET /) is less robust than the Github API
-            LATEST_PORTAL_TAG=$(curl -s https://api.github.com/repos/ENCODE-DCC/encoded/tags | jq '.[] | select(.name | test("^v\\d{2,3}\\.\\d(-hotfix-\\d)?$")) | .name ' | tr -d '"' | head -n 1)
+            LATEST_PORTAL_TAG=$(curl -s https://api.github.com/repos/ENCODE-DCC/encoded/tags | jq  -r '[.[] | select(.name | test("^v\\d{2,3}\\.\\d(-hotfix-\\d)?$"))][0].name')
             echo "Found latest portal tag from Github: ${LATEST_PORTAL_TAG}"
             # Get the latest accession git tag reachable from current commit
             LATEST_ACCESSION_GIT_TAG=$(python3 -c "import accession;print(accession.__version__)")

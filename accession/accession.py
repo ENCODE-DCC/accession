@@ -1,5 +1,6 @@
 import logging
 from abc import ABC, abstractmethod
+from http import HTTPStatus
 from pathlib import Path
 from typing import Any, Callable, Dict, List, Optional, Tuple, Type, Union, cast
 
@@ -24,8 +25,11 @@ from accession.encode_models import (
     EncodeAnalysis,
     EncodeAttachment,
     EncodeCommonMetadata,
+    EncodeDocument,
+    EncodeDocumentType,
     EncodeExperiment,
     EncodeFile,
+    EncodeGenericObject,
     EncodeQualityMetric,
     EncodeStepRun,
 )
@@ -243,7 +247,8 @@ class Accession(ABC):
         )
         modeled_encode_file = EncodeFile(encode_posted_file)
         if modeled_encode_file.status == "upload failed" or (
-            modeled_encode_file.status == "uploading" and status_code != 409
+            modeled_encode_file.status == "uploading"
+            and status_code != HTTPStatus.CONFLICT
         ):
             self.upload_queue.append((modeled_encode_file, gs_file))
         else:
@@ -365,7 +370,8 @@ class Accession(ABC):
             return_original_status_code=True,
             truncate_long_strings_in_payload_log=True,
         )
-        if status_code == 409:
+        posted, status_code = self.conn.post(payload, return_original_status_code=True)
+        if status_code == HTTPStatus.CONFLICT:
             self.logger.warning(
                 "Analysis step run with aliases %s already exists, will not post it",
                 aliases,
@@ -570,7 +576,7 @@ class Accession(ABC):
         self.raw_qcs.append(modeled_qc)
 
     def get_attachment(
-        self, gs_file: GSFile, mime_type: str, add_ext: str = ""
+        self, gs_file: GSFile, mime_type: str, additional_extension: str = ""
     ) -> Dict[str, str]:
         """
         Files with certain extensions will fail portal validation since it can't guess
@@ -582,38 +588,69 @@ class Accession(ABC):
         filename = gs_file.filename
         contents = self.backend.read_file(filename)
         attachment = EncodeAttachment(contents, filename)
-        obj = attachment.get_portal_object(mime_type, add_ext)
+        obj = attachment.get_portal_object(
+            mime_type, additional_extension=additional_extension
+        )
         return obj
 
-    def patch_experiment_analyses(self) -> None:
+    def post_document(self, document: EncodeDocument) -> EncodeGenericObject:
         """
-        Patch the new analysis (a list of file @ids) to the `analyses` property of the
-        experiment that was being accessioned. If an equivalent analysis exists already,
-        then do not patch anything.
-
-        From the accessioning code standpoint, the analysis is all or nothing: either it
-        is not patched in if it already exists or it is posted after the accessioning of
-        files and qcs completes. As such the code here assumes an analysis is never
-        incomplete.
-
-        encode_utils has `extend_array_values=True` on by default, but we add it here
-        also to be explicit.
+        Returns an instance of `EncodeGenericObject` representing the posted document.
+        If the document already exists, as determined by an alias conflict (409) then
+        the document will not be posted and the existing document on the portal will be
+        returned.
         """
-        current_analysis = EncodeAnalysis.from_files(self.new_files)
-        for analysis in self.experiment.analyses:
-            if current_analysis == analysis:
-                self.logger.info(
-                    "Will not patch analyses for experiment %s, found analysis %s matching the current set of accessioned files %s",
-                    self.experiment.at_id,
-                    analysis,
-                    current_analysis,
-                )
-                return
-        analysis_payload = current_analysis.get_portal_object()
-        payload = self.experiment.make_postable_analyses_from_analysis_payload(
-            analysis_payload
+        postable_document = document.get_portal_object()
+        response, status_code = self.conn.post(
+            postable_document,
+            return_original_status_code=True,
+            truncate_long_strings_in_payload_log=True,
         )
-        self.conn.patch(payload, extend_array_values=True)
+        posted_document = EncodeGenericObject(response)
+        if status_code == HTTPStatus.CONFLICT:
+            self.logger.warning(
+                "Found existing document %s with conflicting aliases, could not post",
+                posted_document.at_id,
+            )
+        return posted_document
+
+    def post_analysis(self) -> EncodeGenericObject:
+        """
+        Tries to POST the new analysis. If an equivalent analysis exists, as determined
+        by 409 conflict, then this will not POST anything. Will post the workflow
+        metadata as an attachment in a document, then insert that document into the
+        `documents` array in the analysis object, and finally post the analyis object.
+        """
+        document_aliases = [
+            f"{self.common_metadata.lab_pi}:cromwell-metadata-{self.analysis.workflow_id}"
+        ]
+        document_attachment = self.analysis.metadata.get_as_attachment()
+        document = EncodeDocument(
+            attachment=document_attachment,
+            common_metadata=self.common_metadata,
+            document_type=EncodeDocumentType.WorkflowMetadata,
+            aliases=document_aliases,
+        )
+        posted_document = self.post_document(document)
+        current_analysis = EncodeAnalysis(
+            files=self.new_files,
+            lab_pi=self.common_metadata.lab_pi,
+            workflow_id=self.analysis.workflow_id,
+            documents=[posted_document],
+        )
+        payload = current_analysis.get_portal_object()
+        response, status_code = self.conn.post(
+            payload,
+            return_original_status_code=True,
+            truncate_long_strings_in_payload_log=True,
+        )
+        modeled_analysis = EncodeGenericObject(response)
+        if status_code == HTTPStatus.CONFLICT:
+            self.logger.warning(
+                "Found existing analysis %s with conflicting aliases, could not post",
+                modeled_analysis.at_id,
+            )
+        return modeled_analysis
 
     def patch_experiment_internal_status(self) -> None:
         """
@@ -622,6 +659,12 @@ class Accession(ABC):
         """
         payload = self.experiment.get_patchable_internal_status()
         self.conn.patch(payload)
+
+    def patch_experiment_analysis_objects(
+        self, analysis_object: EncodeGenericObject
+    ) -> None:
+        payload = self.experiment.get_patchable_analysis_object(analysis_object.at_id)
+        self.conn.patch(payload, extend_array_values=True)
 
     def accession_step(
         self, single_step_params: AccessionStep, dry_run: bool = False
@@ -698,6 +741,22 @@ class Accession(ABC):
         First executes a dry run, checking for md5 duplicates. If `dry_run` is `True`
         or if duplicates were detected and `force_accession` is `False` then will
         return, otherwise the experiment will subsequently actually be accessioned.
+
+        The main entrypoint for accessioning. The process looks like this:
+            * For each step in the template, accession the step run, files, and generate
+              the QCs
+            * Post all the QCs generated in the previous step
+            * Post the `Analysis` object pointing to all the files that were accessioned
+              as part of the run
+            * Update the experiment internal_status to indicate that the accessioning
+              has completed
+            * Upload all of the files to S3. We do this as the last step so that all of
+              the metadata objects are posted quickly, which ideally allows them to fit
+              within one Elasticsearch indexing cycle on the portal (1 minute)
+
+        When `dry_run` is `True`, then the only thing we do is iterate through all of
+        the steps and check for potential duplicates that would be posted in the normal
+        mode, without posting, patching, or uploading anything.
         """
         self.logger.info("Currently performing dry run, will not post to server.")
         accumulated_matches = self._get_dry_run_matches()
@@ -724,9 +783,10 @@ class Accession(ABC):
         for step in self.steps.content:
             self.accession_step(step)
         self.post_qcs()
-        self.patch_experiment_analyses()
+        analysis = self.post_analysis()
         for encode_file, gs_file in self.upload_queue:
             self.upload_file(encode_file, gs_file)
+        self.patch_experiment_analysis_objects(analysis)
         self.patch_experiment_internal_status()
 
 
@@ -811,7 +871,7 @@ class AccessionBulkRna(AccessionGenericRna):
         qc_bytes = EncodeAttachment.get_bytes_from_dict(qc)
         modeled_attachment = EncodeAttachment(qc_bytes, gs_file.filename)
         attachment = modeled_attachment.get_portal_object(
-            mime_type="application/json", extension=".json"
+            mime_type="application/json", additional_extension=".json"
         )
         star_qc_metric["attachment"] = attachment
         return self.queue_qc(
@@ -845,7 +905,7 @@ class AccessionBulkRna(AccessionGenericRna):
         qc_bytes = EncodeAttachment.get_bytes_from_dict(qc)
         modeled_attachment = EncodeAttachment(qc_bytes, gs_file.filename)
         attachment = modeled_attachment.get_portal_object(
-            mime_type="application/json", extension=".json"
+            mime_type="application/json", additional_extension=".json"
         )
         output_qc["attachment"] = attachment
         return self.queue_qc(
@@ -899,7 +959,7 @@ class AccessionBulkRna(AccessionGenericRna):
         qc_bytes = EncodeAttachment.get_bytes_from_dict(qc)
         modeled_attachment = EncodeAttachment(qc_bytes, gs_file.filename)
         attachment = modeled_attachment.get_portal_object(
-            mime_type="application/json", extension=".json"
+            mime_type="application/json", additional_extension=".json"
         )
         output_qc["attachment"] = attachment
         return self.queue_qc(
@@ -1190,7 +1250,7 @@ class AccessionAtacChip(Accession):
             )
         ]
         pipeline_rep = None
-        for k, v in self.analysis.metadata["inputs"].items():
+        for k, v in self.analysis.metadata.content["inputs"].items():
             if "fastqs" in k and "ctl" not in k:
                 if sorted(v) == sorted(parent_fastqs):
                     pipeline_rep = k.split("_")[1]
@@ -1505,7 +1565,7 @@ class AccessionChip(AccessionAtacChip):
             output_qc.update(
                 {
                     "idr_parameters": self.get_attachment(
-                        idr_log, "text/plain", add_ext=".txt"
+                        idr_log, "text/plain", additional_extension=".txt"
                     )
                 }
             )
@@ -1718,7 +1778,7 @@ class AccessionAtac(AccessionAtacChip):
             output_qc.update(
                 {
                     "idr_parameters": self.get_attachment(
-                        idr_log, "text/plain", add_ext=".txt"
+                        idr_log, "text/plain", additional_extension=".txt"
                     )
                 }
             )
