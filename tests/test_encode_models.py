@@ -337,6 +337,11 @@ def test_encode_experiment_get_patchable_internal_status(encode_experiment):
     assert result == {"internal_status": "pipeline completed", "_enc_id": "foo"}
 
 
+def test_encode_experiment_get_patchable_analysis_object(encode_experiment):
+    result = encode_experiment.get_patchable_analysis_object("foo")
+    assert result == {"analysis_objects": ["foo"], "_enc_id": "foo"}
+
+
 def test_encode_quality_metric_no_file_id_raises(payload):
     with pytest.raises(Exception):
         EncodeQualityMetric(payload, file_id=None)

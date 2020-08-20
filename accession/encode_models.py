@@ -297,6 +297,14 @@ class EncodeExperiment:
             Connection.ENCID_KEY: self.at_id,
         }
 
+    def get_patchable_analysis_object(
+        self, analysis_object_at_id: str
+    ) -> Dict[str, Union[str, List[str]]]:
+        return {
+            "analysis_objects": [analysis_object_at_id],
+            Connection.ENCID_KEY: self.at_id,
+        }
+
 
 class EncodeAttachment:
     def __init__(

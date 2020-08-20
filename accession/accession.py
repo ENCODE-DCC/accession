@@ -656,6 +656,10 @@ class Accession(ABC):
         payload = self.experiment.get_patchable_internal_status()
         self.conn.patch(payload)
 
+    def patch_experiment_analysis_objects(self, analysis_object: EncodeGenericObject) -> None:
+        payload = self.experiment.get_patchable_analysis_object(analysis_object.at_id)
+        self.conn.patch(payload, extend_array_values=True)
+
     def accession_step(
         self, single_step_params: AccessionStep, dry_run: bool = False
     ) -> Union[List[Optional[MatchingMd5Record]], List[EncodeFile], None]:
@@ -773,9 +777,10 @@ class Accession(ABC):
         for step in self.steps.content:
             self.accession_step(step)
         self.post_qcs()
-        self.post_analysis()
+        analysis = self.post_analysis()
         for encode_file, gs_file in self.upload_queue:
             self.upload_file(encode_file, gs_file)
+        self.patch_experiment_analysis_objects(analysis)
         self.patch_experiment_internal_status()
 
 
