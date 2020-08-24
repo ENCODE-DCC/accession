@@ -26,6 +26,7 @@ CLASSIFIERS = [
 INSTALL_REQUIRES = [
     "requests",
     "encode_utils==2.10.0",
+    "flatdict==4.0.1",
     "google-cloud-storage",
     "attrs",
     "boto3==1.13.5",
@@ -37,7 +38,7 @@ INSTALL_REQUIRES = [
 ]
 EXTRAS_REQUIRE = {
     "docs": ["sphinx"],
-    "tests": ["pytest", "pytest-cov", "pytest-mock<3.3.0", "docker"],
+    "tests": ["pytest", "pytest-cov", "pytest-mock==3.2.0", "docker"],
 }
 EXTRAS_REQUIRE["dev"] = (
     EXTRAS_REQUIRE["docs"] + EXTRAS_REQUIRE["tests"] + ["pre-commit"]
