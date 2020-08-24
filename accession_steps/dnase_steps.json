@@ -47,6 +47,26 @@
       "wdl_task_name": "dnase_replicate"
     },
     {
+      "dcc_step_run": "/analysis-steps/dnase-peak-calling-step-v-1/",
+      "dcc_step_version": "/analysis-step-versions/dnase-peak-calling-step-v-1-0/",
+      "wdl_files": [
+        {
+          "derived_from_files": [
+            {
+              "derived_from_filekey": "analysis.nuclear_bam",
+              "derived_from_task": "dnase_replicate"
+            }
+          ],
+          "file_format": "bed",
+          "file_format_type": "bed3+",
+          "filekey": "analysis.five_percent_allcalls_bed_gz",
+          "output_type": "FDR cut rate",
+          "quality_metrics": []
+        }
+      ],
+      "wdl_task_name": "dnase_replicate"
+    },
+    {
       "dcc_step_run": "/analysis-steps/dnase-footprinting-step-v-1/",
       "dcc_step_version": "/analysis-step-versions/dnase-footprinting-step-v-1-0/",
       "wdl_files": [
@@ -62,6 +82,7 @@
             }
           ],
           "file_format": "bed",
+          "file_format_type": "bed3+",
           "filekey": "analysis.one_percent_footprints_bed_gz",
           "output_type": "footprints",
           "quality_metrics": []
@@ -81,6 +102,7 @@
             }
           ],
           "file_format": "bigBed",
+          "file_format_type": "bed3+",
           "filekey": "one_percent_footprints_bigbed",
           "output_type": "footprints",
           "quality_metrics": []
@@ -108,25 +130,6 @@
       "wdl_task_name": "dnase_replicate"
     },
     {
-      "dcc_step_run": "/analysis-steps/dnase-peak-calling-step-v-1/",
-      "dcc_step_version": "/analysis-step-versions/dnase-peak-calling-step-v-1-0/",
-      "wdl_files": [
-        {
-          "derived_from_files": [
-            {
-              "derived_from_filekey": "analysis.nuclear_bam",
-              "derived_from_task": "dnase_replicate"
-            }
-          ],
-          "file_format": "bed",
-          "filekey": "analysis.five_percent_allcalls_bed_gz",
-          "output_type": "FDR cut rate",
-          "quality_metrics": []
-        }
-      ],
-      "wdl_task_name": "dnase_replicate"
-    },
-    {
       "dcc_step_run": "/analysis-steps/dnase-fdr-cut-rate-file-format-conversion-step-v-1/",
       "dcc_step_version": "/analysis-step-versions/dnase-fdr-cut-rate-file-format-conversion-step-v-1-0/",
       "wdl_files": [
@@ -138,6 +141,7 @@
             }
           ],
           "file_format": "bigBed",
+          "file_format_type": "bed3+",
           "filekey": "analysis.five_percent_allcalls_bigbed",
           "output_type": "FDR cut rate",
           "quality_metrics": []
@@ -157,6 +161,7 @@
             }
           ],
           "file_format": "bed",
+          "file_format_type": "bed3+",
           "filekey": "analysis.five_percent_narrowpeaks_bed_gz",
           "output_type": "peaks",
           "quality_metrics": []
@@ -176,6 +181,7 @@
             }
           ],
           "file_format": "bed",
+          "file_format_type": "bed3+",
           "filekey": "analysis.tenth_of_one_percent_narrowpeaks_bed_gz",
           "output_type": "peaks",
           "quality_metrics": []
@@ -195,6 +201,7 @@
             }
           ],
           "file_format": "bigBed",
+          "file_format_type": "bed3+",
           "filekey": "analysis.tenth_of_one_percent_narrowpeaks_bigbed",
           "output_type": "peaks",
           "quality_metrics": []
@@ -214,6 +221,7 @@
             }
           ],
           "file_format": "bigBed",
+          "file_format_type": "bed3+",
           "filekey": "analysis.five_percent_narrowpeaks_bigbed",
           "output_type": "peaks",
           "quality_metrics": []

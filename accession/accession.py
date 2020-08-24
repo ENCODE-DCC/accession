@@ -1039,7 +1039,7 @@ class AccessionDnase(Accession):
 
     @property
     def assembly(self) -> str:
-        filekey = "nuclear_chroms_gz"
+        filekey = "references.nuclear_chroms_gz"
         return self.find_portal_property_from_filekey(filekey, EncodeFile.ASSEMBLY)
 
 
