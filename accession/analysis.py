@@ -197,7 +197,9 @@ class Analysis:
         for task_item in set(
             map(
                 lambda x: x.task
-                if x.task is not None and x.task.task_name not in disallow_tasks
+                if x.task is not None
+                and x.task.task_name not in disallow_tasks
+                and id(start_task) != id(x.task)
                 else None,
                 start_task.input_files,
             )
