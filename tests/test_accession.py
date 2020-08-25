@@ -355,6 +355,17 @@ def test_get_derived_from_all(mirna_accessioner):
     assert set(accession_ids) == set(ancestor_accessions)
 
 
+@pytest.mark.parametrize(
+    "file_size_bytes,expected",
+    [(1, 8_388_608), (100e9, 16_777_216), (200e9, 25_165_824)],
+)
+def test_accession_calculate_multipart_chunksize(
+    mock_accession, file_size_bytes, expected
+):
+    result = mock_accession._calculate_multipart_chunksize(file_size_bytes)
+    assert result == expected
+
+
 def mock_post_step_run(payload, *args, **kwargs):
     payload.update({"@id": "foo", "@type": ["AnalysisStepRun"]})
     return (payload, 200)
