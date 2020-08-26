@@ -323,7 +323,7 @@ class Accession(ABC):
         part limit. The default values are the same as the defaults for `TransferConfig`
         """
         multipart_chunksize = BOTO3_DEFAULT_MULTIPART_CHUNKSIZE * (
-            file_size_bytes
+            max((file_size_bytes - 1), 0)
             // (BOTO3_MULTIPART_MAX_PARTS * BOTO3_DEFAULT_MULTIPART_CHUNKSIZE)
             + 1
         )

@@ -357,7 +357,12 @@ def test_get_derived_from_all(mirna_accessioner):
 
 @pytest.mark.parametrize(
     "file_size_bytes,expected",
-    [(1, 8_388_608), (100e9, 16_777_216), (200e9, 25_165_824)],
+    [
+        (1, 8_388_608),
+        (10_000 * 8_388_608, 8_388_608),
+        (100e9, 16_777_216),
+        (200e9, 25_165_824),
+    ],
 )
 def test_accession_calculate_multipart_chunksize(
     mock_accession, file_size_bytes, expected
