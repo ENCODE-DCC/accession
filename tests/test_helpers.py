@@ -1,4 +1,4 @@
-from accession.helpers import LruCache, flatten, string_to_number
+from accession.helpers import LruCache, flatten, impersonate_file, string_to_number
 
 
 def test_lru_cache_get_has_key_should_reorder():
@@ -77,3 +77,13 @@ def test_string_to_number_non_number_string_returns_input():
 def test_flatten() -> None:
     result = flatten([["a", "b"], ["c", "d"]])
     assert result == ["a", "b", "c", "d"]
+
+
+def test_impersonate_file() -> None:
+    bytes_data = b"firstline\nsecondline\n"
+    with impersonate_file(bytes_data) as totally_a_file:
+        with open(totally_a_file) as fp:
+            data = fp.readlines()
+    assert len(data) == 2
+    assert isinstance(data[0], str)
+    assert data[1] == "secondline\n"

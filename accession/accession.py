@@ -34,7 +34,7 @@ from accession.encode_models import (
     EncodeStepRun,
 )
 from accession.file import GSFile
-from accession.helpers import LruCache, flatten, string_to_number
+from accession.helpers import LruCache, flatten, impersonate_file, string_to_number
 from accession.logger_factory import logger_factory
 from accession.metadata import Metadata, metadata_factory
 from accession.preflight import MatchingMd5Record, PreflightHelper
@@ -1035,12 +1035,21 @@ class AccessionBulkRna(AccessionGenericRna):
 
 
 class AccessionDnase(Accession):
-    QC_MAP = {}  # type: ignore
+    QC_MAP = {
+        "trimstats": "make_trimstats_qc",
+        "unfiltered_flagstats": "make_unfiltered_flagstats_qc",
+    }  # type: ignore
 
     @property
     def assembly(self) -> str:
         filekey = "references.nuclear_chroms_gz"
         return self.find_portal_property_from_filekey(filekey, EncodeFile.ASSEMBLY)
+
+    def make_trimstats_qc(self):
+        pass
+
+    def make_unfiltered_flagstats_qc(self):
+        pass
 
 
 class AccessionLongReadRna(AccessionGenericRna):

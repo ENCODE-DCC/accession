@@ -22,7 +22,10 @@
           "file_format": "bam",
           "filekey": "analysis.unfiltered_bam",
           "output_type": "unfiltered alignments",
-          "quality_metrics": []
+          "quality_metrics": [
+            "trimstats",
+            "unfiltered_flagstats"
+          ]
         }
       ],
       "wdl_task_name": "dnase_replicate"
@@ -103,7 +106,7 @@
           ],
           "file_format": "bigBed",
           "file_format_type": "bed3+",
-          "filekey": "one_percent_footprints_bigbed",
+          "filekey": "analysis.one_percent_footprints_bigbed",
           "output_type": "footprints",
           "quality_metrics": []
         }
