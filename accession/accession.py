@@ -6,6 +6,7 @@ from typing import Any, Callable, Dict, List, Optional, Tuple, Type, Union, cast
 
 import boto3
 from encode_utils.connection import Connection
+from qc_utils.parsers import parse_flagstats
 
 from accession.accession_steps import (
     AccessionStep,
@@ -1036,7 +1037,6 @@ class AccessionBulkRna(AccessionGenericRna):
 
 class AccessionDnase(Accession):
     QC_MAP = {
-        "trimstats": "make_trimstats_qc",
         "unfiltered_flagstats": "make_unfiltered_flagstats_qc",
     }  # type: ignore
 
@@ -1045,11 +1045,25 @@ class AccessionDnase(Accession):
         filekey = "references.nuclear_chroms_gz"
         return self.find_portal_property_from_filekey(filekey, EncodeFile.ASSEMBLY)
 
-    def make_trimstats_qc(self):
-        pass
-
-    def make_unfiltered_flagstats_qc(self):
-        pass
+    def make_unfiltered_flagstats_qc(
+        self, encode_file: EncodeFile, gs_file: GSFile
+    ) -> None:
+        if encode_file.has_qc("SamtolsFlagstatsQualityMetric"):
+            return
+        print(gs_file.task.task_name)
+        qc_file = self.analysis.get_files(
+            filekey="analysis.qc.unfiltered_bam_qc.flagstats"
+        )[
+            0
+        ]  # this is GSFile
+        print(qc_file.filename)
+        qc_bytes = self.backend.read_file(qc_file.filename)
+        with impersonate_file(qc_bytes) as flagstats:
+            with open(flagstats) as fp:
+                qc_output_dict = parse_flagstats(fp.read())
+        return self.queue_qc(
+            qc_output_dict, encode_file, "samtools-flagstats-quality-metric"
+        )
 
 
 class AccessionLongReadRna(AccessionGenericRna):

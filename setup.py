@@ -34,6 +34,7 @@ INSTALL_REQUIRES = [
     "google-cloud-tasks==1.5.0",
     "google-auth==1.18.0",
     "google-api-core==1.21.0",
+    "qc_utils==20.6.2",
     "typing-extensions==3.7.4.2",
 ]
 EXTRAS_REQUIRE = {

@@ -23,7 +23,6 @@
           "filekey": "analysis.unfiltered_bam",
           "output_type": "unfiltered alignments",
           "quality_metrics": [
-            "trimstats",
             "unfiltered_flagstats"
           ]
         }
