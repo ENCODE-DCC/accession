@@ -1059,8 +1059,10 @@ class AccessionDnase(Accession):
         print(qc_file.filename)
         qc_bytes = self.backend.read_file(qc_file.filename)
         with impersonate_file(qc_bytes) as flagstats:
-            with open(flagstats) as fp:
-                qc_output_dict = parse_flagstats(fp.read())
+            qc_output_dict = parse_flagstats(flagstats)
+        qc_output_dict["mapped_pct"] = str(qc_output_dict["mapped_pct"])
+        qc_output_dict["paired_properly_pct"] = str(qc_output_dict["paired_properly_pct"])
+        qc_output_dict["singletons_pct"] = str(qc_output_dict["singletons_pct"])
         return self.queue_qc(
             qc_output_dict, encode_file, "samtools-flagstats-quality-metric"
         )

@@ -27,7 +27,7 @@ INSTALL_REQUIRES = [
     "requests",
     "encode_utils==2.10.0",
     "flatdict==4.0.1",
-    "google-cloud-storage",
+    "google-cloud-storage==1.28.1",
     "attrs",
     "boto3==1.13.5",
     "caper==1.0.0",
