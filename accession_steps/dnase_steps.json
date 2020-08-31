@@ -23,7 +23,8 @@
           "filekey": "analysis.unfiltered_bam",
           "output_type": "unfiltered alignments",
           "quality_metrics": [
-            "unfiltered_flagstats"
+            "unfiltered_flagstats",
+            "unfiltered_trimstats"
           ]
         }
       ],
@@ -43,7 +44,12 @@
           "file_format": "bam",
           "filekey": "analysis.nuclear_bam",
           "output_type": "alignments",
-          "quality_metrics": []
+          "quality_metrics": ["nuclear_flagstats",
+                              "nuclear_duplication_metric",
+                              "nuclear_hotspot1_metric",
+                              "nuclear_samtools_stats",
+                              "nuclear_alignment_quality_metric"
+                            ]
         }
       ],
       "wdl_task_name": "dnase_replicate"
