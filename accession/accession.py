@@ -1050,19 +1050,19 @@ class AccessionDnase(Accession):
     ) -> None:
         if encode_file.has_qc("SamtolsFlagstatsQualityMetric"):
             return
-        print(gs_file.task.task_name)
         qc_file = self.analysis.get_files(
             filekey="analysis.qc.unfiltered_bam_qc.flagstats"
         )[
             0
         ]  # this is GSFile
-        print(qc_file.filename)
         qc_bytes = self.backend.read_file(qc_file.filename)
         with impersonate_file(qc_bytes) as flagstats:
             qc_output_dict = parse_flagstats(flagstats)
         qc_output_dict["mapped_pct"] = str(qc_output_dict["mapped_pct"])
         qc_output_dict["paired_properly_pct"] = str(qc_output_dict["paired_properly_pct"])
         qc_output_dict["singletons_pct"] = str(qc_output_dict["singletons_pct"])
+        attachment = self.get_attachment(qc_file, "text/plain")
+        qc_output_dict["attachment"] = attachment
         return self.queue_qc(
             qc_output_dict, encode_file, "samtools-flagstats-quality-metric"
         )
