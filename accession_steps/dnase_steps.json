@@ -69,7 +69,7 @@
           "file_format_type": "bed3+",
           "filekey": "analysis.five_percent_allcalls_bed_gz",
           "output_type": "FDR cut rate",
-          "quality_metrics": []
+          "quality_metrics": ["five_percent_allcalls_qc"]
         }
       ],
       "wdl_task_name": "dnase_replicate"
