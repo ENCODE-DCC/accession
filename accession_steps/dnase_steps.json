@@ -17,6 +17,11 @@
               "derived_from_filekey": "replicate.pe_fastqs",
               "derived_from_inputs": true,
               "derived_from_task": "dnase_replicate"
+            },
+            {
+              "derived_from_filekey": "references.bwa_index_tar_gz",
+              "derived_from_inputs": true,
+              "derived_from_task": "dnase_replicate"
             }
           ],
           "file_format": "bam",
@@ -172,7 +177,7 @@
           "file_format_type": "bed3+",
           "filekey": "analysis.five_percent_narrowpeaks_bed_gz",
           "output_type": "peaks",
-          "quality_metrics": []
+          "quality_metrics": ["five_percent_narrowpeaks_qc"]
         }
       ],
       "wdl_task_name": "dnase_replicate"

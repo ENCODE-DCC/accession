@@ -1053,6 +1053,7 @@ class AccessionDnase(Accession):
         "footprints_quality_metric": "make_footprints_qc",
         "tenth_of_one_percent_peaks_qc": "make_tenth_of_one_percent_peaks_qc",
         "five_percent_allcalls_qc": "make_five_percent_allcalls_qc",
+        "five_percent_narrowpeaks_qc": "make_five_percent_narrowpeaks_qc",
     }  # type: ignore
 
     @property
@@ -1273,6 +1274,29 @@ class AccessionDnase(Accession):
         )
         qc_output = {}
         qc_output["five_percent_allcalls_count"] = five_percent_allcalls_count
+        return self.queue_qc(qc_output, encode_file, "hotspot-quality-metric")
+
+    def make_five_percent_narrowpeaks_qc(
+        self, encode_file: EncodeFile, gs_file: GSFile
+    ) -> None:
+        if encode_file.has_qc("HotspotQualityMetric"):
+            return
+        five_percent_narrowpeaks_count = int(
+            gs_file.task.outputs["analysis"]["qc"]["peaks_qc"][
+                "five_percent_narrowpeaks_count"
+            ]
+        )
+        five_percent_hotspots_count = int(
+            gs_file.task.outputs["analysis"]["qc"]["peaks_qc"][
+                "five_percent_hotspots_count"
+            ]
+        )
+        hotspot2_file = self.analysis.get_files(filekey="analysis.qc.peaks_qc.hotspot2")[0]
+        hotspot2_score = float(self.backend.read_file(hotspot2_file.filename).decode())
+        qc_output = {}
+        qc_output["five_percent_narrowpeaks_count"] = five_percent_narrowpeaks_count
+        qc_output["five_percent_hotspots_count"] = five_percent_hotspots_count
+        qc_output["spot2_score"] = hotspot2_score
         return self.queue_qc(qc_output, encode_file, "hotspot-quality-metric")
 
 
