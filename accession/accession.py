@@ -1050,6 +1050,8 @@ class AccessionDnase(Accession):
         "nuclear_hotspot1_metric": "make_nuclear_hotspot1_qc",
         "nuclear_samtools_stats": "make_nuclear_samtools_stats_qc",
         "nuclear_alignment_quality_metric": "make_nuclear_alignment_qc",
+        "footprints_quality_metric": "make_footprints_qc",
+        "tenth_of_one_percent_peaks_qc": "make_tenth_of_one_percent_peaks_qc",
     }  # type: ignore
 
     @property
@@ -1219,6 +1221,44 @@ class AccessionDnase(Accession):
         return self.queue_qc(
             dnase_alignment_qc_output, encode_file, "dnase-alignment-quality-metric"
         )
+
+    def make_footprints_qc(self, encode_file: EncodeFile, gs_file: GSFile) -> None:
+
+        if encode_file.has_qc("DnaseFootprintingQualityMetric"):
+            return
+        footprint_count = int(
+            gs_file.task.outputs["analysis"]["qc"]["footprints_qc"][
+                "one_percent_footprints_count"
+            ]
+        )
+        dispersion_model_file = self.analysis.get_files(
+            filekey="analysis.qc.footprints_qc.dispersion_model"
+        )[0]
+        dispersion_model_attachment = self.get_attachment(
+            dispersion_model_file, "application/json"
+        )
+        footprints_qc_output = {}
+        footprints_qc_output["footprint_count"] = footprint_count
+        footprints_qc_output["dispersion_model"] = dispersion_model_attachment
+        return self.queue_qc(
+            footprints_qc_output, encode_file, "dnase-footprinting-quality-metric"
+        )
+
+    def make_tenth_of_one_percent_peaks_qc(
+        self, encode_file: EncodeFile, gs_file: GSFile
+    ) -> None:
+        if encode_file.has_qc("HotspotsQualityMetric"):
+            return
+        tenth_of_percent_narrowpeaks_count = int(
+            gs_file.task.outputs["analysis"]["qc"]["peaks_qc"][
+                "tenth_of_one_percent_narrowpeaks_count"
+            ]
+        )
+        qc_output = {}
+        qc_output[
+            "tenth_of_one_percent_narrowpeaks_count"
+        ] = tenth_of_percent_narrowpeaks_count
+        return self.queue_qc(qc_output, encode_file, "hotspot-quality-metric")
 
 
 class AccessionLongReadRna(AccessionGenericRna):

@@ -93,7 +93,7 @@
           "file_format_type": "bed3+",
           "filekey": "analysis.one_percent_footprints_bed_gz",
           "output_type": "footprints",
-          "quality_metrics": []
+          "quality_metrics": ["footprints_quality_metric"]
         }
       ],
       "wdl_task_name": "dnase_replicate"
@@ -212,7 +212,7 @@
           "file_format_type": "bed3+",
           "filekey": "analysis.tenth_of_one_percent_narrowpeaks_bigbed",
           "output_type": "peaks",
-          "quality_metrics": []
+          "quality_metrics": ["tenth_of_one_percent_peaks_qc"]
         }
       ],
       "wdl_task_name": "dnase_replicate"
