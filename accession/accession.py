@@ -39,6 +39,9 @@ from accession.logger_factory import logger_factory
 from accession.metadata import Metadata, metadata_factory
 from accession.preflight import MatchingMd5Record, PreflightHelper
 
+BOTO3_DEFAULT_MULTIPART_CHUNKSIZE = 8_388_608
+BOTO3_MULTIPART_MAX_PARTS = 10_000
+
 
 class Accession(ABC):
     """
@@ -305,9 +308,26 @@ class Accession(ABC):
         key = "/".join(path_parts)
         filename = gs_file.filename
         gcs_blob = self.backend.blob_from_filename(filename)
+        multipart_chunksize = self._calculate_multipart_chunksize(gcs_blob.size)
+        transfer_config = boto3.s3.transfer.TransferConfig(
+            multipart_chunksize=multipart_chunksize
+        )
         self.logger.info("Uploading file %s to %s", filename, s3_uri)
-        s3.upload_fileobj(gcs_blob, bucket, key)
+        s3.upload_fileobj(gcs_blob, bucket, key, Config=transfer_config)
         self.logger.info("Finished uploading file %s", filename)
+
+    def _calculate_multipart_chunksize(self, file_size_bytes: int) -> int:
+        """
+        Calculates the `multipart_chunksize` to use for `boto3` `TransferConfig` to
+        ensure that the file can be uploaded successfully without reaching the 100000
+        part limit. The default values are the same as the defaults for `TransferConfig`
+        """
+        multipart_chunksize = BOTO3_DEFAULT_MULTIPART_CHUNKSIZE * (
+            max((file_size_bytes - 1), 0)
+            // (BOTO3_MULTIPART_MAX_PARTS * BOTO3_DEFAULT_MULTIPART_CHUNKSIZE)
+            + 1
+        )
+        return multipart_chunksize
 
     def _upload_file_using_cloud_tasks(
         self, encode_file: EncodeFile, gs_file: GSFile
