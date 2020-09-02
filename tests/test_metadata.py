@@ -28,6 +28,13 @@ def test_metadata_get_filename(file_metadata, prefix, expected):
     assert result == expected
 
 
+def test_metadata_get_as_attachment(file_metadata):
+    result = file_metadata.get_as_attachment(filename_prefix="foo")
+    assert isinstance(result.contents, bytes)
+    assert result.filename.startswith("foo")
+    assert result.mime_type == "application/json"
+
+
 def test_file_metadata(file_metadata):
     assert file_metadata.content == {"id": "foo", "foo": "bar"}
 

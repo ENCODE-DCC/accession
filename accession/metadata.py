@@ -26,13 +26,15 @@ class Metadata(ABC):
         delimited_prefix = f"{prefix}_" if prefix else ""
         return f"{delimited_prefix}{self.workflow_id}_metadata.json"
 
-    def get_as_attachment(self) -> EncodeAttachment:
+    def get_as_attachment(self, filename_prefix: str = "") -> EncodeAttachment:
         """
         Get the representation of the attachment on the portal
         """
         metadata_bytes = EncodeAttachment.get_bytes_from_dict(self.content)
         attachment = EncodeAttachment(
-            metadata_bytes, self.get_filename(), mime_type="application/json"
+            metadata_bytes,
+            self.get_filename(prefix=filename_prefix),
+            mime_type="application/json",
         )
         return attachment
 
