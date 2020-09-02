@@ -44,6 +44,11 @@
             {
               "derived_from_filekey": "analysis.unfiltered_bam",
               "derived_from_task": "dnase_replicate"
+            },
+            {
+              "derived_from_filekey": "references.nuclear_chroms_gz",
+              "derived_from_inputs": true,
+              "derived_from_task": "dnase_replicate"
             }
           ],
           "file_format": "bam",
@@ -91,6 +96,10 @@
             },
             {
               "derived_from_filekey": "analysis.five_percent_allcalls_bed_gz",
+              "derived_from_task": "dnase_replicate"
+            },
+            { "derived_from_filekey": "references.bias_model_gz",
+              "derived_from_inputs": true,
               "derived_from_task": "dnase_replicate"
             }
           ],
@@ -170,6 +179,11 @@
           "derived_from_files": [
             {
               "derived_from_filekey": "analysis.nuclear_bam",
+              "derived_from_task": "dnase_replicate"
+            },
+            {
+              "derived_from_filekey": "references.hotspot2_tar_gz",
+              "derived_from_inputs": true,
               "derived_from_task": "dnase_replicate"
             }
           ],
