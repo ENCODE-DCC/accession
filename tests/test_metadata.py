@@ -11,10 +11,25 @@ from accession.metadata import (
 )
 
 
-def test_file_metadata(mocker):
-    mocker.patch("builtins.open", mocker.mock_open(read_data='{"foo":"bar"}'))
+@pytest.fixture
+def file_metadata(mocker):
+    mocker.patch(
+        "builtins.open", mocker.mock_open(read_data='{"foo":"bar","id":"foo"}')
+    )
     file_metadata = FileMetadata("foo")
-    assert file_metadata.content == {"foo": "bar"}
+    return file_metadata
+
+
+@pytest.mark.parametrize(
+    "prefix,expected", [("", "foo_metadata.json"), ("cool", "cool_foo_metadata.json")]
+)
+def test_metadata_get_filename(file_metadata, prefix, expected):
+    result = file_metadata.get_filename(prefix=prefix)
+    assert result == expected
+
+
+def test_file_metadata(file_metadata):
+    assert file_metadata.content == {"id": "foo", "foo": "bar"}
 
 
 @pytest.mark.parametrize(

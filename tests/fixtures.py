@@ -409,7 +409,7 @@ def mock_accession(
         new_callable=PropertyMock(
             return_value=EncodeExperiment(
                 {
-                    "@id": "foo",
+                    "@id": "/experiments/foo/",
                     "assay_term_name": "microRNA",
                     "replicates": [
                         {"biological_replicate_number": 1},

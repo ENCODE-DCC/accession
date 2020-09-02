@@ -110,7 +110,7 @@ def test_accession_experiment(mocker, mock_accession):
         "get_encode_file_matching_md5_of_blob",
         EncodeFile({"@id": "baz", "dataset": "foo"}),
     )
-    experiment = EncodeExperiment({"@id": "foo"})
+    experiment = EncodeExperiment({"@id": "/experiments/foo/"})
     mocker.patch.object(mock_accession.conn, "get", experiment.portal_properties)
     assert mock_accession.experiment.at_id == experiment.at_id
 
