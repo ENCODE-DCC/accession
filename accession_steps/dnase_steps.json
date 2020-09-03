@@ -188,7 +188,7 @@
             }
           ],
           "file_format": "bed",
-          "file_format_type": "bed3+",
+          "file_format_type": "narrowPeak",
           "filekey": "analysis.five_percent_narrowpeaks_bed_gz",
           "output_type": "peaks",
           "quality_metrics": ["five_percent_narrowpeaks_qc"]
@@ -208,10 +208,10 @@
             }
           ],
           "file_format": "bed",
-          "file_format_type": "bed3+",
+          "file_format_type": "narrowPeak",
           "filekey": "analysis.tenth_of_one_percent_narrowpeaks_bed_gz",
           "output_type": "peaks",
-          "quality_metrics": []
+          "quality_metrics": ["tenth_of_one_percent_peaks_qc"]
         }
       ],
       "wdl_task_name": "dnase_replicate"
@@ -228,7 +228,7 @@
             }
           ],
           "file_format": "bigBed",
-          "file_format_type": "bed3+",
+          "file_format_type": "narrowPeak",
           "filekey": "analysis.tenth_of_one_percent_narrowpeaks_bigbed",
           "output_type": "peaks",
           "quality_metrics": ["tenth_of_one_percent_peaks_qc"]
@@ -248,10 +248,10 @@
             }
           ],
           "file_format": "bigBed",
-          "file_format_type": "bed3+",
+          "file_format_type": "narrowPeak",
           "filekey": "analysis.five_percent_narrowpeaks_bigbed",
           "output_type": "peaks",
-          "quality_metrics": []
+          "quality_metrics": ["five_percent_narrowpeaks_qc"]
         }
       ],
       "wdl_task_name": "dnase_replicate"

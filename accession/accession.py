@@ -1181,13 +1181,14 @@ class AccessionDnase(Accession):
     ) -> None:
         if encode_file.has_qc("DnaseAlignmentQualityMetric"):
             return
+        dnase_alignment_qc_output = {}
         insert_size_info_file = self.analysis.get_files(
             filekey="analysis.qc.nuclear_bam_qc.insert_size_info"
         )[0]
-        insert_size_info_bytes = self.backend.read_file(insert_size_info_file.filename)
-        dnase_alignment_qc_output = self.parse_dict_from_bytes(
-            insert_size_info_bytes, parse_insert_size_info
+        insert_size_info_attachment = self.get_attachment(
+            insert_size_info_file, "text/plain", additional_extension=".txt"
         )
+        dnase_alignment_qc_output["attachment"] = insert_size_info_attachment
         insert_size_metric_file = self.analysis.get_files(
             filekey="analysis.qc.nuclear_bam_qc.insert_size_metrics"
         )[0]
@@ -1291,7 +1292,9 @@ class AccessionDnase(Accession):
                 "five_percent_hotspots_count"
             ]
         )
-        hotspot2_file = self.analysis.get_files(filekey="analysis.qc.peaks_qc.hotspot2")[0]
+        hotspot2_file = self.analysis.get_files(
+            filekey="analysis.qc.peaks_qc.hotspot2"
+        )[0]
         hotspot2_score = float(self.backend.read_file(hotspot2_file.filename).decode())
         qc_output = {}
         qc_output["five_percent_narrowpeaks_count"] = five_percent_narrowpeaks_count
