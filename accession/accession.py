@@ -8,10 +8,10 @@ import boto3
 from encode_utils.connection import Connection
 from qc_utils.parsers import (
     parse_flagstats,
-    parse_picard_duplication_metrics,
     parse_hotspot1_spot_score,
-    parse_samtools_stats,
     parse_insert_size_info,
+    parse_picard_duplication_metrics,
+    parse_samtools_stats,
 )
 
 from accession.accession_steps import (
