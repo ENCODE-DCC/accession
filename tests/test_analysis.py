@@ -8,6 +8,14 @@ from accession.metadata import FileMetadata
 from accession.task import Task
 
 
+@pytest.fixture
+def analysis(mock_gc_backend):
+    analysis = Analysis(
+        FileMetadata("foo"), backend=mock_gc_backend, auto_populate=False
+    )
+    return analysis
+
+
 class StubMetadata:
     content = {
         "workflowRoot": "gs://foo/bar",
@@ -60,6 +68,60 @@ def test_make_task(normal_analysis):
     assert new_task.docker_image == docker_image
 
 
+def test_analysis_get_or_make_files_simple_structure(mocker, analysis):
+    mocker.patch.object(analysis, "get_or_make_file", return_value="bar")
+    outputs = {
+        "one_percent_footprints_bigbed": "gs://foo/footprints.fps.0.01.bb",
+        "pe_fastqs": ["gs://foo/ENCFF123ABC.fastq.gz", "gs://foo/ENCFF456ABC.fastq.gz"],
+    }
+    result = analysis.get_or_make_files(outputs)
+    assert len(result) == 3
+    analysis.get_or_make_file.assert_any_call(
+        "one_percent_footprints_bigbed", "gs://foo/footprints.fps.0.01.bb", None, None
+    )
+    analysis.get_or_make_file.assert_any_call(
+        "pe_fastqs", "gs://foo/ENCFF123ABC.fastq.gz", None, None
+    )
+    analysis.get_or_make_file.assert_any_call(
+        "pe_fastqs", "gs://foo/ENCFF456ABC.fastq.gz", None, None
+    )
+
+
+def test_analysis_get_or_make_files_flattens_nested_dicts(mocker, analysis):
+    mocker.patch.object(analysis, "get_or_make_file", return_value="bar")
+    outputs = {
+        "analysis": {
+            "one_percent_footprints_bigbed": "gs://foo/footprints.fps.0.01.bb",
+            "replicate": {
+                "read_length": 76,
+                "number": 1,
+                "se_fastqs": None,
+                "pe_fastqs": [
+                    {
+                        "R1": "gs://foo/ENCFF123ABC.fastq.gz",
+                        "R2": "gs://foo/ENCFF456ABC.fastq.gz",
+                    }
+                ],
+                "adapters": [{"sequence_R1": "ATGC"}],
+            },
+        }
+    }
+    result = analysis.get_or_make_files(outputs)
+    assert len(result) == 3
+    analysis.get_or_make_file.assert_any_call(
+        "analysis.one_percent_footprints_bigbed",
+        "gs://foo/footprints.fps.0.01.bb",
+        None,
+        None,
+    )
+    analysis.get_or_make_file.assert_any_call(
+        "analysis.replicate.pe_fastqs", "gs://foo/ENCFF123ABC.fastq.gz", None, None
+    )
+    analysis.get_or_make_file.assert_any_call(
+        "analysis.replicate.pe_fastqs", "gs://foo/ENCFF456ABC.fastq.gz", None, None
+    )
+
+
 @pytest.mark.filesystem
 def test_get_or_make_file_empty_analysis(empty_analysis):
     assert len(empty_analysis.files) == 0
@@ -89,32 +151,6 @@ def test_get_or_make_file_normal_analysis(normal_analysis):
 def test_workflow_id(normal_analysis):
     expected = "2099edd0-0399-46ba-941c-abdcea355c1c"
     assert normal_analysis.workflow_id == expected
-
-
-@pytest.mark.filesystem
-def test_outputs_whitelist(normal_analysis):
-    prefix = (
-        "gs://encode-pipeline-test-runs/atac/2099edd0-0399-46ba-941c-abdcea355c1c/call-"
-        "qc_report/"
-    )
-    expected = [
-        f"{prefix}glob-3440f922973abb7a616aaf203e0db08b/qc.json",
-        f"{prefix}glob-eae855c82d0f7e2185388856e7b2cc7b/qc.html",
-    ]
-    assert normal_analysis.outputs_whitelist == expected
-
-
-@pytest.mark.filesystem
-def test_inputs_whitelist(normal_analysis):
-    prefix = "gs://atac-seq-accessioning-samples/ENCSR609OHJ/"
-    expected = [
-        f"{prefix}rep_1/ENCFF599TJR.fastq.gz",
-        f"{prefix}rep_1/ENCFF176IZG.fastq.gz",
-        f"{prefix}rep_2/ENCFF957VLH.fastq.gz",
-        f"{prefix}rep_2/ENCFF999IJT.fastq.gz",
-        "gs://encode-pipeline-genome-data/mm10_google.tsv",
-    ]
-    assert normal_analysis.inputs_whitelist == expected
 
 
 @pytest.mark.filesystem

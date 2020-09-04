@@ -2,6 +2,8 @@ import operator
 from functools import reduce
 from typing import Tuple
 
+from flatdict import FlatDict
+
 from accession.backends import GCBackend
 from accession.file import GSFile
 from accession.task import Task
@@ -13,17 +15,25 @@ class Analysis:
     """
 
     def __init__(
-        self, metadata, raw_fastqs_keys=None, auto_populate=True, backend=None
+        self,
+        metadata,
+        raw_fastqs_keys=None,
+        raw_fastqs_can_have_task=False,
+        auto_populate=True,
+        backend=None,
     ):
         self.files = []
         self.tasks = []
         self.metadata = metadata
         self.raw_fastqs_keys = raw_fastqs_keys
+        self.raw_fastqs_can_have_task = raw_fastqs_can_have_task
         if self.metadata:
-            bucket = (
-                self.metadata.content["workflowRoot"].split("gs://")[1].split("/")[0]
-            )
             if backend is None:
+                bucket = (
+                    self.metadata.content["workflowRoot"]
+                    .split("gs://")[1]
+                    .split("/")[0]
+                )
                 self.backend = GCBackend(bucket)
             else:
                 self.backend = backend
@@ -31,6 +41,13 @@ class Analysis:
             raise Exception("Valid metadata json output must be supplied")
         if auto_populate:
             self.tasks = self.make_tasks()
+
+    @property
+    def workflow_id(self) -> str:
+        """
+        Returns the Cromwell workflow id
+        """
+        return self.metadata.workflow_id
 
     def make_tasks(self):
         """
@@ -55,11 +72,19 @@ class Analysis:
         new_task = Task(task_name.split(".")[1], task)
         return new_task
 
-    # Makes instances of GSFile from input or output section of task
-    # When task=None, file is not associated with a task
     def get_or_make_files(self, section, task=None, used_by_tasks=None):
+        """
+        Makes instances of GSFile from input or output section of task. When task=None,
+        file is not associated with a task. Flattens nested dict keys, so if the section
+        looks like `{"foo": {"bar": "baz", "qux": [{"quux": "corge"}]}}`, first the
+        section will be flattened into
+        `{"foo.bar": "baz", "foo.qux": [{"quux": "corge"}]}`, note that arrays are not
+        flattened. Any files anywhere inside the array will be reached later via
+        `extract_files`
+        """
         files = []
-        for key, value in section.items():
+        flattened = FlatDict(section, delimiter=".")
+        for key, value in flattened.items():
             for filename in self.extract_files(value):
                 files.append(self.get_or_make_file(key, filename, task, used_by_tasks))
         return files
@@ -77,23 +102,6 @@ class Analysis:
         new_file = GSFile(key, filename, blob.md5sum, blob.size, task, used_by_tasks)
         self.files.append(new_file)
         return new_file
-
-    # Cromwell workflow id
-    @property
-    def workflow_id(self):
-        return self.metadata.workflow_id
-
-    # Files in the 'outputs' of the metadata that are
-    # used for filtering out intermediate outputs
-    @property
-    def outputs_whitelist(self):
-        return list(self.extract_files(self.metadata.content["outputs"]))
-
-    # Files in the 'inputs' of the metadata that are
-    # used for filtering out intermediate inputs
-    @property
-    def inputs_whitelist(self):
-        return list(self.extract_files(self.metadata.content["inputs"]))
 
     # Extracts file names from dict values
     def extract_files(self, outputs):
@@ -132,7 +140,10 @@ class Analysis:
         if self.raw_fastqs_keys is not None:
             raw_fastqs_keys = self.raw_fastqs_keys
         for file in self.files:
-            if any([k in file.filekeys for k in raw_fastqs_keys]) and file.task is None:
+            if any([k in file.filekeys for k in raw_fastqs_keys]):
+                if not self.raw_fastqs_can_have_task:
+                    if file.task is not None:
+                        continue
                 fastqs.append(file)
         return fastqs
 
@@ -186,7 +197,9 @@ class Analysis:
         for task_item in set(
             map(
                 lambda x: x.task
-                if x.task is not None and x.task.task_name not in disallow_tasks
+                if x.task is not None
+                and x.task.task_name not in disallow_tasks
+                and id(start_task) != id(x.task)
                 else None,
                 start_task.input_files,
             )

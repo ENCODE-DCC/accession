@@ -63,6 +63,10 @@ class AccessionSteps:
     def raw_fastqs_keys(self) -> Optional[str]:
         return self.steps.get("raw_fastqs_keys")
 
+    @property
+    def raw_fastqs_can_have_task(self) -> bool:
+        return self.steps.get("raw_fastqs_can_have_task", False)
+
 
 class DerivedFromFile:
     def __init__(self, derived_from_file: Dict[str, Any]) -> None:

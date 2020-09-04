@@ -1,4 +1,7 @@
+import os
+import tempfile
 from collections import OrderedDict
+from contextlib import contextmanager
 from typing import Any, Generic, List, Optional, TypeVar
 
 K = TypeVar("K")
@@ -51,7 +54,7 @@ class LruCache(Generic[K, V]):
             del self.data[key]
 
 
-def string_to_number(string):
+def string_to_number(string: str):
     if not isinstance(string, str):
         return string
     try:
@@ -77,3 +80,19 @@ def flatten(nested_input: List[Any]):
         return flatten(nested_input[0]) + flatten(nested_input[1:])
     else:
         return nested_input[:1] + flatten(nested_input[1:])
+
+
+@contextmanager
+def impersonate_file(data):
+    """With this contextmanager one can use bytes or string as if it is a file.
+    Usage:
+        with impersonate_file(bytes_data) as filepath:
+            function_expecting_file(filepath)
+    """
+    temporary_file = tempfile.NamedTemporaryFile(delete=False)
+    temporary_file.write(data)
+    temporary_file.close()
+    try:
+        yield temporary_file.name
+    finally:
+        os.unlink(temporary_file.name)
