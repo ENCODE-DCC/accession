@@ -9,7 +9,6 @@ from encode_utils.connection import Connection
 from qc_utils.parsers import (
     parse_flagstats,
     parse_hotspot1_spot_score,
-    parse_insert_size_info,
     parse_picard_duplication_metrics,
     parse_samtools_stats,
 )
@@ -1240,7 +1239,7 @@ class AccessionDnase(Accession):
         dispersion_model_attachment = self.get_attachment(
             dispersion_model_file, "application/json"
         )
-        footprints_qc_output = {}
+        footprints_qc_output = {}  # type: Dict[str, Union[int, Dict[str,str]]]
         footprints_qc_output["footprint_count"] = footprint_count
         footprints_qc_output["dispersion_model"] = dispersion_model_attachment
         return self.queue_qc(
@@ -1296,7 +1295,7 @@ class AccessionDnase(Accession):
             filekey="analysis.qc.peaks_qc.hotspot2"
         )[0]
         hotspot2_score = float(self.backend.read_file(hotspot2_file.filename).decode())
-        qc_output = {}
+        qc_output = {}  # type: Dict[str, Union[int, float]]
         qc_output["five_percent_narrowpeaks_count"] = five_percent_narrowpeaks_count
         qc_output["five_percent_hotspots_count"] = five_percent_hotspots_count
         qc_output["spot2_score"] = hotspot2_score
