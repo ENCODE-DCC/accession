@@ -133,7 +133,9 @@
           "file_format_type": "bed3+",
           "filekey": "analysis.one_percent_footprints_bigbed",
           "output_type": "footprints",
-          "quality_metrics": []
+          "quality_metrics": [
+            "footprints_quality_metric"
+          ]
         }
       ],
       "wdl_task_name": "dnase_replicate"
@@ -172,7 +174,9 @@
           "file_format_type": "bed3+",
           "filekey": "analysis.five_percent_allcalls_bigbed",
           "output_type": "FDR cut rate",
-          "quality_metrics": []
+          "quality_metrics": [
+            "five_percent_allcalls_qc"
+          ]
         }
       ],
       "wdl_task_name": "dnase_replicate"
