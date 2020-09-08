@@ -217,6 +217,11 @@
             {
               "derived_from_filekey": "analysis.nuclear_bam",
               "derived_from_task": "dnase_replicate"
+            },
+            {
+              "derived_from_filekey": "references.hotspot2_tar_gz",
+              "derived_from_inputs": true,
+              "derived_from_task": "dnase_replicate"
             }
           ],
           "file_format": "bed",
