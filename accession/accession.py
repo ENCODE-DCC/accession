@@ -650,7 +650,9 @@ class Accession(ABC):
         document_aliases = [
             f"{self.common_metadata.lab_pi}:cromwell-metadata-{self.analysis.workflow_id}"
         ]
-        document_attachment = self.analysis.metadata.get_as_attachment()
+        document_attachment = self.analysis.metadata.get_as_attachment(
+            filename_prefix=self.experiment.accession
+        )
         document = EncodeDocument(
             attachment=document_attachment,
             common_metadata=self.common_metadata,

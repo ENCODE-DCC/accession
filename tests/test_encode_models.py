@@ -41,7 +41,7 @@ def encode_analysis():
 @pytest.fixture(scope="module")
 def encode_experiment():
     properties = {
-        "@id": "foo",
+        "@id": "/experiments/foo/",
         "assay_term_name": "mirna",
         "replicates": [
             {"biological_replicate_number": 1},
@@ -328,20 +328,27 @@ def test_encode_experiment_is_replicated(encode_experiment):
     assert encode_experiment.is_replicated is True
 
 
+def test_encode_experiment_accession(encode_experiment):
+    assert encode_experiment.accession == "foo"
+
+
 def test_encode_experiment_assay_term_name(encode_experiment):
     assert encode_experiment.assay_term_name == "mirna"
 
 
 def test_encode_experiment_get_patchable_internal_status(encode_experiment):
     result = encode_experiment.get_patchable_internal_status()
-    assert result == {"internal_status": "pipeline completed", "_enc_id": "foo"}
+    assert result == {
+        "internal_status": "pipeline completed",
+        "_enc_id": "/experiments/foo/",
+    }
 
 
 def test_encode_experiment_get_patchable_analysis_object(encode_experiment):
     result = encode_experiment.get_patchable_analysis_object("foo")
     assert result == {
         "analysis_objects": ["foo"],
-        "_enc_id": "foo",
+        "_enc_id": "/experiments/foo/",
         "_profile": "experiment",
     }
 

@@ -17,21 +17,24 @@ class Metadata(ABC):
     def workflow_id(self) -> str:
         return self.content["id"]
 
-    def get_filename(self) -> str:
+    def get_filename(self, prefix: str = "") -> str:
         """
         Construct an artificial filename for the metadata JSON. We do this because it
         could be possible in the future that the metadata is not actually in a file, for
         instance if we pull them directly from Caper.
         """
-        return f"{self.workflow_id}_metadata.json"
+        delimited_prefix = f"{prefix}_" if prefix else ""
+        return f"{delimited_prefix}{self.workflow_id}_metadata.json"
 
-    def get_as_attachment(self) -> EncodeAttachment:
+    def get_as_attachment(self, filename_prefix: str = "") -> EncodeAttachment:
         """
         Get the representation of the attachment on the portal
         """
         metadata_bytes = EncodeAttachment.get_bytes_from_dict(self.content)
         attachment = EncodeAttachment(
-            metadata_bytes, self.get_filename(), mime_type="application/json"
+            metadata_bytes,
+            self.get_filename(prefix=filename_prefix),
+            mime_type="application/json",
         )
         return attachment
 

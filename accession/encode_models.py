@@ -282,6 +282,10 @@ class EncodeExperiment:
     def is_replicated(self):
         return self.get_number_of_biological_replicates() > 1
 
+    @property
+    def accession(self) -> str:
+        return self.at_id.split("/")[-2]
+
     def get_number_of_biological_replicates(self) -> int:
         bio_reps = set(
             [
