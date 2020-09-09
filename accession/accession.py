@@ -1245,7 +1245,10 @@ class AccessionDnase(Accession):
         footprints_qc_output["footprint_count"] = footprint_count
         footprints_qc_output["dispersion_model"] = dispersion_model_attachment
         return self.queue_qc(
-            footprints_qc_output, encode_file, "dnase-footprinting-quality-metric"
+            footprints_qc_output,
+            encode_file,
+            "dnase-footprinting-quality-metric",
+            shared=True,
         )
 
     def make_tenth_of_one_percent_peaks_qc(
