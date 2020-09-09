@@ -1306,7 +1306,9 @@ class AccessionDnase(Accession):
         qc_output["five_percent_narrowpeaks_count"] = five_percent_narrowpeaks_count
         qc_output["five_percent_hotspots_count"] = five_percent_hotspots_count
         qc_output["spot2_score"] = hotspot2_score
-        return self.queue_qc(qc_output, encode_file, "hotspot-quality-metric")
+        return self.queue_qc(
+            qc_output, encode_file, "hotspot-quality-metric", shared=True
+        )
 
 
 class AccessionLongReadRna(AccessionGenericRna):
