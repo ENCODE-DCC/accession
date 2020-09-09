@@ -1050,6 +1050,7 @@ class AccessionDnase(Accession):
         "nuclear_duplication_metric": "make_nuclear_duplication_qc",
         "nuclear_hotspot1_metric": "make_nuclear_hotspot1_qc",
         "nuclear_samtools_stats": "make_nuclear_samtools_stats_qc",
+        "unfiltered_samtools_stats": "make_unfiltered_samtools_stats_qc",
         "nuclear_alignment_quality_metric": "make_nuclear_alignment_qc",
         "footprints_quality_metric": "make_footprints_qc",
         "tenth_of_one_percent_peaks_qc": "make_tenth_of_one_percent_peaks_qc",
@@ -1152,12 +1153,12 @@ class AccessionDnase(Accession):
         qc_output_dict["attachment"] = attachment
         return self.queue_qc(qc_output_dict, encode_file, "hotspot-quality-metric")
 
-    def make_nuclear_samtools_stats_qc(
-        self, encode_file: EncodeFile, gs_file: GSFile
+    def make_samtools_stats_qc(
+        self, encode_file: EncodeFile, gs_file: GSFile, filekey: str
     ) -> None:
         if encode_file.has_qc("SamtoolStatsQualityMetric"):
             return
-        qc_file = self.analysis.get_files(filekey="analysis.qc.nuclear_bam_qc.stats")[0]
+        qc_file = self.analysis.get_files(filekey=filekey)[0]
         qc_bytes = self.backend.read_file(qc_file.filename)
         qc_output_dict = self.parse_dict_from_bytes(qc_bytes, parse_samtools_stats)
         attachment = self.get_attachment(qc_file, "text/plain")
@@ -1175,6 +1176,24 @@ class AccessionDnase(Accession):
             del qc_output_dict[key]
         return self.queue_qc(
             qc_output_dict, encode_file, "samtools-stats-quality-metric"
+        )
+
+    def make_nuclear_samtools_stats_qc(
+        self, encode_file: EncodeFile, gs_file: GSFile
+    ) -> None:
+        self.make_samtools_stats_qc(
+            encode_file=encode_file,
+            gs_file=gs_file,
+            filekey="analysis.qc.nuclear_bam_qc.stats",
+        )
+
+    def make_unfiltered_samtools_stats_qc(
+        self, encode_file: EncodeFile, gs_file: GSFile
+    ) -> None:
+        self.make_samtools_stats_qc(
+            encode_file=encode_file,
+            gs_file=gs_file,
+            filekey="analysis.qc.unfiltered_bam_qc.stats",
         )
 
     def make_nuclear_alignment_qc(

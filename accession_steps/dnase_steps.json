@@ -29,7 +29,8 @@
           "output_type": "unfiltered alignments",
           "quality_metrics": [
             "unfiltered_flagstats",
-            "unfiltered_trimstats"
+            "unfiltered_trimstats",
+            "unfiltered_samtools_stats"
           ]
         }
       ],
@@ -74,6 +75,11 @@
             {
               "derived_from_filekey": "analysis.nuclear_bam",
               "derived_from_task": "dnase_replicate"
+            },
+            {
+              "derived_from_filekey": "references.hotspot2_tar_gz",
+              "derived_from_inputs": true,
+              "derived_from_task": "dnase_replicate"
             }
           ],
           "file_format": "bed",
@@ -103,6 +109,11 @@
             },
             {
               "derived_from_filekey": "references.bias_model_gz",
+              "derived_from_inputs": true,
+              "derived_from_task": "dnase_replicate"
+            },
+            {
+              "derived_from_filekey": "references.indexed_fasta_tar_gz",
               "derived_from_inputs": true,
               "derived_from_task": "dnase_replicate"
             }
@@ -148,6 +159,11 @@
           "derived_from_files": [
             {
               "derived_from_filekey": "analysis.nuclear_bam",
+              "derived_from_task": "dnase_replicate"
+            },
+            {
+              "derived_from_filekey": "references.hotspot2_tar_gz",
+              "derived_from_inputs": true,
               "derived_from_task": "dnase_replicate"
             }
           ],
@@ -216,6 +232,11 @@
           "derived_from_files": [
             {
               "derived_from_filekey": "analysis.nuclear_bam",
+              "derived_from_task": "dnase_replicate"
+            },
+            {
+              "derived_from_filekey": "references.hotspot2_tar_gz",
+              "derived_from_inputs": true,
               "derived_from_task": "dnase_replicate"
             }
           ],
