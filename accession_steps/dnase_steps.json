@@ -29,7 +29,8 @@
           "output_type": "unfiltered alignments",
           "quality_metrics": [
             "unfiltered_flagstats",
-            "unfiltered_trimstats"
+            "unfiltered_trimstats",
+            "unfiltered_samtools_stats"
           ]
         }
       ],
