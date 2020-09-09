@@ -1265,7 +1265,9 @@ class AccessionDnase(Accession):
         qc_output[
             "tenth_of_one_percent_narrowpeaks_count"
         ] = tenth_of_percent_narrowpeaks_count
-        return self.queue_qc(qc_output, encode_file, "hotspot-quality-metric")
+        return self.queue_qc(
+            qc_output, encode_file, "hotspot-quality-metric", shared=True
+        )
 
     def make_five_percent_allcalls_qc(
         self, encode_file: EncodeFile, gs_file: GSFile
