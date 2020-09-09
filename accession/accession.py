@@ -1264,10 +1264,7 @@ class AccessionDnase(Accession):
         footprints_qc_output["footprint_count"] = footprint_count
         footprints_qc_output["dispersion_model"] = dispersion_model_attachment
         return self.queue_qc(
-            footprints_qc_output,
-            encode_file,
-            "dnase-footprinting-quality-metric",
-            shared=True,
+            footprints_qc_output, encode_file, "dnase-footprinting-quality-metric"
         )
 
     def make_tenth_of_one_percent_peaks_qc(
@@ -1284,9 +1281,7 @@ class AccessionDnase(Accession):
         qc_output[
             "tenth_of_one_percent_narrowpeaks_count"
         ] = tenth_of_percent_narrowpeaks_count
-        return self.queue_qc(
-            qc_output, encode_file, "hotspot-quality-metric", shared=True
-        )
+        return self.queue_qc(qc_output, encode_file, "hotspot-quality-metric")
 
     def make_five_percent_allcalls_qc(
         self, encode_file: EncodeFile, gs_file: GSFile
@@ -1300,9 +1295,7 @@ class AccessionDnase(Accession):
         )
         qc_output = {}
         qc_output["five_percent_allcalls_count"] = five_percent_allcalls_count
-        return self.queue_qc(
-            qc_output, encode_file, "hotspot-quality-metric", shared=True
-        )
+        return self.queue_qc(qc_output, encode_file, "hotspot-quality-metric")
 
     def make_five_percent_narrowpeaks_qc(
         self, encode_file: EncodeFile, gs_file: GSFile
@@ -1327,9 +1320,7 @@ class AccessionDnase(Accession):
         qc_output["five_percent_narrowpeaks_count"] = five_percent_narrowpeaks_count
         qc_output["five_percent_hotspots_count"] = five_percent_hotspots_count
         qc_output["spot2_score"] = hotspot2_score
-        return self.queue_qc(
-            qc_output, encode_file, "hotspot-quality-metric", shared=True
-        )
+        return self.queue_qc(qc_output, encode_file, "hotspot-quality-metric")
 
 
 class AccessionLongReadRna(AccessionGenericRna):
