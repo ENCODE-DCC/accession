@@ -1088,7 +1088,7 @@ class AccessionDnase(Accession):
         paired_properly_pct = qc_output_dict.get("paired_properly_pct")
         if paired_properly_pct is not None:
             qc_output_dict["paired_properly_pct"] = str(paired_properly_pct)
-        qc_output_dict["singletons_pct"] = str(qc_output_dict["singletons_pct"])
+            qc_output_dict["singletons_pct"] = str(qc_output_dict["singletons_pct"])
         attachment = self.get_attachment(qc_file, "text/plain")
         qc_output_dict["attachment"] = attachment
         return self.queue_qc(
