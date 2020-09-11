@@ -1071,17 +1071,24 @@ class AccessionDnase(Accession):
     def make_flagstats_qc(
         self, encode_file: EncodeFile, gs_file: GSFile, filekey: str
     ) -> None:
+        """
+        Filekey is either "nuclear_bam_qc" or "unfiltered_bam_qc"
+        """
         if encode_file.has_qc("SamtolsFlagstatsQualityMetric"):
             return
-        qc_file = self.analysis.get_files(filekey=filekey)[0]  # this is GSFile
+        qc_file = self.analysis.get_files(
+            filename=gs_file.task.outputs["analysis"]["qc"][filekey]["flagstats"]
+        )[
+            0
+        ]  # this is GSFile
         qc_bytes = self.backend.read_file(qc_file.filename)
         with impersonate_file(qc_bytes) as flagstats:
             qc_output_dict = parse_flagstats(flagstats)
         qc_output_dict["mapped_pct"] = str(qc_output_dict["mapped_pct"])
-        qc_output_dict["paired_properly_pct"] = str(
-            qc_output_dict["paired_properly_pct"]
-        )
-        qc_output_dict["singletons_pct"] = str(qc_output_dict["singletons_pct"])
+        paired_properly_pct = qc_output_dict.get("paired_properly_pct")
+        if paired_properly_pct is not None:
+            qc_output_dict["paired_properly_pct"] = str(paired_properly_pct)
+            qc_output_dict["singletons_pct"] = str(qc_output_dict["singletons_pct"])
         attachment = self.get_attachment(qc_file, "text/plain")
         qc_output_dict["attachment"] = attachment
         return self.queue_qc(
@@ -1092,21 +1099,27 @@ class AccessionDnase(Accession):
         self, encode_file: EncodeFile, gs_file: GSFile
     ) -> None:
         self.make_flagstats_qc(
-            encode_file=encode_file,
-            gs_file=gs_file,
-            filekey="analysis.qc.unfiltered_bam_qc.flagstats",
+            encode_file=encode_file, gs_file=gs_file, filekey="unfiltered_bam_qc"
         )
 
     def make_unfiltered_trimstats_qc(
-        self, encode_file: EncodeFile, gs_gile: GSFile
+        self, encode_file: EncodeFile, gs_file: GSFile
     ) -> None:
+        """
+        If there is no trimstats qc then will return without queueing anything for
+        posting.
+        """
         qc_output_dict = {}
         if encode_file.has_qc("TrimmingQualityMetric"):
             return
-        qc_file = self.analysis.get_files(
-            filekey="analysis.qc.unfiltered_bam_qc.trimstats"
-        )[0]
-        attachment = self.get_attachment(qc_file, "text/plain")
+        qc_files = self.analysis.get_files(
+            filename=gs_file.task.outputs["analysis"]["qc"]["unfiltered_bam_qc"][
+                "trimstats"
+            ]
+        )
+        if not qc_files:
+            return
+        attachment = self.get_attachment(qc_files[0], "text/plain")
         qc_output_dict["attachment"] = attachment
         return self.queue_qc(qc_output_dict, encode_file, "trimming-quality-metric")
 
@@ -1114,23 +1127,29 @@ class AccessionDnase(Accession):
         self, encode_file: EncodeFile, gs_file: GSFile
     ) -> None:
         self.make_flagstats_qc(
-            encode_file=encode_file,
-            gs_file=gs_file,
-            filekey="analysis.qc.nuclear_bam_qc.flagstats",
+            encode_file=encode_file, gs_file=gs_file, filekey="nuclear_bam_qc"
         )
 
     def make_nuclear_duplication_qc(
         self, encode_file: EncodeFile, gs_file: GSFile
     ) -> None:
+        """
+        If data is SE then Picard MarkDuplicates library size estimate will be an empty
+        string, need to handle.
+        """
         if encode_file.has_qc("DuplicatesQualityMetric"):
             return
         qc_file = self.analysis.get_files(
-            filekey="analysis.qc.nuclear_bam_qc.duplication_metrics"
+            filename=gs_file.task.outputs["analysis"]["qc"]["nuclear_bam_qc"][
+                "duplication_metrics"
+            ]
         )[0]
         qc_bytes = self.backend.read_file(qc_file.filename)
         qc_output_dict = self.parse_dict_from_bytes(
             qc_bytes, parse_picard_duplication_metrics
         )
+        if not qc_output_dict["Estimated Library Size"]:
+            del qc_output_dict["Estimated Library Size"]
         attachment = self.get_attachment(
             qc_file, "text/plain", additional_extension=".txt"
         )
@@ -1143,7 +1162,9 @@ class AccessionDnase(Accession):
         if encode_file.has_qc("HotspotQualityMetric"):
             return
         qc_file = self.analysis.get_files(
-            filekey="analysis.qc.nuclear_bam_qc.hotspot1"
+            filename=gs_file.task.outputs["analysis"]["qc"]["nuclear_bam_qc"][
+                "hotspot1"
+            ]
         )[0]
         qc_bytes = self.backend.read_file(qc_file.filename)
         qc_output_dict = self.parse_dict_from_bytes(qc_bytes, parse_hotspot1_spot_score)
@@ -1156,9 +1177,14 @@ class AccessionDnase(Accession):
     def make_samtools_stats_qc(
         self, encode_file: EncodeFile, gs_file: GSFile, filekey: str
     ) -> None:
+        """
+        Filekey is either unfiltered_bam_qc or nuclear_bam_qc.
+        """
         if encode_file.has_qc("SamtoolStatsQualityMetric"):
             return
-        qc_file = self.analysis.get_files(filekey=filekey)[0]
+        qc_file = self.analysis.get_files(
+            filename=gs_file.task.outputs["analysis"]["qc"][filekey]["stats"]
+        )[0]
         qc_bytes = self.backend.read_file(qc_file.filename)
         qc_output_dict = self.parse_dict_from_bytes(qc_bytes, parse_samtools_stats)
         attachment = self.get_attachment(qc_file, "text/plain")
@@ -1182,49 +1208,72 @@ class AccessionDnase(Accession):
         self, encode_file: EncodeFile, gs_file: GSFile
     ) -> None:
         self.make_samtools_stats_qc(
-            encode_file=encode_file,
-            gs_file=gs_file,
-            filekey="analysis.qc.nuclear_bam_qc.stats",
+            encode_file=encode_file, gs_file=gs_file, filekey="nuclear_bam_qc"
         )
 
     def make_unfiltered_samtools_stats_qc(
         self, encode_file: EncodeFile, gs_file: GSFile
     ) -> None:
         self.make_samtools_stats_qc(
-            encode_file=encode_file,
-            gs_file=gs_file,
-            filekey="analysis.qc.unfiltered_bam_qc.stats",
+            encode_file=encode_file, gs_file=gs_file, filekey="unfiltered_bam_qc"
         )
 
     def make_nuclear_alignment_qc(
         self, encode_file: EncodeFile, gs_file: GSFile
     ) -> None:
+        """
+        For SE data skip the insert size QC since it is only estimated for PE data.
+        """
         if encode_file.has_qc("DnaseAlignmentQualityMetric"):
             return
         dnase_alignment_qc_output = {}
-        insert_size_info_file = self.analysis.get_files(
-            filekey="analysis.qc.nuclear_bam_qc.insert_size_info"
-        )[0]
-        insert_size_info_attachment = self.get_attachment(
-            insert_size_info_file, "text/plain", additional_extension=".txt"
+
+        insert_size_info_files = self.analysis.get_files(
+            filename=gs_file.task.outputs["analysis"]["qc"]["nuclear_bam_qc"][
+                "insert_size_info"
+            ]
         )
-        dnase_alignment_qc_output["attachment"] = insert_size_info_attachment
-        insert_size_metric_file = self.analysis.get_files(
-            filekey="analysis.qc.nuclear_bam_qc.insert_size_metrics"
-        )[0]
-        insert_size_metric_attachment = self.get_attachment(
-            insert_size_metric_file, "text/plain", additional_extension=".txt"
-        )
-        dnase_alignment_qc_output["insert_size_metric"] = insert_size_metric_attachment
+        if insert_size_info_files:
+            insert_size_info_file = insert_size_info_files[0]
+            insert_size_info_attachment = self.get_attachment(
+                insert_size_info_file, "text/plain", additional_extension=".txt"
+            )
+            dnase_alignment_qc_output["attachment"] = insert_size_info_attachment
+            insert_size_metric_file = self.analysis.get_files(
+                filename=gs_file.task.outputs["analysis"]["qc"]["nuclear_bam_qc"][
+                    "insert_size_metrics"
+                ]
+            )[0]
+            insert_size_metric_attachment = self.get_attachment(
+                insert_size_metric_file, "text/plain", additional_extension=".txt"
+            )
+            dnase_alignment_qc_output[
+                "insert_size_metric"
+            ] = insert_size_metric_attachment
+
+            insert_size_histogram_file = self.analysis.get_files(
+                filename=gs_file.task.outputs["analysis"]["qc"]["nuclear_bam_qc"][
+                    "insert_size_histogram_pdf"
+                ]
+            )[0]
+            insert_size_histogram_attachment = self.get_attachment(
+                insert_size_histogram_file, "application/pdf"
+            )
+            dnase_alignment_qc_output[
+                "insert_size_histogram"
+            ] = insert_size_histogram_attachment
+
         nuclear_preseq_file = self.analysis.get_files(
-            filekey="analysis.qc.nuclear_bam_qc.preseq"
+            filename=gs_file.task.outputs["analysis"]["qc"]["nuclear_bam_qc"]["preseq"]
         )[0]
         nuclear_preseq_attachment = self.get_attachment(
             nuclear_preseq_file, "text/plain"
         )
         dnase_alignment_qc_output["nuclear_preseq"] = nuclear_preseq_attachment
         nuclear_preseq_targets_file = self.analysis.get_files(
-            filekey="analysis.qc.nuclear_bam_qc.preseq_targets"
+            filename=gs_file.task.outputs["analysis"]["qc"]["nuclear_bam_qc"][
+                "preseq_targets"
+            ]
         )[0]
         nuclear_preseq_targets_attachment = self.get_attachment(
             nuclear_preseq_targets_file, "text/plain"
@@ -1232,21 +1281,12 @@ class AccessionDnase(Accession):
         dnase_alignment_qc_output[
             "nuclear_preseq_targets"
         ] = nuclear_preseq_targets_attachment
-        insert_size_histogram_file = self.analysis.get_files(
-            filekey="analysis.qc.nuclear_bam_qc.insert_size_histogram_pdf"
-        )[0]
-        insert_size_histogram_attachment = self.get_attachment(
-            insert_size_histogram_file, "application/pdf"
-        )
-        dnase_alignment_qc_output[
-            "insert_size_histogram"
-        ] = insert_size_histogram_attachment
+
         return self.queue_qc(
             dnase_alignment_qc_output, encode_file, "dnase-alignment-quality-metric"
         )
 
     def make_footprints_qc(self, encode_file: EncodeFile, gs_file: GSFile) -> None:
-
         if encode_file.has_qc("DnaseFootprintingQualityMetric"):
             return
         footprint_count = int(
@@ -1255,7 +1295,9 @@ class AccessionDnase(Accession):
             ]
         )
         dispersion_model_file = self.analysis.get_files(
-            filekey="analysis.qc.footprints_qc.dispersion_model"
+            filename=gs_file.task.outputs["analysis"]["qc"]["footprints_qc"][
+                "dispersion_model"
+            ]
         )[0]
         dispersion_model_attachment = self.get_attachment(
             dispersion_model_file, "application/json"
@@ -1313,7 +1355,7 @@ class AccessionDnase(Accession):
             ]
         )
         hotspot2_file = self.analysis.get_files(
-            filekey="analysis.qc.peaks_qc.hotspot2"
+            filename=gs_file.task.outputs["analysis"]["qc"]["peaks_qc"]["hotspot2"]
         )[0]
         hotspot2_score = float(self.backend.read_file(hotspot2_file.filename).decode())
         qc_output = {}  # type: Dict[str, Union[int, float]]
