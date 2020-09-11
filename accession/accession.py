@@ -1133,6 +1133,10 @@ class AccessionDnase(Accession):
     def make_nuclear_duplication_qc(
         self, encode_file: EncodeFile, gs_file: GSFile
     ) -> None:
+        """
+        If data is SE then Picard MarkDuplicates library size estimate will be an empty
+        string, need to handle.
+        """
         if encode_file.has_qc("DuplicatesQualityMetric"):
             return
         qc_file = self.analysis.get_files(
@@ -1144,6 +1148,8 @@ class AccessionDnase(Accession):
         qc_output_dict = self.parse_dict_from_bytes(
             qc_bytes, parse_picard_duplication_metrics
         )
+        if not qc_output_dict["Estimated Library Size"]:
+            del qc_output_dict["Estimated Library Size"]
         attachment = self.get_attachment(
             qc_file, "text/plain", additional_extension=".txt"
         )
