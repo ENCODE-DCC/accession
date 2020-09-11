@@ -1222,12 +1222,13 @@ class AccessionDnase(Accession):
             return
         dnase_alignment_qc_output = {}
 
-        insert_size_info_file = self.analysis.get_files(
+        insert_size_info_files = self.analysis.get_files(
             filename=gs_file.task.outputs["analysis"]["qc"]["nuclear_bam_qc"][
                 "insert_size_info"
             ]
-        )[0]
-        if insert_size_info_file is not None:
+        )
+        if insert_size_info_files:
+            insert_size_info_file = insert_size_info_files[0]
             insert_size_info_attachment = self.get_attachment(
                 insert_size_info_file, "text/plain", additional_extension=".txt"
             )
