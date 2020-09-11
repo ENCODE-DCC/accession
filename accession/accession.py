@@ -1245,6 +1245,18 @@ class AccessionDnase(Accession):
                 "insert_size_metric"
             ] = insert_size_metric_attachment
 
+            insert_size_histogram_file = self.analysis.get_files(
+                filename=gs_file.task.outputs["analysis"]["qc"]["nuclear_bam_qc"][
+                    "insert_size_histogram_pdf"
+                ]
+            )[0]
+            insert_size_histogram_attachment = self.get_attachment(
+                insert_size_histogram_file, "application/pdf"
+            )
+            dnase_alignment_qc_output[
+                "insert_size_histogram"
+            ] = insert_size_histogram_attachment
+
         nuclear_preseq_file = self.analysis.get_files(
             filename=gs_file.task.outputs["analysis"]["qc"]["nuclear_bam_qc"]["preseq"]
         )[0]
@@ -1263,17 +1275,7 @@ class AccessionDnase(Accession):
         dnase_alignment_qc_output[
             "nuclear_preseq_targets"
         ] = nuclear_preseq_targets_attachment
-        insert_size_histogram_file = self.analysis.get_files(
-            filename=gs_file.task.outputs["analysis"]["qc"]["nuclear_bam_qc"][
-                "insert_size_histogram_pdf"
-            ]
-        )[0]
-        insert_size_histogram_attachment = self.get_attachment(
-            insert_size_histogram_file, "application/pdf"
-        )
-        dnase_alignment_qc_output[
-            "insert_size_histogram"
-        ] = insert_size_histogram_attachment
+
         return self.queue_qc(
             dnase_alignment_qc_output, encode_file, "dnase-alignment-quality-metric"
         )
