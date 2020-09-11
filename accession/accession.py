@@ -1105,15 +1105,21 @@ class AccessionDnase(Accession):
     def make_unfiltered_trimstats_qc(
         self, encode_file: EncodeFile, gs_file: GSFile
     ) -> None:
+        """
+        If there is no trimstats qc then will return without queueing anything for
+        posting.
+        """
         qc_output_dict = {}
         if encode_file.has_qc("TrimmingQualityMetric"):
             return
-        qc_file = self.analysis.get_files(
+        qc_files = self.analysis.get_files(
             filename=gs_file.task.outputs["analysis"]["qc"]["unfiltered_bam_qc"][
                 "trimstats"
             ]
-        )[0]
-        attachment = self.get_attachment(qc_file, "text/plain")
+        )
+        if not qc_files:
+            return
+        attachment = self.get_attachment(qc_files[0], "text/plain")
         qc_output_dict["attachment"] = attachment
         return self.queue_qc(qc_output_dict, encode_file, "trimming-quality-metric")
 
