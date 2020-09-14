@@ -144,9 +144,7 @@
           "file_format_type": "bed3+",
           "filekey": "analysis.one_percent_footprints_bigbed",
           "output_type": "footprints",
-          "quality_metrics": [
-            "footprints_quality_metric"
-          ]
+          "quality_metrics": []
         }
       ],
       "wdl_task_name": "dnase_replicate"
@@ -190,9 +188,7 @@
           "file_format_type": "bed3+",
           "filekey": "analysis.five_percent_allcalls_bigbed",
           "output_type": "FDR cut rate",
-          "quality_metrics": [
-            "five_percent_allcalls_qc"
-          ]
+          "quality_metrics": []
         }
       ],
       "wdl_task_name": "dnase_replicate"
@@ -266,9 +262,7 @@
           "file_format_type": "narrowPeak",
           "filekey": "analysis.tenth_of_one_percent_narrowpeaks_bigbed",
           "output_type": "peaks",
-          "quality_metrics": [
-            "tenth_of_one_percent_peaks_qc"
-          ]
+          "quality_metrics": []
         }
       ],
       "wdl_task_name": "dnase_replicate"
@@ -288,9 +282,7 @@
           "file_format_type": "narrowPeak",
           "filekey": "analysis.five_percent_narrowpeaks_bigbed",
           "output_type": "peaks",
-          "quality_metrics": [
-            "five_percent_narrowpeaks_qc"
-          ]
+          "quality_metrics": []
         }
       ],
       "wdl_task_name": "dnase_replicate"
