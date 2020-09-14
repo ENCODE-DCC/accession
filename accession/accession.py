@@ -1074,7 +1074,7 @@ class AccessionDnase(Accession):
         """
         Filekey is either "nuclear_bam_qc" or "unfiltered_bam_qc"
         """
-        if encode_file.has_qc("SamtolsFlagstatsQualityMetric"):
+        if encode_file.has_qc("SamtoolsFlagstatsQualityMetric"):
             return
         qc_file = self.analysis.get_files(
             filename=gs_file.task.outputs["analysis"]["qc"][filekey]["flagstats"]
@@ -1180,7 +1180,7 @@ class AccessionDnase(Accession):
         """
         Filekey is either unfiltered_bam_qc or nuclear_bam_qc.
         """
-        if encode_file.has_qc("SamtoolStatsQualityMetric"):
+        if encode_file.has_qc("SamtoolsStatsQualityMetric"):
             return
         qc_file = self.analysis.get_files(
             filename=gs_file.task.outputs["analysis"]["qc"][filekey]["stats"]
