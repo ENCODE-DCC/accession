@@ -2171,6 +2171,67 @@ class AccessionAtac(AccessionAtacChip):
         )
 
 
+class AccessionWgbs(Accession):
+    QC_MAP = {
+        "gembs_alignment": "make_gembs_alignment_qc",
+        "samtools_stats": "make_samtools_stats_qc",
+        "cpg_correlation": "make_cpg_correlation_qc",
+    }
+
+    @property
+    def assembly(self):
+        filekey = "reference"
+        return self.find_portal_property_from_filekey(filekey, EncodeFile.ASSEMBLY)
+
+    def make_gembs_alignment_qc(self, encode_file: EncodeFile, gs_file: GSFile) -> None:
+        if encode_file.has_qc("GembsAlignmentQualityMetric"):
+            return
+        output_qc = {}
+        gembs_qc_file = self.analysis.search_down(
+            gs_file.task, "qc_report", "portal_map_qc_json"
+        )[0]
+        gembs_qc = self.backend.read_json(gembs_qc_file)
+        output_qc.update(gembs_qc)
+        average_coverage_qc_file = self.analysis.search_down(
+            gs_file.task, "calculate_average_coverage", "average_coverage_qc"
+        )[0]
+        average_coverage_qc = self.backend.read_json(average_coverage_qc_file)
+        output_qc.update(average_coverage_qc["average_coverage"])
+        return self.queue_qc(output_qc, encode_file, "gembs-alignment-quality-metric")
+
+    def make_samtools_stats_qc(self, encode_file: EncodeFile, gs_file: GSFile) -> None:
+        if encode_file.has_qc("SamtoolsStatsQualityMetric"):
+            return
+        output_qc = {}
+        samtools_stats_qc_file = self.analysis.search_down(
+            gs_file.task, "calculate_average_coverage", "average_coverage_qc"
+        )[0]
+        samtools_stats_qc = self.backend.read_json(samtools_stats_qc_file)
+        output_qc.update(samtools_stats_qc["samtools_stats"])
+        return self.queue_qc(output_qc, encode_file, "samtools-stats-quality-metric")
+
+    def make_cpg_correlation_qc(self, encode_file: EncodeFile, gs_file: GSFile) -> None:
+        if (
+            encode_file.has_qc("CpgCorrelationQualityMetric")
+            or len(self.analysis.metadata["inputs"]["fastqs"]) != 2
+        ):
+            return
+
+        output_qc = {}  # type: ignore
+        cpg_correlation_qc_file = self.analysis.search_down(
+            gs_file.task,
+            "calculate_bed_pearson_correlation",
+            "bed_pearson_correlation_qc",
+        )[0]
+        cpg_correlation_qc = self.backend.read_json(cpg_correlation_qc_file)
+        output_qc["Pearson correlation"] = cpg_correlation_qc["pearson_correlation"][
+            "pearson_correlation"
+        ]
+        return self.queue_qc(
+            output_qc, encode_file, "cpg-correlation-quality-metric", shared=True
+        )
+
+
 def accession_factory(
     pipeline_type: str,
     accession_metadata: str,
@@ -2199,6 +2260,7 @@ def accession_factory(
         "control_chip": AccessionChip,
         "atac": AccessionAtac,
         "dnase": AccessionDnase,
+        "wgbs": AccessionWgbs,
     }
     selected_accession: Optional[Type[Accession]] = None
     try:
