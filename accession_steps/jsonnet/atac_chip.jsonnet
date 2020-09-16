@@ -148,9 +148,11 @@ more legible.
     // steps do not include `-seq`
     local signal_generation_prefix = if is_atac then 'atac-seq' else 'tf-chip',
     local file_format_type = 'narrowPeak',
-    local shared_file_props = {
+    local shared_file_props_no_qc = {
       file_format_type: file_format_type,
       output_type: 'IDR thresholded peaks',
+    },
+    local shared_file_props = shared_file_props_no_qc {
       quality_metrics: (if is_atac then ['atac_replication', 'atac_peak_enrichment'] else [
                           'chip_replication',
                           'chip_peak_enrichment',
@@ -185,7 +187,7 @@ more legible.
         ],
         file_format: 'bigBed',
         filekey: 'bfilt_idr_peak_bb',
-      } + shared_file_props,
+      } + shared_file_props_no_qc,
     ],
     'accession.steps': [
       {
@@ -254,8 +256,10 @@ more legible.
   local AtacHistoneMintPeakCallSteps(is_atac=false, blacklist_derived_from_task='', blacklist_derived_from_filekey='blacklist') = {
     local step_prefix = if is_atac then 'atac' else 'histone-chip',
     local has_blacklist_derived_from_task = std.length(blacklist_derived_from_task) > 0,
-    local shared_file_props = {
+    local shared_file_props_no_qc = {
       file_format_type: 'narrowPeak',
+    },
+    local shared_file_props = shared_file_props_no_qc {
       quality_metrics: (if is_atac then ['atac_replication', 'atac_peak_enrichment'] else [
                           'chip_replication',
                           'chip_peak_enrichment',
@@ -284,7 +288,7 @@ more legible.
         file_format: 'bigBed',
         filekey: 'bfilt_overlap_peak_bb',
         output_type: output_type,
-      } + shared_file_props,
+      } + shared_file_props_no_qc,
     ],
     'accession.steps': (if is_atac then [] else [
                           {
