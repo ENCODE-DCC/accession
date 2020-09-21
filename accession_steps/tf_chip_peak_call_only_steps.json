@@ -289,11 +289,7 @@
           "file_format": "bigBed",
           "file_format_type": "narrowPeak",
           "filekey": "bfilt_idr_peak_bb",
-          "output_type": "IDR thresholded peaks",
-          "quality_metrics": [
-            "chip_replication",
-            "chip_peak_enrichment"
-          ]
+          "output_type": "IDR thresholded peaks"
         }
       ],
       "wdl_task_name": "idr_pr"
@@ -316,11 +312,7 @@
           "file_format": "bigBed",
           "file_format_type": "narrowPeak",
           "filekey": "bfilt_idr_peak_bb",
-          "output_type": "IDR thresholded peaks",
-          "quality_metrics": [
-            "chip_replication",
-            "chip_peak_enrichment"
-          ]
+          "output_type": "IDR thresholded peaks"
         }
       ],
       "wdl_task_name": "idr_ppr"
@@ -344,11 +336,7 @@
           "file_format": "bigBed",
           "file_format_type": "narrowPeak",
           "filekey": "bfilt_idr_peak_bb",
-          "output_type": "IDR thresholded peaks",
-          "quality_metrics": [
-            "chip_replication",
-            "chip_peak_enrichment"
-          ]
+          "output_type": "IDR thresholded peaks"
         }
       ],
       "wdl_task_name": "idr"

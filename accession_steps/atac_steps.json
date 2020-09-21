@@ -311,11 +311,7 @@
           "file_format": "bigBed",
           "file_format_type": "narrowPeak",
           "filekey": "bfilt_idr_peak_bb",
-          "output_type": "IDR thresholded peaks",
-          "quality_metrics": [
-            "atac_replication",
-            "atac_peak_enrichment"
-          ]
+          "output_type": "IDR thresholded peaks"
         }
       ],
       "wdl_task_name": "idr_pr"
@@ -335,11 +331,7 @@
           "file_format": "bigBed",
           "file_format_type": "narrowPeak",
           "filekey": "bfilt_idr_peak_bb",
-          "output_type": "IDR thresholded peaks",
-          "quality_metrics": [
-            "atac_replication",
-            "atac_peak_enrichment"
-          ]
+          "output_type": "IDR thresholded peaks"
         }
       ],
       "wdl_task_name": "idr_ppr"
@@ -362,11 +354,7 @@
           "file_format": "bigBed",
           "file_format_type": "narrowPeak",
           "filekey": "bfilt_idr_peak_bb",
-          "output_type": "IDR thresholded peaks",
-          "quality_metrics": [
-            "atac_replication",
-            "atac_peak_enrichment"
-          ]
+          "output_type": "IDR thresholded peaks"
         }
       ],
       "wdl_task_name": "idr"
@@ -477,11 +465,7 @@
           "file_format": "bigBed",
           "file_format_type": "narrowPeak",
           "filekey": "bfilt_overlap_peak_bb",
-          "output_type": "pseudo-replicated peaks",
-          "quality_metrics": [
-            "atac_replication",
-            "atac_peak_enrichment"
-          ]
+          "output_type": "pseudo-replicated peaks"
         }
       ],
       "wdl_task_name": "overlap_pr"
@@ -504,11 +488,7 @@
           "file_format": "bigBed",
           "file_format_type": "narrowPeak",
           "filekey": "bfilt_overlap_peak_bb",
-          "output_type": "pseudo-replicated peaks",
-          "quality_metrics": [
-            "atac_replication",
-            "atac_peak_enrichment"
-          ]
+          "output_type": "pseudo-replicated peaks"
         }
       ],
       "wdl_task_name": "overlap_ppr"
@@ -531,11 +511,7 @@
           "file_format": "bigBed",
           "file_format_type": "narrowPeak",
           "filekey": "bfilt_overlap_peak_bb",
-          "output_type": "replicated peaks",
-          "quality_metrics": [
-            "atac_replication",
-            "atac_peak_enrichment"
-          ]
+          "output_type": "replicated peaks"
         }
       ],
       "wdl_task_name": "overlap"
