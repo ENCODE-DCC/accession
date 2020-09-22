@@ -16,8 +16,8 @@
     },
     'accession.steps': [
       {
-        dcc_step_run: 'wgbs-alignment-step-run-v-1',
-        dcc_step_version: '/analysis-step-versions/wgbs-alignment-step-v-1-0/',
+        dcc_step_run: 'gembs-alignment-step-v-1',
+        dcc_step_version: '/analysis-step-versions/gembs-alignment-step-v-1-0/',
         wdl_files: [
           {
             derived_from_files: [
@@ -49,8 +49,8 @@
         wdl_task_name: 'map',
       },
       {
-        dcc_step_run: 'wgbs-extract-step-run-v-1',
-        dcc_step_version: '/analysis-step-versions/wgbs-extract-step-v-1-0/',
+        dcc_step_run: 'egembs-methylation-estimation-step-v-1',
+        dcc_step_version: '/analysis-step-versions/egembs-methylation-estimation-step-v-1-0/',
         wdl_files: [
           bed_bigwig_derived_from_files + i
           for i in [
@@ -90,8 +90,8 @@
         wdl_task_name: 'extract',
       },
       {
-        dcc_step_run: 'wgbs-genotyping-extract-step-run-v-1',
-        dcc_step_version: '/analysis-step-versions/wgbs-genotyping-extract-step-v-1-0/',
+        dcc_step_run: 'gembs-genotyping-methylation-estimation-smoothing-step-v-1',
+        dcc_step_version: '/analysis-step-versions/gembs-genotyping-methylation-estimation-smoothing-step-v-1-0/',
         wdl_files: [
           {
             derived_from_files: [
@@ -109,57 +109,68 @@
         wdl_task_name: 'bsmooth',
       },
       {
-        dcc_step_run: 'wgbs-extract-format-conversion-step-run-v-1',
-        dcc_step_version: '/analysis-step-versions/wgbs-extract-format-conversion-step-v-1-0/',
+        dcc_step_run: 'gembs-cpg-file-format-conversion-step-v-1',
+        dcc_step_version: '/analysis-step-versions/gembs-cpg-file-format-conversion-step-v-1-0/',
         wdl_files: [
-          bed_bigwig_derived_from_files + i
-          for i in [
-            {
-              derived_from_files: [
-                contig_sizes_derived_from_file,
-                {
-                  derived_from_filekey: 'chg_bed',
-                  derived_from_task: 'extract',
-                },
-              ],
-              file_format: 'bigBed',
-              file_format_type: 'bedMethyl',
-              filekey: 'chg_bb',
-              output_type: 'methylation state at CHG',
-            },
-            {
-              derived_from_files: [
-                contig_sizes_derived_from_file,
-                {
-                  derived_from_filekey: 'chh_bed',
-                  derived_from_task: 'extract',
-                },
-              ],
-              file_format: 'bigBed',
-              file_format_type: 'bedMethyl',
-              filekey: 'chh_bb',
-              output_type: 'methylation state at CHH',
-            },
-            {
-              derived_from_files: [
-                contig_sizes_derived_from_file,
-                {
-                  derived_from_filekey: 'cpg_bed',
-                  derived_from_task: 'extract',
-                },
-              ],
-              file_format: 'bigBed',
-              file_format_type: 'bedMethyl',
-              filekey: 'cpg_bb',
-              output_type: 'methylation state at CPG',
-            },
-          ]
+          bed_bigwig_derived_from_files {
+            derived_from_files: [
+              contig_sizes_derived_from_file,
+              {
+                derived_from_filekey: 'cpg_bed',
+                derived_from_task: 'extract',
+              },
+            ],
+            file_format: 'bigBed',
+            file_format_type: 'bedMethyl',
+            filekey: 'cpg_bb',
+            output_type: 'methylation state at CPG',
+          },
         ],
         wdl_task_name: 'extract',
       },
       {
-        dcc_step_run: 'wgbs-genotyping-extract-format-conversion-step-run-v-1',
-        dcc_step_version: '/analysis-step-versions/wgbs-genotyping-extract-format-conversion-step-v-1-0/',
+        dcc_step_run: 'gembs-chg-file-format-conversion-step-v-1',
+        dcc_step_version: '/analysis-step-versions/gembs-chg-file-format-conversion-step-v-1-0/',
+        wdl_files: [
+          bed_bigwig_derived_from_files {
+            derived_from_files: [
+              contig_sizes_derived_from_file,
+              {
+                derived_from_filekey: 'chg_bed',
+                derived_from_task: 'extract',
+              },
+            ],
+            file_format: 'bigBed',
+            file_format_type: 'bedMethyl',
+            filekey: 'chg_bb',
+            output_type: 'methylation state at CHG',
+          },
+        ],
+        wdl_task_name: 'extract',
+      },
+      {
+        dcc_step_run: 'gembs-chh-file-format-conversion-step-v-1',
+        dcc_step_version: '/analysis-step-versions/gembs-chh-file-format-conversion-step-v-1-0/',
+        wdl_files: [
+          bed_bigwig_derived_from_files {
+            derived_from_files: [
+              contig_sizes_derived_from_file,
+              {
+                derived_from_filekey: 'chh_bed',
+                derived_from_task: 'extract',
+              },
+            ],
+            file_format: 'bigBed',
+            file_format_type: 'bedMethyl',
+            filekey: 'chh_bb',
+            output_type: 'methylation state at CHH',
+          },
+        ],
+        wdl_task_name: 'extract',
+      },
+      {
+        dcc_step_run: 'gembs-smoothed-cpg-file-format-conversion-step-v-1',
+        dcc_step_version: '/analysis-step-versions/gembs-smoothed-cpg-file-format-conversion-step-v-1-0/',
         wdl_files: [
           {
             derived_from_files: [
@@ -182,8 +193,8 @@
         wdl_task_name: 'bsmooth',
       },
       {
-        dcc_step_run: 'wgbs-average-coverage-step-run-v-1',
-        dcc_step_version: '/analysis-step-versions/wgbs-average-coverage-step-v-1-0/',
+        dcc_step_run: 'gembs-cpg-coverage-calculation-step-v-1',
+        dcc_step_version: '/analysis-step-versions/gembs-cpg-coverage-calculation-step-v-1-0/',
         wdl_files: [
           {
             derived_from_files: [
