@@ -2258,7 +2258,22 @@ class AccessionWgbs(Accession):
             gs_file.task, "calculate_average_coverage", "average_coverage_qc"
         )[0]
         samtools_stats_qc = self.backend.read_json(samtools_stats_qc_file)
-        output_qc.update(samtools_stats_qc["samtools_stats"])
+        output_qc.update(
+            {
+                k: v
+                for k, v in samtools_stats_qc["samtools_stats"].items()
+                if k
+                not in [
+                    "total first fragment length",
+                    "total last fragment length",
+                    "average first fragment length",
+                    "average last fragment length",
+                    "maximum first fragment length",
+                    "maximum last fragment length",
+                    "percentage of properly paired reads (%)",
+                ]
+            }
+        )
         return self.queue_qc(output_qc, encode_file, "samtools-stats-quality-metric")
 
     def make_cpg_correlation_qc(self, encode_file: EncodeFile, gs_file: GSFile) -> None:
