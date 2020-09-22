@@ -2227,15 +2227,6 @@ class AccessionWgbs(Accession):
                 )
             }
         )
-        average_coverage_qc_file = self.analysis.search_down(
-            gs_file.task, "calculate_average_coverage", "average_coverage_qc"
-        )[0]
-        average_coverage_qc = self.backend.read_json(average_coverage_qc_file)  # noqa
-        average_coverage_qc_attachment = self.get_attachment(
-            average_coverage_qc_file, mime_type="application/json"
-        )
-        output_qc["attachment"] = average_coverage_qc_attachment
-        # output_qc.update(average_coverage_qc["average_coverage"])
         mapq_plot_png = self.analysis.search_down(
             gs_file.task, "qc_report", "map_qc_mapq_plot_png"
         )[0]
@@ -2248,6 +2239,17 @@ class AccessionWgbs(Accession):
         output_qc["insert_size_plot"] = self.get_attachment(
             insert_size_plot_png, mime_type="image/png"
         )
+        average_coverage_qc_file = self.analysis.search_down(
+            gs_file.task, "calculate_average_coverage", "average_coverage_qc"
+        )[0]
+        average_coverage_qc = self.backend.read_json(average_coverage_qc_file)
+        attachment_qc = {**average_coverage_qc, **gembs_qc}
+        qc_bytes = EncodeAttachment.get_bytes_from_dict(attachment_qc)
+        modeled_attachment = EncodeAttachment(qc_bytes, gs_file.filename)
+        attachment = modeled_attachment.get_portal_object(
+            mime_type="application/json", additional_extension=".json"
+        )
+        output_qc["attachment"] = attachment
         return self.queue_qc(output_qc, encode_file, "gembs-alignment-quality-metric")
 
     def make_samtools_stats_qc(self, encode_file: EncodeFile, gs_file: GSFile) -> None:
