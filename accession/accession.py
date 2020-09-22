@@ -2183,6 +2183,27 @@ class AccessionWgbs(Accession):
         filekey = "reference"
         return self.find_portal_property_from_filekey(filekey, EncodeFile.ASSEMBLY)
 
+    @property
+    def experiment(self) -> EncodeExperiment:
+        """
+        We override the implementation in the base class because in the WGBS pipeline
+        both the `make_metadata_csv` and `map` tasks have `fastqs` as input, but in one
+        of them it is a JSON file containing file paths and not the actual fastqs,
+        which is not present on the portal. So we need to manually dig up one of the
+        fastqs to find on the portal.
+        """
+        if self._experiment is None:
+            map_task = self.analysis.get_tasks("map")[0]
+            fastq_filename = map_task.inputs["fastqs"][0]
+            encode_file = self.get_encode_file_matching_md5_of_blob(
+                self.analysis.get_files(filename=fastq_filename)[0]
+            )
+            if encode_file is None:
+                raise ValueError("Could not find raw fastqs on the portal")
+            experiment_obj = self.conn.get(encode_file.dataset, frame="embedded")
+            self._experiment = EncodeExperiment(experiment_obj)
+        return self._experiment
+
     def make_gembs_alignment_qc(self, encode_file: EncodeFile, gs_file: GSFile) -> None:
         if encode_file.has_qc("GembsAlignmentQualityMetric"):
             return
