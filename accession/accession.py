@@ -2212,7 +2212,21 @@ class AccessionWgbs(Accession):
             gs_file.task, "qc_report", "portal_map_qc_json"
         )[0]
         gembs_qc = self.backend.read_json(gembs_qc_file)
-        output_qc.update(gembs_qc)
+        output_qc.update(
+            {
+                k: v
+                for k, v in gembs_qc.items()
+                if k
+                not in (
+                    "correct_pairs",
+                    "general_reads",
+                    "pct_general_reads",
+                    "pct_reads_in_control_sequences",
+                    "pct_sequenced_reads",
+                    "reads_in_control_sequences",
+                )
+            }
+        )
         average_coverage_qc_file = self.analysis.search_down(
             gs_file.task, "calculate_average_coverage", "average_coverage_qc"
         )[0]
