@@ -2250,7 +2250,7 @@ class AccessionWgbs(Accession):
     def make_cpg_correlation_qc(self, encode_file: EncodeFile, gs_file: GSFile) -> None:
         if (
             encode_file.has_qc("CpgCorrelationQualityMetric")
-            or len(self.analysis.metadata["inputs"]["fastqs"]) != 2
+            or len(self.analysis.metadata.content["inputs"]["fastqs"]) != 2
         ):
             return
 
