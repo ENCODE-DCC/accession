@@ -49,8 +49,8 @@
         wdl_task_name: 'map',
       },
       {
-        dcc_step_run: 'egembs-methylation-estimation-step-v-1',
-        dcc_step_version: '/analysis-step-versions/egembs-methylation-estimation-step-v-1-0/',
+        dcc_step_run: 'gembs-methylation-estimation-step-v-1',
+        dcc_step_version: '/analysis-step-versions/gembs-methylation-estimation-step-v-1-0/',
         wdl_files: [
           bed_bigwig_derived_from_files + i
           for i in [
