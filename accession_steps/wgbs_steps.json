@@ -140,7 +140,7 @@
           "file_format": "bed",
           "file_format_type": "bedMethyl",
           "filekey": "smoothed_cpg_bed",
-          "output_type": "smoothed methylation state at CpG"
+          "output_type": "smoothed methylation stage at CpG"
         }
       ],
       "wdl_task_name": "bsmooth"
@@ -236,7 +236,7 @@
           "file_format": "bigBed",
           "file_format_type": "bedMethyl",
           "filekey": "smoothed_cpg_bigbed",
-          "output_type": "smoothed methylation state at CpG"
+          "output_type": "smoothed methylation stage at CpG"
         }
       ],
       "wdl_task_name": "bsmooth"
