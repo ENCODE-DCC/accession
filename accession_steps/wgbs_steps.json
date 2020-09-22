@@ -86,7 +86,7 @@
           "file_format": "bed",
           "file_format_type": "bedMethyl",
           "filekey": "cpg_bed",
-          "output_type": "methylation state at CPG",
+          "output_type": "methylation state at CpG",
           "quality_metrics": [
             "cpg_correlation"
           ]
@@ -140,7 +140,7 @@
           "file_format": "bed",
           "file_format_type": "bedMethyl",
           "filekey": "smoothed_cpg_bed",
-          "output_type": "smoothed methylation state at CPG"
+          "output_type": "smoothed methylation state at CpG"
         }
       ],
       "wdl_task_name": "bsmooth"
@@ -164,7 +164,7 @@
           "file_format": "bigBed",
           "file_format_type": "bedMethyl",
           "filekey": "cpg_bb",
-          "output_type": "methylation state at CPG"
+          "output_type": "methylation state at CpG"
         }
       ],
       "wdl_task_name": "extract"
@@ -236,7 +236,7 @@
           "file_format": "bigBed",
           "file_format_type": "bedMethyl",
           "filekey": "smoothed_cpg_bigbed",
-          "output_type": "smoothed methylation state at CPG"
+          "output_type": "smoothed methylation state at CpG"
         }
       ],
       "wdl_task_name": "bsmooth"
