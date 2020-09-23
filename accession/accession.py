@@ -1998,7 +1998,8 @@ class AccessionAtac(AccessionAtacChip):
         output_qc["processing_stage"] = processing_stage
         output_qc.update(qc["align"][qc_key][replicate])
         output_qc.update(qc["align"]["frac_mito"][replicate])
-        output_qc.update(qc["align"]["frag_len_stat"][replicate])
+        if gs_file.task.inputs["paired_end"] is True:
+            output_qc.update(qc["align"]["frag_len_stat"][replicate])
         return self.queue_qc(output_qc, encode_file, "atac-alignment-quality-metric")
 
     def make_atac_align_enrich_qc(
