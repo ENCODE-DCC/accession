@@ -2205,6 +2205,12 @@ class AccessionWgbs(Accession):
         return self._experiment
 
     def make_gembs_alignment_qc(self, encode_file: EncodeFile, gs_file: GSFile) -> None:
+        """
+        Several of the properties in the QC are useless so we don't post the to the
+        portal. Furthermore the pipeline QC use values between 0 and 1 for percentages
+        but the portal usually uses values between 0 and 100 so we make sure to multiply
+        any percentages by 100.
+        """
         if encode_file.has_qc("GembsAlignmentQualityMetric"):
             return
         output_qc = {}
@@ -2250,6 +2256,9 @@ class AccessionWgbs(Accession):
             mime_type="application/json", additional_extension=".json"
         )
         output_qc["attachment"] = attachment
+        for k, v in output_qc.items():
+            if k.startswith("pct"):
+                output_qc[k] = 100 * v
         return self.queue_qc(output_qc, encode_file, "gembs-alignment-quality-metric")
 
     def make_samtools_stats_qc(self, encode_file: EncodeFile, gs_file: GSFile) -> None:
