@@ -50,7 +50,7 @@
             }
           ],
           "file_format": "bed",
-          "file_format_type": "bedMethyl",
+          "file_format_type": "bed9+",
           "filekey": "chg_bed_no_header",
           "output_type": "methylation state at CHG"
         },
@@ -67,7 +67,7 @@
             }
           ],
           "file_format": "bed",
-          "file_format_type": "bedMethyl",
+          "file_format_type": "bed9+",
           "filekey": "chh_bed_no_header",
           "output_type": "methylation state at CHH"
         },
@@ -84,7 +84,7 @@
             }
           ],
           "file_format": "bed",
-          "file_format_type": "bedMethyl",
+          "file_format_type": "bed9+",
           "filekey": "cpg_bed_no_header",
           "output_type": "methylation state at CpG",
           "quality_metrics": [
@@ -138,7 +138,7 @@
             }
           ],
           "file_format": "bed",
-          "file_format_type": "bedMethyl",
+          "file_format_type": "bed9+",
           "filekey": "smoothed_cpg_bed",
           "output_type": "smoothed methylation stage at CpG"
         }
@@ -162,7 +162,7 @@
             }
           ],
           "file_format": "bigBed",
-          "file_format_type": "bedMethyl",
+          "file_format_type": "bed9+",
           "filekey": "cpg_bb",
           "output_type": "methylation state at CpG"
         }
@@ -186,7 +186,7 @@
             }
           ],
           "file_format": "bigBed",
-          "file_format_type": "bedMethyl",
+          "file_format_type": "bed9+",
           "filekey": "chg_bb",
           "output_type": "methylation state at CHG"
         }
@@ -210,7 +210,7 @@
             }
           ],
           "file_format": "bigBed",
-          "file_format_type": "bedMethyl",
+          "file_format_type": "bed9+",
           "filekey": "chh_bb",
           "output_type": "methylation state at CHH"
         }
@@ -234,7 +234,7 @@
             }
           ],
           "file_format": "bigBed",
-          "file_format_type": "bedMethyl",
+          "file_format_type": "bed9+",
           "filekey": "smoothed_cpg_bigbed",
           "output_type": "smoothed methylation stage at CpG"
         }
