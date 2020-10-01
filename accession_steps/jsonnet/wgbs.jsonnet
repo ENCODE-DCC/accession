@@ -57,19 +57,19 @@
             {
               file_format: 'bed',
               file_format_type: 'bedMethyl',
-              filekey: 'chg_bed',
+              filekey: 'chg_bed_no_header',
               output_type: 'methylation state at CHG',
             },
             {
               file_format: 'bed',
               file_format_type: 'bedMethyl',
-              filekey: 'chh_bed',
+              filekey: 'chh_bed_no_header',
               output_type: 'methylation state at CHH',
             },
             {
               file_format: 'bed',
               file_format_type: 'bedMethyl',
-              filekey: 'cpg_bed',
+              filekey: 'cpg_bed_no_header',
               output_type: 'methylation state at CpG',
               quality_metrics: [
                 'cpg_correlation',
@@ -116,7 +116,7 @@
             derived_from_files: [
               contig_sizes_derived_from_file,
               {
-                derived_from_filekey: 'cpg_bed',
+                derived_from_filekey: 'cpg_bed_no_header',
                 derived_from_task: 'extract',
               },
             ],
@@ -136,7 +136,7 @@
             derived_from_files: [
               contig_sizes_derived_from_file,
               {
-                derived_from_filekey: 'chg_bed',
+                derived_from_filekey: 'chg_bed_no_header',
                 derived_from_task: 'extract',
               },
             ],
@@ -156,7 +156,7 @@
             derived_from_files: [
               contig_sizes_derived_from_file,
               {
-                derived_from_filekey: 'chh_bed',
+                derived_from_filekey: 'chh_bed_no_header',
                 derived_from_task: 'extract',
               },
             ],
@@ -199,7 +199,7 @@
           {
             derived_from_files: [
               {
-                derived_from_filekey: 'cpg_bed',
+                derived_from_filekey: 'cpg_bed_no_header',
                 derived_from_task: 'extract',
               },
               {
