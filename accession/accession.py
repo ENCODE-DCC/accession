@@ -2171,6 +2171,144 @@ class AccessionAtac(AccessionAtacChip):
         )
 
 
+class AccessionWgbs(Accession):
+    QC_MAP = {
+        "gembs_alignment": "make_gembs_alignment_qc",
+        "samtools_stats": "make_samtools_stats_qc",
+        "cpg_correlation": "make_cpg_correlation_qc",
+    }
+
+    @property
+    def assembly(self):
+        filekey = "reference"
+        return self.find_portal_property_from_filekey(filekey, EncodeFile.ASSEMBLY)
+
+    @property
+    def experiment(self) -> EncodeExperiment:
+        """
+        We override the implementation in the base class because in the WGBS pipeline
+        both the `make_metadata_csv` and `map` tasks have `fastqs` as input, but in one
+        of them it is a JSON file containing file paths and not the actual fastqs,
+        which is not present on the portal. So we need to manually dig up one of the
+        fastqs to find on the portal.
+        """
+        if self._experiment is None:
+            map_task = self.analysis.get_tasks("map")[0]
+            fastq_filename = map_task.inputs["fastqs"][0]
+            encode_file = self.get_encode_file_matching_md5_of_blob(
+                self.analysis.get_files(filename=fastq_filename)[0]
+            )
+            if encode_file is None:
+                raise ValueError("Could not find raw fastqs on the portal")
+            experiment_obj = self.conn.get(encode_file.dataset, frame="embedded")
+            self._experiment = EncodeExperiment(experiment_obj)
+        return self._experiment
+
+    def make_gembs_alignment_qc(self, encode_file: EncodeFile, gs_file: GSFile) -> None:
+        """
+        Several of the properties in the QC are useless so we don't post the to the
+        portal. Furthermore the pipeline QC use values between 0 and 1 for percentages
+        but the portal usually uses values between 0 and 100 so we make sure to multiply
+        any percentages by 100.
+        """
+        if encode_file.has_qc("GembsAlignmentQualityMetric"):
+            return
+        output_qc = {}
+        gembs_qc_file = self.analysis.search_down(
+            gs_file.task, "qc_report", "portal_map_qc_json"
+        )[0]
+        gembs_qc = self.backend.read_json(gembs_qc_file)
+        output_qc.update(
+            {
+                k: v
+                for k, v in gembs_qc.items()
+                if k
+                not in (
+                    "correct_pairs",
+                    "general_reads",
+                    "pct_general_reads",
+                    "pct_reads_in_control_sequences",
+                    "pct_sequenced_reads",
+                    "reads_in_control_sequences",
+                )
+            }
+        )
+        mapq_plot_png = self.analysis.search_down(
+            gs_file.task, "qc_report", "map_qc_mapq_plot_png"
+        )[0]
+        output_qc["mapq_plot"] = self.get_attachment(
+            mapq_plot_png, mime_type="image/png"
+        )
+        insert_size_plot_png = self.analysis.search_down(
+            gs_file.task, "qc_report", "map_qc_insert_size_plot_png"
+        )[0]
+        output_qc["insert_size_plot"] = self.get_attachment(
+            insert_size_plot_png, mime_type="image/png"
+        )
+        average_coverage_qc_file = self.analysis.search_down(
+            gs_file.task, "calculate_average_coverage", "average_coverage_qc"
+        )[0]
+        average_coverage_qc = self.backend.read_json(average_coverage_qc_file)
+        attachment_qc = {**average_coverage_qc, **gembs_qc}
+        qc_bytes = EncodeAttachment.get_bytes_from_dict(attachment_qc)
+        modeled_attachment = EncodeAttachment(qc_bytes, gs_file.filename)
+        attachment = modeled_attachment.get_portal_object(
+            mime_type="application/json", additional_extension=".json"
+        )
+        output_qc["attachment"] = attachment
+        for k, v in output_qc.items():
+            if k.startswith("pct"):
+                output_qc[k] = 100 * v
+        return self.queue_qc(output_qc, encode_file, "gembs-alignment-quality-metric")
+
+    def make_samtools_stats_qc(self, encode_file: EncodeFile, gs_file: GSFile) -> None:
+        if encode_file.has_qc("SamtoolsStatsQualityMetric"):
+            return
+        output_qc = {}
+        samtools_stats_qc_file = self.analysis.search_down(
+            gs_file.task, "calculate_average_coverage", "average_coverage_qc"
+        )[0]
+        samtools_stats_qc = self.backend.read_json(samtools_stats_qc_file)
+        output_qc.update(
+            {
+                k: v
+                for k, v in samtools_stats_qc["samtools_stats"].items()
+                if k
+                not in [
+                    "total first fragment length",
+                    "total last fragment length",
+                    "average first fragment length",
+                    "average last fragment length",
+                    "maximum first fragment length",
+                    "maximum last fragment length",
+                    "percentage of properly paired reads (%)",
+                ]
+            }
+        )
+        return self.queue_qc(output_qc, encode_file, "samtools-stats-quality-metric")
+
+    def make_cpg_correlation_qc(self, encode_file: EncodeFile, gs_file: GSFile) -> None:
+        if (
+            encode_file.has_qc("CpgCorrelationQualityMetric")
+            or len(self.analysis.metadata.content["inputs"]["wgbs.fastqs"]) != 2
+        ):
+            return
+
+        output_qc = {}  # type: ignore
+        cpg_correlation_qc_file = self.analysis.search_down(
+            gs_file.task,
+            "calculate_bed_pearson_correlation",
+            "bed_pearson_correlation_qc",
+        )[0]
+        cpg_correlation_qc = self.backend.read_json(cpg_correlation_qc_file)
+        output_qc["Pearson correlation"] = cpg_correlation_qc["pearson_correlation"][
+            "pearson_correlation"
+        ]
+        return self.queue_qc(
+            output_qc, encode_file, "cpg-correlation-quality-metric", shared=True
+        )
+
+
 def accession_factory(
     pipeline_type: str,
     accession_metadata: str,
@@ -2199,6 +2337,7 @@ def accession_factory(
         "control_chip": AccessionChip,
         "atac": AccessionAtac,
         "dnase": AccessionDnase,
+        "wgbs": AccessionWgbs,
     }
     selected_accession: Optional[Type[Accession]] = None
     try:
