@@ -206,7 +206,8 @@ more legible.
       {
         dcc_step_run: '%s-seq-pseudoreplicated-idr-step-v-1' % step_prefix,
         dcc_step_version: '/analysis-step-versions/%s-seq-pseudoreplicated-idr-step-v-1-0/' % step_prefix,
-        wdl_files: IdrWdlFiles(self.wdl_task_name, is_atac=is_atac),
+        local callbacks = if is_atac then [] else [MAYBE_PREFERRED_DEFAULT],
+        wdl_files: IdrWdlFiles(self.wdl_task_name, callbacks=callbacks, is_atac=is_atac),
         wdl_task_name: 'idr_pr',
       },
       {
@@ -228,7 +229,8 @@ more legible.
       {
         dcc_step_run: '%s-seq-pseudoreplicated-idr-thresholded-peaks-file-format-conversion-step-v-1' % step_prefix,
         dcc_step_version: '/analysis-step-versions/%s-seq-pseudoreplicated-idr-thresholded-peaks-file-format-conversion-step-v-1-0/' % step_prefix,
-        wdl_files: FormatConversionWdlFiles(self.wdl_task_name,),
+        local callbacks = if is_atac then [] else [MAYBE_PREFERRED_DEFAULT],
+        wdl_files: FormatConversionWdlFiles(self.wdl_task_name, callbacks=callbacks,),
         wdl_task_name: 'idr_pr',
       },
       {
@@ -309,7 +311,7 @@ more legible.
         local _blacklist_derived_from_task = if has_blacklist_derived_from_task then blacklist_derived_from_task else self.wdl_task_name,
         dcc_step_run: '%s-seq-pseudoreplicated-overlap-step-v-1' % step_prefix,
         dcc_step_version: '/analysis-step-versions/%s-seq-pseudoreplicated-overlap-step-v-1-0/' % step_prefix,
-        wdl_files: OverlapWdlFiles(_blacklist_derived_from_task, blacklist_derived_from_filekey, 'pseudo-replicated peaks', is_atac=is_atac),
+        wdl_files: OverlapWdlFiles(_blacklist_derived_from_task, blacklist_derived_from_filekey, 'pseudo-replicated peaks', callbacks=[MAYBE_PREFERRED_DEFAULT], is_atac=is_atac),
         wdl_task_name: 'overlap_pr',
       },
       {
@@ -335,7 +337,7 @@ more legible.
       {
         dcc_step_run: '%s-seq-pseudoreplicated-overlap-stable-peaks-file-format-conversion-step-v-1' % step_prefix,
         dcc_step_version: '/analysis-step-versions/%s-seq-pseudoreplicated-overlap-stable-peaks-file-format-conversion-step-v-1-0/' % step_prefix,
-        wdl_files: FormatConversionWdlFiles(self.wdl_task_name, 'pseudo-replicated peaks'),
+        wdl_files: FormatConversionWdlFiles(self.wdl_task_name, 'pseudo-replicated peaks', callbacks=[MAYBE_PREFERRED_DEFAULT]),
         wdl_task_name: 'overlap_pr',
       },
       {
