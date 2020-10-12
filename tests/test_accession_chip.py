@@ -373,13 +373,31 @@ def test_get_chip_pipeline_replication_method(peak_caller, expected):
         ),
     ],
 )
-def test_maybe_preferred_default(mocker, mock_accession_chip, gsfile, qc, expected):
+def test_maybe_preferred_default_replicated(
+    mocker, mock_accession_chip, gsfile, qc, expected
+):
     mocker.patch.object(
         mock_accession_chip.analysis, "get_files", return_value=[gsfile]
     )
     mocker.patch.object(
         mock_accession_chip.analysis.backend, "read_file", return_value=qc
     )
+    mocker.patch.object(mock_accession_chip, "get_number_of_replicates", return_value=2)
+    result = mock_accession_chip.maybe_preferred_default(gsfile)
+    assert result == expected
+
+
+@pytest.mark.parametrize(
+    "task_name,expected", [("idr_pr", {"preferred_default": True}), ("idr", {})]
+)
+def test_maybe_preferred_default_unreplicated(
+    mocker, mock_accession_chip, gsfile, task_name, expected
+):
+    mocker.patch.object(
+        mock_accession_chip.analysis, "get_files", return_value=[gsfile]
+    )
+    mocker.patch.object(gsfile.task, "task_name", task_name)
+    mocker.patch.object(mock_accession_chip, "get_number_of_replicates", return_value=1)
     result = mock_accession_chip.maybe_preferred_default(gsfile)
     assert result == expected
 
@@ -607,6 +625,23 @@ def test_get_atac_chip_pipeline_replicate_raises(mocker, mock_accession_chip, gs
     )
     with pytest.raises(ValueError):
         mock_accession_chip.get_atac_chip_pipeline_replicate(gsfile)
+
+
+def test_get_atac_chip_pipeline_get_number_of_replicates(mocker, mock_accession_chip):
+    mocker.patch.object(
+        mock_accession_chip.analysis.metadata,
+        "content",
+        {
+            "inputs": {
+                "fastqs_rep1_R1": ["gs://abc/cde.fastq.gz"],
+                "fastqs_rep1_R2": ["gs://abc/cde.fastq.gz"],
+                "fastqs_rep2_R1": ["gs://spam/eggs.fastq.gz"],
+                "ctl_fastqs_rep2_R1": ["gs://spam/eggs.fastq.gz"],
+            }
+        },
+    )
+    result = mock_accession_chip.get_number_of_replicates()
+    assert result == 2
 
 
 @pytest.mark.parametrize(
