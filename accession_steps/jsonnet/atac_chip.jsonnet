@@ -19,15 +19,13 @@ more legible.
 */
 {
   local MAYBE_PREFERRED_DEFAULT = 'maybe_preferred_default',
-  local BedBigwigDerivedFromFiles(is_atac=false) = [
+  local BedBigwigDerivedFromFiles(is_atac=false, is_pseudoreplicated=true) = [
+    local disallow_tasks = if is_pseudoreplicated then [] else ['call_peak_pooled'] + if is_atac then [] else ['choose_ctl'];
+    local disallow_tasks_value = if std.length(disallow_tasks) != 0 then { disallow_tasks: disallow_tasks } else {};
     {
       derived_from_filekey: 'nodup_bam',
       derived_from_task: 'filter',
-    } + if is_atac then {} else {
-      disallow_tasks: [
-        'choose_ctl',
-      ],
-    },
+    } + disallow_tasks_value,
   ] + (if is_atac then [] else [{
          derived_from_filekey: 'bam',
          derived_from_inputs: true,
@@ -40,11 +38,12 @@ more legible.
     blacklist_derived_from_task,
     derived_from_filekey='blacklist',
     is_atac=false,
-  ) = [BedBigwigDerivedFromFiles(is_atac)[0]] + [{
+    is_pseudoreplicated=true,
+  ) = [BedBigwigDerivedFromFiles(is_atac, is_pseudoreplicated)[0]] + [{
     derived_from_filekey: derived_from_filekey,
     derived_from_inputs: true,
     derived_from_task: blacklist_derived_from_task,
-  }] + (if is_atac then [] else [BedBigwigDerivedFromFiles(is_atac)[1]]),
+  }] + (if is_atac then [] else [BedBigwigDerivedFromFiles(is_atac, is_pseudoreplicated)[1]]),
   local BigwigWdlFiles(is_atac=false) = [
     {
       derived_from_files: BedBigwigDerivedFromFiles(is_atac),
@@ -158,7 +157,12 @@ more legible.
                           'chip_peak_enrichment',
                         ]),
     },
-    local IdrWdlFiles(blacklist_derived_from_task, callbacks=[], is_atac=false) = [
+    local IdrWdlFiles(
+      blacklist_derived_from_task,
+      callbacks=[],
+      is_atac=false,
+      is_pseudoreplicated=true,
+    ) = [
       {
         derived_from_files: BedBigwigDerivedFromFiles(is_atac),
         file_format: 'bed',
@@ -170,7 +174,11 @@ more legible.
       (
         if std.length(callbacks) != 0 then { callbacks: callbacks } else {}
       ) + {
-        derived_from_files: BedBigwigBlacklistDerivedFromFiles(blacklist_derived_from_task, is_atac=is_atac),
+        derived_from_files: BedBigwigBlacklistDerivedFromFiles(
+          blacklist_derived_from_task,
+          is_atac=is_atac,
+          is_pseudoreplicated=is_pseudoreplicated,
+        ),
         file_format: 'bed',
         filekey: 'bfilt_idr_peak',
       } + shared_file_props,
@@ -214,7 +222,7 @@ more legible.
         dcc_step_version: '/analysis-step-versions/%s-seq-pooled-pseudoreplicated-idr-step-v-1-0/' % step_prefix,
         requires_replication: true,
         local callbacks = if is_atac then [] else [MAYBE_PREFERRED_DEFAULT],
-        wdl_files: IdrWdlFiles(self.wdl_task_name, callbacks=callbacks, is_atac=is_atac),
+        wdl_files: IdrWdlFiles(self.wdl_task_name, callbacks=callbacks, is_atac=is_atac, is_pseudoreplicated=false),
         wdl_task_name: 'idr_ppr',
       },
       {
@@ -222,7 +230,7 @@ more legible.
         dcc_step_version: '/analysis-step-versions/%s-seq-replicated-idr-step-v-1-0/' % step_prefix,
         requires_replication: true,
         local callbacks = (if is_atac then [] else [MAYBE_PREFERRED_DEFAULT]) + ['maybe_conservative_set'],
-        wdl_files: IdrWdlFiles(self.wdl_task_name, callbacks=callbacks, is_atac=is_atac),
+        wdl_files: IdrWdlFiles(self.wdl_task_name, callbacks=callbacks, is_atac=is_atac, is_pseudoreplicated=false),
         wdl_task_name: 'idr',
       },
       {
@@ -265,11 +273,23 @@ more legible.
                           'chip_peak_enrichment',
                         ]),
     },
-    local OverlapWdlFiles(blacklist_derived_from_task, blacklist_derived_from_filekey, output_type, callbacks=[], is_atac=false) = [
+    local OverlapWdlFiles(
+      blacklist_derived_from_task,
+      blacklist_derived_from_filekey,
+      output_type,
+      callbacks=[],
+      is_atac=false,
+      is_pseudoreplicated=true,
+    ) = [
       (
         if std.length(callbacks) != 0 then { callbacks: callbacks } else {}
       ) + {
-        derived_from_files: BedBigwigBlacklistDerivedFromFiles(blacklist_derived_from_task, blacklist_derived_from_filekey, is_atac=is_atac),
+        derived_from_files: BedBigwigBlacklistDerivedFromFiles(
+          blacklist_derived_from_task,
+          blacklist_derived_from_filekey,
+          is_atac=is_atac,
+          is_pseudoreplicated=is_pseudoreplicated,
+        ),
         file_format: 'bed',
         filekey: 'bfilt_overlap_peak',
         output_type: output_type,
@@ -317,9 +337,14 @@ more legible.
         dcc_step_run: '%s-seq-pooled-pseudoreplicated-overlap-step-v-1' % step_prefix,
         dcc_step_version: '/analysis-step-versions/%s-seq-pooled-pseudoreplicated-overlap-step-v-1-0/' % step_prefix,
         requires_replication: true,
-        wdl_files: OverlapWdlFiles(_blacklist_derived_from_task, blacklist_derived_from_filekey, 'pseudo-replicated peaks', callbacks=[
-          MAYBE_PREFERRED_DEFAULT,
-        ], is_atac=is_atac),
+        wdl_files: OverlapWdlFiles(
+          _blacklist_derived_from_task,
+          blacklist_derived_from_filekey,
+          'pseudo-replicated peaks',
+          callbacks=[MAYBE_PREFERRED_DEFAULT],
+          is_atac=is_atac,
+          is_pseudoreplicated=false,
+        ),
         wdl_task_name: 'overlap_ppr',
       },
       {
@@ -327,9 +352,14 @@ more legible.
         dcc_step_run: '%s-seq-replicated-overlap-step-v-1' % step_prefix,
         dcc_step_version: '/analysis-step-versions/%s-seq-replicated-overlap-step-v-1-0/' % step_prefix,
         requires_replication: true,
-        wdl_files: OverlapWdlFiles(_blacklist_derived_from_task, blacklist_derived_from_filekey, 'replicated peaks', callbacks=[
-          MAYBE_PREFERRED_DEFAULT,
-        ], is_atac=is_atac),
+        wdl_files: OverlapWdlFiles(
+          _blacklist_derived_from_task,
+          blacklist_derived_from_filekey,
+          'replicated peaks',
+          callbacks=[MAYBE_PREFERRED_DEFAULT],
+          is_atac=is_atac,
+          is_pseudoreplicated=false,
+        ),
         wdl_task_name: 'overlap',
       },
       {

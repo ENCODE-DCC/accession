@@ -88,10 +88,7 @@
           "derived_from_files": [
             {
               "derived_from_filekey": "nodup_bam",
-              "derived_from_task": "filter",
-              "disallow_tasks": [
-                "choose_ctl"
-              ]
+              "derived_from_task": "filter"
             },
             {
               "derived_from_filekey": "bam",
@@ -108,10 +105,7 @@
           "derived_from_files": [
             {
               "derived_from_filekey": "nodup_bam",
-              "derived_from_task": "filter",
-              "disallow_tasks": [
-                "choose_ctl"
-              ]
+              "derived_from_task": "filter"
             },
             {
               "derived_from_filekey": "bam",
@@ -136,10 +130,7 @@
           "derived_from_files": [
             {
               "derived_from_filekey": "nodup_bam",
-              "derived_from_task": "filter",
-              "disallow_tasks": [
-                "choose_ctl"
-              ]
+              "derived_from_task": "filter"
             },
             {
               "derived_from_filekey": "bam",
@@ -156,10 +147,7 @@
           "derived_from_files": [
             {
               "derived_from_filekey": "nodup_bam",
-              "derived_from_task": "filter",
-              "disallow_tasks": [
-                "choose_ctl"
-              ]
+              "derived_from_task": "filter"
             },
             {
               "derived_from_filekey": "bam",
@@ -183,10 +171,7 @@
           "derived_from_files": [
             {
               "derived_from_filekey": "nodup_bam",
-              "derived_from_task": "filter",
-              "disallow_tasks": [
-                "choose_ctl"
-              ]
+              "derived_from_task": "filter"
             },
             {
               "derived_from_filekey": "tas",
@@ -225,6 +210,7 @@
               "derived_from_filekey": "nodup_bam",
               "derived_from_task": "filter",
               "disallow_tasks": [
+                "call_peak_pooled",
                 "choose_ctl"
               ]
             },
@@ -265,6 +251,7 @@
               "derived_from_filekey": "nodup_bam",
               "derived_from_task": "filter",
               "disallow_tasks": [
+                "call_peak_pooled",
                 "choose_ctl"
               ]
             },
