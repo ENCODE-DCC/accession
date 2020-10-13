@@ -187,7 +187,6 @@
               "derived_from_filekey": "nodup_bam",
               "derived_from_task": "filter",
               "disallow_tasks": [
-                "call_peak_pooled",
                 "choose_ctl"
               ]
             },

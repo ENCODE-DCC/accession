@@ -224,7 +224,7 @@ more legible.
         dcc_step_version: '/analysis-step-versions/%s-seq-pooled-pseudoreplicated-idr-step-v-1-0/' % step_prefix,
         requires_replication: true,
         local callbacks = if is_atac then [] else [MAYBE_PREFERRED_DEFAULT],
-        wdl_files: IdrWdlFiles(self.wdl_task_name, callbacks=callbacks, is_atac=is_atac, ignore_pooled_peak_for_clarity=true),
+        wdl_files: IdrWdlFiles(self.wdl_task_name, callbacks=callbacks, is_atac=is_atac),
         wdl_task_name: 'idr_ppr',
       },
       {
@@ -345,7 +345,6 @@ more legible.
           'pseudo-replicated peaks',
           callbacks=[MAYBE_PREFERRED_DEFAULT],
           is_atac=is_atac,
-          ignore_pooled_peak_for_clarity=true,
         ),
         wdl_task_name: 'overlap_ppr',
       },
