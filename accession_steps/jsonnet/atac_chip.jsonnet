@@ -20,8 +20,10 @@ more legible.
 {
   local MAYBE_PREFERRED_DEFAULT = 'maybe_preferred_default',
   local BedBigwigDerivedFromFiles(is_atac=false, is_pseudoreplicated=true) = [
-    local disallow_tasks = if is_pseudoreplicated then [] else ['call_peak_pooled'] + if is_atac then [] else ['choose_ctl'];
-    local disallow_tasks_value = if std.length(disallow_tasks) != 0 then { disallow_tasks: disallow_tasks } else {};
+    local disallow_call_peak_pooled = if is_pseudoreplicated then [] else ['call_peak_pooled'];
+    local disallow_choose_ctl = if is_atac then [] else ['choose_ctl'];
+    local disallow_tasks = disallow_call_peak_pooled + disallow_choose_ctl;
+    local disallow_tasks_value = if std.length(disallow_tasks) > 0 then { disallow_tasks: disallow_tasks } else {};
     {
       derived_from_filekey: 'nodup_bam',
       derived_from_task: 'filter',
