@@ -19,8 +19,8 @@ more legible.
 */
 {
   local MAYBE_PREFERRED_DEFAULT = 'maybe_preferred_default',
-  local BedBigwigDerivedFromFiles(is_atac=false, is_pseudoreplicated=true) = [
-    local disallow_call_peak_pooled = if is_pseudoreplicated then [] else ['call_peak_pooled'];
+  local BedBigwigDerivedFromFiles(is_atac=false, ignore_pooled_peak_for_clarity=false) = [
+    local disallow_call_peak_pooled = if !ignore_pooled_peak_for_clarity then [] else ['call_peak_pooled'];
     local disallow_choose_ctl = if is_atac then [] else ['choose_ctl'];
     local disallow_tasks = disallow_call_peak_pooled + disallow_choose_ctl;
     local disallow_tasks_value = if std.length(disallow_tasks) > 0 then { disallow_tasks: disallow_tasks } else {};
@@ -40,12 +40,12 @@ more legible.
     blacklist_derived_from_task,
     derived_from_filekey='blacklist',
     is_atac=false,
-    is_pseudoreplicated=true,
-  ) = [BedBigwigDerivedFromFiles(is_atac, is_pseudoreplicated)[0]] + [{
+    ignore_pooled_peak_for_clarity=false,
+  ) = [BedBigwigDerivedFromFiles(is_atac, ignore_pooled_peak_for_clarity)[0]] + [{
     derived_from_filekey: derived_from_filekey,
     derived_from_inputs: true,
     derived_from_task: blacklist_derived_from_task,
-  }] + (if is_atac then [] else [BedBigwigDerivedFromFiles(is_atac, is_pseudoreplicated)[1]]),
+  }] + (if is_atac then [] else [BedBigwigDerivedFromFiles(is_atac, ignore_pooled_peak_for_clarity)[1]]),
   local BigwigWdlFiles(is_atac=false) = [
     {
       derived_from_files: BedBigwigDerivedFromFiles(is_atac),
@@ -163,7 +163,7 @@ more legible.
       blacklist_derived_from_task,
       callbacks=[],
       is_atac=false,
-      is_pseudoreplicated=true,
+      ignore_pooled_peak_for_clarity=false,
     ) = [
       {
         derived_from_files: BedBigwigDerivedFromFiles(is_atac),
@@ -179,7 +179,7 @@ more legible.
         derived_from_files: BedBigwigBlacklistDerivedFromFiles(
           blacklist_derived_from_task,
           is_atac=is_atac,
-          is_pseudoreplicated=is_pseudoreplicated,
+          ignore_pooled_peak_for_clarity=ignore_pooled_peak_for_clarity,
         ),
         file_format: 'bed',
         filekey: 'bfilt_idr_peak',
@@ -224,7 +224,7 @@ more legible.
         dcc_step_version: '/analysis-step-versions/%s-seq-pooled-pseudoreplicated-idr-step-v-1-0/' % step_prefix,
         requires_replication: true,
         local callbacks = if is_atac then [] else [MAYBE_PREFERRED_DEFAULT],
-        wdl_files: IdrWdlFiles(self.wdl_task_name, callbacks=callbacks, is_atac=is_atac, is_pseudoreplicated=false),
+        wdl_files: IdrWdlFiles(self.wdl_task_name, callbacks=callbacks, is_atac=is_atac, ignore_pooled_peak_for_clarity=true),
         wdl_task_name: 'idr_ppr',
       },
       {
@@ -232,7 +232,7 @@ more legible.
         dcc_step_version: '/analysis-step-versions/%s-seq-replicated-idr-step-v-1-0/' % step_prefix,
         requires_replication: true,
         local callbacks = (if is_atac then [] else [MAYBE_PREFERRED_DEFAULT]) + ['maybe_conservative_set'],
-        wdl_files: IdrWdlFiles(self.wdl_task_name, callbacks=callbacks, is_atac=is_atac, is_pseudoreplicated=false),
+        wdl_files: IdrWdlFiles(self.wdl_task_name, callbacks=callbacks, is_atac=is_atac, ignore_pooled_peak_for_clarity=true),
         wdl_task_name: 'idr',
       },
       {
@@ -281,7 +281,7 @@ more legible.
       output_type,
       callbacks=[],
       is_atac=false,
-      is_pseudoreplicated=true,
+      ignore_pooled_peak_for_clarity=false,
     ) = [
       (
         if std.length(callbacks) != 0 then { callbacks: callbacks } else {}
@@ -290,7 +290,7 @@ more legible.
           blacklist_derived_from_task,
           blacklist_derived_from_filekey,
           is_atac=is_atac,
-          is_pseudoreplicated=is_pseudoreplicated,
+          ignore_pooled_peak_for_clarity=ignore_pooled_peak_for_clarity,
         ),
         file_format: 'bed',
         filekey: 'bfilt_overlap_peak',
@@ -345,7 +345,7 @@ more legible.
           'pseudo-replicated peaks',
           callbacks=[MAYBE_PREFERRED_DEFAULT],
           is_atac=is_atac,
-          is_pseudoreplicated=false,
+          ignore_pooled_peak_for_clarity=true,
         ),
         wdl_task_name: 'overlap_ppr',
       },
@@ -360,7 +360,7 @@ more legible.
           'replicated peaks',
           callbacks=[MAYBE_PREFERRED_DEFAULT],
           is_atac=is_atac,
-          is_pseudoreplicated=false,
+          ignore_pooled_peak_for_clarity=true,
         ),
         wdl_task_name: 'overlap',
       },
