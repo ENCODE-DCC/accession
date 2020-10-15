@@ -5,7 +5,6 @@ from typing import Dict, List
 import pytest
 from pytest_mock.plugin import MockFixture
 from requests import Response
-from WDL import parse_document
 
 from accession.accession import (
     Accession,
@@ -77,13 +76,7 @@ def test_accession_genome_annotation(mock_accession):
     assert super(AccessionMicroRna, mock_accession).genome_annotation is None
 
 
-def test_accession_pipeline_version(mocker, mock_accession, wdl_workflow):
-    mocker.patch.object(
-        mock_accession.analysis.metadata,
-        "get_parsed_workflow",
-        return_value=parse_document(wdl_workflow),
-        create=True,
-    )
+def test_accession_pipeline_version(mock_accession):
     assert mock_accession.pipeline_version == "1.2.3"
 
 
@@ -283,6 +276,7 @@ def test_accession_post_analysis(mocker, mock_accession):
         "files": ["/files/foo/"],
         "aliases": ["encode-processing-pipeline:123"],
         "documents": ["doc"],
+        "pipeline_version": "1.2.3",
     }
 
 
