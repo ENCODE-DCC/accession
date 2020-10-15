@@ -174,6 +174,15 @@ def mirna_replicated_metadata_path() -> str:
 
 
 @pytest.fixture
+def wdl_workflow():
+    workflow = (
+        'workflow myWorkflow { meta { version: "v1.2.3" } call myTask } task myTask {'
+        " command { bar }}"
+    )
+    return workflow
+
+
+@pytest.fixture
 def encode_file_no_qc():
     return EncodeFile({"@id": "/files/foo/", "quality_metrics": []})
 

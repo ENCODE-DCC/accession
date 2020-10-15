@@ -352,6 +352,23 @@ def test_assembly(mocker, mock_accession_chip_unpatched_properties, gsfile):
     assert result == "GRCh38"
 
 
+def test_accession_chip_pipeline_version(
+    mocker, mock_accession_chip_unpatched_properties, gsfile
+):
+    mocker.patch.object(
+        mock_accession_chip_unpatched_properties.analysis,
+        "get_files",
+        return_value=[gsfile],
+    )
+    mocker.patch.object(
+        mock_accession_chip_unpatched_properties.analysis.backend,
+        "read_file",
+        return_value=b'{"general":{"pipeline_ver":"v1.2.3"}}',
+    )
+    result = mock_accession_chip_unpatched_properties.pipeline_version
+    assert result == "1.2.3"
+
+
 @pytest.mark.parametrize("peak_caller,expected", [("spp", "idr"), ("macs2", "overlap")])
 def test_get_chip_pipeline_replication_method(peak_caller, expected):
     method = AccessionChip.get_chip_pipeline_replication_method(
