@@ -2224,9 +2224,6 @@ class AccessionWgbs(Accession):
                 for k, v in gembs_qc.items()
                 if k
                 not in (
-                    "correct_pairs",
-                    "general_reads",
-                    "pct_general_reads",
                     "pct_reads_in_control_sequences",
                     "pct_sequenced_reads",
                     "reads_in_control_sequences",
@@ -2249,13 +2246,7 @@ class AccessionWgbs(Accession):
             gs_file.task, "calculate_average_coverage", "average_coverage_qc"
         )[0]
         average_coverage_qc = self.backend.read_json(average_coverage_qc_file)
-        attachment_qc = {**average_coverage_qc, **gembs_qc}
-        qc_bytes = EncodeAttachment.get_bytes_from_dict(attachment_qc)
-        modeled_attachment = EncodeAttachment(qc_bytes, gs_file.filename)
-        attachment = modeled_attachment.get_portal_object(
-            mime_type="application/json", additional_extension=".json"
-        )
-        output_qc["attachment"] = attachment
+        output_qc.update(average_coverage_qc["average_coverage"])
         for k, v in output_qc.items():
             if k.startswith("pct"):
                 output_qc[k] = 100 * v
