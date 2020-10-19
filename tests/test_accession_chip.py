@@ -10,21 +10,6 @@ from accession.task import Task
 
 
 @pytest.fixture
-def gsfile():
-    task = {
-        "inputs": {
-            "prefix": "pooled-pr1_vs_pooled-pr2",
-            "fastqs_R1": ["gs://abc/spam.fastq.gz"],
-        },
-        "outputs": {},
-    }
-    my_task = Task("my_task", task)
-    return GSFile(
-        "foo", "gs://abc/spam.fastq.gz", md5sum="123", size="456", task=my_task
-    )
-
-
-@pytest.fixture
 def gsfile_multiple_fastqs():
     task = {
         "inputs": {
