@@ -83,7 +83,6 @@
             }
           ],
           "file_format": "starch",
-          "file_format_type": "???",
           "filekey": "analysis.tenth_of_one_percent_peaks_starch",
           "output_type": "peaks",
           "quality_metrics": []
