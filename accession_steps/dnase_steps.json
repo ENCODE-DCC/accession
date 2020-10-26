@@ -82,6 +82,31 @@
               "derived_from_task": "dnase_replicate"
             }
           ],
+          "file_format": "starch",
+          "file_format_type": "???",
+          "filekey": "analysis.tenth_of_one_percent_peaks_starch",
+          "output_type": "peaks",
+          "quality_metrics": []
+        }
+      ],
+      "wdl_task_name": "dnase_replicate"
+    },
+    {
+      "dcc_step_run": "/analysis-steps/dnase-peak-calling-step-v-1/",
+      "dcc_step_version": "/analysis-step-versions/dnase-peak-calling-step-v-1-0/",
+      "wdl_files": [
+        {
+          "derived_from_files": [
+            {
+              "derived_from_filekey": "analysis.nuclear_bam",
+              "derived_from_task": "dnase_replicate"
+            },
+            {
+              "derived_from_filekey": "references.hotspot2_tar_gz",
+              "derived_from_inputs": true,
+              "derived_from_task": "dnase_replicate"
+            }
+          ],
           "file_format": "bed",
           "file_format_type": "bed3+",
           "filekey": "analysis.five_percent_allcalls_bed_gz",
