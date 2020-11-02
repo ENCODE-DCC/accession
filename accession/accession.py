@@ -1502,6 +1502,7 @@ class AccessionDnaseStarchFromBam(Accession):
         )
         posted_document = self.post_document(document)
         payload = {
+            self.conn.PROFILE_KEY: "analysis",
             self.conn.ENCID_KEY: self.analysis.metadata.content["inputs"]["replicates"][
                 0
             ]["analysis"],
