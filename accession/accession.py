@@ -1471,6 +1471,60 @@ class AccessionLongReadRna(AccessionGenericRna):
         )
 
 
+class AccessionDnaseStarchFromBam(Accession):
+    """
+    See PROD-309. This is strictly meant for backfilling starch files into previously
+    accessioned runs.
+    """
+
+    QC_MAP: Dict[str, str] = {}
+
+    @property
+    def assembly(self) -> str:
+        filekey = "hotspot2_tar_gz"
+        return self.find_portal_property_from_filekey(filekey, EncodeFile.ASSEMBLY)
+
+    def post_analysis(self) -> EncodeGenericObject:
+        """
+        For these hacky runs we need to patch into the existing Analysis objects.
+        """
+        document_aliases = [
+            f"{self.common_metadata.lab_pi}:cromwell-metadata-{self.analysis.workflow_id}"
+        ]
+        document_attachment = self.analysis.metadata.get_as_attachment(
+            filename_prefix=self.experiment.accession
+        )
+        document = EncodeDocument(
+            attachment=document_attachment,
+            common_metadata=self.common_metadata,
+            document_type=EncodeDocumentType.WorkflowMetadata,
+            aliases=document_aliases,
+        )
+        posted_document = self.post_document(document)
+        payload = {
+            self.conn.ENCID_KEY: self.analysis.metadata.content["inputs"]["replicates"][
+                0
+            ]["analysis"],
+            "files": [f.at_id for f in self.new_files],
+            "documents": [posted_document.at_id],
+        }
+
+        response = self.conn.patch(payload, extend_array_values=True)
+        modeled_analysis = EncodeGenericObject(response)
+        return modeled_analysis
+
+    def get_or_make_step_run(self, accession_step: AccessionStep) -> EncodeStepRun:
+        """
+        For the hacky runs we need to reuse the existing step runs.
+        """
+        return EncodeStepRun(
+            self.conn.get(
+                self.analysis.metadata.content["inputs"]["replicates"][0]["step_run"],
+                frame="object",
+            )
+        )
+
+
 class AccessionMicroRna(AccessionGenericRna):
     QC_MAP = {
         "mirna_mapping": "make_microrna_mapping_qc",
@@ -2328,6 +2382,7 @@ def accession_factory(
         "control_chip": AccessionChip,
         "atac": AccessionAtac,
         "dnase": AccessionDnase,
+        "dnase_starch_from_bam": AccessionDnaseStarchFromBam,
         "wgbs": AccessionWgbs,
     }
     selected_accession: Optional[Type[Accession]] = None
