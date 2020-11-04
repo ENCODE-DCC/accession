@@ -1,0 +1,32 @@
+{
+  "accession.steps": [
+    {
+      "dcc_step_run": "/analysis-steps/foo-v-1/",
+      "dcc_step_version": "/analysis-step-versions/foo-v-1-0/",
+      "wdl_files": [
+        {
+          "derived_from_files": [
+            {
+              "derived_from_filekey": "nuclear_bam",
+              "derived_from_inputs": true,
+              "derived_from_task": "hotspot2"
+            },
+            {
+              "derived_from_filekey": "hotspot2_tar_gz",
+              "derived_from_inputs": true,
+              "derived_from_task": "unpack_hotspot2_tar_gz_to_struct"
+            }
+          ],
+          "file_format": "starch",
+          "filekey": "peaks.peaks",
+          "output_type": "peaks",
+          "quality_metrics": []
+        }
+      ],
+      "wdl_task_name": "hotspot2"
+    }
+  ],
+  "raw_fastqs_keys": [
+    "nuclear_bam"
+  ]
+}
