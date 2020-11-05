@@ -1047,7 +1047,7 @@ class AccessionBulkRna(AccessionGenericRna):
             and self.experiment.get_number_of_technical_replicates() == 2
         ) or self.experiment.get_number_of_biological_replicates() == 2:
             mad_qc = self.prepare_mad_qc_metric(gs_file)
-            return self.queue_qc(mad_qc, encode_file, "mad-quality-metric")
+            return self.queue_qc(mad_qc, encode_file, "mad-quality-metric", shared=True)
         else:
             return
 
