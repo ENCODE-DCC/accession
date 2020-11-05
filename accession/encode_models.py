@@ -295,6 +295,15 @@ class EncodeExperiment:
         )
         return len(bio_reps)
 
+    def get_number_of_technical_replicates(self) -> int:
+        bio_reps = set(
+            [
+                rep.get("technical_replicate_number")
+                for rep in self.portal_properties["replicates"]
+            ]
+        )
+        return len(bio_reps)
+
     def get_patchable_internal_status(self):
         return {
             self.INTERNAL_STATUS_KEY: self.INTERNAL_STATUS_POST_ACCESSIONING,
