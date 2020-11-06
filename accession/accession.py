@@ -2371,6 +2371,7 @@ def accession_factory(
     """
     pipeline_type_map = {
         "bulk_rna": AccessionBulkRna,
+        "bulk_rna_no_kallisto": AccessionBulkRna,
         "mirna": AccessionMicroRna,
         "long_read_rna": AccessionLongReadRna,
         "chip_map_only": AccessionChip,
