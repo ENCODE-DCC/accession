@@ -1,34 +1,6 @@
 {
    "accession.steps": [
-      {
-         "dcc_step_run": "/analysis-steps/bulk-rna-seq-kallisto-quantification-step-v-1/",
-         "dcc_step_version": "/analysis-step-versions/bulk-rna-seq-kallisto-quantification-step-v-1-0/",
-         "wdl_files": [
-            {
-               "derived_from_files": [
-                  {
-                     "derived_from_filekey": "fastqs_R1",
-                     "derived_from_inputs": true,
-                     "derived_from_task": "kallisto"
-                  },
-                  {
-                     "derived_from_filekey": "fastqs_R2",
-                     "derived_from_inputs": true,
-                     "derived_from_task": "kallisto"
-                  },
-                  {
-                     "derived_from_filekey": "kallisto_index",
-                     "derived_from_inputs": true,
-                     "derived_from_task": "kallisto"
-                  }
-               ],
-               "file_format": "tsv",
-               "filekey": "quants",
-               "output_type": "transcript quantifications"
-            }
-         ],
-         "wdl_task_name": "kallisto"
-      },
+      { },
       {
          "dcc_step_run": "/analysis-steps/bulk-rna-seq-alignment-step-v-1/",
          "dcc_step_version": "/analysis-step-versions/bulk-rna-seq-alignment-step-v-1-0/",
