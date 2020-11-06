@@ -1,7 +1,7 @@
 /*depending on Boolean run_kallisto, include the kallisto output file in the template or omit it.
 */
 {
-  'bulk_rna_no_kallisto_steps.json': BulkRnaSteps(run_kallisto=false),
+  'bulk_rna_no_kallisto_steps.json': std.prune(BulkRnaSteps(run_kallisto=false)),
   'bulk_rna_steps.json': BulkRnaSteps(run_kallisto=true),
   local BulkRnaSteps(run_kallisto) = {
     local kallisto_item = if run_kallisto then
@@ -33,7 +33,7 @@
           },
         ],
         wdl_task_name: 'kallisto',
-      } else {},
+      },
 
     'accession.steps': [
       kallisto_item,
