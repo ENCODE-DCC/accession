@@ -22,17 +22,18 @@ RUN apt-get update && apt-get install -y apt-transport-https software-properties
 RUN apt-get update && apt-get install -y \
     bsdtar \
     elasticsearch \
+    git \
     graphviz \
+    libjpeg8-dev \
+    libpq-dev \
+    nginx \
     nodejs \
     openjdk-11-jdk \
     postgresql-10 \
-    libpq-dev \
     python3-dev \
     python3-pip \
-    git \
-    libjpeg8-dev \
+    redis-server \
     zlib1g-dev \
-    nginx \
 && rm -rf /var/lib/apt/lists/*
 
 # Shouldn't be an issue if we run the container as root?
