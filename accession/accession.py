@@ -433,6 +433,13 @@ class Accession(ABC):
         Returns list of accession ids of files on portal or recently accessioned. Will
         search_down if the ancestor file indicates it should be `search_down`ed for via
         its `should_search_down` property.
+
+        Generally this searches the portal and looks through newly accessioned files to
+        find the appropriate `derived_from` file. However, it is possible to avoid
+        searching for files on the portal by specifing `"ignore_files_on_portal": true`
+        in the template. This is useful when there are several files on the portal with
+        an md5sum that is the same as the parent file, but you know you only need to
+        connect to the newly posted file.
         """
         try:
             if ancestor.should_search_down:
@@ -455,7 +462,6 @@ class Accession(ABC):
                 "An error occured searching for the parent file of %s", file.filename
             )
             raise
-        encode_files = []
 
         # Do the filtering before getting md5sums to avoid unnecessary searches
         if ancestor.workflow_inputs_to_match:
@@ -463,10 +469,13 @@ class Accession(ABC):
                 derived_from_files, ancestor
             )
 
-        for gs_file in derived_from_files:
-            encode_file = self.get_encode_file_matching_md5_of_blob(gs_file)
-            if encode_file is not None:
-                encode_files.append(encode_file)
+        encode_files = []
+        if not ancestor.ignore_files_on_portal:
+            for gs_file in derived_from_files:
+                encode_file = self.get_encode_file_matching_md5_of_blob(gs_file)
+                if encode_file is not None:
+                    encode_files.append(encode_file)
+
         accessioned_files = encode_files + self.new_files
         derived_from_accession_ids = []
         for gs_file in derived_from_files:

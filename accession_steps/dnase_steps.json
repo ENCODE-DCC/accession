@@ -161,7 +161,8 @@
           "derived_from_files": [
             {
               "derived_from_filekey": "analysis.one_percent_footprints_bed_gz",
-              "derived_from_task": "dnase_replicate"
+              "derived_from_task": "dnase_replicate",
+              "ignore_files_on_portal": true
             }
           ],
           "file_format": "bigBed",
