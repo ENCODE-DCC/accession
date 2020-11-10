@@ -85,7 +85,7 @@ def local_encoded_server(
             raise RuntimeError("Container unexpectedly exited early")
         try:
             response = requests.get(
-                urljoin(f"http://{server_address}", "_indexer"),
+                urljoin(f"http://{server_address}", "_indexer_state"),
                 headers={"Accept": "application/json"},
                 auth=api_credentials,
             )
