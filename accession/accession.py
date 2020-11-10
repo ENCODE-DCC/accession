@@ -1016,15 +1016,6 @@ class AccessionBulkRna(AccessionGenericRna):
             "gene-quantification-quality-metric",
         )
 
-    def make_mad_qc_metric(self, encode_file: EncodeFile, gs_file: GSFile) -> None:
-        self.make_generic_correlation_qc(
-            encode_file,
-            gs_file,
-            self.prepare_mad_qc_metric,
-            "MadQualityMetric",
-            "mad-quality-metric",
-        )
-
     def prepare_mad_qc_metric(self, gs_file: GSFile) -> Dict[str, Any]:
         qc_file = self.analysis.search_down(gs_file.task, "mad_qc", "madQCmetrics")[0]
         qc = self.backend.read_json(qc_file)
@@ -1040,6 +1031,29 @@ class AccessionBulkRna(AccessionGenericRna):
         attachment = self.get_attachment(attachment_file, "image/png")
         mad_qc["attachment"] = attachment
         return mad_qc
+
+    def make_mad_qc_metric(self, encode_file: EncodeFile, gs_file: GSFile) -> None:
+        """
+        Special logic is required to facilitate situation where the experiment is
+        unreplicated in biological replication sense, but contains two technical replicates.
+        In this situation from pipeline POV the experiment is replicated and thus madQC gets calculated.
+        """
+        if encode_file.has_qc("MadQualityMetric"):
+            return
+
+        num_biological_replicates = (
+            self.experiment.get_number_of_biological_replicates()
+        )
+        if num_biological_replicates > 2:
+            return
+        elif (
+            num_biological_replicates == 1
+            and self.experiment.get_number_of_technical_replicates() == 2
+        ) or num_biological_replicates == 2:
+            mad_qc = self.prepare_mad_qc_metric(gs_file)
+            return self.queue_qc(mad_qc, encode_file, "mad-quality-metric", shared=True)
+        else:
+            return
 
 
 class AccessionDnase(Accession):

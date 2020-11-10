@@ -46,6 +46,7 @@ def encode_experiment():
         "replicates": [
             {"biological_replicate_number": 1},
             {"biological_replicate_number": 3},
+            {"technical_replicate_number": 42},
         ],
     }
     return EncodeExperiment(properties)
@@ -322,6 +323,10 @@ def test_encode_analysis_get_portal_object(analysis, expected):
 
 def test_encode_experiment_get_number_of_biological_replicates(encode_experiment):
     assert encode_experiment.get_number_of_biological_replicates() == 2
+
+
+def test_encode_experiment_get_number_of_technical_replicates(encode_experiment):
+    assert encode_experiment.get_number_of_technical_replicates() == 1
 
 
 def test_encode_experiment_is_replicated(encode_experiment):
