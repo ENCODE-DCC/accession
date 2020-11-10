@@ -1040,8 +1040,10 @@ class AccessionBulkRna(AccessionGenericRna):
         """
         if encode_file.has_qc("MadQualityMetric"):
             return
-           
-        num_biological_replicates = self.experiment.get_number_of_biological_replicates()
+
+        num_biological_replicates = (
+            self.experiment.get_number_of_biological_replicates()
+        )
         if num_biological_replicates > 2:
             return
         elif (
