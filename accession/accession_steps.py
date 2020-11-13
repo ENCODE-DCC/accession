@@ -78,8 +78,8 @@ class DerivedFromFile:
         `workflow_inputs_to_match` can be used to indicate that only files with
         filenames matching the workflow input keys given should be considered.
 
-        `ignore_files_on_portal` will avoid searching the portal for files with the same
-        md5sum when generating the `derived_from`
+        `only_search_current_analysis` will only consider direct ancestors in the WDL
+        call graph when generating the `derived_from`
         """
         self.allow_empty: bool = derived_from_file.get("allow_empty", False)
         self.derived_from_filekey: str = derived_from_file["derived_from_filekey"]
@@ -98,8 +98,8 @@ class DerivedFromFile:
         if not isinstance(workflow_inputs_to_match, list):
             raise ValueError("`workflow_inputs_to_match` must be an array")
         self.workflow_inputs_to_match: List[str] = workflow_inputs_to_match
-        self.ignore_files_on_portal: bool = derived_from_file.get(
-            "ignore_files_on_portal", False
+        self.only_search_current_analysis: bool = derived_from_file.get(
+            "only_search_current_analysis", False
         )
 
 

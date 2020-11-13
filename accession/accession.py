@@ -436,10 +436,10 @@ class Accession(ABC):
 
         Generally this searches the portal and looks through newly accessioned files to
         find the appropriate `derived_from` file. However, it is possible to avoid
-        searching for files on the portal by specifing `"ignore_files_on_portal": true`
-        in the template. This is useful when there are several files on the portal with
-        an md5sum that is the same as the parent file, but you know you only need to
-        connect to the newly posted file.
+        searching for files on the portal by specifing `"only_search_current_analysis": true`
+        in the template. This is useful when there are several files with an md5sum that
+        is the same as the parent file, but you know you only need to connect to the
+        newly posted file.
         """
         try:
             if ancestor.should_search_down:
@@ -469,26 +469,33 @@ class Accession(ABC):
                 derived_from_files, ancestor
             )
 
-        encode_files = []
-        if not ancestor.ignore_files_on_portal:
+        derived_from_accession_ids = []
+        if ancestor.only_search_current_analysis:
+            for gs_file in derived_from_files:
+                for new_file in self.new_files:
+                    if (new_file.md5sum == gs_file.md5sum) and (
+                        new_file.submitted_file_name == gs_file.filename
+                    ):
+                        derived_from_accession_ids.append(new_file.at_id)
+        else:
+            encode_files = []
             for gs_file in derived_from_files:
                 encode_file = self.get_encode_file_matching_md5_of_blob(gs_file)
                 if encode_file is not None:
                     encode_files.append(encode_file)
-
-        accessioned_files = encode_files + self.new_files
-        derived_from_accession_ids = []
-        for gs_file in derived_from_files:
-            for encode_file in accessioned_files:
-                if gs_file.md5sum == encode_file.md5sum:
-                    # Optimal peaks can be mistaken for conservative peaks
-                    # when their md5sum is the same
-                    if (
-                        ancestor.derived_from_output_type is not None
-                        and ancestor.derived_from_output_type != encode_file.output_type
-                    ):
-                        continue
-                    derived_from_accession_ids.append(encode_file.at_id)
+            accessioned_files = encode_files + self.new_files
+            for gs_file in derived_from_files:
+                for encode_file in accessioned_files:
+                    if gs_file.md5sum == encode_file.md5sum:
+                        # Optimal peaks can be mistaken for conservative peaks
+                        # when their md5sum is the same
+                        if (
+                            ancestor.derived_from_output_type is not None
+                            and ancestor.derived_from_output_type
+                            != encode_file.output_type
+                        ):
+                            continue
+                        derived_from_accession_ids.append(encode_file.at_id)
         # Duplicate derived from files may be an indication of a problem
         # (or absolutely ok as is the case in bulk rna single ended runs)
         if len(set(derived_from_accession_ids)) != len(derived_from_accession_ids):

@@ -162,7 +162,7 @@
             {
               "derived_from_filekey": "analysis.one_percent_footprints_bed_gz",
               "derived_from_task": "dnase_replicate",
-              "ignore_files_on_portal": true
+              "only_search_current_analysis": true
             }
           ],
           "file_format": "bigBed",
