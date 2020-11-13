@@ -309,6 +309,37 @@ def test_genome_annotation(mirna_accessioner):
     assert mirna_accessioner.genome_annotation == "M21"
 
 
+def test_get_derived_from_only_search_current_analysis(mocker, gsfile, mock_accession):
+    derived_from_file = DerivedFromFile(
+        {
+            "only_search_current_analysis": True,
+            "derived_from_filekey": "foo",
+            "derived_from_task": "bar",
+        }
+    )
+    mocker.patch.object(mock_accession.analysis, "search_up", return_value=[gsfile])
+    mocker.patch.object(
+        mock_accession,
+        "new_files",
+        [
+            EncodeFile(
+                {"md5sum": "123", "@id": "baz", "submitted_file_name": gsfile.filename}
+            ),
+            EncodeFile(
+                {
+                    "md5sum": "123",
+                    "@id": "qux",
+                    "submitted_file_name": "gs://not/the/same",
+                }
+            ),
+        ],
+    )
+    mocker.patch.object(mock_accession, "get_encode_file_matching_md5_of_blob")
+    result = mock_accession.get_derived_from(gsfile, derived_from_file)
+    mock_accession.get_encode_file_matching_md5_of_blob.assert_not_called()
+    assert result == ["baz"]
+
+
 @pytest.mark.docker
 @pytest.mark.skip(
     reason="Elasticsearch is not reliable, produces inconsistent results."

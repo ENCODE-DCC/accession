@@ -101,6 +101,10 @@ class EncodeFile:
     def md5sum(self) -> str:
         return self.portal_file["md5sum"]
 
+    @property
+    def submitted_file_name(self) -> str:
+        return self.portal_file["submitted_file_name"]
+
     def get(
         self, key: str, default: Optional[U] = None
     ) -> Union[Optional[T], Union[T, U]]:
