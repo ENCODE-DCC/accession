@@ -14,10 +14,19 @@ from accession.metadata import (
 
 @pytest.fixture
 def file_metadata(mocker, wdl_workflow):
-    metadata = {"foo": "bar", "id": "foo", "submittedFiles": {"workflow": wdl_workflow}}
+    metadata = {
+        "foo": "bar",
+        "id": "foo",
+        "labels": {"caper-backend": "Local"},
+        "submittedFiles": {"workflow": wdl_workflow},
+    }
     mocker.patch("builtins.open", mocker.mock_open(read_data=json.dumps(metadata)))
     file_metadata = FileMetadata("foo")
     return file_metadata
+
+
+def test_metadata_backend_name(file_metadata):
+    assert file_metadata.backend_name == "Local"
 
 
 @pytest.mark.parametrize(

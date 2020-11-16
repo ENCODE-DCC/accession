@@ -172,7 +172,7 @@ class EncodeFile:
         dataset: str,
         derived_from: List[str],
         file_params: FileParams,
-        file_size: str,
+        file_size: int,
         file_md5sum: str,
         step_run_id: str,
         submitted_file_name: str,

@@ -1,0 +1,37 @@
+{
+  "calls": {
+    "dummy.cutadapt": [
+      {
+        "attempt": 1,
+        "backend": "gcp",
+        "backendLabels": {
+          "cromwell-workflow-id": "cromwell-dummy",
+          "wdl-task-name": "cutadapt"
+        },
+        "backendStatus": "Success",
+        "dockerImageUsed": "quay.io/encode-dcc/mirna-seq-pipeline@sha256:88a580275e9e532db5d48bbc975ea04c15b44af4b726abddee607cb86d3da887",
+        "executionStatus": "Done",
+        "inputs": {
+          "fastqs_to_trim": "DATA_DIR/input.fastq.gz"
+        },
+        "labels": {
+          "cromwell-workflow-id": "cromwell-dummy",
+          "wdl-task-name": "cutadapt"
+        },
+        "outputs": {
+          "bam": "DATA_DIR/output.bam"
+        }
+      }
+    ]
+  },
+  "id": "dummy",
+  "labels": {
+    "caper-backend": "Local",
+    "cromwell-workflow-id": "cromwell-dummy"
+  },
+  "status": "Succeeded",
+  "submittedFiles": {
+    "workflow": "workflow dummy {meta {version: \"v1.0.0\"}}"
+  },
+  "workflowName": "dummy"
+}

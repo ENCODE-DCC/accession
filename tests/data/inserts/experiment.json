@@ -49,5 +49,31 @@
     "status": "released",
     "submitted_by": "facilisi.tristique@potenti.vivamus",
     "uuid": "df7a3c62-2d5c-44ba-a8a8-2ff1f8d53a74"
+  },
+  {
+    "accession": "ENCSR123ABC",
+    "aliases": [
+      "ali-mortazavi:empty"
+    ],
+    "assay_term_name": "microRNA-seq",
+    "award": "U54HG006998",
+    "biosample_ontology": "tissue_UBERON_0006631",
+    "date_created": "2016-07-25T22:17:15.906822+00:00",
+    "date_released": "2017-01-31",
+    "date_submitted": "2017-01-30",
+    "dbxrefs": [
+      "GEO:GSE105668"
+    ],
+    "description": "miRNA-seq on human right cardiac atrium",
+    "internal_status": "unreviewed",
+    "internal_tags": [
+      "ENCYCLOPEDIAv5",
+      "ENTEx"
+    ],
+    "lab": "ali-mortazavi",
+    "schema_version": "28",
+    "status": "released",
+    "submitted_by": "facilisi.tristique@potenti.vivamus",
+    "uuid": "ab7a3c62-2d5c-44ba-a8a8-2ff1f8d53a83"
   }
 ]

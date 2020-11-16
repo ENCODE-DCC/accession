@@ -34,11 +34,9 @@ def test_accession_wgbs_make_gembs_alignment_qc(
     alignment_qc = {"general_reads": 3000, "pct_general_reads": 0.5}
     average_coverage_qc = {"average_coverage": {"average_coverage": 3.5}}
     mocker.patch.object(
-        mock_accession_wgbs.backend,
-        "read_json",
-        side_effect=[alignment_qc, average_coverage_qc],
+        gsfile, "read_json", side_effect=[alignment_qc, average_coverage_qc]
     )
-    qc = mock_accession_wgbs.make_gembs_alignment_qc(encode_file_no_qc, gs_file=gsfile)
+    qc = mock_accession_wgbs.make_gembs_alignment_qc(encode_file_no_qc, file=gsfile)
     assert qc["average_coverage"] == 3.5
     assert qc["general_reads"] == 3000
     assert qc["pct_general_reads"] == 50.0

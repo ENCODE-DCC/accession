@@ -1,0 +1,26 @@
+{
+  "accession.steps": [
+    {
+      "dcc_step_run": "microrna-seq-trimming-alignment-quantification-step-run-v1",
+      "dcc_step_version": "/analysis-step-versions/microrna-seq-trimming-alignment-quantification-step-v-1-1/",
+      "wdl_files": [
+        {
+          "derived_from_files": [
+            {
+              "derived_from_filekey": "fastqs_to_trim",
+              "derived_from_inputs": true,
+              "derived_from_task": "cutadapt"
+            }
+          ],
+          "file_format": "bam",
+          "filekey": "bam",
+          "output_type": "alignments"
+        }
+      ],
+      "wdl_task_name": "cutadapt"
+    }
+  ],
+  "raw_fastqs_keys": [
+    "fastqs_to_trim"
+  ]
+}
