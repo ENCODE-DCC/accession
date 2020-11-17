@@ -120,6 +120,19 @@ class Accession(ABC):
         return None
 
     @property
+    def pipeline_version(self) -> str:
+        """
+        Pulls the pipeline version out of the submitted WDL workflow's `meta` section,
+        works for most pipelines. Strips leading `v` character to satisfy portal regex,
+        needed for DNAse and the RNA pipelines.
+        """
+        return (
+            self.analysis.metadata.get_parsed_workflow()
+            .workflow.meta["version"]
+            .lstrip("v")
+        )
+
+    @property
     def logger(self) -> logging.Logger:
         """
         Creates the instance's logger if it doesn't already exist, then returns the
@@ -681,6 +694,7 @@ class Accession(ABC):
             lab_pi=self.common_metadata.lab_pi,
             workflow_id=self.analysis.workflow_id,
             documents=[posted_document],
+            pipeline_version=self.pipeline_version,
         )
         payload = current_analysis.get_portal_object()
         response, status_code = self.conn.post(
@@ -1671,6 +1685,16 @@ class AccessionAtacChip(Accession):
             self.logger.exception("Could not determine assembly")
             raise
         return portal_assembly
+
+    @property
+    def pipeline_version(self) -> str:
+        """
+        Need to override implementation in base class since ChIP and ATAC don't have
+        `workflow.meta.version` in WDL.
+        """
+        qc = self.backend.read_json(self.analysis.get_files("qc_json")[0])
+        version = qc["general"]["pipeline_ver"].lstrip("v")
+        return version
 
     def get_atac_chip_pipeline_replicate(self, gs_file):
         """

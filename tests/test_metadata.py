@@ -1,3 +1,4 @@
+import json
 from contextlib import suppress as does_not_raise
 from io import StringIO
 
@@ -12,10 +13,9 @@ from accession.metadata import (
 
 
 @pytest.fixture
-def file_metadata(mocker):
-    mocker.patch(
-        "builtins.open", mocker.mock_open(read_data='{"foo":"bar","id":"foo"}')
-    )
+def file_metadata(mocker, wdl_workflow):
+    metadata = {"foo": "bar", "id": "foo", "submittedFiles": {"workflow": wdl_workflow}}
+    mocker.patch("builtins.open", mocker.mock_open(read_data=json.dumps(metadata)))
     file_metadata = FileMetadata("foo")
     return file_metadata
 
@@ -35,8 +35,14 @@ def test_metadata_get_as_attachment(file_metadata):
     assert result.mime_type == "application/json"
 
 
+def test_metadata_get_parsed_workflow(file_metadata):
+    result = file_metadata.get_parsed_workflow()
+    assert result.workflow.meta["version"] == "v1.2.3"
+
+
 def test_file_metadata(file_metadata):
-    assert file_metadata.content == {"id": "foo", "foo": "bar"}
+    assert file_metadata.content["id"] == "foo"
+    assert file_metadata.content["foo"] == "bar"
 
 
 @pytest.mark.parametrize(

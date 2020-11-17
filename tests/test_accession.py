@@ -76,6 +76,10 @@ def test_accession_genome_annotation(mock_accession):
     assert super(AccessionMicroRna, mock_accession).genome_annotation is None
 
 
+def test_accession_pipeline_version(mock_accession):
+    assert mock_accession.pipeline_version == "1.2.3"
+
+
 def test_logger(mocker, capsys, mock_accession):
     """
     The log message by default includes a non-deterministic timestamp, so check only the
@@ -272,6 +276,7 @@ def test_accession_post_analysis(mocker, mock_accession):
         "files": ["/files/foo/"],
         "aliases": ["encode-processing-pipeline:123"],
         "documents": ["doc"],
+        "pipeline_version": "1.2.3",
     }
 
 

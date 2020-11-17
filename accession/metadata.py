@@ -3,6 +3,8 @@ from abc import ABC, abstractmethod
 from pathlib import Path
 from typing import Any, Dict, List, Optional, TextIO, Union
 
+import WDL
+
 from accession.caper_helper import CaperHelper, caper_conf_exists
 from accession.encode_models import EncodeAttachment
 
@@ -37,6 +39,9 @@ class Metadata(ABC):
             mime_type="application/json",
         )
         return attachment
+
+    def get_parsed_workflow(self) -> WDL.Tree.Document:
+        return WDL.parse_document(self.content["submittedFiles"]["workflow"])
 
 
 class FileMetadata(Metadata):

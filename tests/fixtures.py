@@ -14,6 +14,7 @@ import pytest
 import requests
 from encode_utils.connection import Connection
 from pytest_mock.plugin import MockFixture
+from WDL import parse_document
 
 import docker
 from accession import backends
@@ -173,6 +174,15 @@ def mirna_replicated_metadata_path() -> str:
     current_dir = Path(__file__).resolve()
     metadata_json_path = current_dir.parent / "data" / "mirna_replicated_metadata.json"
     return str(metadata_json_path)
+
+
+@pytest.fixture
+def wdl_workflow():
+    workflow = (
+        'workflow myWorkflow { meta { version: "v1.2.3" } call myTask } task myTask {'
+        " command { bar }}"
+    )
+    return workflow
 
 
 @pytest.fixture
@@ -379,13 +389,15 @@ def accessioner_factory(
     return _accessioner_factory
 
 
-class MockMetadata:
-    content = {"id": "foo", "workflowRoot": "gs://foo/bar", "calls": {}}
-    workflow_id = "123"
-
-
 @pytest.fixture
-def mock_metadata():
+def mock_metadata(wdl_workflow):
+    class MockMetadata:
+        content = {"id": "foo", "workflowRoot": "gs://foo/bar", "calls": {}}
+        workflow_id = "123"
+
+        def get_parsed_workflow(self):
+            return parse_document(wdl_workflow)
+
     return MockMetadata()
 
 
@@ -403,7 +415,7 @@ def mock_accession_steps():
 def mock_accession(
     mocker: MockFixture,
     mock_accession_gc_backend: MockGCBackend,
-    mock_metadata: MockMetadata,
+    mock_metadata,
     mock_accession_steps: MockAccessionSteps,
     server_name: str,
     common_metadata: EncodeCommonMetadata,
@@ -474,7 +486,7 @@ def mock_accession_not_patched(
 def mock_accession_chip(
     mocker: MockFixture,
     mock_accession_gc_backend: MockGCBackend,
-    mock_metadata: MockMetadata,
+    mock_metadata,
     mock_accession_steps: MockAccessionSteps,
     server_name: str,
     common_metadata: EncodeCommonMetadata,
@@ -521,7 +533,7 @@ def mock_accession_chip(
 def mock_accession_unreplicated(
     mocker: MockFixture,
     mock_accession_gc_backend: MockGCBackend,
-    mock_metadata: MockMetadata,
+    mock_metadata,
     lab: str,
     award: str,
 ) -> Accession:

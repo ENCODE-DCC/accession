@@ -18,7 +18,6 @@ CLASSIFIERS = [
     "Operating System :: OS Independent",
     "Programming Language :: Python",
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.5",
     "Programming Language :: Python :: 3.6",
     "Programming Language :: Python :: 3.7",
     "Programming Language :: Python :: 3.8",
@@ -36,6 +35,7 @@ INSTALL_REQUIRES = [
     "google-api-core==1.21.0",
     "qc_utils==20.9.1",
     "typing-extensions==3.7.4.2",
+    "miniwdl==0.8.2",
 ]
 EXTRAS_REQUIRE = {
     "docs": ["sphinx"],
