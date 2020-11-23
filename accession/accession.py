@@ -1723,6 +1723,16 @@ class AccessionAtacChip(Accession):
             )
         return pipeline_rep
 
+    def get_number_of_replicates(self) -> int:
+        """
+        Obtains the number of replicates used in running the pipeline.
+        """
+        num_reps = 0
+        for k, v in self.analysis.metadata.content["inputs"].items():
+            if all((k.startswith("fastqs_rep"), k.endswith("R1"), len(v) > 0)):
+                num_reps += 1
+        return num_reps
+
     def add_mapped_read_length(self, gs_file: GSFile) -> Dict[str, int]:
         """
         Obtains the value of mapped_read_length to post for bam files from the read
@@ -1802,6 +1812,10 @@ class AccessionChip(AccessionAtacChip):
         file object generation time (make_file_obj) to fill in (or not) the missing
         value.
         """
+        if self.get_number_of_replicates() == 1:
+            if gs_file.task.task_name == "idr_pr":
+                return {"preferred_default": True}
+            return {}
         qc = self.backend.read_json(self.analysis.get_files("qc_json")[0])
         method = self.get_chip_pipeline_replication_method(qc)
         replication_qc = qc["replication"]["reproducibility"][method]
@@ -2080,6 +2094,10 @@ class AccessionAtac(AccessionAtacChip):
         For ATAC one of the replicated/PPR overlap peak sets is labeled as
         `preferred_default`.
         """
+        if self.get_number_of_replicates() == 1:
+            if gs_file.task.task_name == "overlap_pr":
+                return {"preferred_default": True}
+            return {}
         qc = self.backend.read_json(self.analysis.get_files("qc_json")[0])
         replication_qc = qc["replication"]["reproducibility"]["overlap"]
 

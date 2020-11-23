@@ -180,6 +180,9 @@
       "dcc_step_version": "/analysis-step-versions/histone-chip-seq-pseudoreplicated-overlap-step-v-1-0/",
       "wdl_files": [
         {
+          "callbacks": [
+            "maybe_preferred_default"
+          ],
           "derived_from_files": [
             {
               "derived_from_filekey": "nodup_bam",
@@ -297,6 +300,9 @@
       "dcc_step_version": "/analysis-step-versions/histone-chip-seq-pseudoreplicated-overlap-stable-peaks-file-format-conversion-step-v-1-0/",
       "wdl_files": [
         {
+          "callbacks": [
+            "maybe_preferred_default"
+          ],
           "derived_from_files": [
             {
               "derived_from_filekey": "bfilt_overlap_peak",
