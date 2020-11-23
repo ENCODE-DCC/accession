@@ -273,6 +273,7 @@ class EncodeAnalysis:
 class EncodeExperiment:
     INTERNAL_STATUS_KEY = "internal_status"
     INTERNAL_STATUS_POST_ACCESSIONING = "pipeline completed"
+    ALLOWED_REPLICATE_STATUSES = ("released", "in progress")
 
     def __init__(self, portal_experiment: Dict[str, Any]):
         self.at_id = portal_experiment["@id"]
@@ -295,6 +296,7 @@ class EncodeExperiment:
             [
                 rep.get("biological_replicate_number")
                 for rep in self.portal_properties["replicates"]
+                if rep["status"] in self.ALLOWED_REPLICATE_STATUSES
             ]
         )
         return len([rep for rep in bio_reps if rep is not None])
@@ -304,6 +306,7 @@ class EncodeExperiment:
             [
                 rep.get("technical_replicate_number")
                 for rep in self.portal_properties["replicates"]
+                if rep["status"] in self.ALLOWED_REPLICATE_STATUSES
             ]
         )
         return len([rep for rep in tech_reps if rep is not None])
