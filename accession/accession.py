@@ -2311,10 +2311,11 @@ class AccessionWgbs(Accession):
         )
         insert_size_plot_png = self.analysis.search_down(
             file.task, "qc_report", "map_qc_insert_size_plot_png"
-        )[0]
-        output_qc["insert_size_plot"] = self.get_attachment(
-            insert_size_plot_png, mime_type="image/png"
         )
+        if insert_size_plot_png:
+            output_qc["insert_size_plot"] = self.get_attachment(
+                insert_size_plot_png[0], mime_type="image/png"
+            )
         average_coverage_qc_file = self.analysis.search_down(
             file.task, "calculate_average_coverage", "average_coverage_qc"
         )[0]
