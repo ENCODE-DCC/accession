@@ -305,6 +305,9 @@ class LocalMockGsFile:
     def get_uri_without_scheme(self) -> str:
         return self.filename.split(self.SCHEME)[-1]
 
+    def get_filename_for_encode_alias(self) -> str:
+        return self.get_uri_without_scheme().replace("/", "-")
+
 
 @pytest.fixture
 def mock_gc_backend(mocker):
