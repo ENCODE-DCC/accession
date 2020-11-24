@@ -154,7 +154,7 @@ def test_get_encode_file_matching_md5_of_blob_unit(
         "get",
         lambda _: {"@id": "/files/bar/", "status": "released"},
     )
-    gs_file = GSFile(key="bam", name="gs://bam/a.bam", md5sum="123", size=456)
+    gs_file = GSFile(key="bam", name="gs://bam/a.bam")
     result = mock_accession.get_encode_file_matching_md5_of_blob(gs_file)
     assert result == expected
 
@@ -167,7 +167,7 @@ def test_get_all_encode_files_matching_md5_of_blob(
     mocker, mock_accession, returned_files, expected
 ):
     mocker.patch.object(mock_accession.conn, "search", return_value=returned_files)
-    gs_file = GSFile(key="bam", name="gs://bam/a.bam", md5sum="123", size=456)
+    gs_file = mocker.Mock(md5sum="123")
     result = mock_accession.get_all_encode_files_matching_md5_of_blob(gs_file)
     assert result == expected
 
@@ -175,7 +175,7 @@ def test_get_all_encode_files_matching_md5_of_blob(
 def test_get_all_encode_files_matching_md5_of_blob_cache_hit(mocker, mock_accession):
     mocker.patch.object(mock_accession.conn, "search")
     returned_files = [{"@id": "foo"}]
-    gs_file = GSFile(key="bam", name="gs://bam/a.bam", md5sum="123", size=456)
+    gs_file = mocker.Mock(md5sum="123")
     mock_accession.search_cache.insert("123", returned_files)
     result = mock_accession.get_all_encode_files_matching_md5_of_blob(gs_file)
     assert not mock_accession.conn.search.mock_calls
@@ -187,7 +187,7 @@ def test_get_all_encode_files_matching_md5_of_blob_cache_hit_no_results_returns_
 ):
     mocker.patch.object(mock_accession.conn, "search")
     returned_files = []
-    gs_file = GSFile(key="bam", name="gs://bam/a.bam", md5sum="123", size=456)
+    gs_file = mocker.Mock(md5sum="123")
     mock_accession.search_cache.insert("123", returned_files)
     result = mock_accession.get_all_encode_files_matching_md5_of_blob(gs_file)
     assert not mock_accession.conn.search.mock_calls
@@ -209,8 +209,8 @@ def test_filter_derived_from_files_by_workflow_inputs(mocker, mock_accession):
             "derived_from_task": "task",
         }
     )
-    file_to_match = GSFile(key="foo", name="gs://bar/baz", md5sum="123", size=456)
-    file_to_ignore = GSFile(key="baz", name="gs://bar/qux", md5sum="123", size=456)
+    file_to_match = GSFile(key="foo", name="gs://bar/baz")
+    file_to_ignore = GSFile(key="baz", name="gs://bar/qux")
     derived_from_files = [file_to_match, file_to_ignore]
     result = mock_accession._filter_derived_from_files_by_workflow_inputs(
         derived_from_files, ancestor
@@ -458,10 +458,9 @@ def test_accession_steps_dry_run(mocker: MockFixture, mock_accession: Accession)
     file_name = "gs://bam/a.bam"
     filekey = "bam"
     task = Task(task_name, {"inputs": {}, "outputs": {filekey: file_name}})
-    task.output_files = [
-        GSFile(key=filekey, name=file_name, md5sum="123", size=456, task=task)
-    ]
+    task.output_files = [GSFile(key=filekey, name=file_name, task=task)]
     mocker.patch.object(mock_accession.analysis, "get_tasks", return_value=[task])
+    mocker.patch.object(mock_accession, "get_all_encode_files_matching_md5_of_blob")
     mocker.patch.object(
         mock_accession.preflight_helper,
         "make_file_matching_md5_record",
@@ -555,14 +554,7 @@ def test_accession_steps_matches_with_force(
 def test_accession_init(mock_accession: Accession, lab: str, award: str) -> None:
     assert mock_accession.common_metadata.lab == lab
     assert mock_accession.common_metadata.award == award
-    assert all(
-        (
-            mock_accession.analysis,
-            mock_accession.backend,
-            mock_accession.conn,
-            mock_accession.steps,
-        )
-    )
+    assert all((mock_accession.analysis, mock_accession.conn, mock_accession.steps))
 
 
 @pytest.mark.parametrize(

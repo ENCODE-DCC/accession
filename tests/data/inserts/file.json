@@ -139,6 +139,40 @@
     "uuid": "5392551f-7bf3-4544-9460-81ac06297868"
   },
   {
+    "accession": "ENCFF011BED",
+    "aliases": [],
+    "award": "U54HG006998",
+    "content_md5sum": "14f467756f70ca7fa236d501af566697",
+    "dataset": "ENCSR123ABC",
+    "date_created": "2017-01-31T01:32:59.887793+00:00",
+    "dbxrefs": [
+      "SRA:SRR6213689"
+    ],
+    "fastq_signature": [
+      "C89PJANXX:2:1:GTGAAGC:",
+      "C89PJANXX:3:1:GTGAAGC:",
+      "C89PJANXX:4:1:GTGAAGC:",
+      "C89PJANXX:5:1:GTGAAGC:"
+    ],
+    "file_format": "fastq",
+    "file_size": 10,
+    "flowcell_details": [],
+    "lab": "ali-mortazavi",
+    "md5sum": "d41d8cd98f00b204e9800998ecf8427e",
+    "no_file_available": false,
+    "output_type": "reads",
+    "platform": "616db2ff-a1c3-4c4f-b0de-9ea11c825b82",
+    "read_count": 5815263,
+    "read_length": 50,
+    "replicate": "9a7a2e68-2b4e-459e-b554-204dbb1917b6",
+    "run_type": "single-ended",
+    "schema_version": "15",
+    "status": "released",
+    "submitted_by": "facilisi.tristique@potenti.vivamus",
+    "submitted_file_name": "empty.fastq.gz",
+    "uuid": "5392661f-7bf3-4544-9460-81ac06297867"
+  },
+  {
     "accession": "ENCFF123QLG",
     "aliases": [],
     "alternate_accessions": [],

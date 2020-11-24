@@ -1,11 +1,11 @@
 import operator
 from functools import reduce
-from typing import Tuple
+from typing import Any, Dict, Iterable, List, Optional
 
 from flatdict import FlatDict
 
-from accession.backends import GCBackend
-from accession.file import GSFile
+from accession.backends import Backend, GCBackend
+from accession.file import File
 from accession.task import Task
 
 
@@ -19,26 +19,15 @@ class Analysis:
         metadata,
         raw_fastqs_keys=None,
         raw_fastqs_can_have_task=False,
-        auto_populate=True,
-        backend=None,
-    ):
-        self.files = []
-        self.tasks = []
+        auto_populate: bool = True,
+        backend: Optional[Backend] = None,
+    ) -> None:
+        self.files: List[File] = []
+        self.tasks: List[Task] = []
         self.metadata = metadata
         self.raw_fastqs_keys = raw_fastqs_keys
         self.raw_fastqs_can_have_task = raw_fastqs_can_have_task
-        if self.metadata:
-            if backend is None:
-                bucket = (
-                    self.metadata.content["workflowRoot"]
-                    .split("gs://")[1]
-                    .split("/")[0]
-                )
-                self.backend = GCBackend(bucket)
-            else:
-                self.backend = backend
-        else:
-            raise Exception("Valid metadata json output must be supplied")
+        self.backend = backend if backend is not None else GCBackend()
         if auto_populate:
             self.tasks = self.make_tasks()
 
@@ -49,7 +38,7 @@ class Analysis:
         """
         return self.metadata.workflow_id
 
-    def make_tasks(self):
+    def make_tasks(self) -> List[Task]:
         """
         Makes instances of Task. If the task did not succeed then will not add it to the
         call graph.
@@ -64,17 +53,22 @@ class Analysis:
         # Making input files after making output files avoids creating
         # a duplicate file
         for task in tasks:
-            task.input_files = self.get_or_make_files(task.inputs, used_by_tasks=task)
+            task.input_files = self.get_or_make_files(task.inputs, used_by_task=task)
         return tasks
 
     # Makes an instance of task with input and output GSFile instances
-    def make_task(self, task_name, task):
+    def make_task(self, task_name: str, task: Dict[str, Any]) -> Task:
         new_task = Task(task_name.split(".")[1], task)
         return new_task
 
-    def get_or_make_files(self, section, task=None, used_by_tasks=None):
+    def get_or_make_files(
+        self,
+        section: Dict[str, Any],
+        task: Optional[Task] = None,
+        used_by_task: Optional[Task] = None,
+    ) -> List[File]:
         """
-        Makes instances of GSFile from input or output section of task. When task=None,
+        Makes instances of File from input or output section of task. When task=None,
         file is not associated with a task. Flattens nested dict keys, so if the section
         looks like `{"foo": {"bar": "baz", "qux": [{"quux": "corge"}]}}`, first the
         section will be flattened into
@@ -86,26 +80,35 @@ class Analysis:
         flattened = FlatDict(section, delimiter=".")
         for key, value in flattened.items():
             for filename in self.extract_files(value):
-                files.append(self.get_or_make_file(key, filename, task, used_by_tasks))
+                files.append(self.get_or_make_file(key, filename, task, used_by_task))
         return files
 
-    # Returns a GSFile object, makes a new one if one doesn't exist
-    def get_or_make_file(self, key, filename, task=None, used_by_tasks=None):
+    def get_or_make_file(
+        self,
+        key: str,
+        filename: str,
+        task: Optional[Task] = None,
+        used_by_task: Optional[Task] = None,
+    ) -> File:
+        """
+        Returns a GSFile object, makes a new one if one doesn't exist
+        """
         for file in self.files:
             if filename == file.filename:
                 if key not in file.filekeys:
                     file.filekeys.append(key)
-                if used_by_tasks and used_by_tasks not in file.used_by_tasks:
-                    file.used_by_tasks.append(used_by_tasks)
+                if used_by_task and used_by_task not in file.used_by_tasks:
+                    file.used_by_tasks.append(used_by_task)
                 return file
-        blob = self.backend.blob_from_filename(filename)
-        new_file = GSFile(key, filename, blob.md5sum, blob.size, task, used_by_tasks)
+        new_file = self.backend.make_file(key, filename, task, used_by_task)
         self.files.append(new_file)
         return new_file
 
-    # Extracts file names from dict values
     def extract_files(self, outputs):
-        if isinstance(outputs, str) and "gs://" in outputs:
+        """
+        Extracts file names from dict values
+        """
+        if isinstance(outputs, str) and self.backend.is_valid_uri(outputs):
             yield outputs
         elif isinstance(outputs, list):
             for item in outputs:
@@ -114,8 +117,8 @@ class Analysis:
             for key, values in outputs.items():
                 yield from self.extract_files(values)
 
-    def get_tasks(self, task_name):
-        tasks = []
+    def get_tasks(self, task_name: str) -> List[Task]:
+        tasks: List[Task] = []
         for task in self.tasks:
             if task_name == task.task_name:
                 tasks.append(task)
@@ -153,7 +156,7 @@ class Analysis:
         task_name,
         filekey,
         inputs=False,
-        disallow_tasks: Tuple[str, ...] = (),
+        disallow_tasks: Iterable[str] = (),
     ):
         return list(
             set(self._search_up(start_task, task_name, filekey, inputs, disallow_tasks))
@@ -168,10 +171,10 @@ class Analysis:
         task_name,
         filekey,
         inputs: bool = False,
-        disallow_tasks: Tuple[str, ...] = (),
+        disallow_tasks: Iterable[str] = (),
     ):
         """
-        Search the Analysis hirearchy up for a file matching filekey. Returns a
+        Search the Analysis hierarchy up for a file matching filekey. Returns a
         generator, access with next() or list() task parameter specifies the starting
         point, task_name is target task in which filekey exists.
 
@@ -211,7 +214,7 @@ class Analysis:
 
     def _search_down(self, start_task, task_name, filekey, inputs: bool = False):
         """
-        Search the Analysis hirearchy down for a file matching filekey. Returns
+        Search the Analysis hierarchy down for a file matching filekey. Returns
         generator object, access with next(). Task parameter specifies the starting
         point, task_name is target task in which filekey exists.
 

@@ -20,6 +20,7 @@ from accession.accession_steps import (
     FileParams,
 )
 from accession.analysis import Analysis
+from accession.backends import LocalBackend, backend_factory
 from accession.cloud_tasks import (
     AwsCredentials,
     AwsS3Object,
@@ -39,7 +40,7 @@ from accession.encode_models import (
     EncodeQualityMetric,
     EncodeStepRun,
 )
-from accession.file import GSFile
+from accession.file import File, GSFile
 from accession.helpers import LruCache, flatten, impersonate_file, string_to_number
 from accession.logger_factory import logger_factory
 from accession.metadata import Metadata, metadata_factory
@@ -65,13 +66,12 @@ class Accession(ABC):
         no_log_file=False,
         queue_info: Optional[QueueInfo] = None,
     ):
-        self.analysis = analysis
+        self.analysis: Analysis = analysis
         self.steps = steps
-        self.backend = self.analysis.backend
         self.conn = connection
         self.common_metadata = common_metadata
         self.new_files: List[EncodeFile] = []
-        self.upload_queue: List[Tuple[EncodeFile, GSFile]] = []
+        self.upload_queue: List[Tuple[EncodeFile, File]] = []
         self.new_qcs: List[Dict[str, Any]] = []
         self.raw_qcs: List[EncodeQualityMetric] = []
         self.log_file_path = log_file_path
@@ -106,7 +106,7 @@ class Accession(ABC):
 
     @property
     @abstractmethod
-    def QC_MAP(self):
+    def QC_MAP(self) -> Dict[str, str]:
         raise NotImplementedError("Derived classes should provide their own QC_MAPs")
 
     @property
@@ -163,7 +163,7 @@ class Accession(ABC):
         return self._experiment
 
     def get_all_encode_files_matching_md5_of_blob(
-        self, file: GSFile
+        self, file: File
     ) -> Optional[List[EncodeFile]]:
         """
         Retrieves all files from the portal with an md5sum matching the blob's md5. Will
@@ -196,13 +196,11 @@ class Accession(ABC):
         modeled_encode_files = [EncodeFile(file_props) for file_props in encode_files]
         return modeled_encode_files
 
-    def get_encode_file_matching_md5_of_blob(
-        self, file: GSFile
-    ) -> Optional[EncodeFile]:
+    def get_encode_file_matching_md5_of_blob(self, file: File) -> Optional[EncodeFile]:
         """Finds an ENCODE File object whose md5sum matches md5 of a blob in URI in backend.
 
         Args:
-            file (GSFile): A GSFile representing an object on the backend.
+            file (File): A File representing an object on the backend.
 
         Returns:
             EncodeFile: an instance of EncodeFile, a document-object mapping
@@ -221,19 +219,17 @@ class Accession(ABC):
         else:
             return None
 
-    def make_file_matching_md5_record(
-        self, gs_file: GSFile
-    ) -> Optional[MatchingMd5Record]:
+    def make_file_matching_md5_record(self, file: File) -> Optional[MatchingMd5Record]:
         """
         This has not been completely extracted into preflight.py because otherwise the
         preflight helper would be required to know about the method
         `get_all_encode_files_matching_md5_of_blob`.
         """
-        matching = self.get_all_encode_files_matching_md5_of_blob(gs_file)
+        matching = self.get_all_encode_files_matching_md5_of_blob(file)
         if matching is None:
             return None
         record = self.preflight_helper.make_file_matching_md5_record(
-            gs_file.filename, matching
+            file.filename, matching
         )
         return record
 
@@ -243,9 +239,7 @@ class Accession(ABC):
                 return False
         return True
 
-    def accession_file(
-        self, encode_file: Dict[str, Any], gs_file: GSFile
-    ) -> EncodeFile:
+    def accession_file(self, encode_file: Dict[str, Any], file: File) -> EncodeFile:
         """
         First POSTs the file metadata and subsequently queues upload of the actual data.
         The file is queued for upload if there are no 409 conflicts for the posted file
@@ -254,7 +248,7 @@ class Accession(ABC):
         the file status is uploading, then we assume the file is currently being
         uploaded and upload will not be queued.
         """
-        file_exists = self.get_encode_file_matching_md5_of_blob(gs_file)
+        file_exists = self.get_encode_file_matching_md5_of_blob(file)
         if file_exists:
             self.logger.warning(
                 "Attempting to post duplicate file of %s with md5sum %s",
@@ -272,7 +266,7 @@ class Accession(ABC):
             modeled_encode_file.status == "uploading"
             and status_code != HTTPStatus.CONFLICT
         ):
-            self.upload_queue.append((modeled_encode_file, gs_file))
+            self.upload_queue.append((modeled_encode_file, file))
         else:
             self.logger.info(
                 "Encode file %s is already uploaded, will not reupload",
@@ -281,11 +275,11 @@ class Accession(ABC):
         self.new_files.append(modeled_encode_file)
         return modeled_encode_file
 
-    def upload_file(self, encode_file: EncodeFile, gs_file: GSFile) -> None:
+    def upload_file(self, encode_file: EncodeFile, file: File) -> None:
         """
         If there is a Cloud Tasks upload client (i.e. successfully read the config from
         the environment) then will upload using Cloud Tasks, otherwise will fallback
-        to local file upload.
+        to local file upload if the file is on Google Cloud Storage.
         """
         if self.cloud_tasks_upload_client is None:
             self.logger.info(
@@ -294,11 +288,14 @@ class Accession(ABC):
                     "correctly?), will use local upload"
                 )
             )
-            self._upload_file_locally(encode_file, gs_file)
+            self._upload_file_locally(encode_file, file)
             return
-        self._upload_file_using_cloud_tasks(encode_file, gs_file)
 
-    def _upload_file_locally(self, encode_file: EncodeFile, gs_file: GSFile) -> None:
+        if not isinstance(file, GSFile):
+            raise ValueError("Cannot upload local files via Cloud Tasks")
+        self._upload_file_using_cloud_tasks(encode_file, file)
+
+    def _upload_file_locally(self, encode_file: EncodeFile, file: File) -> None:
         """
         At a high level, uploads the file from GCS to S3 by streaming bytes. As the s3
         client reads chunks they are lazily fetched from GCS. Blocks until upload is
@@ -306,9 +303,8 @@ class Accession(ABC):
 
         In more details, obtains STS credentials to upload to the portal file specified
         by `encode_file`, creates a s3 client, and uploads the file corresponding to
-        `gs_file` (potentially as multipart). For this to work, the blob acquired by
-        `self.backend.blob_from_filename` must return an object that has a file-like
-        `read` method. For more details see the `boto3` docs:
+        `file` (potentially as multipart). For this to work, `file` must have a
+        file-like `read` method. For more details see the `boto3` docs:
         https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/s3.html#S3.Client.upload_fileobj
 
         Extensive testing revealed that for the boto3 default transfer config performed
@@ -325,15 +321,13 @@ class Accession(ABC):
         path_parts = s3_uri.replace("s3://", "").split("/")
         bucket = path_parts.pop(0)
         key = "/".join(path_parts)
-        filename = gs_file.filename
-        gcs_blob = self.backend.blob_from_filename(filename)
-        multipart_chunksize = self._calculate_multipart_chunksize(gcs_blob.size)
+        multipart_chunksize = self._calculate_multipart_chunksize(file.size)
         transfer_config = boto3.s3.transfer.TransferConfig(
             multipart_chunksize=multipart_chunksize
         )
-        self.logger.info("Uploading file %s to %s", filename, s3_uri)
-        s3.upload_fileobj(gcs_blob, bucket, key, Config=transfer_config)
-        self.logger.info("Finished uploading file %s", filename)
+        self.logger.info("Uploading file %s to %s", file.filename, s3_uri)
+        s3.upload_fileobj(file, bucket, key, Config=transfer_config)
+        self.logger.info("Finished uploading file %s", file.filename)
 
     def _calculate_multipart_chunksize(self, file_size_bytes: int) -> int:
         """
@@ -349,7 +343,7 @@ class Accession(ABC):
         return multipart_chunksize
 
     def _upload_file_using_cloud_tasks(
-        self, encode_file: EncodeFile, gs_file: GSFile
+        self, encode_file: EncodeFile, file: GSFile
     ) -> None:
         """
         Submits file for upload to the Cloud Tasks queue. Unlike `_upload_file_locally`
@@ -369,15 +363,12 @@ class Accession(ABC):
         bucket = path_parts.pop(0)
         key = "/".join(path_parts)
         aws_s3_object = AwsS3Object(bucket=bucket, key=key)
-        gcs_blob = self.backend.blob_from_filename(gs_file.filename)
         upload_payload = UploadPayload(
-            aws_credentials=aws_credentials,
-            aws_s3_object=aws_s3_object,
-            gcs_blob=gcs_blob,
+            aws_credentials=aws_credentials, aws_s3_object=aws_s3_object, gcs_blob=file
         )
         self.logger.info(
             "Submitting file %s for upload to %s using queue %s",
-            gs_file.filename,
+            file.filename,
             s3_uri,
             self.cloud_tasks_upload_client.get_queue_path(),
         )
@@ -434,14 +425,14 @@ class Accession(ABC):
             raise KeyError(msg)
 
     def get_derived_from_all(
-        self, file: GSFile, files: List[DerivedFromFile]
+        self, file: File, files: List[DerivedFromFile]
     ) -> List[str]:
         ancestors = []
         for ancestor in files:
             ancestors.append(self.get_derived_from(file, ancestor))
         return list(set(flatten(ancestors)))
 
-    def get_derived_from(self, file: GSFile, ancestor: DerivedFromFile) -> List[str]:
+    def get_derived_from(self, file: File, ancestor: DerivedFromFile) -> List[str]:
         """
         Returns list of accession ids of files on portal or recently accessioned. Will
         search_down if the ancestor file indicates it should be `search_down`ed for via
@@ -472,7 +463,7 @@ class Accession(ABC):
                 )
         except ValueError:
             self.logger.exception(
-                "An error occured searching for the parent file of %s", file.filename
+                "An error occurred searching for the parent file of %s", file.filename
             )
             raise
 
@@ -484,22 +475,22 @@ class Accession(ABC):
 
         derived_from_accession_ids = []
         if ancestor.only_search_current_analysis:
-            for gs_file in derived_from_files:
+            for file in derived_from_files:
                 for new_file in self.new_files:
-                    if (new_file.md5sum == gs_file.md5sum) and (
-                        new_file.submitted_file_name == gs_file.filename
+                    if (new_file.md5sum == file.md5sum) and (
+                        new_file.submitted_file_name == file.filename
                     ):
                         derived_from_accession_ids.append(new_file.at_id)
         else:
             encode_files = []
-            for gs_file in derived_from_files:
-                encode_file = self.get_encode_file_matching_md5_of_blob(gs_file)
+            for file in derived_from_files:
+                encode_file = self.get_encode_file_matching_md5_of_blob(file)
                 if encode_file is not None:
                     encode_files.append(encode_file)
             accessioned_files = encode_files + self.new_files
-            for gs_file in derived_from_files:
+            for file in derived_from_files:
                 for encode_file in accessioned_files:
-                    if gs_file.md5sum == encode_file.md5sum:
+                    if file.md5sum == encode_file.md5sum:
                         # Optimal peaks can be mistaken for conservative peaks
                         # when their md5sum is the same
                         if (
@@ -533,13 +524,14 @@ class Accession(ABC):
             )
         if len(derived_from_accession_ids) != len(derived_from_files):
             raise Exception(
-                f"Missing some of the derived_from files on the portal, found ids {derived_from_accession_ids}, still missing {missing}"
+                "Missing some of the derived_from files on the portal, found ids "
+                f"{derived_from_accession_ids}, still missing {missing}"
             )
         return derived_from_accession_ids
 
     def _filter_derived_from_files_by_workflow_inputs(
-        self, derived_from_files: List[GSFile], ancestor: DerivedFromFile
-    ) -> List[GSFile]:
+        self, derived_from_files: List[File], ancestor: DerivedFromFile
+    ) -> List[File]:
         """
         Filter the list of candidate derived_from files on the condition that the
         filename matches or is present in a workflow input. Used in
@@ -552,13 +544,13 @@ class Accession(ABC):
                 for key in ancestor.workflow_inputs_to_match
             ]
         )
-        for gs_file in derived_from_files:
-            if gs_file.filename in potential_filenames:
-                new.append(gs_file)
+        for file in derived_from_files:
+            if file.filename in potential_filenames:
+                new.append(file)
         return new
 
     def make_file_obj(
-        self, file: GSFile, file_params: FileParams, step_run: EncodeStepRun
+        self, file: File, file_params: FileParams, step_run: EncodeStepRun
     ) -> Dict[str, Any]:
         """
         Obtains a file object postable to the ENCODE portal. Slashes `/` are not allowed
@@ -572,7 +564,7 @@ class Accession(ABC):
         for callback in file_params.callbacks:
             result: Dict[str, Any] = getattr(self, callback)(file)
             extras.update(result)
-        file_name = file.filename.split(file.SCHEME)[-1].replace("/", "-")
+        file_name = file.get_filename_for_encode_alias()
         obj = EncodeFile.from_template(
             aliases=[
                 "{}:{}-{}".format(
@@ -631,7 +623,7 @@ class Accession(ABC):
         self.raw_qcs.append(modeled_qc)
 
     def get_attachment(
-        self, gs_file: GSFile, mime_type: str, additional_extension: str = ""
+        self, file: File, mime_type: str, additional_extension: str = ""
     ) -> Dict[str, str]:
         """
         Files with certain extensions will fail portal validation since it can't guess
@@ -640,9 +632,8 @@ class Accession(ABC):
         extension that will cause the portal to correctly guess the mime type, for
         instance in the above case appending a `.txt` extension will validate properly.
         """
-        filename = gs_file.filename
-        contents = self.backend.read_file(filename)
-        attachment = EncodeAttachment(contents, filename)
+        contents = file.read_bytes()
+        attachment = EncodeAttachment(contents, file.filename)
         obj = attachment.get_portal_object(
             mime_type, additional_extension=additional_extension
         )
@@ -674,7 +665,7 @@ class Accession(ABC):
         Tries to POST the new analysis. If an equivalent analysis exists, as determined
         by 409 conflict, then this will not POST anything. Will post the workflow
         metadata as an attachment in a document, then insert that document into the
-        `documents` array in the analysis object, and finally post the analyis object.
+        `documents` array in the analysis object, and finally post the analysis object.
         """
         document_aliases = [
             f"{self.common_metadata.lab_pi}:cromwell-metadata-{self.analysis.workflow_id}"
@@ -732,7 +723,7 @@ class Accession(ABC):
         accessioning template to a function name. This will raise a NotImplementedError if the
         method is not defined, wrapping the AttributeError raised by getattr(). Quality metric
         helper functions should be implemented by derived classes.
-        The optional parameter "requries_replication" is used to denote wdl tasks that
+        The optional parameter "requires_replication" is used to denote wdl tasks that
         will not be present in the metadata if the pipeline is ran on unreplicated data,
         for example pooled IDR in the ChIP-seq pipeline.
         """
@@ -842,8 +833,8 @@ class Accession(ABC):
             self.accession_step(step)
         self.post_qcs()
         analysis = self.post_analysis()
-        for encode_file, gs_file in self.upload_queue:
-            self.upload_file(encode_file, gs_file)
+        for encode_file, file in self.upload_queue:
+            self.upload_file(encode_file, file)
         self.patch_experiment_analysis_objects(analysis)
         self.patch_experiment_internal_status()
 
@@ -852,7 +843,7 @@ class AccessionGenericRna(Accession):
     def make_generic_correlation_qc(
         self,
         encode_file: EncodeFile,
-        gs_file: GSFile,
+        file: File,
         handler: Callable,
         qc_schema_name: str = "CorrelationQualityMetric",
         qc_schema_name_with_hyphens: str = "correlation-quality-metric",
@@ -866,7 +857,7 @@ class AccessionGenericRna(Accession):
             or self.experiment.get_number_of_biological_replicates() != 2
         ):
             return
-        qc = handler(gs_file)
+        qc = handler(file)
         return self.queue_qc(qc, encode_file, qc_schema_name_with_hyphens, shared=True)
 
 
@@ -911,15 +902,13 @@ class AccessionBulkRna(AccessionGenericRna):
             filekey, EncodeFile.GENOME_ANNOTATION
         )
 
-    def make_star_mapping_qc(
-        self, encode_bam_file: EncodeFile, gs_file: GSFile
-    ) -> None:
+    def make_star_mapping_qc(self, encode_bam_file: EncodeFile, file: File) -> None:
         if encode_bam_file.has_qc("StarQualityMetric"):  # actual name of the object
             return
         qc_file = self.analysis.get_files(
-            filename=gs_file.task.outputs["log_json"]  # task output name
+            filename=file.get_task().outputs["log_json"]  # task output name
         )[0]
-        qc = self.backend.read_json(qc_file)
+        qc = qc_file.read_json()
         star_qc_metric = qc.get("star_log_qc")  # what the key is in actual qc json file
         del star_qc_metric["Started job on"]
         del star_qc_metric["Started mapping on"]
@@ -927,7 +916,7 @@ class AccessionBulkRna(AccessionGenericRna):
         for key, value in star_qc_metric.items():
             star_qc_metric[key] = string_to_number(value)
         qc_bytes = EncodeAttachment.get_bytes_from_dict(qc)
-        modeled_attachment = EncodeAttachment(qc_bytes, gs_file.filename)
+        modeled_attachment = EncodeAttachment(qc_bytes, file.filename)
         attachment = modeled_attachment.get_portal_object(
             mime_type="application/json", additional_extension=".json"
         )
@@ -942,13 +931,11 @@ class AccessionBulkRna(AccessionGenericRna):
         output = {prop: qc_dict[prop] for prop in properties_to_report}
         return output
 
-    def make_reads_by_gene_type_qc(
-        self, encode_file: EncodeFile, gs_file: GSFile
-    ) -> None:
+    def make_reads_by_gene_type_qc(self, encode_file: EncodeFile, file: File) -> None:
         if encode_file.has_qc("GeneTypeQuantificationQualityMetric"):
             return
-        qc_file = self.analysis.search_down(gs_file.task, "rna_qc", "rnaQC")[0]
-        qc = self.backend.read_json(qc_file)
+        qc_file = self.analysis.search_down(file.task, "rna_qc", "rnaQC")[0]
+        qc = qc_file.read_json()
         try:
             gene_type_count_key = "gene_type_count"
             reads_by_gene_type_qc_metric = qc[gene_type_count_key]
@@ -961,7 +948,7 @@ class AccessionBulkRna(AccessionGenericRna):
             reads_by_gene_type_qc_metric, self.GENE_TYPE_PROPERTIES
         )
         qc_bytes = EncodeAttachment.get_bytes_from_dict(qc)
-        modeled_attachment = EncodeAttachment(qc_bytes, gs_file.filename)
+        modeled_attachment = EncodeAttachment(qc_bytes, file.filename)
         attachment = modeled_attachment.get_portal_object(
             mime_type="application/json", additional_extension=".json"
         )
@@ -973,7 +960,7 @@ class AccessionBulkRna(AccessionGenericRna):
     def make_qc_from_well_formed_json(
         self,
         encode_file: EncodeFile,
-        gs_file: GSFile,
+        file: File,
         qc_schema_name: str,
         qc_file_task_output_name: str,
         qc_dictionary_key: str,
@@ -982,16 +969,16 @@ class AccessionBulkRna(AccessionGenericRna):
         if encode_file.has_qc(qc_schema_name):
             return
         qc_file = self.analysis.get_files(
-            filename=gs_file.task.outputs[qc_file_task_output_name]
+            filename=file.get_task().outputs[qc_file_task_output_name]
         )[0]
-        qc = self.backend.read_json(qc_file)
+        qc = qc_file.read_json()
         output_qc = qc.get(qc_dictionary_key)
         return self.queue_qc(output_qc, encode_file, qc_schema_name_with_hyphens)
 
     def make_flagstat_qc(
         self,
         encode_file: EncodeFile,
-        gs_file: GSFile,
+        file: File,
         task_output_name: str,
         qc_dictionary_key: str,
         convert_to_string: List[str,] = [
@@ -1003,9 +990,9 @@ class AccessionBulkRna(AccessionGenericRna):
         if encode_file.has_qc("SamtoolsFlagstatsQualityMetric"):
             return
         qc_file = self.analysis.get_files(
-            filename=gs_file.task.outputs[task_output_name]
+            filename=file.get_task().outputs[task_output_name]
         )[0]
-        qc = self.backend.read_json(qc_file)
+        qc = qc_file.read_json()
         output_qc = qc.get(qc_dictionary_key)
         for key in convert_to_string:
             # paired_properly_pct and singletons_pct are not there in single-ended
@@ -1015,7 +1002,7 @@ class AccessionBulkRna(AccessionGenericRna):
                 continue
 
         qc_bytes = EncodeAttachment.get_bytes_from_dict(qc)
-        modeled_attachment = EncodeAttachment(qc_bytes, gs_file.filename)
+        modeled_attachment = EncodeAttachment(qc_bytes, file.filename)
         attachment = modeled_attachment.get_portal_object(
             mime_type="application/json", additional_extension=".json"
         )
@@ -1024,45 +1011,43 @@ class AccessionBulkRna(AccessionGenericRna):
             output_qc, encode_file, "samtools-flagstats-quality-metric"
         )
 
-    def make_genome_flagstat_qc(self, encode_file: EncodeFile, gs_file: GSFile) -> None:
+    def make_genome_flagstat_qc(self, encode_file: EncodeFile, file: File) -> None:
         self.make_flagstat_qc(
-            encode_file, gs_file, "genome_flagstat_json", "samtools_genome_flagstat"
+            encode_file, file, "genome_flagstat_json", "samtools_genome_flagstat"
         )
 
-    def make_anno_flagstat_qc(self, encode_file: EncodeFile, gs_file: GSFile) -> None:
+    def make_anno_flagstat_qc(self, encode_file: EncodeFile, file: File) -> None:
         self.make_flagstat_qc(
-            encode_file, gs_file, "anno_flagstat_json", "samtools_anno_flagstat"
+            encode_file, file, "anno_flagstat_json", "samtools_anno_flagstat"
         )
 
     def make_number_of_genes_detected_qc(
-        self, encode_file: EncodeFile, gs_file: GSFile
+        self, encode_file: EncodeFile, file: File
     ) -> None:
         self.make_qc_from_well_formed_json(
             encode_file,
-            gs_file,
+            file,
             "GeneQuantificationQualityMetric",
             "number_of_genes",
             "number_of_genes_detected",
             "gene-quantification-quality-metric",
         )
 
-    def prepare_mad_qc_metric(self, gs_file: GSFile) -> Dict[str, Any]:
-        qc_file = self.analysis.search_down(gs_file.task, "mad_qc", "madQCmetrics")[0]
-        qc = self.backend.read_json(qc_file)
+    def prepare_mad_qc_metric(self, file: File) -> Dict[str, Any]:
+        qc_file = self.analysis.search_down(file.task, "mad_qc", "madQCmetrics")[0]
+        qc = qc_file.read_json()
         try:
             qc_key = "MAD.R"
             mad_qc = qc[qc_key]
         except KeyError:
             self.logger.exception("Could not find key %s in madqc source file", qc_key)
             raise
-        attachment_file = self.analysis.search_down(
-            gs_file.task, "mad_qc", "madQCplot"
-        )[0]
+        attachment_file = self.analysis.search_down(file.task, "mad_qc", "madQCplot")[0]
         attachment = self.get_attachment(attachment_file, "image/png")
         mad_qc["attachment"] = attachment
         return mad_qc
 
-    def make_mad_qc_metric(self, encode_file: EncodeFile, gs_file: GSFile) -> None:
+    def make_mad_qc_metric(self, encode_file: EncodeFile, file: File) -> None:
         """
         Special logic is required to facilitate situation where the experiment is
         unreplicated in biological replication sense, but contains two technical replicates.
@@ -1080,7 +1065,7 @@ class AccessionBulkRna(AccessionGenericRna):
             num_biological_replicates == 1
             and self.experiment.get_number_of_technical_replicates() == 2
         ) or num_biological_replicates == 2:
-            mad_qc = self.prepare_mad_qc_metric(gs_file)
+            mad_qc = self.prepare_mad_qc_metric(file)
             return self.queue_qc(mad_qc, encode_file, "mad-quality-metric", shared=True)
         else:
             return
@@ -1113,7 +1098,7 @@ class AccessionDnase(Accession):
         return result
 
     def make_flagstats_qc(
-        self, encode_file: EncodeFile, gs_file: GSFile, filekey: str
+        self, encode_file: EncodeFile, file: File, filekey: str
     ) -> None:
         """
         Filekey is either "nuclear_bam_qc" or "unfiltered_bam_qc"
@@ -1121,11 +1106,11 @@ class AccessionDnase(Accession):
         if encode_file.has_qc("SamtoolsFlagstatsQualityMetric"):
             return
         qc_file = self.analysis.get_files(
-            filename=gs_file.task.outputs["analysis"]["qc"][filekey]["flagstats"]
+            filename=file.get_task().outputs["analysis"]["qc"][filekey]["flagstats"]
         )[
             0
-        ]  # this is GSFile
-        qc_bytes = self.backend.read_file(qc_file.filename)
+        ]  # this is File
+        qc_bytes = qc_file.read_bytes()
         with impersonate_file(qc_bytes) as flagstats:
             qc_output_dict = parse_flagstats(flagstats)
         qc_output_dict["mapped_pct"] = str(qc_output_dict["mapped_pct"])
@@ -1139,16 +1124,12 @@ class AccessionDnase(Accession):
             qc_output_dict, encode_file, "samtools-flagstats-quality-metric"
         )
 
-    def make_unfiltered_flagstats_qc(
-        self, encode_file: EncodeFile, gs_file: GSFile
-    ) -> None:
+    def make_unfiltered_flagstats_qc(self, encode_file: EncodeFile, file: File) -> None:
         self.make_flagstats_qc(
-            encode_file=encode_file, gs_file=gs_file, filekey="unfiltered_bam_qc"
+            encode_file=encode_file, file=file, filekey="unfiltered_bam_qc"
         )
 
-    def make_unfiltered_trimstats_qc(
-        self, encode_file: EncodeFile, gs_file: GSFile
-    ) -> None:
+    def make_unfiltered_trimstats_qc(self, encode_file: EncodeFile, file: File) -> None:
         """
         If there is no trimstats qc then will return without queueing anything for
         posting.
@@ -1157,7 +1138,7 @@ class AccessionDnase(Accession):
         if encode_file.has_qc("TrimmingQualityMetric"):
             return
         qc_files = self.analysis.get_files(
-            filename=gs_file.task.outputs["analysis"]["qc"]["unfiltered_bam_qc"][
+            filename=file.get_task().outputs["analysis"]["qc"]["unfiltered_bam_qc"][
                 "trimstats"
             ]
         )
@@ -1167,16 +1148,12 @@ class AccessionDnase(Accession):
         qc_output_dict["attachment"] = attachment
         return self.queue_qc(qc_output_dict, encode_file, "trimming-quality-metric")
 
-    def make_nuclear_flagstats_qc(
-        self, encode_file: EncodeFile, gs_file: GSFile
-    ) -> None:
+    def make_nuclear_flagstats_qc(self, encode_file: EncodeFile, file: File) -> None:
         self.make_flagstats_qc(
-            encode_file=encode_file, gs_file=gs_file, filekey="nuclear_bam_qc"
+            encode_file=encode_file, file=file, filekey="nuclear_bam_qc"
         )
 
-    def make_nuclear_duplication_qc(
-        self, encode_file: EncodeFile, gs_file: GSFile
-    ) -> None:
+    def make_nuclear_duplication_qc(self, encode_file: EncodeFile, file: File) -> None:
         """
         If data is SE then Picard MarkDuplicates library size estimate will be an empty
         string, need to handle.
@@ -1184,11 +1161,11 @@ class AccessionDnase(Accession):
         if encode_file.has_qc("DuplicatesQualityMetric"):
             return
         qc_file = self.analysis.get_files(
-            filename=gs_file.task.outputs["analysis"]["qc"]["nuclear_bam_qc"][
+            filename=file.get_task().outputs["analysis"]["qc"]["nuclear_bam_qc"][
                 "duplication_metrics"
             ]
         )[0]
-        qc_bytes = self.backend.read_file(qc_file.filename)
+        qc_bytes = qc_file.read_bytes()
         qc_output_dict = self.parse_dict_from_bytes(
             qc_bytes, parse_picard_duplication_metrics
         )
@@ -1200,17 +1177,15 @@ class AccessionDnase(Accession):
         qc_output_dict["attachment"] = attachment
         return self.queue_qc(qc_output_dict, encode_file, "duplicates-quality-metric")
 
-    def make_nuclear_hotspot1_qc(
-        self, encode_file: EncodeFile, gs_file: GSFile
-    ) -> None:
+    def make_nuclear_hotspot1_qc(self, encode_file: EncodeFile, file: File) -> None:
         if encode_file.has_qc("HotspotQualityMetric"):
             return
         qc_file = self.analysis.get_files(
-            filename=gs_file.task.outputs["analysis"]["qc"]["nuclear_bam_qc"][
+            filename=file.get_task().outputs["analysis"]["qc"]["nuclear_bam_qc"][
                 "hotspot1"
             ]
         )[0]
-        qc_bytes = self.backend.read_file(qc_file.filename)
+        qc_bytes = qc_file.read_bytes()
         qc_output_dict = self.parse_dict_from_bytes(qc_bytes, parse_hotspot1_spot_score)
         attachment = self.get_attachment(
             qc_file, "text/plain", additional_extension=".txt"
@@ -1219,7 +1194,7 @@ class AccessionDnase(Accession):
         return self.queue_qc(qc_output_dict, encode_file, "hotspot-quality-metric")
 
     def make_samtools_stats_qc(
-        self, encode_file: EncodeFile, gs_file: GSFile, filekey: str
+        self, encode_file: EncodeFile, file: File, filekey: str
     ) -> None:
         """
         Filekey is either unfiltered_bam_qc or nuclear_bam_qc.
@@ -1227,9 +1202,9 @@ class AccessionDnase(Accession):
         if encode_file.has_qc("SamtoolsStatsQualityMetric"):
             return
         qc_file = self.analysis.get_files(
-            filename=gs_file.task.outputs["analysis"]["qc"][filekey]["stats"]
+            filename=file.get_task().outputs["analysis"]["qc"][filekey]["stats"]
         )[0]
-        qc_bytes = self.backend.read_file(qc_file.filename)
+        qc_bytes = qc_file.read_bytes()
         qc_output_dict = self.parse_dict_from_bytes(qc_bytes, parse_samtools_stats)
         attachment = self.get_attachment(qc_file, "text/plain")
         qc_output_dict["attachment"] = attachment
@@ -1249,22 +1224,20 @@ class AccessionDnase(Accession):
         )
 
     def make_nuclear_samtools_stats_qc(
-        self, encode_file: EncodeFile, gs_file: GSFile
+        self, encode_file: EncodeFile, file: File
     ) -> None:
         self.make_samtools_stats_qc(
-            encode_file=encode_file, gs_file=gs_file, filekey="nuclear_bam_qc"
+            encode_file=encode_file, file=file, filekey="nuclear_bam_qc"
         )
 
     def make_unfiltered_samtools_stats_qc(
-        self, encode_file: EncodeFile, gs_file: GSFile
+        self, encode_file: EncodeFile, file: File
     ) -> None:
         self.make_samtools_stats_qc(
-            encode_file=encode_file, gs_file=gs_file, filekey="unfiltered_bam_qc"
+            encode_file=encode_file, file=file, filekey="unfiltered_bam_qc"
         )
 
-    def make_nuclear_alignment_qc(
-        self, encode_file: EncodeFile, gs_file: GSFile
-    ) -> None:
+    def make_nuclear_alignment_qc(self, encode_file: EncodeFile, file: File) -> None:
         """
         For SE data skip the insert size QC since it is only estimated for PE data.
         """
@@ -1273,7 +1246,7 @@ class AccessionDnase(Accession):
         dnase_alignment_qc_output = {}
 
         insert_size_info_files = self.analysis.get_files(
-            filename=gs_file.task.outputs["analysis"]["qc"]["nuclear_bam_qc"][
+            filename=file.get_task().outputs["analysis"]["qc"]["nuclear_bam_qc"][
                 "insert_size_info"
             ]
         )
@@ -1284,7 +1257,7 @@ class AccessionDnase(Accession):
             )
             dnase_alignment_qc_output["attachment"] = insert_size_info_attachment
             insert_size_metric_file = self.analysis.get_files(
-                filename=gs_file.task.outputs["analysis"]["qc"]["nuclear_bam_qc"][
+                filename=file.get_task().outputs["analysis"]["qc"]["nuclear_bam_qc"][
                     "insert_size_metrics"
                 ]
             )[0]
@@ -1296,7 +1269,7 @@ class AccessionDnase(Accession):
             ] = insert_size_metric_attachment
 
             insert_size_histogram_file = self.analysis.get_files(
-                filename=gs_file.task.outputs["analysis"]["qc"]["nuclear_bam_qc"][
+                filename=file.get_task().outputs["analysis"]["qc"]["nuclear_bam_qc"][
                     "insert_size_histogram_pdf"
                 ]
             )[0]
@@ -1308,14 +1281,16 @@ class AccessionDnase(Accession):
             ] = insert_size_histogram_attachment
 
         nuclear_preseq_file = self.analysis.get_files(
-            filename=gs_file.task.outputs["analysis"]["qc"]["nuclear_bam_qc"]["preseq"]
+            filename=file.get_task().outputs["analysis"]["qc"]["nuclear_bam_qc"][
+                "preseq"
+            ]
         )[0]
         nuclear_preseq_attachment = self.get_attachment(
             nuclear_preseq_file, "text/plain"
         )
         dnase_alignment_qc_output["nuclear_preseq"] = nuclear_preseq_attachment
         nuclear_preseq_targets_file = self.analysis.get_files(
-            filename=gs_file.task.outputs["analysis"]["qc"]["nuclear_bam_qc"][
+            filename=file.get_task().outputs["analysis"]["qc"]["nuclear_bam_qc"][
                 "preseq_targets"
             ]
         )[0]
@@ -1330,16 +1305,16 @@ class AccessionDnase(Accession):
             dnase_alignment_qc_output, encode_file, "dnase-alignment-quality-metric"
         )
 
-    def make_footprints_qc(self, encode_file: EncodeFile, gs_file: GSFile) -> None:
+    def make_footprints_qc(self, encode_file: EncodeFile, file: File) -> None:
         if encode_file.has_qc("DnaseFootprintingQualityMetric"):
             return
         footprint_count = int(
-            gs_file.task.outputs["analysis"]["qc"]["footprints_qc"][
+            file.get_task().outputs["analysis"]["qc"]["footprints_qc"][
                 "one_percent_footprints_count"
             ]
         )
         dispersion_model_file = self.analysis.get_files(
-            filename=gs_file.task.outputs["analysis"]["qc"]["footprints_qc"][
+            filename=file.get_task().outputs["analysis"]["qc"]["footprints_qc"][
                 "dispersion_model"
             ]
         )[0]
@@ -1354,12 +1329,12 @@ class AccessionDnase(Accession):
         )
 
     def make_tenth_of_one_percent_peaks_qc(
-        self, encode_file: EncodeFile, gs_file: GSFile
+        self, encode_file: EncodeFile, file: File
     ) -> None:
         if encode_file.has_qc("HotspotsQualityMetric"):
             return
         tenth_of_percent_narrowpeaks_count = int(
-            gs_file.task.outputs["analysis"]["qc"]["peaks_qc"][
+            file.get_task().outputs["analysis"]["qc"]["peaks_qc"][
                 "tenth_of_one_percent_narrowpeaks_count"
             ]
         )
@@ -1370,12 +1345,12 @@ class AccessionDnase(Accession):
         return self.queue_qc(qc_output, encode_file, "hotspot-quality-metric")
 
     def make_five_percent_allcalls_qc(
-        self, encode_file: EncodeFile, gs_file: GSFile
+        self, encode_file: EncodeFile, file: File
     ) -> None:
         if encode_file.has_qc("HotspotQualityMetric"):
             return
         five_percent_allcalls_count = int(
-            gs_file.task.outputs["analysis"]["qc"]["peaks_qc"][
+            file.get_task().outputs["analysis"]["qc"]["peaks_qc"][
                 "five_percent_allcalls_count"
             ]
         )
@@ -1384,24 +1359,24 @@ class AccessionDnase(Accession):
         return self.queue_qc(qc_output, encode_file, "hotspot-quality-metric")
 
     def make_five_percent_narrowpeaks_qc(
-        self, encode_file: EncodeFile, gs_file: GSFile
+        self, encode_file: EncodeFile, file: File
     ) -> None:
         if encode_file.has_qc("HotspotQualityMetric"):
             return
         five_percent_narrowpeaks_count = int(
-            gs_file.task.outputs["analysis"]["qc"]["peaks_qc"][
+            file.get_task().outputs["analysis"]["qc"]["peaks_qc"][
                 "five_percent_narrowpeaks_count"
             ]
         )
         five_percent_hotspots_count = int(
-            gs_file.task.outputs["analysis"]["qc"]["peaks_qc"][
+            file.get_task().outputs["analysis"]["qc"]["peaks_qc"][
                 "five_percent_hotspots_count"
             ]
         )
         hotspot2_file = self.analysis.get_files(
-            filename=gs_file.task.outputs["analysis"]["qc"]["peaks_qc"]["hotspot2"]
+            filename=file.get_task().outputs["analysis"]["qc"]["peaks_qc"]["hotspot2"]
         )[0]
-        hotspot2_score = float(self.backend.read_file(hotspot2_file.filename).decode())
+        hotspot2_score = float(hotspot2_file.read_bytes().decode())
         qc_output = {}  # type: Dict[str, Union[int, float]]
         qc_output["five_percent_narrowpeaks_count"] = five_percent_narrowpeaks_count
         qc_output["five_percent_hotspots_count"] = five_percent_hotspots_count
@@ -1457,30 +1432,30 @@ class AccessionLongReadRna(AccessionGenericRna):
             )
         return genome_annotation
 
-    def make_long_read_rna_correlation_qc(self, encode_file, gs_file):
+    def make_long_read_rna_correlation_qc(self, encode_file, file):
         """
         Make and post Spearman QC for long read RNA by giving the make_generic_correlation_qc the
         appropriate handler.
         """
         return self.make_generic_correlation_qc(
-            encode_file, gs_file, handler=self.prepare_long_read_rna_correlation_qc
+            encode_file, file, handler=self.prepare_long_read_rna_correlation_qc
         )
 
-    def prepare_long_read_rna_correlation_qc(self, gs_file):
+    def prepare_long_read_rna_correlation_qc(self, file):
         """
         Handler for creating the correlation QC object, specifically for long read rna. Finds and
         parses the spearman QC JSON.
         """
         qc_file, *_ = self.analysis.search_down(
-            gs_file.task, "calculate_spearman", "spearman"
+            file.task, "calculate_spearman", "spearman"
         )
-        qc = self.backend.read_json(qc_file)
+        qc = qc_file.read_json()
         spearman_value = qc["replicates_correlation"]["spearman_correlation"]
         spearman_correlation_qc = {"Spearman correlation": spearman_value}
         return spearman_correlation_qc
 
     def make_long_read_rna_mapping_qc(
-        self, encode_file: EncodeFile, gs_file: GSFile
+        self, encode_file: EncodeFile, file: File
     ) -> None:
         """
         The commented lines add number_of_mapped_reads to the qc object, a field that is currently
@@ -1488,10 +1463,10 @@ class AccessionLongReadRna(AccessionGenericRna):
         """
         if encode_file.has_qc("LongReadRnaMappingQualityMetric"):
             return
-        qc_file = self.analysis.get_files(filename=gs_file.task.outputs["mapping_qc"])[
-            0
-        ]
-        qc = self.backend.read_json(qc_file)
+        qc_file = self.analysis.get_files(
+            filename=file.get_task().outputs["mapping_qc"]
+        )[0]
+        qc = qc_file.read_json()
         output_qc: Dict[str, Any] = {}
         mr = "mapping_rate"
         flnc = qc["full_length_non_chimeric_reads"]["flnc"]
@@ -1502,13 +1477,13 @@ class AccessionLongReadRna(AccessionGenericRna):
         )
 
     def make_long_read_rna_quantification_qc(
-        self, encode_file: EncodeFile, gs_file: GSFile
+        self, encode_file: EncodeFile, file: File
     ) -> None:
         if encode_file.has_qc("LongReadRnaQuantificationQualityMetric"):
             return
         ngd = "number_of_genes_detected"
-        qc_file = self.analysis.get_files(filename=gs_file.task.outputs[ngd])[0]
-        qc = self.backend.read_json(qc_file)
+        qc_file = self.analysis.get_files(filename=file.get_task().outputs[ngd])[0]
+        qc = qc_file.read_json()
         output_qc = {"genes_detected": int(qc[ngd][ngd])}
         return self.queue_qc(
             output_qc, encode_file, "long-read-rna-quantification-quality-metric"
@@ -1591,36 +1566,32 @@ class AccessionMicroRna(AccessionGenericRna):
         )
 
     def make_microrna_quantification_qc(
-        self, encode_file: EncodeFile, gs_file: GSFile
+        self, encode_file: EncodeFile, file: File
     ) -> None:
         if encode_file.has_qc("MicroRnaQuantificationQualityMetric"):
             return
         qc_file = self.analysis.get_files(
-            filename=gs_file.task.outputs["star_qc_json"]
+            filename=file.get_task().outputs["star_qc_json"]
         )[0]
-        qc = self.backend.read_json(qc_file)
+        qc = qc_file.read_json()
         expressed_mirnas_qc = qc["expressed_mirnas"]
         return self.queue_qc(
             expressed_mirnas_qc, encode_file, "micro-rna-quantification-quality-metric"
         )
 
-    def make_microrna_mapping_qc(
-        self, encode_file: EncodeFile, gs_file: GSFile
-    ) -> None:
+    def make_microrna_mapping_qc(self, encode_file: EncodeFile, file: File) -> None:
         if encode_file.has_qc("MicroRnaMappingQualityMetric"):
             return
         qc_file = self.analysis.get_files(
-            filename=gs_file.task.outputs["star_qc_json"]
+            filename=file.get_task().outputs["star_qc_json"]
         )[0]
-        qc = self.backend.read_json(qc_file)
+        qc = qc_file.read_json()
         aligned_reads_qc = qc["aligned_reads"]
         return self.queue_qc(
             aligned_reads_qc, encode_file, "micro-rna-mapping-quality-metric"
         )
 
-    def make_microrna_correlation_qc(
-        self, encode_file: EncodeFile, gs_file: GSFile
-    ) -> None:
+    def make_microrna_correlation_qc(self, encode_file: EncodeFile, file: File) -> None:
         """
         Returns without queueing this QC for posting if the experiment is not replicated, since
         correlation is computed between pairs of replicates.
@@ -1631,9 +1602,9 @@ class AccessionMicroRna(AccessionGenericRna):
         ):
             return
         qc_file = self.analysis.search_down(
-            gs_file.task, "spearman_correlation", "spearman_json"
+            file.task, "spearman_correlation", "spearman_json"
         )[0]
-        qc = self.backend.read_json(qc_file)
+        qc = qc_file.read_json()
         spearman_value = qc["spearman_correlation"]["spearman_correlation"]
         spearman_correlation_qc = {"Spearman correlation": spearman_value}
         return self.queue_qc(
@@ -1643,13 +1614,13 @@ class AccessionMicroRna(AccessionGenericRna):
             shared=True,
         )
 
-    def make_star_qc_metric(self, encode_bam_file: EncodeFile, gs_file: GSFile) -> None:
+    def make_star_qc_metric(self, encode_bam_file: EncodeFile, file: File) -> None:
         if encode_bam_file.has_qc("StarQualityMetric"):
             return
         qc_file = self.analysis.get_files(
-            filename=gs_file.task.outputs["star_qc_json"]
+            filename=file.get_task().outputs["star_qc_json"]
         )[0]
-        qc = self.backend.read_json(qc_file)
+        qc = qc_file.read_json()
         star_qc_metric = qc.get("star_qc_metric")
         del star_qc_metric["Started job on"]
         del star_qc_metric["Started mapping on"]
@@ -1692,11 +1663,11 @@ class AccessionAtacChip(Accession):
         Need to override implementation in base class since ChIP and ATAC don't have
         `workflow.meta.version` in WDL.
         """
-        qc = self.backend.read_json(self.analysis.get_files("qc_json")[0])
+        qc = self.analysis.get_files("qc_json")[0].read_json()
         version = qc["general"]["pipeline_ver"].lstrip("v")
         return version
 
-    def get_atac_chip_pipeline_replicate(self, gs_file):
+    def get_atac_chip_pipeline_replicate(self, file):
         """
         Searches for the input fastq array corresponding to the ancestor input fastqs of the current
         file and returns the pipeline replicate number. We only need to check R1, since it will
@@ -1706,7 +1677,7 @@ class AccessionAtacChip(Accession):
         parent_fastqs = [
             file.filename
             for file in self.analysis.search_up(
-                gs_file.task, "align", "fastqs_R1", inputs=True
+                file.task, "align", "fastqs_R1", inputs=True
             )
         ]
         pipeline_rep = None
@@ -1717,9 +1688,7 @@ class AccessionAtacChip(Accession):
                     break
         if not pipeline_rep:
             raise ValueError(
-                "Could not determine pipeline replicate number for file {}".format(
-                    gs_file
-                )
+                "Could not determine pipeline replicate number for file {}".format(file)
             )
         return pipeline_rep
 
@@ -1733,13 +1702,13 @@ class AccessionAtacChip(Accession):
                 num_reps += 1
         return num_reps
 
-    def add_mapped_read_length(self, gs_file: GSFile) -> Dict[str, int]:
+    def add_mapped_read_length(self, file: File) -> Dict[str, int]:
         """
         Obtains the value of mapped_read_length to post for bam files from the read
         length log in the ancestor align task in the ChIP-seq pipeline.
         """
-        read_len_log = self.analysis.search_up(gs_file.task, "align", "read_len_log")[0]
-        log_contents = self.backend.read_file(read_len_log.filename)
+        read_len_log = self.analysis.search_up(file.task, "align", "read_len_log")[0]
+        log_contents = read_len_log.read_bytes()
         try:
             mapped_read_length = int(log_contents)
         except ValueError as e:
@@ -1748,14 +1717,14 @@ class AccessionAtacChip(Accession):
             ) from e
         return {"mapped_read_length": mapped_read_length}
 
-    def add_mapped_run_type(self, gs_file: GSFile) -> Dict[str, str]:
+    def add_mapped_run_type(self, file: File) -> Dict[str, str]:
         """
         Obtains the value of `mapped_run_type` to post for bam files from the read
         length log in the ancestor align task in the ChIP-seq pipeline, useful for
         detecting PE data that was mapped as SE on the portal.
         """
-        replicate = self.get_atac_chip_pipeline_replicate(gs_file)
-        qc = self.backend.read_json(self.analysis.get_files("qc_json")[0])
+        replicate = self.get_atac_chip_pipeline_replicate(file)
+        qc = self.analysis.get_files("qc_json")[0].read_json()
         is_paired_end = qc["general"]["seq_endedness"][replicate]["paired_end"]
         if not isinstance(is_paired_end, bool):
             raise TypeError(
@@ -1764,7 +1733,7 @@ class AccessionAtacChip(Accession):
         mapped_run_type = "paired-ended" if is_paired_end else "single-ended"
         return {"mapped_run_type": mapped_run_type}
 
-    def maybe_conservative_set(self, gs_file: GSFile) -> Dict[str, str]:
+    def maybe_conservative_set(self, file: File) -> Dict[str, str]:
         """
         For replicated ChIP/ATAC experiments, the exact file that is to be labeled as
         the conservative set may vary. As such, this callback is registered for any
@@ -1772,12 +1741,12 @@ class AccessionAtacChip(Accession):
         file object generation time (make_file_obj) to fill in (or not) the missing
         value.
         """
-        qc = self.backend.read_json(self.analysis.get_files("qc_json")[0])[
-            "replication"
-        ]["reproducibility"]["idr"]
+        qc = self.analysis.get_files("qc_json")[0].read_json()["replication"][
+            "reproducibility"
+        ]["idr"]
 
         consv_set = qc["consv_set"]
-        current_set = gs_file.task.inputs["prefix"]
+        current_set = file.get_task().inputs["prefix"]
         if current_set == consv_set:
             return {"output_type": "conservative IDR thresholded peaks"}
         return {}
@@ -1804,7 +1773,7 @@ class AccessionChip(AccessionAtacChip):
             return "overlap"
         return "idr"
 
-    def maybe_preferred_default(self, gs_file: GSFile) -> Dict[str, bool]:
+    def maybe_preferred_default(self, file: File) -> Dict[str, bool]:
         """
         For replicated ChIP-seq experiment, the exact file that is to be labeled with
         preferred_default=true may vary. As such, this callback is registered for any
@@ -1813,20 +1782,20 @@ class AccessionChip(AccessionAtacChip):
         value.
         """
         if self.get_number_of_replicates() == 1:
-            if gs_file.task.task_name == "idr_pr":
+            if file.get_task().task_name == "idr_pr":
                 return {"preferred_default": True}
             return {}
-        qc = self.backend.read_json(self.analysis.get_files("qc_json")[0])
+        qc = self.analysis.get_files("qc_json")[0].read_json()
         method = self.get_chip_pipeline_replication_method(qc)
         replication_qc = qc["replication"]["reproducibility"][method]
 
         optimal_set = replication_qc["opt_set"]
-        current_set = gs_file.task.inputs["prefix"]
+        current_set = file.get_task().inputs["prefix"]
         if current_set == optimal_set:
             return {"preferred_default": True}
         return {}
 
-    def maybe_add_cropped_read_length(self, gs_file: GSFile) -> Dict[str, int]:
+    def maybe_add_cropped_read_length(self, file: File) -> Dict[str, int]:
         """
         Obtains the value of mapped_read_length to post for bam files from the
         crop_length input of the ancestor align task in the ChIP-seq pipeline. If the
@@ -1842,9 +1811,7 @@ class AccessionChip(AccessionAtacChip):
             return {}
         return {"cropped_read_length": crop_length}
 
-    def maybe_add_cropped_read_length_tolerance(
-        self, gs_file: GSFile
-    ) -> Dict[str, int]:
+    def maybe_add_cropped_read_length_tolerance(self, file: File) -> Dict[str, int]:
         """
         Obtains the value of cropped_read_length_tolerance to post for bam files from
         crop_length input of an arbitrary align task in the pipeline (value will be the
@@ -1862,15 +1829,15 @@ class AccessionChip(AccessionAtacChip):
             return {}
         return {"cropped_read_length_tolerance": crop_length_tol}
 
-    def make_chip_alignment_qc(self, encode_file: EncodeFile, gs_file: GSFile) -> None:
+    def make_chip_alignment_qc(self, encode_file: EncodeFile, file: File) -> None:
         """
         This function typecasts to match the ENCODE schema. Trucated zero values could
         potentially be deserialized from the qc json as integers instead of floats.
         """
         if encode_file.has_qc("ChipAlignmentQualityMetric"):
             return
-        qc = self.backend.read_json(self.analysis.get_files("qc_json")[0])
-        replicate = self.get_atac_chip_pipeline_replicate(gs_file)
+        qc = self.analysis.get_files("qc_json")[0].read_json()
+        replicate = self.get_atac_chip_pipeline_replicate(file)
         if "unfiltered" in encode_file.output_type:
             qc_key, processing_stage = "samstat", "unfiltered"
         else:
@@ -1887,9 +1854,7 @@ class AccessionChip(AccessionAtacChip):
             output_qc, encode_file, "chip-alignment-samstat-quality-metric"
         )
 
-    def make_chip_align_enrich_qc(
-        self, encode_file: EncodeFile, gs_file: GSFile
-    ) -> None:
+    def make_chip_align_enrich_qc(self, encode_file: EncodeFile, file: File) -> None:
         """
         The xcor plots are not downstream of encode_file, in fact, they don't even share
         a common parent task with encode_file. Instead, we search up to find the parent
@@ -1898,13 +1863,13 @@ class AccessionChip(AccessionAtacChip):
         """
         if encode_file.has_qc("ChipAlignmentEnrichmentQualityMetric"):
             return
-        qc = self.backend.read_json(self.analysis.get_files("qc_json")[0])
-        replicate = self.get_atac_chip_pipeline_replicate(gs_file)
+        qc = self.analysis.get_files("qc_json")[0].read_json()
+        replicate = self.get_atac_chip_pipeline_replicate(file)
         key_to_match = "fastqs_R1"
         parent_fastqs = [
             file.filename
             for file in self.analysis.search_up(
-                gs_file.task, "align", key_to_match, inputs=True
+                file.task, "align", key_to_match, inputs=True
             )
         ]
         align_r1_tasks = self.analysis.get_tasks("align_R1")
@@ -1924,16 +1889,14 @@ class AccessionChip(AccessionAtacChip):
             except ValueError:
                 self.logger.exception(
                     "Could not make ChipAlignEnrichQualityMetric for file %s",
-                    gs_file.filename,
+                    file.filename,
                 )
                 raise
         cross_corr_plot_pdf = self.analysis.search_down(
             start_task[0], "xcor", "plot_pdf"
         )[0]
-        fingerprint_plot_png = self.analysis.search_down(gs_file.task, "jsd", "plot")[0]
-        gc_bias_plot_png = self.analysis.search_down(
-            gs_file.task, "gc_bias", "gc_plot"
-        )[0]
+        fingerprint_plot_png = self.analysis.search_down(file.task, "jsd", "plot")[0]
+        gc_bias_plot_png = self.analysis.search_down(file.task, "gc_bias", "gc_plot")[0]
         output_qc = {
             **qc["align_enrich"]["xcor_score"][replicate],
             **qc["align_enrich"]["jsd"][replicate],
@@ -1962,11 +1925,11 @@ class AccessionChip(AccessionAtacChip):
             output_qc, encode_file, "chip-alignment-enrichment-quality-metric"
         )
 
-    def make_chip_library_qc(self, encode_file: EncodeFile, gs_file: GSFile) -> None:
+    def make_chip_library_qc(self, encode_file: EncodeFile, file: File) -> None:
         if encode_file.has_qc("ChipLibraryQualityMetric"):
             return
-        qc = self.backend.read_json(self.analysis.get_files("qc_json")[0])
-        replicate = self.get_atac_chip_pipeline_replicate(gs_file)
+        qc = self.analysis.get_files("qc_json")[0].read_json()
+        replicate = self.get_atac_chip_pipeline_replicate(file)
         output_qc = {
             **qc["align"]["dup"][replicate],
             **qc["lib_complexity"]["lib_complexity"][replicate],
@@ -1979,9 +1942,7 @@ class AccessionChip(AccessionAtacChip):
                 output_qc[k] = int(v)
         return self.queue_qc(output_qc, encode_file, "chip-library-quality-metric")
 
-    def make_chip_replication_qc(
-        self, encode_file: EncodeFile, gs_file: GSFile
-    ) -> None:
+    def make_chip_replication_qc(self, encode_file: EncodeFile, file: File) -> None:
         """
         Rescue ratio and self-consistency ratio are only reported for optimal set. This
         set is determined by checking the QC JSON, and comparing to the prefix in the
@@ -1995,12 +1956,13 @@ class AccessionChip(AccessionAtacChip):
         """
         if encode_file.has_qc("ChipReplicationQualityMetric"):
             return
-        raw_qc = self.backend.read_json(self.analysis.get_files("qc_json")[0])
+        raw_qc = self.analysis.get_files("qc_json")[0].read_json()
         method = self.get_chip_pipeline_replication_method(raw_qc)
         qc = raw_qc["replication"]["reproducibility"][method]
 
         optimal_set = qc["opt_set"]
-        current_set = gs_file.task.inputs["prefix"]
+        task = file.get_task()
+        current_set = task.inputs["prefix"]
         output_qc = {}
 
         if current_set == optimal_set:
@@ -2013,7 +1975,7 @@ class AccessionChip(AccessionAtacChip):
                 }
             )
 
-        task_name = gs_file.task.task_name
+        task_name = task.task_name
         num_peaks = None
         if task_name == f"{method}_ppr":
             num_peaks = qc["Np"]
@@ -2026,13 +1988,9 @@ class AccessionChip(AccessionAtacChip):
             output_qc["reproducible_peaks"] = int(num_peaks)
 
         if method == "idr":
-            output_qc["idr_cutoff"] = float(gs_file.task.inputs["idr_thresh"])
-            idr_plot_png = self.analysis.get_files(
-                filename=gs_file.task.outputs["idr_plot"]
-            )[0]
-            idr_log = self.analysis.get_files(filename=gs_file.task.outputs["idr_log"])[
-                0
-            ]
+            output_qc["idr_cutoff"] = float(task.inputs["idr_thresh"])
+            idr_plot_png = self.analysis.get_files(filename=task.outputs["idr_plot"])[0]
+            idr_log = self.analysis.get_files(filename=task.outputs["idr_log"])[0]
             output_qc.update(
                 {"idr_dispersion_plot": self.get_attachment(idr_plot_png, "image/png")}
             )
@@ -2045,9 +2003,7 @@ class AccessionChip(AccessionAtacChip):
             )
         return self.queue_qc(output_qc, encode_file, "chip-replication-quality-metric")
 
-    def make_chip_peak_enrichment_qc(
-        self, encode_file: EncodeFile, gs_file: GSFile
-    ) -> None:
+    def make_chip_peak_enrichment_qc(self, encode_file: EncodeFile, file: File) -> None:
         """
         The peak region stats are only useful for the optimal set, since the ones for
         rep1 and rep2 are applicable to files that are not posted by to the portal.
@@ -2057,11 +2013,11 @@ class AccessionChip(AccessionAtacChip):
         if encode_file.has_qc("ChipPeakEnrichmentQualityMetric"):
             return
 
-        qc = self.backend.read_json(self.analysis.get_files("qc_json")[0])
+        qc = self.analysis.get_files("qc_json")[0].read_json()
         method = self.get_chip_pipeline_replication_method(qc)
 
         optimal_set = qc["replication"]["reproducibility"][method]["opt_set"]
-        current_set = gs_file.task.inputs["prefix"]
+        current_set = file.get_task().inputs["prefix"]
 
         output_qc = {
             "frip": qc["peak_enrich"]["frac_reads_in_peaks"][method][current_set][
@@ -2089,25 +2045,25 @@ class AccessionAtac(AccessionAtacChip):
         "atac_peak_enrichment": "make_atac_peak_enrichment_qc",
     }
 
-    def maybe_preferred_default(self, gs_file: GSFile) -> Dict[str, bool]:
+    def maybe_preferred_default(self, file: File) -> Dict[str, bool]:
         """
         For ATAC one of the replicated/PPR overlap peak sets is labeled as
         `preferred_default`.
         """
         if self.get_number_of_replicates() == 1:
-            if gs_file.task.task_name == "overlap_pr":
+            if file.get_task().task_name == "overlap_pr":
                 return {"preferred_default": True}
             return {}
-        qc = self.backend.read_json(self.analysis.get_files("qc_json")[0])
+        qc = self.analysis.get_files("qc_json")[0].read_json()
         replication_qc = qc["replication"]["reproducibility"]["overlap"]
 
         optimal_set = replication_qc["opt_set"]
-        current_set = gs_file.task.inputs["prefix"]
+        current_set = file.get_task().inputs["prefix"]
         if current_set == optimal_set:
             return {"preferred_default": True}
         return {}
 
-    def make_atac_alignment_qc(self, encode_file: EncodeFile, gs_file: GSFile) -> None:
+    def make_atac_alignment_qc(self, encode_file: EncodeFile, file: File) -> None:
         """
         Constructs postable QC from the `samstat` and `nodup_samstat` sections of the
         ATAC global QC for the raw and filtered bams, respectively, and also adds in
@@ -2115,8 +2071,8 @@ class AccessionAtac(AccessionAtacChip):
         """
         if encode_file.has_qc("AtacAlignmentQualityMetric"):
             return
-        qc = self.backend.read_json(self.analysis.get_files("qc_json")[0])
-        replicate = self.get_atac_chip_pipeline_replicate(gs_file)
+        qc = self.analysis.get_files("qc_json")[0].read_json()
+        replicate = self.get_atac_chip_pipeline_replicate(file)
         if "unfiltered" in encode_file.output_type:
             qc_key, processing_stage = "samstat", "unfiltered"
         else:
@@ -2125,26 +2081,22 @@ class AccessionAtac(AccessionAtacChip):
         output_qc["processing_stage"] = processing_stage
         output_qc.update(qc["align"][qc_key][replicate])
         output_qc.update(qc["align"]["frac_mito"][replicate])
-        if gs_file.task.inputs["paired_end"] is True:
+        if file.get_task().inputs["paired_end"] is True:
             output_qc.update(qc["align"]["frag_len_stat"][replicate])
         return self.queue_qc(output_qc, encode_file, "atac-alignment-quality-metric")
 
-    def make_atac_align_enrich_qc(
-        self, encode_file: EncodeFile, gs_file: GSFile
-    ) -> None:
+    def make_atac_align_enrich_qc(self, encode_file: EncodeFile, file: File) -> None:
         """
         Similar to ChIP, except no xcor is needed and ATAC has TSS enrichment.
         """
         if encode_file.has_qc("AtacAlignmentEnrichmentQualityMetric"):
             return
-        qc = self.backend.read_json(self.analysis.get_files("qc_json")[0])
-        replicate = self.get_atac_chip_pipeline_replicate(gs_file)
-        fingerprint_plot_png = self.analysis.search_down(gs_file.task, "jsd", "plot")[0]
-        gc_bias_plot_png = self.analysis.search_down(
-            gs_file.task, "gc_bias", "gc_plot"
-        )[0]
+        qc = self.analysis.get_files("qc_json")[0].read_json()
+        replicate = self.get_atac_chip_pipeline_replicate(file)
+        fingerprint_plot_png = self.analysis.search_down(file.task, "jsd", "plot")[0]
+        gc_bias_plot_png = self.analysis.search_down(file.task, "gc_bias", "gc_plot")[0]
         tss_enrichment_plot_png = self.analysis.search_down(
-            gs_file.task, "tss_enrich", "tss_large_plot"
+            file.task, "tss_enrich", "tss_large_plot"
         )[0]
         output_qc = {}
         output_qc.update(qc["align_enrich"]["jsd"][replicate])
@@ -2169,7 +2121,7 @@ class AccessionAtac(AccessionAtacChip):
             output_qc, encode_file, "atac-alignment-enrichment-quality-metric"
         )
 
-    def make_atac_library_qc(self, encode_file: EncodeFile, gs_file: GSFile) -> None:
+    def make_atac_library_qc(self, encode_file: EncodeFile, file: File) -> None:
         """
         The ATAC pipeline only produces fragment length distribution plots for paired
         end data, so we need to check the bam endedness before searching the analysis
@@ -2177,15 +2129,15 @@ class AccessionAtac(AccessionAtacChip):
         """
         if encode_file.has_qc("AtacLibraryQualityMetric"):
             return
-        qc = self.backend.read_json(self.analysis.get_files("qc_json")[0])
-        replicate = self.get_atac_chip_pipeline_replicate(gs_file)
+        qc = self.analysis.get_files("qc_json")[0].read_json()
+        replicate = self.get_atac_chip_pipeline_replicate(file)
         output_qc = {
             **qc["align"]["dup"][replicate],
             **qc["lib_complexity"]["lib_complexity"][replicate],
         }
-        if gs_file.task.inputs["paired_end"] is True:
+        if file.get_task().inputs["paired_end"] is True:
             fragment_length_plot_png = self.analysis.search_down(
-                gs_file.task, "fraglen_stat_pe", "fraglen_dist_plot"
+                file.task, "fraglen_stat_pe", "fraglen_dist_plot"
             )[0]
             output_qc["fragment_length_distribution_plot"] = self.get_attachment(
                 fragment_length_plot_png, "image/png"
@@ -2194,9 +2146,7 @@ class AccessionAtac(AccessionAtacChip):
             output_qc, encode_file, "atac-library-complexity-quality-metric"
         )
 
-    def make_atac_replication_qc(
-        self, encode_file: EncodeFile, gs_file: GSFile
-    ) -> None:
+    def make_atac_replication_qc(self, encode_file: EncodeFile, file: File) -> None:
         """
         Rescue ratio and self-consistency ratio are only reported for optimal set. This
         set is determined by checking the QC JSON, and comparing to the prefix in the
@@ -2213,13 +2163,14 @@ class AccessionAtac(AccessionAtacChip):
         if encode_file.has_qc("AtacReplicationQualityMetric"):
             return
 
-        raw_qc = self.backend.read_json(self.analysis.get_files("qc_json")[0])
-        task_name = gs_file.task.task_name
+        raw_qc = self.analysis.get_files("qc_json")[0].read_json()
+        task = file.get_task()
+        task_name = task.task_name
         method = task_name.split("_")[0]
         qc = raw_qc["replication"]["reproducibility"][method]
 
         optimal_set = qc["opt_set"]
-        current_set = gs_file.task.inputs["prefix"]
+        current_set = task.inputs["prefix"]
         output_qc = {}
 
         if current_set == optimal_set:
@@ -2244,13 +2195,9 @@ class AccessionAtac(AccessionAtacChip):
             output_qc["reproducible_peaks"] = int(num_peaks)
 
         if method == "idr":
-            output_qc["idr_cutoff"] = float(gs_file.task.inputs["idr_thresh"])
-            idr_plot_png = self.analysis.get_files(
-                filename=gs_file.task.outputs["idr_plot"]
-            )[0]
-            idr_log = self.analysis.get_files(filename=gs_file.task.outputs["idr_log"])[
-                0
-            ]
+            output_qc["idr_cutoff"] = float(task.inputs["idr_thresh"])
+            idr_plot_png = self.analysis.get_files(filename=task.outputs["idr_plot"])[0]
+            idr_log = self.analysis.get_files(filename=task.outputs["idr_log"])[0]
             output_qc.update(
                 {"idr_dispersion_plot": self.get_attachment(idr_plot_png, "image/png")}
             )
@@ -2263,9 +2210,7 @@ class AccessionAtac(AccessionAtacChip):
             )
         return self.queue_qc(output_qc, encode_file, "atac-replication-quality-metric")
 
-    def make_atac_peak_enrichment_qc(
-        self, encode_file: EncodeFile, gs_file: GSFile
-    ) -> None:
+    def make_atac_peak_enrichment_qc(self, encode_file: EncodeFile, file: File) -> None:
         """
         The peak region stats are only useful for the optimal set, since the ones for
         rep1 and rep2 are applicable to files that are not posted by to the portal.
@@ -2275,11 +2220,12 @@ class AccessionAtac(AccessionAtacChip):
         if encode_file.has_qc("AtacPeakEnrichmentQualityMetric"):
             return
 
-        qc = self.backend.read_json(self.analysis.get_files("qc_json")[0])
-        method = gs_file.task.task_name.split("_")[0]
+        qc = self.analysis.get_files("qc_json")[0].read_json()
+        task = file.get_task()
+        method = task.task_name.split("_")[0]
 
         optimal_set = qc["replication"]["reproducibility"][method]["opt_set"]
-        current_set = gs_file.task.inputs["prefix"]
+        current_set = task.inputs["prefix"]
 
         output_qc = {
             "frip": qc["peak_enrich"]["frac_reads_in_peaks"][method][current_set][
@@ -2331,7 +2277,7 @@ class AccessionWgbs(Accession):
             self._experiment = EncodeExperiment(experiment_obj)
         return self._experiment
 
-    def make_gembs_alignment_qc(self, encode_file: EncodeFile, gs_file: GSFile) -> None:
+    def make_gembs_alignment_qc(self, encode_file: EncodeFile, file: File) -> None:
         """
         Several of the properties in the QC are useless so we don't post the to the
         portal. Furthermore the pipeline QC use values between 0 and 1 for percentages
@@ -2342,9 +2288,9 @@ class AccessionWgbs(Accession):
             return
         output_qc = {}
         gembs_qc_file = self.analysis.search_down(
-            gs_file.task, "qc_report", "portal_map_qc_json"
+            file.task, "qc_report", "portal_map_qc_json"
         )[0]
-        gembs_qc = self.backend.read_json(gembs_qc_file)
+        gembs_qc = gembs_qc_file.read_json()
         output_qc.update(
             {
                 k: v
@@ -2358,35 +2304,35 @@ class AccessionWgbs(Accession):
             }
         )
         mapq_plot_png = self.analysis.search_down(
-            gs_file.task, "qc_report", "map_qc_mapq_plot_png"
+            file.task, "qc_report", "map_qc_mapq_plot_png"
         )[0]
         output_qc["mapq_plot"] = self.get_attachment(
             mapq_plot_png, mime_type="image/png"
         )
         insert_size_plot_png = self.analysis.search_down(
-            gs_file.task, "qc_report", "map_qc_insert_size_plot_png"
+            file.task, "qc_report", "map_qc_insert_size_plot_png"
         )[0]
         output_qc["insert_size_plot"] = self.get_attachment(
             insert_size_plot_png, mime_type="image/png"
         )
         average_coverage_qc_file = self.analysis.search_down(
-            gs_file.task, "calculate_average_coverage", "average_coverage_qc"
+            file.task, "calculate_average_coverage", "average_coverage_qc"
         )[0]
-        average_coverage_qc = self.backend.read_json(average_coverage_qc_file)
+        average_coverage_qc = average_coverage_qc_file.read_json()
         output_qc.update(average_coverage_qc["average_coverage"])
         for k, v in output_qc.items():
             if k.startswith("pct"):
                 output_qc[k] = 100 * v
         return self.queue_qc(output_qc, encode_file, "gembs-alignment-quality-metric")
 
-    def make_samtools_stats_qc(self, encode_file: EncodeFile, gs_file: GSFile) -> None:
+    def make_samtools_stats_qc(self, encode_file: EncodeFile, file: File) -> None:
         if encode_file.has_qc("SamtoolsStatsQualityMetric"):
             return
         output_qc = {}
         samtools_stats_qc_file = self.analysis.search_down(
-            gs_file.task, "calculate_average_coverage", "average_coverage_qc"
+            file.task, "calculate_average_coverage", "average_coverage_qc"
         )[0]
-        samtools_stats_qc = self.backend.read_json(samtools_stats_qc_file)
+        samtools_stats_qc = samtools_stats_qc_file.read_json()
         output_qc.update(
             {
                 k: v
@@ -2405,7 +2351,7 @@ class AccessionWgbs(Accession):
         )
         return self.queue_qc(output_qc, encode_file, "samtools-stats-quality-metric")
 
-    def make_cpg_correlation_qc(self, encode_file: EncodeFile, gs_file: GSFile) -> None:
+    def make_cpg_correlation_qc(self, encode_file: EncodeFile, file: File) -> None:
         if (
             encode_file.has_qc("CpgCorrelationQualityMetric")
             or len(self.analysis.metadata.content["inputs"]["wgbs.fastqs"]) != 2
@@ -2414,11 +2360,9 @@ class AccessionWgbs(Accession):
 
         output_qc = {}  # type: ignore
         cpg_correlation_qc_file = self.analysis.search_down(
-            gs_file.task,
-            "calculate_bed_pearson_correlation",
-            "bed_pearson_correlation_qc",
+            file.task, "calculate_bed_pearson_correlation", "bed_pearson_correlation_qc"
         )[0]
-        cpg_correlation_qc = self.backend.read_json(cpg_correlation_qc_file)
+        cpg_correlation_qc = cpg_correlation_qc_file.read_json()
         output_qc["Pearson correlation"] = cpg_correlation_qc["pearson_correlation"][
             "pearson_correlation"
         ]
@@ -2480,6 +2424,10 @@ def accession_factory(
     )
     accession_steps = AccessionSteps(steps_json_path)
     backend = kwargs.pop("backend", None)
+    if backend is None:
+        backend = backend_factory(metadata.backend_name)
+    if isinstance(backend, LocalBackend) and kwargs.get("queue_info") is not None:
+        raise ValueError("Cannot use Cloud Tasks queue with local backend.")
     analysis = Analysis(
         metadata,
         raw_fastqs_keys=accession_steps.raw_fastqs_keys,

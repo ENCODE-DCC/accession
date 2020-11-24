@@ -1,7 +1,6 @@
 import pytest
 from google.api_core.exceptions import GoogleAPICallError, RetryError
 
-from accession.backends import GcsBlob
 from accession.cloud_tasks import (
     AwsCredentials,
     AwsS3Object,
@@ -9,6 +8,7 @@ from accession.cloud_tasks import (
     QueueInfo,
     UploadPayload,
 )
+from accession.file import GSFile
 
 
 @pytest.fixture
@@ -25,18 +25,13 @@ def aws_s3_object():
 
 @pytest.fixture
 def upload_payload(mocker, aws_credentials, aws_s3_object):
-    mocker.patch.object(GcsBlob, "__init__", return_value=None)
-
-    class StubBucket:
-        name = "bucket"
-
-    mocker.patch.object(
-        GcsBlob, "bucket", mocker.PropertyMock(return_value=StubBucket())
-    )
-    gcs_blob = GcsBlob("name", "bucket")
-    gcs_blob.name = "name"
+    blob = mocker.Mock()
+    blob.name = "name"
+    blob.bucket.name = "bucket"
+    mocker.patch("accession.file.GSFile.blob", mocker.PropertyMock(return_value=blob))
+    gs_file = GSFile(key="foo", name="gs://bucket/name")
     return UploadPayload(
-        aws_credentials=aws_credentials, aws_s3_object=aws_s3_object, gcs_blob=gcs_blob
+        aws_credentials=aws_credentials, aws_s3_object=aws_s3_object, gcs_blob=gs_file
     )
 
 

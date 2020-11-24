@@ -4,11 +4,10 @@ import shutil
 from base64 import b64decode
 from pathlib import Path
 from time import sleep
-from typing import Callable, Dict, Iterator, Tuple
+from typing import Callable, Iterator, Tuple
 from unittest.mock import PropertyMock, create_autospec
 from urllib.parse import urljoin
 
-import attr
 import encode_utils as eu
 import pytest
 import requests
@@ -69,7 +68,10 @@ def local_encoded_server(
     client = docker.from_env()
     try:
         container = client.containers.run(
-            encoded_docker_image, detach=True, ports={"8000/tcp": host_port}
+            encoded_docker_image,
+            detach=True,
+            ports={"8000/tcp": host_port},
+            auto_remove=True,
         )
     except Exception as e:
         raise RuntimeError(
@@ -213,7 +215,7 @@ def encode_document(encode_attachment, encode_common_metadata):
 
 
 @pytest.fixture
-def gsfile():
+def gsfile(mocker):
     task = {
         "inputs": {
             "prefix": "pooled-pr1_vs_pooled-pr2",
@@ -222,91 +224,55 @@ def gsfile():
         "outputs": {},
     }
     my_task = Task("my_task", task)
-    return GSFile(
-        "foo", "gs://abc/spam.fastq.gz", md5sum="123", size="456", task=my_task
+    mocker.patch(
+        "accession.file.GSFile.md5sum", mocker.PropertyMock(return_value="123")
     )
-
-
-@attr.s(auto_attribs=True)
-class MockFile:
-    filename: str
-    size: int
-    md5sum: str
+    return GSFile(key="foo", name="gs://abc/spam.fastq.gz", task=my_task, client="bar")
 
 
 @pytest.fixture
-def mock_file() -> MockFile:
-    return MockFile("gs://foo/bar", 123, "abc")
+def mock_file(mocker):
+    file = mocker.Mock(
+        filekeys=["foo"], filename="gs://foo/bar", size=123, md5sum="abc"
+    )
+    return file
 
 
-class MockGCBackend(backends.GCBackend):
-    def __init__(self, bucket: str):
-        self.client = MockGCClient()
-        self.bucket = self.client.get_bucket(bucket)
+@pytest.fixture
+def mock_gs_file(mocker):
+    # md5sum is yN0BGTic4eg+yn7K3BVlGw== in base 64
+    file = mocker.MagicMock(
+        filekeys=["foo"],
+        filename="gs://foo/bar",
+        size=3,
+        md5sum="c8dd0119389ce1e83eca7ecadc15651b",
+    )
+    file.blob.download_as_string.return_value = b'{"foobar": "bazqux"}'
+    return file
 
 
-class MockBucket:
-    def __init__(self, bucket: str):
-        self.name = bucket
+class LocalMockGsFile:
+    SCHEME = "gs://"
 
-    def list_blobs(self) -> None:
-        pass
+    def __init__(self, key, name, task=None, used_by_task=None, client=None):
+        self.filekeys = [key]
+        self.filename = name
+        self.task = task
+        self.size = 3
+        self.used_by_tasks = [used_by_task] if used_by_task else []
+        self._md5_lookup = None
 
-
-class MockGCClient:
-    def get_bucket(self, bucket: str) -> MockBucket:
-        return MockBucket(bucket)
-
-
-@attr.s(auto_attribs=True)
-class MockBlob:
-    """
-    Using a dataclass would work here too, but attrs works for Python 3.6 as well.
-    """
-
-    path: str
-    bucket: MockBucket
-    size: int = 3
+    @property
+    def md5_lookup(self):
+        if self._md5_lookup is None:
+            md5_file = Path(__file__).resolve().parent / "data" / "gcloud_md5s.json"
+            with open(md5_file) as f:
+                self._md5_lookup = json.load(f)
+        return self._md5_lookup
 
     @property
     def md5sum(self) -> str:
-        # yN0BGTic4eg+yn7K3BVlGw== in base 64
-        return "c8dd0119389ce1e83eca7ecadc15651b"
-
-    @property
-    def id(self) -> str:
-        return f"{self.bucket.name}/{self.path}"
-
-    @property
-    def public_url(self) -> str:
-        url = urljoin("https://www.mystorageapi.com", f"{self.bucket.name}/{self.path}")
-        return url
-
-    def reload(self) -> None:
-        pass
-
-    def download_as_string(self) -> bytes:
-        return b'{"foobar": "bazqux"}'
-
-
-def load_md5_map() -> Dict[str, str]:
-    md5_file = Path(__file__).resolve().parent / "data" / "gcloud_md5s.json"
-    with open(md5_file) as f:
-        md5_lookup = json.load(f)
-    return md5_lookup
-
-
-class LocalMockBlob(MockBlob):
-    def __init__(self, path: str, bucket: MockBucket, size: int = 3):
-        self.path = path
-        self.bucket = bucket
-        self.size = size
-
-    md5_lookup = load_md5_map()
-
-    @property
-    def md5sum(self) -> str:
-        b64_md5 = self.md5_lookup[f"gs://{self.bucket.name}/{self.path}"]
+        b64_md5 = self.md5_lookup[self.filename]
         return b64decode(b64_md5).hex()
 
     def download_as_string(self) -> bytes:
@@ -314,43 +280,67 @@ class LocalMockBlob(MockBlob):
         We use the concatenation of the last two path elements (glob and filename) to
         find the file in the test data, which should be unique
         """
-        file_name = self.path.split("/")[-1]
+        file_name = self.filename.split("/")[-1]
         current_dir = Path(__file__).resolve()
         file_path = current_dir.parent / "data" / "files" / file_name
         with open(file_path, "rb") as f:
             binary_data = f.read()
         return binary_data
 
+    def read_json(self):
+        """
+        Read file and convert to JSON
+        """
+        return json.loads(self.download_as_string().decode())
+
+    def get_task(self) -> Task:
+        """
+        Either gets the `File`'s task or raises a ValueError.
+        """
+        task = self.task
+        if task is None:
+            raise ValueError("No task found")
+        return task
+
+    def get_uri_without_scheme(self) -> str:
+        return self.filename.split(self.SCHEME)[-1]
+
+    def get_filename_for_encode_alias(self) -> str:
+        return self.get_uri_without_scheme().replace("/", "-")
+
 
 @pytest.fixture
-def mock_gc_backend(mocker) -> MockGCBackend:
+def mock_gc_backend(mocker):
     """
-    Fully mocked fixture returning an instance of MockGCBackend that does not initialize
-    a Google Cloud client or make Google Cloud API calls.
+    A mocked instance of GCBackend that cannot initialize a Google Cloud client or make
+    Google Cloud API calls.
 
     mocker fixture can only be used with function-scoped pytest fixtures for now:
     https://github.com/pytest-dev/pytest-mock/issues/136
     """
-    mocker.patch.object(backends, "GcsBlob", MockBlob)
-    mock_gc_backend = MockGCBackend("accession-test-bucket")
+    mocker.patch("accession.file.GSFile", mock_gs_file)
+    mocker.patch("accession.backends.GCBackend.client", mocker.PropertyMock())
+    mock_gc_backend = backends.GCBackend()
     return mock_gc_backend
 
 
 @pytest.fixture
-def mock_accession_gc_backend(mocker) -> MockGCBackend:
+def mock_accession_gc_backend(mocker):
     """
     Similar to mock_gc_backend, except it provides real md5sums and can access real test
     data files.
     """
-    mocker.patch.object(backends, "GcsBlob", LocalMockBlob)
-    mock_gc_backend = MockGCBackend("encode-processing")
+    mocker.patch("accession.backends.GCBackend.client", mocker.PropertyMock())
+    mocker.patch("accession.file.GSFile", LocalMockGsFile)
+    mocker.patch("accession.backends.GSFile", LocalMockGsFile)
+    mock_gc_backend = backends.GCBackend()
     return mock_gc_backend
 
 
 @pytest.fixture
 def accessioner_factory(
     mocker: MockFixture,
-    mock_accession_gc_backend: MockGCBackend,
+    mock_accession_gc_backend,
     local_encoded_server: str,
     environ_api_credentials: None,
     lab: str,
@@ -414,7 +404,7 @@ def mock_accession_steps():
 @pytest.fixture
 def mock_accession(
     mocker: MockFixture,
-    mock_accession_gc_backend: MockGCBackend,
+    mock_accession_gc_backend,
     mock_metadata,
     mock_accession_steps: MockAccessionSteps,
     server_name: str,
@@ -485,7 +475,7 @@ def mock_accession_not_patched(
 @pytest.fixture
 def mock_accession_chip(
     mocker: MockFixture,
-    mock_accession_gc_backend: MockGCBackend,
+    mock_accession_gc_backend,
     mock_metadata,
     mock_accession_steps: MockAccessionSteps,
     server_name: str,
@@ -531,11 +521,7 @@ def mock_accession_chip(
 
 @pytest.fixture
 def mock_accession_unreplicated(
-    mocker: MockFixture,
-    mock_accession_gc_backend: MockGCBackend,
-    mock_metadata,
-    lab: str,
-    award: str,
+    mocker: MockFixture, mock_accession_gc_backend, mock_metadata, lab: str, award: str
 ) -> Accession:
     """
     Mocked accession instance with dummy __init__ that doesn't do anything and pre-baked

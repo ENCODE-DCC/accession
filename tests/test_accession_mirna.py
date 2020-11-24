@@ -3,6 +3,7 @@ from pathlib import Path
 from unittest.mock import PropertyMock
 
 import pytest
+import requests
 from pytest_mock.plugin import MockFixture
 
 from accession.analysis import Analysis
@@ -31,7 +32,6 @@ def mock_replicated_mirna_accession(mocker, mirna_replicated_analysis, mock_acce
     generation without creating any connections to servers.
     """
     mocker.patch.object(mock_accession, "analysis", mirna_replicated_analysis)
-    mocker.patch.object(mock_accession, "backend", mirna_replicated_analysis.backend)
     mocker.patch.object(mock_accession, "queue_qc", mock_queue_qc)
     mocker.patch.object(
         mock_accession,
@@ -55,7 +55,7 @@ def mock_replicated_mirna_accession(mocker, mirna_replicated_analysis, mock_acce
 @pytest.mark.docker
 @pytest.mark.filesystem
 def test_accession_mirna_replicated(
-    accessioner_factory, mirna_replicated_metadata_path
+    accessioner_factory, mirna_replicated_metadata_path, validate_accessioning
 ):
     factory = accessioner_factory(
         metadata_file=mirna_replicated_metadata_path, assay_name="mirna"
@@ -69,7 +69,7 @@ def test_accession_mirna_replicated(
 
 @pytest.mark.docker
 @pytest.mark.filesystem
-def test_accession_mirna_unreplicated(accessioner_factory):
+def test_accession_mirna_unreplicated(accessioner_factory, validate_accessioning):
     current_dir = Path(__file__).resolve()
     metadata_json_path = (
         current_dir.parent / "data" / "mirna_unreplicated_metadata.json"
@@ -82,100 +82,109 @@ def test_accession_mirna_unreplicated(accessioner_factory):
     )
 
 
-def validate_accessioning(accessioner, expected_files, expected_num_files, dataset):
-    all_files = accessioner.conn.get("/files/", database=True)["@graph"]
-    accessioner.conn.get(f"/files/?dataset=/experiments/{dataset}/", database=True)[
-        "@graph"
-    ]
-    all_quality_metrics = [
-        accessioner.conn.get(qm["@id"], database=True, frame="object")
-        for qm in accessioner.conn.get("/quality-metrics/", database=True)["@graph"]
-    ]
-    excluded_types = ("reads", "genome index", "genome reference")
-    files = [
-        f
-        for f in all_files
-        if f["output_type"] not in excluded_types
-        and f["dataset"] == f"/experiments/{dataset}/"
-    ]
-    assert len(files) == expected_num_files
-    shared_keys_to_skip = ["submitted_by", "date_created", "@id", "uuid"]
-    file_keys_to_skip = [
-        "title",
-        "accession",
-        "file_size",
-        "cloud_metadata",
-        "href",
-        "s3_uri",
-        "no_file_available",
-        "analysis_step_version",
-        "content_md5sum",
-        "matching_md5sum",
-        "audit",
-        "schema_version",
-    ]
-    qm_keys_to_skip = ["step_run"]
-    for keys_to_skip in (file_keys_to_skip, qm_keys_to_skip):
-        keys_to_skip.extend(shared_keys_to_skip)
-    for partial_file in files:
-        file = accessioner.conn.get(
-            partial_file["@id"], frame="embedded", database=True
-        )
-        quality_metrics = [
-            qm for qm in all_quality_metrics if file["@id"] in qm["quality_metric_of"]
+@pytest.fixture
+def validate_accessioning(local_encoded_server, api_credentials):
+    def _validate_accessioning(
+        accessioner, expected_files, expected_num_files, dataset
+    ):
+        all_files = requests.get(
+            f"http://{local_encoded_server}/files/?limit=all&datastore=database",
+            headers={"Accept": "application/json"},
+            auth=api_credentials,
+        ).json()["@graph"]
+        all_quality_metrics = [
+            accessioner.conn.get(qm["@id"], database=True, frame="object")
+            for qm in accessioner.conn.get("/quality-metrics/", database=True)["@graph"]
         ]
-        aliases = file["aliases"]
-        expected = [f for f in expected_files if f["aliases"] == aliases][0]
-        for key, expected_value in expected.items():
-            if key in file_keys_to_skip:
-                continue
-            elif key == "step_run":
-                for step_run_key in ("analysis_step_version", "aliases"):
-                    assert file[key][step_run_key] == expected_value[step_run_key]
-                assert file[key]["status"] == "in progress"
-            elif key == "status":
-                assert file[key] == "uploading"
-            elif key in ("award", "lab"):
-                assert file[key]["@id"] == expected_value["@id"]
-            elif key == "file_size":
-                assert file[key] == 3
-            elif key == "derived_from":
-                derived_from_aliases = []
-                for i in all_files:
-                    if i["@id"] in file[key]:
-                        db_file = accessioner.conn.get(i["@id"], database=True)
-                        derived_from_aliases.append(
-                            (db_file["aliases"], db_file["md5sum"])
-                        )
-                expected_aliases = [
-                    (f["aliases"], f["md5sum"])
-                    for f in expected_files
-                    if f["@id"] in expected_value
-                ]
-                assert sorted(derived_from_aliases) == sorted(expected_aliases)
-            elif key == "quality_metrics":
-                if not expected_value:
-                    assert not quality_metrics
+        excluded_types = ("reads", "genome index", "genome reference")
+        files = [
+            f
+            for f in all_files
+            if f["output_type"] not in excluded_types
+            and f["dataset"] == f"/experiments/{dataset}/"
+        ]
+        assert len(files) == expected_num_files
+        shared_keys_to_skip = ["submitted_by", "date_created", "@id", "uuid"]
+        file_keys_to_skip = [
+            "title",
+            "accession",
+            "file_size",
+            "cloud_metadata",
+            "href",
+            "s3_uri",
+            "no_file_available",
+            "analysis_step_version",
+            "content_md5sum",
+            "matching_md5sum",
+            "audit",
+            "schema_version",
+        ]
+        qm_keys_to_skip = ["step_run"]
+        for keys_to_skip in (file_keys_to_skip, qm_keys_to_skip):
+            keys_to_skip.extend(shared_keys_to_skip)
+        for partial_file in files:
+            file = accessioner.conn.get(
+                partial_file["@id"], frame="embedded", database=True
+            )
+            quality_metrics = [
+                qm
+                for qm in all_quality_metrics
+                if file["@id"] in qm["quality_metric_of"]
+            ]
+            aliases = file["aliases"]
+            expected = [f for f in expected_files if f["aliases"] == aliases][0]
+            for key, expected_value in expected.items():
+                if key in file_keys_to_skip:
+                    continue
+                elif key == "step_run":
+                    for step_run_key in ("analysis_step_version", "aliases"):
+                        assert file[key][step_run_key] == expected_value[step_run_key]
+                    assert file[key]["status"] == "in progress"
+                elif key == "status":
+                    assert file[key] == "uploading"
+                elif key in ("award", "lab"):
+                    assert file[key]["@id"] == expected_value["@id"]
+                elif key == "file_size":
+                    assert file[key] == 3
+                elif key == "derived_from":
+                    derived_from_aliases = []
+                    for i in all_files:
+                        if i["@id"] in file[key]:
+                            db_file = accessioner.conn.get(i["@id"], database=True)
+                            derived_from_aliases.append(
+                                (db_file["aliases"], db_file["md5sum"])
+                            )
+                    expected_aliases = [
+                        (f["aliases"], f["md5sum"])
+                        for f in expected_files
+                        if f["@id"] in expected_value
+                    ]
+                    assert sorted(derived_from_aliases) == sorted(expected_aliases)
+                elif key == "quality_metrics":
+                    if not expected_value:
+                        assert not quality_metrics
+                    else:
+                        for expected_qm in expected_value:
+                            posted_qms = [
+                                qm
+                                for qm in quality_metrics
+                                if qm["@type"] == expected_qm["@type"]
+                            ]
+                            assert len(posted_qms) == 1
+                            posted_qm = posted_qms[0]
+                            for qm_key, qm_value in expected_qm.items():
+                                if qm_key == "quality_metric_of":
+                                    assert len(qm_value) == len(posted_qm[qm_key])
+                                elif qm_key in qm_keys_to_skip:
+                                    continue
+                                elif qm_key == "status":
+                                    assert posted_qm[qm_key] == "in progress"
+                                else:
+                                    assert qm_value == posted_qm[qm_key]
                 else:
-                    for expected_qm in expected_value:
-                        posted_qms = [
-                            qm
-                            for qm in quality_metrics
-                            if qm["@type"] == expected_qm["@type"]
-                        ]
-                        assert len(posted_qms) == 1
-                        posted_qm = posted_qms[0]
-                        for qm_key, qm_value in expected_qm.items():
-                            if qm_key == "quality_metric_of":
-                                assert len(qm_value) == len(posted_qm[qm_key])
-                            elif qm_key in qm_keys_to_skip:
-                                continue
-                            elif qm_key == "status":
-                                assert posted_qm[qm_key] == "in progress"
-                            else:
-                                assert qm_value == posted_qm[qm_key]
-            else:
-                assert file[key] == expected_value
+                    assert file[key] == expected_value
+
+    return _validate_accessioning
 
 
 @pytest.mark.filesystem
@@ -210,9 +219,6 @@ def test_make_microrna_correlation_qc_unreplicated_returns_none(
 ):
     mocker.patch.object(
         mock_accession_unreplicated, "analysis", mirna_replicated_analysis
-    )
-    mocker.patch.object(
-        mock_accession_unreplicated, "backend", mirna_replicated_analysis.backend
     )
     mocker.patch.object(mock_accession_unreplicated, "queue_qc", mock_queue_qc)
     gs_file = [

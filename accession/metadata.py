@@ -4,6 +4,7 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional, TextIO, Union
 
 import WDL
+from caper.caper_labels import CaperLabels
 
 from accession.caper_helper import CaperHelper, caper_conf_exists
 from accession.encode_models import EncodeAttachment
@@ -18,6 +19,10 @@ class Metadata(ABC):
     @property
     def workflow_id(self) -> str:
         return self.content["id"]
+
+    @property
+    def backend_name(self) -> str:
+        return self.content["labels"][CaperLabels.KEY_CAPER_BACKEND]
 
     def get_filename(self, prefix: str = "") -> str:
         """

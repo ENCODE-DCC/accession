@@ -8,7 +8,7 @@ from accession.encode_models import EncodeFile
 
 @attr.s(auto_attribs=True)
 class MatchingMd5Record:
-    gs_file_path: str
+    file_path: str
     portal_files: List[EncodeFile]
 
 
@@ -31,7 +31,7 @@ class PreflightHelper:
         if not matching:
             return None
         matching_md5_record = MatchingMd5Record(
-            gs_file_path=filename, portal_files=matching
+            file_path=filename, portal_files=matching
         )
         return matching_md5_record
 
@@ -48,7 +48,7 @@ class PreflightHelper:
         for match in matches:
             for i, portal_file in enumerate(match.portal_files):
                 if i == 0:
-                    display_filename = match.gs_file_path
+                    display_filename = match.file_path
                 else:
                     display_filename = ""
                 rows.append(

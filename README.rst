@@ -36,21 +36,25 @@ Next, provide your API keys from the ENCODE portal:
     $ export DCC_API_KEY=XXXXXXXX
     $ export DCC_SECRET_KEY=yyyyyyyyyyy
 
-You will also need to authenticate with Google Cloud if using WDL metadata from pipeline runs on Google Cloud. Run the following two commands and follow the prompts:
-
-.. code-block:: console
-
-    $ gcloud auth login --no-launch-browser
-    $ gcloud auth application-default login --no-launch-browser
-
-| In addition, it is highly recommended to set the DCC_LAB and DCC_AWARD environment
-  variables for ease of use. These correspond to the lab and award identifiers given by
-  the ENCODE portal, e.g. ``/labs/foo/`` and ``U00HG123456``, respectively.
+| It is highly recommended to set the DCC_LAB and DCC_AWARD environment variables for
+  ease of use. These correspond to the lab and award identifiers given by the ENCODE
+  portal, e.g. ``/labs/foo/`` and ``U00HG123456``, respectively.
 
 .. code-block:: console
 
     $ export DCC_LAB=XXXXXXXX
     $ export DCC_AWARD=yyyyyyyyyyy
+
+| If you are accessioning workflows produced using the
+  `Caper <https://github.com/ENCODE-DCC/caper>`_ local backend, then installation is
+  complete. However, if using WDL metadata from pipeline runs on Google Cloud, you will
+  also need to authenticate with Google Cloud. Run the following two commands and follow
+  the prompts:
+
+.. code-block:: console
+
+    $ gcloud auth login --no-launch-browser
+    $ gcloud auth application-default login --no-launch-browser
 
 | If you would like to be able to pass Caper workflow IDs or labels you will
   need to configure access to the Caper server. If you are invoking ``accession`` from

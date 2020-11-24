@@ -9,7 +9,7 @@ from google.api_core.exceptions import GoogleAPICallError, RetryError
 from google.cloud import tasks_v2
 from typing_extensions import TypedDict
 
-from accession.backends import GcsBlob
+from accession.file import GSFile
 from accession.logger_factory import logger_factory
 
 APP_ENGINE_UPLOAD_ENDPOINT = "/upload"
@@ -58,7 +58,7 @@ class UploadPayload:
         self,
         aws_credentials: AwsCredentials,
         aws_s3_object: AwsS3Object,
-        gcs_blob: GcsBlob,
+        gcs_blob: GSFile,
     ) -> None:
         self.aws_credentials = aws_credentials
         self.aws_s3_object = aws_s3_object
@@ -87,8 +87,8 @@ class UploadPayload:
             "aws_credentials": self.aws_credentials.get_dict(),
             "aws_s3_object": self.aws_s3_object.get_dict(),
             "gcs_blob": {
-                "bucket": self.gcs_blob.bucket.name,
-                "name": self.gcs_blob.name,
+                "bucket": self.gcs_blob.blob.bucket.name,
+                "name": self.gcs_blob.blob.name,
             },
         }
 
