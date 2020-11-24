@@ -42,8 +42,8 @@ def mock_replicated_mirna_accession(mocker, mirna_replicated_analysis, mock_acce
                     "@id": "foo",
                     "assay_term_name": "microRNA",
                     "replicates": [
-                        {"biological_replicate_number": 1},
-                        {"biological_replicate_number": 2},
+                        {"biological_replicate_number": 1, "status": "released"},
+                        {"biological_replicate_number": 2, "status": "in progress"},
                     ],
                 }
             )

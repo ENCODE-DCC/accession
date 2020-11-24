@@ -44,9 +44,24 @@ def encode_experiment():
         "@id": "/experiments/foo/",
         "assay_term_name": "mirna",
         "replicates": [
-            {"biological_replicate_number": 1},
-            {"biological_replicate_number": 3},
-            {"technical_replicate_number": 42},
+            {"biological_replicate_number": 1, "status": "released"},
+            {"biological_replicate_number": 3, "status": "released"},
+            {"technical_replicate_number": 42, "status": "released"},
+        ],
+    }
+    return EncodeExperiment(properties)
+
+
+@pytest.fixture(scope="module")
+def encode_experiment_ignored_replicates():
+    properties = {
+        "@id": "/experiments/foo/",
+        "assay_term_name": "mirna",
+        "replicates": [
+            {"biological_replicate_number": 1, "status": "released"},
+            {"biological_replicate_number": 3, "status": "archived"},
+            {"technical_replicate_number": 42, "status": "released"},
+            {"technical_replicate_number": 44, "status": "revoked"},
         ],
     }
     return EncodeExperiment(properties)
@@ -325,8 +340,24 @@ def test_encode_experiment_get_number_of_biological_replicates(encode_experiment
     assert encode_experiment.get_number_of_biological_replicates() == 2
 
 
+def test_encode_experiment_get_number_of_biological_replicates_filters_by_status(
+    encode_experiment_ignored_replicates
+):
+    assert (
+        encode_experiment_ignored_replicates.get_number_of_biological_replicates() == 1
+    )
+
+
 def test_encode_experiment_get_number_of_technical_replicates(encode_experiment):
     assert encode_experiment.get_number_of_technical_replicates() == 1
+
+
+def test_encode_experiment_get_number_of_technical_replicates_filters_by_status(
+    encode_experiment_ignored_replicates
+):
+    assert (
+        encode_experiment_ignored_replicates.get_number_of_technical_replicates() == 1
+    )
 
 
 def test_encode_experiment_is_replicated(encode_experiment):

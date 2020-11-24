@@ -549,7 +549,9 @@ def mock_accession_unreplicated(
                 {
                     "@id": "foo",
                     "assay_term_name": "microRNA",
-                    "replicates": [{"biological_replicate_number": 1}],
+                    "replicates": [
+                        {"biological_replicate_number": 1, "status": "released"}
+                    ],
                 }
             )
         ),
