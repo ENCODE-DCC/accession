@@ -14,7 +14,7 @@ from accession.database import (
 )
 from accession.encode_models import EncodeFile, EncodeQualityMetric, FileStatus
 
-_File = TypeVar("_File", bound="File")
+_DbFile = TypeVar("_DbFile", bound="DbFile")
 _QualityMetric = TypeVar("_QualityMetric", bound="QualityMetric")
 
 Base = declarative_base()
@@ -41,7 +41,7 @@ class Run(Base):
     workflow_id = Column(String, nullable=False)
     date_created = Column(Date, nullable=False, default=datetime.date.today)
     status = Column(Enum(RunStatus), nullable=False)
-    files = relationship("File", backref=RUN_TABLE_NAME, uselist=True)
+    files = relationship("DbFile", backref=RUN_TABLE_NAME, uselist=True)
     workflow_labels = relationship(
         "WorkflowLabel", backref=RUN_TABLE_NAME, uselist=True
     )
@@ -58,7 +58,7 @@ class WorkflowLabel(Base):
         return self.value
 
 
-class File(Base):
+class DbFile(Base):
     __tablename__ = FILE_TABLE_NAME
     id = Column(Integer, primary_key=True)
     portal_at_id = Column(String, nullable=False)
@@ -69,7 +69,7 @@ class File(Base):
     )
 
     @classmethod
-    def from_encode_file(cls: Type[_File], encode_file: EncodeFile) -> _File:
+    def from_encode_file(cls: Type[_DbFile], encode_file: EncodeFile) -> _DbFile:
         return cls(portal_at_id=encode_file.at_id, status=encode_file.status)
 
 

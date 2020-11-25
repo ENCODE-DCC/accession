@@ -30,7 +30,13 @@ from accession.cloud_tasks import (
     UploadPayload,
 )
 from accession.database.connection import DbSession
-from accession.database.models import File, QualityMetric, Run, RunStatus, WorkflowLabel
+from accession.database.models import (
+    DbFile,
+    QualityMetric,
+    Run,
+    RunStatus,
+    WorkflowLabel,
+)
 from accession.encode_models import (
     EncodeAnalysis,
     EncodeAttachment,
@@ -814,7 +820,9 @@ class Accession(ABC):
         for file in self.new_files:
             # Enum interpreted as string, so ignore types
             # https://github.com/dropbox/sqlalchemy-stubs/issues/114
-            db_file = File(portal_at_id=file.at_id, status=file.status)  # type: ignore
+            db_file = DbFile(  # type: ignore
+                portal_at_id=file.at_id, status=file.status
+            )
             file_qcs = []
             for qc in self.new_qcs:
                 if qc.files is None:

@@ -3,7 +3,13 @@ from contextlib import suppress as does_not_raise
 
 import pytest
 
-from accession.database.models import File, QualityMetric, Run, RunStatus, WorkflowLabel
+from accession.database.models import (
+    DbFile,
+    QualityMetric,
+    Run,
+    RunStatus,
+    WorkflowLabel,
+)
 from accession.encode_models import FileStatus
 from accession.subcommands.info import (
     CromwellWorkflowLabel,
@@ -208,12 +214,12 @@ def test_get_rows_from_runs():
         status=RunStatus.Succeeded,
         workflow_labels=[WorkflowLabel(key="foo", value="bar")],
         files=[
-            File(
+            DbFile(
                 portal_at_id="baz",
                 status=FileStatus.Released,
                 quality_metrics=[QualityMetric(portal_at_id="qux")],
             ),
-            File(portal_at_id="quux", status=FileStatus.Released, quality_metrics=[]),
+            DbFile(portal_at_id="quux", status=FileStatus.Released, quality_metrics=[]),
         ],
     )
     runs = [run]
