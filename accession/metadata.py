@@ -28,7 +28,7 @@ class Metadata(ABC):
 
     @property
     def backend_name(self) -> str:
-        return self.content["labels"][CaperLabels.KEY_CAPER_BACKEND]
+        return self.labels[CaperLabels.KEY_CAPER_BACKEND]
 
     @property
     def labels(self) -> Dict[str, str]:
