@@ -1698,7 +1698,7 @@ class AccessionAtacChip(Accession):
         """
         num_reps = 0
         for k, v in self.analysis.metadata.content["inputs"].items():
-            if all((k.startswith("fastqs_rep"), k.endswith("R1"), len(v) > 0)):
+            if k.startswith("fastqs_rep") and k.endswith("R1") and len(v) > 0:
                 num_reps += 1
         return num_reps
 
