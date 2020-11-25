@@ -15,9 +15,9 @@ class Backend(ABC):
 
     @property
     @abstractmethod
-    def CROMWELL_NAME(self) -> str:
+    def CAPER_NAME(self) -> str:
         """
-        The name Cromwell uses to refer to the backend.
+        The name Caper uses to refer to the backend.
         """
         raise NotImplementedError
 
@@ -41,7 +41,7 @@ class GCBackend(Backend):
     Backend for interacting with Google Cloud Storage (GCS)
     """
 
-    CROMWELL_NAME = "google"
+    CAPER_NAME = "gcp"
 
     def __init__(self) -> None:
         self._client = None
@@ -78,7 +78,7 @@ class LocalBackend(Backend):
     """
 
     # For some reason local backend name is capitalized in Cromwell `Local`
-    CROMWELL_NAME = "Local"
+    CAPER_NAME = "Local"
 
     def make_file(
         self,
@@ -99,9 +99,9 @@ class LocalBackend(Backend):
 
 
 def backend_factory(backend_name: str) -> Backend:
-    if backend_name == LocalBackend.CROMWELL_NAME:
+    if backend_name == LocalBackend.CAPER_NAME:
         return LocalBackend()
-    elif backend_name == GCBackend.CROMWELL_NAME:
+    elif backend_name == GCBackend.CAPER_NAME:
         return GCBackend()
     else:
         raise ValueError(f"Backend {backend_name} is not supported")
