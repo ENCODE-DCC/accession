@@ -644,6 +644,7 @@ def test_get_atac_chip_pipeline_get_number_of_replicates(mocker, mock_accession_
                 "fastqs_rep1_R2": ["gs://abc/cde.fastq.gz"],
                 "fastqs_rep2_R1": ["gs://spam/eggs.fastq.gz"],
                 "ctl_fastqs_rep2_R1": ["gs://spam/eggs.fastq.gz"],
+                "other": None,
             }
         },
     )
