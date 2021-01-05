@@ -1667,7 +1667,7 @@ class AccessionAtacChip(Accession):
         version = qc["general"]["pipeline_ver"].lstrip("v")
         return version
 
-    def get_atac_chip_pipeline_replicate(self, file):
+    def get_atac_chip_pipeline_replicate(self, file: File) -> str:
         """
         Searches for the input fastq array corresponding to the ancestor input fastqs of the current
         file and returns the pipeline replicate number. We only need to check R1, since it will
