@@ -1685,7 +1685,7 @@ class AccessionAtacChip(Accession):
             if "fastqs" in k:
                 if sorted(v) == sorted(parent_fastqs):
                     if "ctl" in k:
-                        pipeline_rep = k.split("_")[2]
+                        pipeline_rep = "ctl" + k.split("_")[2].lstrip("rep")
                     else:
                         pipeline_rep = k.split("_")[1]
                     break
