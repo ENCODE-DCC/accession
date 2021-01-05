@@ -1684,7 +1684,10 @@ class AccessionAtacChip(Accession):
         for k, v in self.analysis.metadata.content["inputs"].items():
             if "fastqs" in k:
                 if sorted(v) == sorted(parent_fastqs):
-                    pipeline_rep = k.split("_")[1]
+                    if "ctl" in k:
+                        pipeline_rep = k.split("_")[2]
+                    else:
+                        pipeline_rep = k.split("_")[1]
                     break
         if not pipeline_rep:
             raise ValueError(
