@@ -62,7 +62,11 @@ more legible.
       quality_metrics: [],
     },
   ],
-  local AtacChipMapOnlySteps(is_control=false, is_atac=false) = {
+  local AtacChipMapOnlySteps(
+    is_control=false,
+    is_atac=false,
+    separate_control_task=false
+  ) = {
     local step_run = if is_atac then 'atac-seq-alignment-step-v-2' else 'chip-seq-alignment-step-v-2',
     local step_version = if is_atac then '/analysis-step-versions/atac-seq-alignment-step-v-2-1/' else '/analysis-step-versions/chip-seq-alignment-step-v-2-0/',
     'accession.steps': [
@@ -95,7 +99,7 @@ more legible.
                               ]),
           },
         ],
-        wdl_task_name: 'align',
+        wdl_task_name: if separate_control_task then 'align_ctl' else 'align',
       },
       {
         dcc_step_run: step_run,
@@ -135,7 +139,7 @@ more legible.
                               ]),
           },
         ],
-        wdl_task_name: 'filter',
+        wdl_task_name: if separate_control_task then 'filter_ctl' else 'filter',
       },
     ],
     raw_fastqs_keys: [
@@ -393,11 +397,16 @@ more legible.
   local atac_map_only_steps = AtacChipMapOnlySteps(is_atac=true),
   local atac_idr_peak_call_steps = AtacTfChipPeakCallOnlySteps(is_atac=true),
   local atac_overlap_peak_call_steps = AtacHistoneMintPeakCallSteps(is_atac=true),
+  local control_chip_separate_control_task = AtacChipMapOnlySteps(is_control=true, separate_control_task=true),
   'tf_chip_peak_call_only_steps.json': AtacTfChipPeakCallOnlySteps(),
   'histone_chip_peak_call_only_steps.json': AtacHistoneMintPeakCallSteps(),
   'mint_chip_peak_call_only_steps.json': AtacHistoneMintPeakCallSteps(blacklist_derived_from_task='pool_blacklist', blacklist_derived_from_filekey='tas'),
   'tf_chip_steps.json': {
     'accession.steps': $['chip_map_only_steps.json']['accession.steps'] + $['tf_chip_peak_call_only_steps.json']['accession.steps'],
+    raw_fastqs_keys: $['chip_map_only_steps.json'].raw_fastqs_keys,
+  },
+  'tf_chip_control_fastqs_steps.json': {
+    'accession.steps': control_chip_separate_control_task['accession.steps'] + $['chip_map_only_steps.json']['accession.steps'] + $['tf_chip_peak_call_only_steps.json']['accession.steps'],
     raw_fastqs_keys: $['chip_map_only_steps.json'].raw_fastqs_keys,
   },
   'histone_chip_steps.json': {
