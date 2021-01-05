@@ -1682,7 +1682,7 @@ class AccessionAtacChip(Accession):
         ]
         pipeline_rep = None
         for k, v in self.analysis.metadata.content["inputs"].items():
-            if "fastqs" in k and "ctl" not in k:
+            if "fastqs" in k:
                 if sorted(v) == sorted(parent_fastqs):
                     pipeline_rep = k.split("_")[1]
                     break
