@@ -2399,6 +2399,7 @@ def accession_factory(
         "histone_chip_peak_call_only": AccessionChip,
         "mint_chip_peak_call_only": AccessionChip,
         "tf_chip": AccessionChip,
+        "tf_chip_control_fastqs": AccessionChip,
         "histone_chip": AccessionChip,
         "mint_chip": AccessionChip,
         "control_chip": AccessionChip,
