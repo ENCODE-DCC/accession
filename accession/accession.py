@@ -20,7 +20,7 @@ from accession.accession_steps import (
     FileParams,
 )
 from accession.analysis import Analysis
-from accession.backends import LocalBackend, backend_factory
+from accession.backends import Backend, LocalBackend, backend_factory
 from accession.cloud_tasks import (
     AwsCredentials,
     AwsS3Object,
@@ -65,6 +65,7 @@ class Accession(ABC):
         log_file_path="accession.log",
         no_log_file=False,
         queue_info: Optional[QueueInfo] = None,
+        private_filenames: bool = False,
     ):
         self.analysis: Analysis = analysis
         self.steps = steps
@@ -76,6 +77,7 @@ class Accession(ABC):
         self.raw_qcs: List[EncodeQualityMetric] = []
         self.log_file_path = log_file_path
         self.no_log_file: bool = no_log_file
+        self.private_filenames: bool = private_filenames
         # keys are hex md5sums, values are lists of portal objects
         self.search_cache: LruCache[str, List[Dict[str, Any]]] = LruCache()
         self._logger: Optional[logging.Logger] = None
@@ -564,7 +566,11 @@ class Accession(ABC):
         for callback in file_params.callbacks:
             result: Dict[str, Any] = getattr(self, callback)(file)
             extras.update(result)
-        file_name = file.get_filename_for_encode_alias()
+        file_name = (
+            file.get_filename_for_encode_alias()
+            if not self.private_filenames
+            else file.md5sum
+        )
         obj = EncodeFile.from_template(
             aliases=[
                 "{}:{}-{}".format(
@@ -579,7 +585,7 @@ class Accession(ABC):
             file_size=file.size,
             file_md5sum=file.md5sum,
             step_run_id=step_run.at_id,
-            submitted_file_name=file.filename,
+            submitted_file_name=file.filename if not self.private_filenames else None,
             genome_annotation=self.genome_annotation,
             extras=extras,
         )
@@ -667,24 +673,27 @@ class Accession(ABC):
         metadata as an attachment in a document, then insert that document into the
         `documents` array in the analysis object, and finally post the analysis object.
         """
-        document_aliases = [
-            f"{self.common_metadata.lab_pi}:cromwell-metadata-{self.analysis.workflow_id}"
-        ]
-        document_attachment = self.analysis.metadata.get_as_attachment(
-            filename_prefix=self.experiment.accession
-        )
-        document = EncodeDocument(
-            attachment=document_attachment,
-            common_metadata=self.common_metadata,
-            document_type=EncodeDocumentType.WorkflowMetadata,
-            aliases=document_aliases,
-        )
-        posted_document = self.post_document(document)
+        documents = []
+        if not self.private_filenames:
+            document_aliases = [
+                f"{self.common_metadata.lab_pi}:cromwell-metadata-{self.analysis.workflow_id}"
+            ]
+            document_attachment = self.analysis.metadata.get_as_attachment(
+                filename_prefix=self.experiment.accession
+            )
+            document = EncodeDocument(
+                attachment=document_attachment,
+                common_metadata=self.common_metadata,
+                document_type=EncodeDocumentType.WorkflowMetadata,
+                aliases=document_aliases,
+            )
+            posted_document = self.post_document(document)
+            documents = [posted_document]
         current_analysis = EncodeAnalysis(
             files=self.new_files,
             lab_pi=self.common_metadata.lab_pi,
             workflow_id=self.analysis.workflow_id,
-            documents=[posted_document],
+            documents=documents,
             pipeline_version=self.pipeline_version,
         )
         payload = current_analysis.get_portal_object()
@@ -2384,8 +2393,10 @@ def accession_factory(
     server: str,
     lab: str,
     award: str,
-    *args: Any,
-    **kwargs: Any,
+    backend: Optional[Backend] = None,
+    no_log_file: bool = False,
+    log_file_path: str = "accession.log",
+    queue_info: Optional[QueueInfo] = None,
 ) -> Accession:
     """
     Matches against the user-specified pipeline_type string and returns an instance of
@@ -2427,14 +2438,19 @@ def accession_factory(
             metadata
         )
 
+    private_filenames = False
+    if pipeline_type in ("control_chip", "tf_chip", "histone_chip"):
+        if _chip_pbam_used(metadata):
+            pipeline_type = pipeline_type + "_pbam"
+            private_filenames = True
+
     steps_json_path = (
         current_dir.parents[1] / "accession_steps" / f"{pipeline_type}_steps.json"
     )
     accession_steps = AccessionSteps(steps_json_path)
-    backend = kwargs.pop("backend", None)
     if backend is None:
         backend = backend_factory(metadata.backend_name)
-    if isinstance(backend, LocalBackend) and kwargs.get("queue_info") is not None:
+    if isinstance(backend, LocalBackend) and queue_info is not None:
         raise ValueError("Cannot use Cloud Tasks queue with local backend.")
     analysis = Analysis(
         metadata,
@@ -2445,7 +2461,14 @@ def accession_factory(
     connection = Connection(server, no_log_file=True)
     common_metadata = EncodeCommonMetadata(lab, award)
     return selected_accession(
-        accession_steps, analysis, connection, common_metadata, *args, **kwargs
+        accession_steps,
+        analysis,
+        connection,
+        common_metadata,
+        log_file_path="accession.log",
+        no_log_file=no_log_file,
+        queue_info=queue_info,
+        private_filenames=private_filenames,
     )
 
 
@@ -2460,3 +2483,11 @@ def _get_long_read_rna_steps_json_name_prefix_from_metadata(metadata: Metadata) 
     if num_spikeins == 1:
         return "long_read_rna_one_spikein"
     return "long_read_rna_two_or_more_spikeins"
+
+
+def _chip_pbam_used(metadata: Metadata) -> bool:
+    """
+    If data was processed using pbam conversion via `redact_nodup_bam: true` in pipeline
+    input then need to select the pbam template.
+    """
+    return metadata.content["inputs"]["redact_nodup_bam"]
