@@ -1667,7 +1667,7 @@ class AccessionAtacChip(Accession):
         version = qc["general"]["pipeline_ver"].lstrip("v")
         return version
 
-    def get_atac_chip_pipeline_replicate(self, file):
+    def get_atac_chip_pipeline_replicate(self, file: File) -> str:
         """
         Searches for the input fastq array corresponding to the ancestor input fastqs of the current
         file and returns the pipeline replicate number. We only need to check R1, since it will
@@ -1682,9 +1682,12 @@ class AccessionAtacChip(Accession):
         ]
         pipeline_rep = None
         for k, v in self.analysis.metadata.content["inputs"].items():
-            if "fastqs" in k and "ctl" not in k:
+            if "fastqs" in k:
                 if sorted(v) == sorted(parent_fastqs):
-                    pipeline_rep = k.split("_")[1]
+                    if "ctl" in k:
+                        pipeline_rep = "ctl" + k.split("_")[2].lstrip("rep")
+                    else:
+                        pipeline_rep = k.split("_")[1]
                     break
         if not pipeline_rep:
             raise ValueError(
@@ -2396,6 +2399,7 @@ def accession_factory(
         "histone_chip_peak_call_only": AccessionChip,
         "mint_chip_peak_call_only": AccessionChip,
         "tf_chip": AccessionChip,
+        "tf_chip_control_fastqs": AccessionChip,
         "histone_chip": AccessionChip,
         "mint_chip": AccessionChip,
         "control_chip": AccessionChip,
