@@ -6,6 +6,7 @@ from flatdict import FlatDict
 
 from accession.backends import Backend, GCBackend
 from accession.file import File
+from accession.metadata import Metadata
 from accession.task import Task
 
 
@@ -16,9 +17,9 @@ class Analysis:
 
     def __init__(
         self,
-        metadata,
-        raw_fastqs_keys=None,
-        raw_fastqs_can_have_task=False,
+        metadata: Metadata,
+        raw_fastqs_keys: Optional[List[str]] = None,
+        raw_fastqs_can_have_task: bool = False,
         auto_populate: bool = True,
         backend: Optional[Backend] = None,
     ) -> None:

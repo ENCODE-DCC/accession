@@ -60,7 +60,7 @@ class AccessionSteps:
         return self._content
 
     @property
-    def raw_fastqs_keys(self) -> Optional[str]:
+    def raw_fastqs_keys(self) -> Optional[List[str]]:
         return self.steps.get("raw_fastqs_keys")
 
     @property
