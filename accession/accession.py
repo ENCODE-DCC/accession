@@ -540,7 +540,7 @@ class Accession(ABC):
         new = []
         potential_filenames = flatten(
             [
-                self.analysis.metadata["inputs"][key]
+                self.analysis.metadata.content["inputs"][key]
                 for key in ancestor.workflow_inputs_to_match
             ]
         )
@@ -1397,7 +1397,7 @@ class AccessionLongReadRna(AccessionGenericRna):
         cannot get it via `self.analysis.get_files` and instead need to go via the
         tasks.
         """
-        gtf_filename = self.analysis.metadata["inputs"]["annotation"]
+        gtf_filename = self.analysis.metadata.content["inputs"]["annotation"]
         gtf_file = self.analysis.get_files(filename=gtf_filename)[0]
         portal_gtf = self.get_encode_file_matching_md5_of_blob(gtf_file)
         if portal_gtf is None:
