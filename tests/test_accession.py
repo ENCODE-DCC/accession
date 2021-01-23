@@ -199,7 +199,7 @@ def test_filter_derived_from_files_by_workflow_inputs(mocker, mock_accession):
         mock_accession.analysis,
         "metadata",
         new_callable=mocker.PropertyMock(
-            return_value={"inputs": {"foo": ["gs://bar/baz"]}}
+            return_value=mocker.Mock(content={"inputs": {"foo": ["gs://bar/baz"]}})
         ),
     )
     ancestor = DerivedFromFile(
