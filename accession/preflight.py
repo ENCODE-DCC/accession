@@ -55,7 +55,7 @@ class PreflightHelper:
                     (
                         display_filename,
                         portal_file.accession,
-                        portal_file.status,
+                        portal_file.status.value,
                         portal_file.dataset,
                     )
                 )
