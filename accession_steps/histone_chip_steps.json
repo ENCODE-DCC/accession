@@ -205,7 +205,7 @@
           "file_format": "bed",
           "file_format_type": "narrowPeak",
           "filekey": "bfilt_overlap_peak",
-          "output_type": "pseudo-replicated peaks",
+          "output_type": "pseudoreplicated peaks",
           "quality_metrics": [
             "chip_replication",
             "chip_peak_enrichment"
@@ -245,7 +245,7 @@
           "file_format": "bed",
           "file_format_type": "narrowPeak",
           "filekey": "bfilt_overlap_peak",
-          "output_type": "pseudo-replicated peaks",
+          "output_type": "pseudoreplicated peaks",
           "quality_metrics": [
             "chip_replication",
             "chip_peak_enrichment"
@@ -312,7 +312,7 @@
           "file_format": "bigBed",
           "file_format_type": "narrowPeak",
           "filekey": "bfilt_overlap_peak_bb",
-          "output_type": "pseudo-replicated peaks"
+          "output_type": "pseudoreplicated peaks"
         }
       ],
       "wdl_task_name": "overlap_pr"
@@ -335,7 +335,7 @@
           "file_format": "bigBed",
           "file_format_type": "narrowPeak",
           "filekey": "bfilt_overlap_peak_bb",
-          "output_type": "pseudo-replicated peaks"
+          "output_type": "pseudoreplicated peaks"
         }
       ],
       "wdl_task_name": "overlap_ppr"
