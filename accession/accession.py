@@ -2120,9 +2120,9 @@ class AccessionAtac(AccessionAtacChip):
                 ),
             }
         )
-        if "fri_blacklist" in output_qc:
+        fri_blacklist = output_qc.pop("fri_blacklist", None)
+        if fri_blacklist is not None:
             output_qc["fri_exclusion_list"] = output_qc["fri_blacklist"]
-            del output_qc["fri_blacklist"]
         return self.queue_qc(
             output_qc, encode_file, "atac-alignment-enrichment-quality-metric"
         )
