@@ -33,7 +33,7 @@
       - id: jsonnetfmt
 
   - repo: https://gitlab.com/pycqa/flake8
-    rev: 3.7.9
+    rev: 3.8.4
     hooks:
       - id: flake8
 

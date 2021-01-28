@@ -56,7 +56,7 @@ class EncodeFile:
         self._portal_file = portal_file
         self.at_id: str = portal_file["@id"]
 
-    def __eq__(self, other: "V") -> bool:  # noqa: E821 # type: ignore[override]
+    def __eq__(self, other: "V") -> bool:  # type: ignore[override]  # noqa: E821
         """
         Helpful for pytest assertions. See https://github.com/python/mypy/issues/2783
         for rationale for ignoring type.
