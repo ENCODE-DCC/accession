@@ -2,7 +2,7 @@ import json
 from base64 import b64encode
 from collections import UserDict
 from enum import Enum
-from typing import Any, Dict, List, Optional, Tuple, TypeVar, Union
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple, TypeVar, Union
 
 from encode_utils.connection import Connection
 
@@ -11,6 +11,10 @@ from accession.accession_steps import FileParams
 T = TypeVar("T")
 U = TypeVar("U")
 V = TypeVar("V", bound="EncodeFile")
+if TYPE_CHECKING:
+    UserDictLike = UserDict[str, str]
+else:
+    UserDictLike = UserDict
 
 
 class EncodeGenericObject:
@@ -22,7 +26,7 @@ class EncodeGenericObject:
         return self.portal_properties["@id"]
 
 
-class EncodeCommonMetadata(UserDict[str, str]):
+class EncodeCommonMetadata(UserDictLike):
     """
     Class to hold common metadata shared by all posted objects. Inherits from UserDict
     so we can do things like qc.update(EncodeCommonMetadata("foo", "bar"))

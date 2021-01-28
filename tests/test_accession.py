@@ -73,7 +73,7 @@ def matching_md5_record():
 
 
 def test_accession_genome_annotation(mock_accession):
-    assert super(AccessionMicroRna, mock_accession).genome_annotation is None
+    assert mock_accession.genome_annotation == "V19"
 
 
 def test_accession_pipeline_version(mock_accession):
