@@ -1,0 +1,48 @@
+{
+  "accession.steps": [
+    {
+      "dcc_step_run": "chip-seq-alignment-step-v-2",
+      "dcc_step_version": "/analysis-step-versions/chip-seq-alignment-step-v-2-1/",
+      "wdl_files": [
+        {
+          "callbacks": [
+            "add_mapped_read_length",
+            "add_mapped_run_type",
+            "maybe_add_cropped_read_length",
+            "maybe_add_cropped_read_length_tolerance"
+          ],
+          "derived_from_files": [
+            {
+              "derived_from_filekey": "idx_tar",
+              "derived_from_inputs": true,
+              "derived_from_task": "align"
+            },
+            {
+              "derived_from_filekey": "fastqs_R1",
+              "derived_from_inputs": true,
+              "derived_from_task": "align"
+            },
+            {
+              "allow_empty": true,
+              "derived_from_filekey": "fastqs_R2",
+              "derived_from_inputs": true,
+              "derived_from_task": "align"
+            }
+          ],
+          "file_format": "bam",
+          "filekey": "nodup_bam",
+          "output_type": "redacted alignments",
+          "quality_metrics": [
+            "chip_alignment",
+            "chip_library"
+          ]
+        }
+      ],
+      "wdl_task_name": "filter"
+    }
+  ],
+  "raw_fastqs_keys": [
+    "fastqs_R1",
+    "fastqs_R2"
+  ]
+}

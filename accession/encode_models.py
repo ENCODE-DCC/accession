@@ -175,7 +175,7 @@ class EncodeFile:
         file_size: int,
         file_md5sum: str,
         step_run_id: str,
-        submitted_file_name: str,
+        submitted_file_name: Optional[str] = None,
         genome_annotation: Optional[str] = None,
         extras: Optional[Dict[str, Any]] = None,
     ) -> Dict[str, Any]:
@@ -195,12 +195,13 @@ class EncodeFile:
             "derived_from": derived_from,
             "file_size": file_size,
             "md5sum": file_md5sum,
-            "submitted_file_name": submitted_file_name,
         }
         if file_params.file_format_type:
             obj["file_format_type"] = file_params.file_format_type
         if genome_annotation is not None:
             obj["genome_annotation"] = genome_annotation
+        if submitted_file_name is not None:
+            obj["submitted_file_name"] = submitted_file_name
         if extras is not None:
             obj.update(extras)
         obj[Connection.PROFILE_KEY] = "file"

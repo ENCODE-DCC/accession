@@ -1,22 +1,3 @@
-/*
-File layout:
-    - shared template parts
-    - experiment ChIP map-only template
-    - control ChIP map-only template (nearly identical except for slighly different QC)
-    - TF ChIP peak calling template
-    - histone ChIP peak calling template
-    - MINT ChIP peak calling template
-    - consolidated TF mapping and peak calling template
-    - consolidated histone mapping and peak calling template
-    - consolidated MINT ChIP mapping and peak calling template
-    - ATAC template
-
-After running `jsonnet`, this will produce 9 JSON files. 2 map only accessioning
-templates, 3 pipeline-specific peak calling accessioning templates, and 4
-pipeline-specific mapping and peak calling accessioning templates. Make sure to run
-linting afterwards `tox -e lint` to pretty-format the JSON, which will make the diffs
-more legible.
-*/
 {
   local MAYBE_PREFERRED_DEFAULT = 'maybe_preferred_default',
   local BedBigwigDerivedFromFiles(is_atac=false, ignore_pooled_peak_for_clarity=false) = [
@@ -65,42 +46,47 @@ more legible.
   local AtacChipMapOnlySteps(
     is_control=false,
     is_atac=false,
-    separate_control_task=false
+    separate_control_task=false,
+    pbam=false,
   ) = {
     local step_run = if is_atac then 'atac-seq-alignment-step-v-2' else 'chip-seq-alignment-step-v-2',
-    local step_version = if is_atac then '/analysis-step-versions/atac-seq-alignment-step-v-2-1/' else '/analysis-step-versions/chip-seq-alignment-step-v-2-0/',
-    'accession.steps': [
-      {
-        dcc_step_run: step_run,
-        dcc_step_version: step_version,
-        wdl_files: [
-          {
-            callbacks: [
-              'add_mapped_read_length',
-              'add_mapped_run_type',
-            ] + (if !is_atac then [
-                   'maybe_add_cropped_read_length',
-                   'maybe_add_cropped_read_length_tolerance',
-                 ] else []),
-            derived_from_files: [
-              {
-                derived_from_filekey: 'idx_tar',
-                derived_from_inputs: true,
-                derived_from_task: 'align',
-              },
-              self.derived_from_files[0] { derived_from_filekey: 'fastqs_R1' },
-              self.derived_from_files[0] { allow_empty: true, derived_from_filekey: 'fastqs_R2' },
-            ],
-            file_format: 'bam',
-            filekey: 'bam',
-            output_type: 'unfiltered alignments',
-            quality_metrics: (if is_atac then ['atac_alignment'] else [
-                                'chip_alignment',
-                              ]),
-          },
-        ],
-        wdl_task_name: if separate_control_task then 'align_ctl' else 'align',
-      },
+    local step_version =
+      if is_atac then '/analysis-step-versions/atac-seq-alignment-step-v-2-1/'
+      else if pbam then '/analysis-step-versions/chip-seq-alignment-step-v-2-1/'
+      else '/analysis-step-versions/chip-seq-alignment-step-v-2-0/',
+    local unfiltered_bam = {
+      dcc_step_run: step_run,
+      dcc_step_version: step_version,
+      wdl_files: [
+        {
+          callbacks: [
+            'add_mapped_read_length',
+            'add_mapped_run_type',
+          ] + (if !is_atac then [
+                 'maybe_add_cropped_read_length',
+                 'maybe_add_cropped_read_length_tolerance',
+               ] else []),
+          derived_from_files: [
+            {
+              derived_from_filekey: 'idx_tar',
+              derived_from_inputs: true,
+              derived_from_task: 'align',
+            },
+            self.derived_from_files[0] { derived_from_filekey: 'fastqs_R1' },
+            self.derived_from_files[0] { allow_empty: true, derived_from_filekey: 'fastqs_R2' },
+          ],
+          file_format: 'bam',
+          filekey: 'bam',
+          output_type: 'unfiltered alignments',
+          quality_metrics: (if is_atac then ['atac_alignment'] else [
+                              'chip_alignment',
+                            ]),
+        },
+      ],
+      wdl_task_name: if separate_control_task then 'align_ctl' else 'align',
+    },
+    local unfiltered_bam_wrapped = if pbam then [] else [unfiltered_bam],
+    'accession.steps': unfiltered_bam_wrapped + [
       {
         dcc_step_run: step_run,
         dcc_step_version: step_version,
@@ -131,7 +117,7 @@ more legible.
             derived_from_files: (if is_atac then atac_filtered_bam_derived_from_files else $['chip_map_only_steps.json']['accession.steps'][0].wdl_files[0].derived_from_files),
             file_format: 'bam',
             filekey: 'nodup_bam',
-            output_type: 'alignments',
+            output_type: if pbam then 'redacted alignments' else 'alignments',
             quality_metrics: (if is_atac then ['atac_alignment', 'atac_library', 'atac_align_enrich'] else [
                                 'chip_alignment',
                               ] + (if !is_control then ['chip_align_enrich'] else []) + [
@@ -392,12 +378,14 @@ more legible.
     ],
     raw_fastqs_keys: $['chip_map_only_steps.json'].raw_fastqs_keys,
   },
-  'chip_map_only_steps.json': AtacChipMapOnlySteps(),
-  'control_chip_steps.json': AtacChipMapOnlySteps(is_control=true),
   local atac_map_only_steps = AtacChipMapOnlySteps(is_atac=true),
+  local chip_pbam_map_only_steps = AtacChipMapOnlySteps(pbam=true),
   local atac_idr_peak_call_steps = AtacTfChipPeakCallOnlySteps(is_atac=true),
   local atac_overlap_peak_call_steps = AtacHistoneMintPeakCallSteps(is_atac=true),
   local control_chip_separate_control_task = AtacChipMapOnlySteps(is_control=true, separate_control_task=true),
+  'chip_map_only_steps.json': AtacChipMapOnlySteps(),
+  'control_chip_steps.json': AtacChipMapOnlySteps(is_control=true),
+  'control_chip_pbam_steps.json': AtacChipMapOnlySteps(is_control=true, pbam=true),
   'tf_chip_peak_call_only_steps.json': AtacTfChipPeakCallOnlySteps(),
   'histone_chip_peak_call_only_steps.json': AtacHistoneMintPeakCallSteps(),
   'mint_chip_peak_call_only_steps.json': AtacHistoneMintPeakCallSteps(blacklist_derived_from_task='pool_blacklist', blacklist_derived_from_filekey='tas'),
@@ -409,8 +397,16 @@ more legible.
     'accession.steps': control_chip_separate_control_task['accession.steps'] + $['chip_map_only_steps.json']['accession.steps'] + $['tf_chip_peak_call_only_steps.json']['accession.steps'],
     raw_fastqs_keys: $['chip_map_only_steps.json'].raw_fastqs_keys,
   },
+  'tf_chip_pbam_steps.json': {
+    'accession.steps': chip_pbam_map_only_steps['accession.steps'] + $['tf_chip_peak_call_only_steps.json']['accession.steps'],
+    raw_fastqs_keys: $['chip_map_only_steps.json'].raw_fastqs_keys,
+  },
   'histone_chip_steps.json': {
     'accession.steps': $['chip_map_only_steps.json']['accession.steps'] + $['histone_chip_peak_call_only_steps.json']['accession.steps'],
+    raw_fastqs_keys: $['chip_map_only_steps.json'].raw_fastqs_keys,
+  },
+  'histone_chip_pbam_steps.json': {
+    'accession.steps': chip_pbam_map_only_steps['accession.steps'] + $['histone_chip_peak_call_only_steps.json']['accession.steps'],
     raw_fastqs_keys: $['chip_map_only_steps.json'].raw_fastqs_keys,
   },
   'mint_chip_steps.json': {
