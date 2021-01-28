@@ -1,6 +1,6 @@
 import operator
 from functools import reduce
-from typing import Any, Dict, Iterable, List, Optional
+from typing import Any, Dict, Iterable, List, Optional, Union
 
 from flatdict import FlatDict
 
@@ -105,7 +105,9 @@ class Analysis:
         self.files.append(new_file)
         return new_file
 
-    def extract_files(self, outputs):
+    def extract_files(
+        self, outputs: Union[Dict[str, Any], List[Any], str]
+    ) -> Iterable[str]:
         """
         Extracts file names from dict values
         """
@@ -125,7 +127,9 @@ class Analysis:
                 tasks.append(task)
         return tasks
 
-    def get_files(self, filekey=None, filename=None):
+    def get_files(
+        self, filekey: Optional[str] = None, filename: Optional[str] = None
+    ) -> List[File]:
         files = []
         if filekey:
             for file in self.files:
@@ -138,11 +142,9 @@ class Analysis:
         return list(set(files))
 
     @property
-    def raw_fastqs(self):
+    def raw_fastqs(self) -> List[File]:
         fastqs = []
-        raw_fastqs_keys = ("fastq", "fastqs")
-        if self.raw_fastqs_keys is not None:
-            raw_fastqs_keys = self.raw_fastqs_keys
+        raw_fastqs_keys = self.raw_fastqs_keys or ["fastq", "fastqs"]
         for file in self.files:
             if any([k in file.filekeys for k in raw_fastqs_keys]):
                 if not self.raw_fastqs_can_have_task:
@@ -153,27 +155,29 @@ class Analysis:
 
     def search_up(
         self,
-        start_task,
-        task_name,
-        filekey,
-        inputs=False,
+        start_task: Task,
+        task_name: str,
+        filekey: str,
+        inputs: bool = False,
         disallow_tasks: Iterable[str] = (),
-    ):
+    ) -> List[File]:
         return list(
             set(self._search_up(start_task, task_name, filekey, inputs, disallow_tasks))
         )
 
-    def search_down(self, start_task, task_name, filekey, inputs: bool = False):
+    def search_down(
+        self, start_task: Task, task_name: str, filekey: str, inputs: bool = False
+    ) -> List[File]:
         return list(set(self._search_down(start_task, task_name, filekey, inputs)))
 
     def _search_up(
         self,
-        start_task,
-        task_name,
-        filekey,
+        start_task: Task,
+        task_name: str,
+        filekey: str,
         inputs: bool = False,
         disallow_tasks: Iterable[str] = (),
-    ):
+    ) -> Iterable[File]:
         """
         Search the Analysis hierarchy up for a file matching filekey. Returns a
         generator, access with next() or list() task parameter specifies the starting
@@ -213,7 +217,9 @@ class Analysis:
                     task_item, task_name, filekey, inputs, disallow_tasks=disallow_tasks
                 )
 
-    def _search_down(self, start_task, task_name, filekey, inputs: bool = False):
+    def _search_down(
+        self, start_task: Task, task_name: str, filekey: str, inputs: bool = False
+    ) -> Iterable[File]:
         """
         Search the Analysis hierarchy down for a file matching filekey. Returns
         generator object, access with next(). Task parameter specifies the starting

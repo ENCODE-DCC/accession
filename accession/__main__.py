@@ -8,7 +8,7 @@ from accession.cloud_tasks import QueueInfo
 from accession.metadata import parse_metadata_list
 
 
-def get_parser():
+def get_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         description="Accession pipeline outputs, \
                                                  download output metadata for scattering"
@@ -124,7 +124,7 @@ def get_metadatas_from_args(args: argparse.Namespace) -> List[str]:
     return metadatas
 
 
-def main():
+def main() -> None:
     parser = get_parser()
     args = parser.parse_args()
     lab, award = check_or_set_lab_award(args.lab, args.award)

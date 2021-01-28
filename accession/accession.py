@@ -41,7 +41,13 @@ from accession.encode_models import (
     EncodeStepRun,
 )
 from accession.file import File, GSFile
-from accession.helpers import LruCache, flatten, impersonate_file, string_to_number
+from accession.helpers import (
+    LruCache,
+    flatten,
+    impersonate_file,
+    string_to_number,
+    unwrap,
+)
 from accession.logger_factory import logger_factory
 from accession.metadata import Metadata, metadata_factory
 from accession.preflight import MatchingMd5Record, PreflightHelper
@@ -58,15 +64,15 @@ class Accession(ABC):
 
     def __init__(
         self,
-        steps,
-        analysis,
-        connection,
+        steps: AccessionSteps,
+        analysis: Analysis,
+        connection: Connection,
         common_metadata: EncodeCommonMetadata,
-        log_file_path="accession.log",
-        no_log_file=False,
+        log_file_path: str = "accession.log",
+        no_log_file: bool = False,
         queue_info: Optional[QueueInfo] = None,
         private_filenames: bool = False,
-    ):
+    ) -> None:
         self.analysis: Analysis = analysis
         self.steps = steps
         self.conn = connection
@@ -94,7 +100,7 @@ class Accession(ABC):
 
     @property
     @abstractmethod
-    def assembly(self):
+    def assembly(self) -> str:
         """
         A reminder that subclasses of Accession *must* provide their own implementation
         for assembly.
@@ -112,14 +118,14 @@ class Accession(ABC):
         raise NotImplementedError("Derived classes should provide their own QC_MAPs")
 
     @property
-    def genome_annotation(self):
+    def genome_annotation(self) -> str:
         """
         Not every pipeline will strictly need this method, so the @abstractmethod
         decorator is not required as in the case of assembly, but we still need a
         default implementation to so that file_from_template can check if the annotation
         is there.
         """
-        return None
+        raise NotImplementedError
 
     @property
     def pipeline_version(self) -> str:
@@ -235,7 +241,7 @@ class Accession(ABC):
         )
         return record
 
-    def raw_files_accessioned(self):
+    def raw_files_accessioned(self) -> bool:
         for file in self.analysis.raw_fastqs:
             if not self.get_encode_file_matching_md5_of_blob(file):
                 return False
@@ -447,17 +453,18 @@ class Accession(ABC):
         is the same as the parent file, but you know you only need to connect to the
         newly posted file.
         """
+        task = unwrap(file.task)
         try:
             if ancestor.should_search_down:
                 derived_from_files = self.analysis.search_down(
-                    file.task,
+                    task,
                     ancestor.derived_from_task,
                     ancestor.derived_from_filekey,
                     ancestor.derived_from_inputs,
                 )
             else:
                 derived_from_files = self.analysis.search_up(
-                    file.task,
+                    task,
                     ancestor.derived_from_task,
                     ancestor.derived_from_filekey,
                     ancestor.derived_from_inputs,
@@ -591,7 +598,7 @@ class Accession(ABC):
         )
         return obj
 
-    def post_qcs(self):
+    def post_qcs(self) -> None:
         for qc in self.raw_qcs:
             self.new_qcs.append(
                 self.conn.post(
@@ -853,7 +860,7 @@ class AccessionGenericRna(Accession):
         self,
         encode_file: EncodeFile,
         file: File,
-        handler: Callable,
+        handler: Callable[[File], Dict[str, Any]],
         qc_schema_name: str = "CorrelationQualityMetric",
         qc_schema_name_with_hyphens: str = "correlation-quality-metric",
     ) -> None:
@@ -900,12 +907,12 @@ class AccessionBulkRna(AccessionGenericRna):
     ]
 
     @property
-    def assembly(self):
+    def assembly(self) -> str:
         filekey = "index"
         return self.find_portal_property_from_filekey(filekey, EncodeFile.ASSEMBLY)
 
     @property
-    def genome_annotation(self):
+    def genome_annotation(self) -> str:
         filekey = "index"
         return self.find_portal_property_from_filekey(
             filekey, EncodeFile.GENOME_ANNOTATION
@@ -918,7 +925,7 @@ class AccessionBulkRna(AccessionGenericRna):
             filename=file.get_task().outputs["log_json"]  # task output name
         )[0]
         qc = qc_file.read_json()
-        star_qc_metric = qc.get("star_log_qc")  # what the key is in actual qc json file
+        star_qc_metric = qc["star_log_qc"]  # what the key is in actual qc json file
         del star_qc_metric["Started job on"]
         del star_qc_metric["Started mapping on"]
         del star_qc_metric["Finished on"]
@@ -943,7 +950,8 @@ class AccessionBulkRna(AccessionGenericRna):
     def make_reads_by_gene_type_qc(self, encode_file: EncodeFile, file: File) -> None:
         if encode_file.has_qc("GeneTypeQuantificationQualityMetric"):
             return
-        qc_file = self.analysis.search_down(file.task, "rna_qc", "rnaQC")[0]
+        task = unwrap(file.task)
+        qc_file = self.analysis.search_down(task, "rna_qc", "rnaQC")[0]
         qc = qc_file.read_json()
         try:
             gene_type_count_key = "gene_type_count"
@@ -981,7 +989,7 @@ class AccessionBulkRna(AccessionGenericRna):
             filename=file.get_task().outputs[qc_file_task_output_name]
         )[0]
         qc = qc_file.read_json()
-        output_qc = qc.get(qc_dictionary_key)
+        output_qc = qc[qc_dictionary_key]
         return self.queue_qc(output_qc, encode_file, qc_schema_name_with_hyphens)
 
     def make_flagstat_qc(
@@ -1002,7 +1010,7 @@ class AccessionBulkRna(AccessionGenericRna):
             filename=file.get_task().outputs[task_output_name]
         )[0]
         qc = qc_file.read_json()
-        output_qc = qc.get(qc_dictionary_key)
+        output_qc = qc[qc_dictionary_key]
         for key in convert_to_string:
             # paired_properly_pct and singletons_pct are not there in single-ended
             try:
@@ -1043,7 +1051,8 @@ class AccessionBulkRna(AccessionGenericRna):
         )
 
     def prepare_mad_qc_metric(self, file: File) -> Dict[str, Any]:
-        qc_file = self.analysis.search_down(file.task, "mad_qc", "madQCmetrics")[0]
+        task = unwrap(file.task)
+        qc_file = self.analysis.search_down(task, "mad_qc", "madQCmetrics")[0]
         qc = qc_file.read_json()
         try:
             qc_key = "MAD.R"
@@ -1051,7 +1060,7 @@ class AccessionBulkRna(AccessionGenericRna):
         except KeyError:
             self.logger.exception("Could not find key %s in madqc source file", qc_key)
             raise
-        attachment_file = self.analysis.search_down(file.task, "mad_qc", "madQCplot")[0]
+        attachment_file = self.analysis.search_down(task, "mad_qc", "madQCplot")[0]
         attachment = self.get_attachment(attachment_file, "image/png")
         mad_qc["attachment"] = attachment
         return mad_qc
@@ -1094,14 +1103,16 @@ class AccessionDnase(Accession):
         "tenth_of_one_percent_peaks_qc": "make_tenth_of_one_percent_peaks_qc",
         "five_percent_allcalls_qc": "make_five_percent_allcalls_qc",
         "five_percent_narrowpeaks_qc": "make_five_percent_narrowpeaks_qc",
-    }  # type: ignore
+    }
 
     @property
     def assembly(self) -> str:
         filekey = "references.nuclear_chroms_gz"
         return self.find_portal_property_from_filekey(filekey, EncodeFile.ASSEMBLY)
 
-    def parse_dict_from_bytes(self, qc_bytes: bytes, parser) -> dict:
+    def parse_dict_from_bytes(
+        self, qc_bytes: bytes, parser: Callable[[str], Dict[str, Any]]
+    ) -> Dict[str, Any]:
         with impersonate_file(qc_bytes) as fake_file:
             result = parser(fake_file)
         return result
@@ -1441,7 +1452,9 @@ class AccessionLongReadRna(AccessionGenericRna):
             )
         return genome_annotation
 
-    def make_long_read_rna_correlation_qc(self, encode_file, file):
+    def make_long_read_rna_correlation_qc(
+        self, encode_file: EncodeFile, file: File
+    ) -> None:
         """
         Make and post Spearman QC for long read RNA by giving the make_generic_correlation_qc the
         appropriate handler.
@@ -1450,14 +1463,13 @@ class AccessionLongReadRna(AccessionGenericRna):
             encode_file, file, handler=self.prepare_long_read_rna_correlation_qc
         )
 
-    def prepare_long_read_rna_correlation_qc(self, file):
+    def prepare_long_read_rna_correlation_qc(self, file: File) -> Dict[str, Any]:
         """
         Handler for creating the correlation QC object, specifically for long read rna. Finds and
         parses the spearman QC JSON.
         """
-        qc_file, *_ = self.analysis.search_down(
-            file.task, "calculate_spearman", "spearman"
-        )
+        task = unwrap(file.task)
+        qc_file = self.analysis.search_down(task, "calculate_spearman", "spearman")[0]
         qc = qc_file.read_json()
         spearman_value = qc["replicates_correlation"]["spearman_correlation"]
         spearman_correlation_qc = {"Spearman correlation": spearman_value}
@@ -1563,12 +1575,12 @@ class AccessionMicroRna(AccessionGenericRna):
     }
 
     @property
-    def assembly(self):
+    def assembly(self) -> str:
         filekey = "annotation"
         return self.find_portal_property_from_filekey(filekey, EncodeFile.ASSEMBLY)
 
     @property
-    def genome_annotation(self):
+    def genome_annotation(self) -> str:
         filekey = "annotation"
         return self.find_portal_property_from_filekey(
             filekey, EncodeFile.GENOME_ANNOTATION
@@ -1610,8 +1622,9 @@ class AccessionMicroRna(AccessionGenericRna):
             or self.experiment.get_number_of_biological_replicates() != 2
         ):
             return
+        task = unwrap(file.task)
         qc_file = self.analysis.search_down(
-            file.task, "spearman_correlation", "spearman_json"
+            task, "spearman_correlation", "spearman_json"
         )[0]
         qc = qc_file.read_json()
         spearman_value = qc["spearman_correlation"]["spearman_correlation"]
@@ -1630,7 +1643,7 @@ class AccessionMicroRna(AccessionGenericRna):
             filename=file.get_task().outputs["star_qc_json"]
         )[0]
         qc = qc_file.read_json()
-        star_qc_metric = qc.get("star_qc_metric")
+        star_qc_metric = qc["star_qc_metric"]
         del star_qc_metric["Started job on"]
         del star_qc_metric["Started mapping on"]
         del star_qc_metric["Finished on"]
@@ -1683,11 +1696,10 @@ class AccessionAtacChip(Accession):
         always be there in both the single and paired ended runs of the ChIP pipeline. We need this
         in order to be able to identify the correct QC in the QC JSON.
         """
+        task = unwrap(file.task)
         parent_fastqs = [
             file.filename
-            for file in self.analysis.search_up(
-                file.task, "align", "fastqs_R1", inputs=True
-            )
+            for file in self.analysis.search_up(task, "align", "fastqs_R1", inputs=True)
         ]
         pipeline_rep = None
         for k, v in self.analysis.metadata.content["inputs"].items():
@@ -1719,13 +1731,14 @@ class AccessionAtacChip(Accession):
         Obtains the value of mapped_read_length to post for bam files from the read
         length log in the ancestor align task in the ChIP-seq pipeline.
         """
-        read_len_log = self.analysis.search_up(file.task, "align", "read_len_log")[0]
+        task = unwrap(file.task)
+        read_len_log = self.analysis.search_up(task, "align", "read_len_log")[0]
         log_contents = read_len_log.read_bytes()
         try:
             mapped_read_length = int(log_contents)
         except ValueError as e:
             raise RuntimeError(
-                f"Could not parse read length log into integer: tried to parse {log_contents}"
+                f"Could not parse read length log into integer: tried to parse {str(log_contents)}"
             ) from e
         return {"mapped_read_length": mapped_read_length}
 
@@ -1875,13 +1888,14 @@ class AccessionChip(AccessionAtacChip):
         """
         if encode_file.has_qc("ChipAlignmentEnrichmentQualityMetric"):
             return
+        task = unwrap(file.task)
         qc = self.analysis.get_files("qc_json")[0].read_json()
         replicate = self.get_atac_chip_pipeline_replicate(file)
         key_to_match = "fastqs_R1"
         parent_fastqs = [
             file.filename
             for file in self.analysis.search_up(
-                file.task, "align", key_to_match, inputs=True
+                task, "align", key_to_match, inputs=True
             )
         ]
         align_r1_tasks = self.analysis.get_tasks("align_R1")
@@ -1907,8 +1921,8 @@ class AccessionChip(AccessionAtacChip):
         cross_corr_plot_pdf = self.analysis.search_down(
             start_task[0], "xcor", "plot_pdf"
         )[0]
-        fingerprint_plot_png = self.analysis.search_down(file.task, "jsd", "plot")[0]
-        gc_bias_plot_png = self.analysis.search_down(file.task, "gc_bias", "gc_plot")[0]
+        fingerprint_plot_png = self.analysis.search_down(task, "jsd", "plot")[0]
+        gc_bias_plot_png = self.analysis.search_down(task, "gc_bias", "gc_plot")[0]
         output_qc = {
             **qc["align_enrich"]["xcor_score"][replicate],
             **qc["align_enrich"]["jsd"][replicate],
@@ -2103,12 +2117,13 @@ class AccessionAtac(AccessionAtacChip):
         """
         if encode_file.has_qc("AtacAlignmentEnrichmentQualityMetric"):
             return
+        task = unwrap(file.task)
         qc = self.analysis.get_files("qc_json")[0].read_json()
         replicate = self.get_atac_chip_pipeline_replicate(file)
-        fingerprint_plot_png = self.analysis.search_down(file.task, "jsd", "plot")[0]
-        gc_bias_plot_png = self.analysis.search_down(file.task, "gc_bias", "gc_plot")[0]
+        fingerprint_plot_png = self.analysis.search_down(task, "jsd", "plot")[0]
+        gc_bias_plot_png = self.analysis.search_down(task, "gc_bias", "gc_plot")[0]
         tss_enrichment_plot_png = self.analysis.search_down(
-            file.task, "tss_enrich", "tss_large_plot"
+            task, "tss_enrich", "tss_large_plot"
         )[0]
         output_qc = {}
         output_qc.update(qc["align_enrich"]["jsd"][replicate])
@@ -2144,6 +2159,7 @@ class AccessionAtac(AccessionAtacChip):
         """
         if encode_file.has_qc("AtacLibraryQualityMetric"):
             return
+        task = unwrap(file.task)
         qc = self.analysis.get_files("qc_json")[0].read_json()
         replicate = self.get_atac_chip_pipeline_replicate(file)
         output_qc = {
@@ -2152,7 +2168,7 @@ class AccessionAtac(AccessionAtacChip):
         }
         if file.get_task().inputs["paired_end"] is True:
             fragment_length_plot_png = self.analysis.search_down(
-                file.task, "fraglen_stat_pe", "fraglen_dist_plot"
+                task, "fraglen_stat_pe", "fraglen_dist_plot"
             )[0]
             output_qc["fragment_length_distribution_plot"] = self.get_attachment(
                 fragment_length_plot_png, "image/png"
@@ -2267,7 +2283,7 @@ class AccessionWgbs(Accession):
     }
 
     @property
-    def assembly(self):
+    def assembly(self) -> str:
         filekey = "reference"
         return self.find_portal_property_from_filekey(filekey, EncodeFile.ASSEMBLY)
 
@@ -2301,9 +2317,10 @@ class AccessionWgbs(Accession):
         """
         if encode_file.has_qc("GembsAlignmentQualityMetric"):
             return
+        task = unwrap(file.task)
         output_qc = {}
         gembs_qc_file = self.analysis.search_down(
-            file.task, "qc_report", "portal_map_qc_json"
+            task, "qc_report", "portal_map_qc_json"
         )[0]
         gembs_qc = gembs_qc_file.read_json()
         output_qc.update(
@@ -2319,20 +2336,20 @@ class AccessionWgbs(Accession):
             }
         )
         mapq_plot_png = self.analysis.search_down(
-            file.task, "qc_report", "map_qc_mapq_plot_png"
+            task, "qc_report", "map_qc_mapq_plot_png"
         )[0]
         output_qc["mapq_plot"] = self.get_attachment(
             mapq_plot_png, mime_type="image/png"
         )
         insert_size_plot_png = self.analysis.search_down(
-            file.task, "qc_report", "map_qc_insert_size_plot_png"
+            task, "qc_report", "map_qc_insert_size_plot_png"
         )
         if insert_size_plot_png:
             output_qc["insert_size_plot"] = self.get_attachment(
                 insert_size_plot_png[0], mime_type="image/png"
             )
         average_coverage_qc_file = self.analysis.search_down(
-            file.task, "calculate_average_coverage", "average_coverage_qc"
+            task, "calculate_average_coverage", "average_coverage_qc"
         )[0]
         average_coverage_qc = average_coverage_qc_file.read_json()
         output_qc.update(average_coverage_qc["average_coverage"])
@@ -2344,9 +2361,10 @@ class AccessionWgbs(Accession):
     def make_samtools_stats_qc(self, encode_file: EncodeFile, file: File) -> None:
         if encode_file.has_qc("SamtoolsStatsQualityMetric"):
             return
+        task = unwrap(file.task)
         output_qc = {}
         samtools_stats_qc_file = self.analysis.search_down(
-            file.task, "calculate_average_coverage", "average_coverage_qc"
+            task, "calculate_average_coverage", "average_coverage_qc"
         )[0]
         samtools_stats_qc = samtools_stats_qc_file.read_json()
         output_qc.update(
@@ -2374,9 +2392,10 @@ class AccessionWgbs(Accession):
         ):
             return
 
-        output_qc = {}  # type: ignore
+        task = unwrap(file.task)
+        output_qc = {}
         cpg_correlation_qc_file = self.analysis.search_down(
-            file.task, "calculate_bed_pearson_correlation", "bed_pearson_correlation_qc"
+            task, "calculate_bed_pearson_correlation", "bed_pearson_correlation_qc"
         )[0]
         cpg_correlation_qc = cpg_correlation_qc_file.read_json()
         output_qc["Pearson correlation"] = cpg_correlation_qc["pearson_correlation"][

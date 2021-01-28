@@ -22,7 +22,7 @@ class EncodeGenericObject:
         return self.portal_properties["@id"]
 
 
-class EncodeCommonMetadata(UserDict):
+class EncodeCommonMetadata(UserDict[str, str]):
     """
     Class to hold common metadata shared by all posted objects. Inherits from UserDict
     so we can do things like qc.update(EncodeCommonMetadata("foo", "bar"))
@@ -52,11 +52,11 @@ class EncodeFile:
     ASSEMBLY = "assembly"
     GENOME_ANNOTATION = "genome_annotation"
 
-    def __init__(self, portal_file: Dict[str, Any]):
+    def __init__(self, portal_file: Dict[str, Any]) -> None:
         self._portal_file = portal_file
-        self.at_id = portal_file["@id"]
+        self.at_id: str = portal_file["@id"]
 
-    def __eq__(self, other):  # noqa: E821 # type: ignore[override]
+    def __eq__(self, other: "V") -> bool:  # noqa: E821 # type: ignore[override]
         """
         Helpful for pytest assertions. See https://github.com/python/mypy/issues/2783
         for rationale for ignoring type.
@@ -65,7 +65,7 @@ class EncodeFile:
             return False
         return self.at_id == other.at_id and self.portal_file == other.portal_file
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self.at_id
 
     @property
@@ -73,7 +73,7 @@ class EncodeFile:
         return self._portal_file
 
     @portal_file.setter
-    def portal_file(self, value) -> None:
+    def portal_file(self, value: Dict[str, Any]) -> None:
         new_id = value["@id"]
         if new_id != self.at_id:
             raise ValueError(
@@ -234,9 +234,9 @@ class EncodeAnalysis:
         self.documents = documents
         self.pipeline_version = pipeline_version
 
-    def __eq__(
+    def __eq__(  # type: ignore  # https://github.com/python/mypy/issues/2783
         self, other
-    ) -> bool:  # type: ignore  # https://github.com/python/mypy/issues/2783
+    ) -> bool:
         """
         Helpful for pytest assertions. Should use # type: ignore[override], but flake8
         gets confused by that, raises F821.
@@ -285,7 +285,7 @@ class EncodeExperiment:
         return self.portal_properties["assay_term_name"]
 
     @property
-    def is_replicated(self):
+    def is_replicated(self) -> bool:
         return self.get_number_of_biological_replicates() > 1
 
     @property
@@ -312,7 +312,7 @@ class EncodeExperiment:
         )
         return len([rep for rep in tech_reps if rep is not None])
 
-    def get_patchable_internal_status(self):
+    def get_patchable_internal_status(self) -> Dict[str, str]:
         return {
             self.INTERNAL_STATUS_KEY: self.INTERNAL_STATUS_POST_ACCESSIONING,
             Connection.ENCID_KEY: self.at_id,
@@ -356,7 +356,9 @@ class EncodeAttachment:
         return b64encode(data).decode("utf-8")
 
     @staticmethod
-    def get_bytes_from_dict(input_dict: Dict, encoding: str = "utf-8") -> bytes:
+    def get_bytes_from_dict(
+        input_dict: Dict[str, Any], encoding: str = "utf-8"
+    ) -> bytes:
         """
         Useful for encoding QC JSON files into bytes for posting as attachments
         """

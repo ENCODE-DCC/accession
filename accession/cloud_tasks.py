@@ -112,7 +112,10 @@ class CloudTasksUploadClient:
     """
 
     def __init__(
-        self, queue_info: QueueInfo, log_file_path="accession.log", no_log_file=False
+        self,
+        queue_info: QueueInfo,
+        log_file_path: str = "accession.log",
+        no_log_file: bool = False,
     ) -> None:
         """
         `location` and `queue` refer to the region and name of the queue, respectively.
