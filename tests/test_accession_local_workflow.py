@@ -13,11 +13,15 @@ from accession.metadata import FileMetadata
 
 
 class AccessionDummy(Accession):
-    QC_MAP = {}  # type: ignore
+    QC_MAP = {}
 
     @property
     def assembly(self):
         return "GRCh38"
+
+    @property
+    def genome_annotation(self):
+        return "V19"
 
     def upload_file(self, *args, **kwargs):
         pass
