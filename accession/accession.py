@@ -73,7 +73,7 @@ class Accession(ABC):
         queue_info: Optional[QueueInfo] = None,
         private_filenames: bool = False,
     ) -> None:
-        self.analysis: Analysis = analysis
+        self.analysis = analysis
         self.steps = steps
         self.conn = connection
         self.common_metadata = common_metadata
@@ -82,8 +82,8 @@ class Accession(ABC):
         self.new_qcs: List[Dict[str, Any]] = []
         self.raw_qcs: List[EncodeQualityMetric] = []
         self.log_file_path = log_file_path
-        self.no_log_file: bool = no_log_file
-        self.private_filenames: bool = private_filenames
+        self.no_log_file = no_log_file
+        self.private_filenames = private_filenames
         # keys are hex md5sums, values are lists of portal objects
         self.search_cache: LruCache[str, List[Dict[str, Any]]] = LruCache()
         self._logger: Optional[logging.Logger] = None
