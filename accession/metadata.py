@@ -13,7 +13,7 @@ from accession.encode_models import EncodeAttachment
 class Metadata(ABC):
     @property
     @abstractmethod
-    def content(self):
+    def content(self) -> Dict[str, Any]:
         raise NotImplementedError
 
     @property

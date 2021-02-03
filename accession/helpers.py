@@ -2,10 +2,11 @@ import os
 import tempfile
 from collections import OrderedDict
 from contextlib import contextmanager
-from typing import Any, Generic, List, Optional, TypeVar
+from typing import Any, Generic, Iterator, List, Optional, TypeVar, Union
 
 K = TypeVar("K")
 V = TypeVar("V")
+T = TypeVar("T")
 
 
 class LruCache(Generic[K, V]):
@@ -16,7 +17,7 @@ class LruCache(Generic[K, V]):
     will complain.
     """
 
-    def __init__(self, max_size: int = 128):
+    def __init__(self, max_size: int = 128) -> None:
         """
         `max_size` is an upper bound on the maximum size of the cache. When the cache is
         at this size, insertions will result in eviction of the oldest values in the
@@ -54,7 +55,7 @@ class LruCache(Generic[K, V]):
             del self.data[key]
 
 
-def string_to_number(string: str):
+def string_to_number(string: str) -> Union[float, str, int]:
     if not isinstance(string, str):
         return string
     try:
@@ -66,7 +67,7 @@ def string_to_number(string: str):
             return string
 
 
-def flatten(nested_input: List[Any]):
+def flatten(nested_input: List[Any]) -> List[Any]:
     """Flattens a nested list.
     Args:
         input_list: A (possibly) nested list.
@@ -83,7 +84,7 @@ def flatten(nested_input: List[Any]):
 
 
 @contextmanager
-def impersonate_file(data):
+def impersonate_file(data: bytes) -> Iterator[str]:
     """With this contextmanager one can use bytes or string as if it is a file.
     Usage:
         with impersonate_file(bytes_data) as filepath:

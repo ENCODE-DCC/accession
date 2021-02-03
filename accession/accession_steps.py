@@ -38,7 +38,7 @@ class AccessionSteps:
     def __init__(self, path_to_accession_step_json: Union[str, Path]):
         self.path = path_to_accession_step_json
         self._steps: Optional[Dict[str, Any]] = None
-        self._content: Optional[List] = None
+        self._content: Optional[List[AccessionStep]] = None
 
     @property
     def steps(self) -> Dict[str, Any]:
