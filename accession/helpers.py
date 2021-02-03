@@ -97,12 +97,3 @@ def impersonate_file(data: bytes) -> Iterator[str]:
         yield temporary_file.name
     finally:
         os.unlink(temporary_file.name)
-
-
-def unwrap(value: Optional[T]) -> T:
-    """
-    Consumes an `Optional` type, raises ValueError if the value is `None`
-    """
-    if value is None:
-        raise ValueError("Called unwrap on None value")
-    return value

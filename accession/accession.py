@@ -41,13 +41,7 @@ from accession.encode_models import (
     EncodeStepRun,
 )
 from accession.file import File, GSFile
-from accession.helpers import (
-    LruCache,
-    flatten,
-    impersonate_file,
-    string_to_number,
-    unwrap,
-)
+from accession.helpers import LruCache, flatten, impersonate_file, string_to_number
 from accession.logger_factory import logger_factory
 from accession.metadata import Metadata, metadata_factory
 from accession.preflight import MatchingMd5Record, PreflightHelper
@@ -453,7 +447,7 @@ class Accession(ABC):
         is the same as the parent file, but you know you only need to connect to the
         newly posted file.
         """
-        task = unwrap(file.task)
+        task = file.get_task()
         try:
             if ancestor.should_search_down:
                 derived_from_files = self.analysis.search_down(
@@ -950,7 +944,7 @@ class AccessionBulkRna(AccessionGenericRna):
     def make_reads_by_gene_type_qc(self, encode_file: EncodeFile, file: File) -> None:
         if encode_file.has_qc("GeneTypeQuantificationQualityMetric"):
             return
-        task = unwrap(file.task)
+        task = file.get_task()
         qc_file = self.analysis.search_down(task, "rna_qc", "rnaQC")[0]
         qc = qc_file.read_json()
         try:
@@ -1051,7 +1045,7 @@ class AccessionBulkRna(AccessionGenericRna):
         )
 
     def prepare_mad_qc_metric(self, file: File) -> Dict[str, Any]:
-        task = unwrap(file.task)
+        task = file.get_task()
         qc_file = self.analysis.search_down(task, "mad_qc", "madQCmetrics")[0]
         qc = qc_file.read_json()
         try:
@@ -1468,7 +1462,7 @@ class AccessionLongReadRna(AccessionGenericRna):
         Handler for creating the correlation QC object, specifically for long read rna. Finds and
         parses the spearman QC JSON.
         """
-        task = unwrap(file.task)
+        task = file.get_task()
         qc_file = self.analysis.search_down(task, "calculate_spearman", "spearman")[0]
         qc = qc_file.read_json()
         spearman_value = qc["replicates_correlation"]["spearman_correlation"]
@@ -1622,7 +1616,7 @@ class AccessionMicroRna(AccessionGenericRna):
             or self.experiment.get_number_of_biological_replicates() != 2
         ):
             return
-        task = unwrap(file.task)
+        task = file.get_task()
         qc_file = self.analysis.search_down(
             task, "spearman_correlation", "spearman_json"
         )[0]
@@ -1696,7 +1690,7 @@ class AccessionAtacChip(Accession):
         always be there in both the single and paired ended runs of the ChIP pipeline. We need this
         in order to be able to identify the correct QC in the QC JSON.
         """
-        task = unwrap(file.task)
+        task = file.get_task()
         parent_fastqs = [
             file.filename
             for file in self.analysis.search_up(task, "align", "fastqs_R1", inputs=True)
@@ -1731,7 +1725,7 @@ class AccessionAtacChip(Accession):
         Obtains the value of mapped_read_length to post for bam files from the read
         length log in the ancestor align task in the ChIP-seq pipeline.
         """
-        task = unwrap(file.task)
+        task = file.get_task()
         read_len_log = self.analysis.search_up(task, "align", "read_len_log")[0]
         log_contents = read_len_log.read_bytes()
         try:
@@ -1888,7 +1882,7 @@ class AccessionChip(AccessionAtacChip):
         """
         if encode_file.has_qc("ChipAlignmentEnrichmentQualityMetric"):
             return
-        task = unwrap(file.task)
+        task = file.get_task()
         qc = self.analysis.get_files("qc_json")[0].read_json()
         replicate = self.get_atac_chip_pipeline_replicate(file)
         key_to_match = "fastqs_R1"
@@ -2117,7 +2111,7 @@ class AccessionAtac(AccessionAtacChip):
         """
         if encode_file.has_qc("AtacAlignmentEnrichmentQualityMetric"):
             return
-        task = unwrap(file.task)
+        task = file.get_task()
         qc = self.analysis.get_files("qc_json")[0].read_json()
         replicate = self.get_atac_chip_pipeline_replicate(file)
         fingerprint_plot_png = self.analysis.search_down(task, "jsd", "plot")[0]
@@ -2159,7 +2153,7 @@ class AccessionAtac(AccessionAtacChip):
         """
         if encode_file.has_qc("AtacLibraryQualityMetric"):
             return
-        task = unwrap(file.task)
+        task = file.get_task()
         qc = self.analysis.get_files("qc_json")[0].read_json()
         replicate = self.get_atac_chip_pipeline_replicate(file)
         output_qc = {
@@ -2317,7 +2311,7 @@ class AccessionWgbs(Accession):
         """
         if encode_file.has_qc("GembsAlignmentQualityMetric"):
             return
-        task = unwrap(file.task)
+        task = file.get_task()
         output_qc = {}
         gembs_qc_file = self.analysis.search_down(
             task, "qc_report", "portal_map_qc_json"
@@ -2361,7 +2355,7 @@ class AccessionWgbs(Accession):
     def make_samtools_stats_qc(self, encode_file: EncodeFile, file: File) -> None:
         if encode_file.has_qc("SamtoolsStatsQualityMetric"):
             return
-        task = unwrap(file.task)
+        task = file.get_task()
         output_qc = {}
         samtools_stats_qc_file = self.analysis.search_down(
             task, "calculate_average_coverage", "average_coverage_qc"
@@ -2392,7 +2386,7 @@ class AccessionWgbs(Accession):
         ):
             return
 
-        task = unwrap(file.task)
+        task = file.get_task()
         output_qc = {}
         cpg_correlation_qc_file = self.analysis.search_down(
             task, "calculate_bed_pearson_correlation", "bed_pearson_correlation_qc"
