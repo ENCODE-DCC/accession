@@ -2432,6 +2432,7 @@ def accession_factory(
         "control_chip": AccessionChip,
         "atac": AccessionAtac,
         "dnase": AccessionDnase,
+        "dnase_no_footprints": AccessionDnase,
         "dnase_starch_from_bam": AccessionDnaseStarchFromBam,
         "wgbs": AccessionWgbs,
     }
