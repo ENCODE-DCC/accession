@@ -10,6 +10,7 @@ from accession.accession import (
     Accession,
     AccessionBulkRna,
     AccessionMicroRna,
+    _chip_pbam_used,
     _get_long_read_rna_steps_json_name_prefix_from_metadata,
     accession_factory,
 )
@@ -622,3 +623,13 @@ def test_get_long_read_rna_steps_json_name_prefix_from_metadata(
     metadata = FileMetadata("foo")
     result = _get_long_read_rna_steps_json_name_prefix_from_metadata(metadata)
     assert result == expected
+
+
+def test_chip_pbam_used(mocker):
+    metadata = mocker.Mock(content={"inputs": {"redact_nodup_bam": True}})
+    assert _chip_pbam_used(metadata) is True
+
+
+def test_chip_pbam_used_missing_key(mocker):
+    metadata = mocker.Mock(content={"inputs": {"foo": "bar"}})
+    assert _chip_pbam_used(metadata) is False
