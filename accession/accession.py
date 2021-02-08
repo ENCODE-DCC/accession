@@ -2504,4 +2504,4 @@ def _chip_pbam_used(metadata: Metadata) -> bool:
     If data was processed using pbam conversion via `redact_nodup_bam: true` in pipeline
     input then need to select the pbam template.
     """
-    return metadata.content["inputs"]["redact_nodup_bam"]
+    return metadata.content["inputs"].get("redact_nodup_bam", False)
