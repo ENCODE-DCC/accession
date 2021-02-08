@@ -112,14 +112,14 @@ class Accession(ABC):
         raise NotImplementedError("Derived classes should provide their own QC_MAPs")
 
     @property
-    def genome_annotation(self) -> str:
+    def genome_annotation(self) -> Optional[str]:
         """
         Not every pipeline will strictly need this method, so the @abstractmethod
         decorator is not required as in the case of assembly, but we still need a
         default implementation to so that file_from_template can check if the annotation
         is there.
         """
-        raise NotImplementedError
+        return None
 
     @property
     def pipeline_version(self) -> str:
@@ -2479,7 +2479,7 @@ def accession_factory(
         analysis,
         connection,
         common_metadata,
-        log_file_path="accession.log",
+        log_file_path=log_file_path,
         no_log_file=no_log_file,
         queue_info=queue_info,
         private_filenames=private_filenames,
