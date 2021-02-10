@@ -392,15 +392,24 @@ def test_maybe_preferred_default_replicated(
 
 
 @pytest.mark.parametrize(
-    "task_name,expected", [("idr_pr", {"preferred_default": True}), ("idr", {})]
+    "task_name,peak_caller,expected",
+    [
+        ("idr_pr", "spp", {"preferred_default": True}),
+        ("idr", "spp", {}),
+        ("overlap_pr", "macs2", {"preferred_default": True}),
+        ("overlap", "macs2", {}),
+    ],
 )
 def test_maybe_preferred_default_unreplicated(
-    mocker, mock_accession_chip, gsfile, task_name, expected
+    mocker, mock_accession_chip, gsfile, task_name, peak_caller, expected
 ):
     mocker.patch.object(
         mock_accession_chip.analysis, "get_files", return_value=[gsfile]
     )
     mocker.patch.object(gsfile.task, "task_name", task_name)
+    mocker.patch.object(
+        gsfile, "read_json", return_value={"general": {"peak_caller": peak_caller}}
+    )
     mocker.patch.object(mock_accession_chip, "get_number_of_replicates", return_value=1)
     result = mock_accession_chip.maybe_preferred_default(gsfile)
     assert result == expected
