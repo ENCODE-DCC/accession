@@ -1800,12 +1800,15 @@ class AccessionChip(AccessionAtacChip):
         file object generation time (make_file_obj) to fill in (or not) the missing
         value.
         """
-        if self.get_number_of_replicates() == 1:
-            if file.get_task().task_name == "idr_pr":
-                return {"preferred_default": True}
-            return {}
         qc = self.analysis.get_files("qc_json")[0].read_json()
         method = self.get_chip_pipeline_replication_method(qc)
+        if self.get_number_of_replicates() == 1:
+            if (
+                file.get_task().task_name
+                == f"{self.get_chip_pipeline_replication_method(qc)}_pr"
+            ):
+                return {"preferred_default": True}
+            return {}
         replication_qc = qc["replication"]["reproducibility"][method]
 
         optimal_set = replication_qc["opt_set"]
