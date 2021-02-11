@@ -90,25 +90,6 @@
         wdl_task_name: 'extract',
       },
       {
-        dcc_step_run: 'gembs-genotyping-methylation-estimation-smoothing-step-v-1',
-        dcc_step_version: '/analysis-step-versions/gembs-genotyping-methylation-estimation-smoothing-step-v-1-0/',
-        wdl_files: [
-          {
-            derived_from_files: [
-              {
-                derived_from_filekey: 'bam',
-                derived_from_task: 'map',
-              },
-            ],
-            file_format: 'bed',
-            file_format_type: 'bed9+',
-            filekey: 'smoothed_cpg_bed',
-            output_type: 'smoothed methylation state at CpG',
-          },
-        ],
-        wdl_task_name: 'bsmooth',
-      },
-      {
         dcc_step_run: 'gembs-cpg-file-format-conversion-step-v-1',
         dcc_step_version: '/analysis-step-versions/gembs-cpg-file-format-conversion-step-v-1-0/',
         wdl_files: [
@@ -167,30 +148,6 @@
           },
         ],
         wdl_task_name: 'extract',
-      },
-      {
-        dcc_step_run: 'gembs-smoothed-cpg-file-format-conversion-step-v-1',
-        dcc_step_version: '/analysis-step-versions/gembs-smoothed-cpg-file-format-conversion-step-v-1-0/',
-        wdl_files: [
-          {
-            derived_from_files: [
-              {
-                derived_from_filekey: 'smoothed_cpg_bed',
-                derived_from_task: 'bsmooth',
-              },
-              {
-                derived_from_filekey: 'chrom_sizes',
-                derived_from_inputs: true,
-                derived_from_task: 'bsmooth',
-              },
-            ],
-            file_format: 'bigBed',
-            file_format_type: 'bed9+',
-            filekey: 'smoothed_cpg_bigbed',
-            output_type: 'smoothed methylation state at CpG',
-          },
-        ],
-        wdl_task_name: 'bsmooth',
       },
       {
         dcc_step_run: 'gembs-cpg-coverage-calculation-step-v-1',
