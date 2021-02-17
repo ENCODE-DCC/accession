@@ -62,7 +62,6 @@ def test_accession_step_get_portal_step_run(steps):
     result = steps.content[0].get_portal_step_run(aliases=["foo"])
     assert result == {
         "aliases": ["foo"],
-        "status": "in progress",
         "analysis_step_version": "/analysis-step-versions/1-0/",
         "_profile": "analysis_step_runs",
     }

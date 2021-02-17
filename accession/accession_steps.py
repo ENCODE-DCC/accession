@@ -27,7 +27,6 @@ class AccessionStep:
         """
         payload = {
             "aliases": aliases,
-            "status": "in progress",
             "analysis_step_version": self.step_version,
             Connection.PROFILE_KEY: "analysis_step_runs",
         }

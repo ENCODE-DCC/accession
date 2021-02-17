@@ -246,7 +246,6 @@ def test_encode_file_from_template(encode_common_metadata):
         "lab": "/labs/lab/",
         "md5sum": "456",
         "output_type": "reads",
-        "status": "uploading",
         "step_run": "step_run_id",
         "submitted_file_name": "baz",
     }

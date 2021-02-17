@@ -189,7 +189,6 @@ class EncodeFile:
         specified in the template.
         """
         obj = {
-            "status": "uploading",
             "aliases": aliases,
             "file_format": file_params.file_format,
             "output_type": file_params.output_type,
