@@ -59,7 +59,7 @@ RUN chown -R encoded ./encoded /var/log/nginx /var/lib/nginx /run
 
 WORKDIR /build/encoded
 
-ENV NGINX_CONF develop/snovault/src/snovault
+ENV NGINX_CONF /usr/local/lib/python3.6/dist-packages/snovault
 
 RUN rm "$NGINX_CONF/nginx-dev.conf"
 
