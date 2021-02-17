@@ -50,9 +50,8 @@ RUN alias python=python3
 RUN git clone https://github.com/ENCODE-DCC/encoded.git --branch "${ENCODED_RELEASE_TAG}" --single-branch && \
     cd encoded && \
     pip3 install --upgrade pip setuptools==51.3.3 && \
-    pip3 install zc.buildout && \
-    buildout bootstrap && \
-    bin/buildout
+    pip3 install -e '.' && \
+    buildout
 
 # encoded users needs write permission to be able to make ES scripts
 # nginx runs with encoded user, need permissions to various folders
