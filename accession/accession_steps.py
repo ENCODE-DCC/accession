@@ -2,8 +2,6 @@ import json
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Union
 
-from encode_utils.connection import Connection
-
 
 class AccessionStep:
     """
@@ -19,18 +17,6 @@ class AccessionStep:
         self.wdl_files: List[FileParams] = [
             FileParams(i) for i in step_params["wdl_files"]
         ]
-
-    def get_portal_step_run(self, aliases: List[str]) -> Dict[str, Any]:
-        """
-        Get the portal's dict representation of the step run with special profile key to
-        enable posting with encode_utils.
-        """
-        payload = {
-            "aliases": aliases,
-            "analysis_step_version": self.step_version,
-            Connection.PROFILE_KEY: "analysis_step_runs",
-        }
-        return payload
 
 
 class AccessionSteps:

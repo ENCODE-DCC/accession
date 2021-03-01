@@ -414,6 +414,22 @@ class EncodeStepRun:
         self.at_id = portal_step_run["@id"]
         self.portal_step_run = portal_step_run
 
+    @staticmethod
+    def get_portal_object(
+        aliases: List[str], common_metadata: EncodeCommonMetadata, step_version: str
+    ) -> Dict[str, Any]:
+        """
+        Get the portal's dict representation of the step run with special profile key to
+        enable posting with encode_utils.
+        """
+        payload = {
+            "aliases": aliases,
+            "analysis_step_version": step_version,
+            Connection.PROFILE_KEY: "analysis_step_runs",
+        }
+        payload.update(common_metadata)
+        return payload
+
 
 class EncodeDocumentType(Enum):
     WorkflowMetadata = "workflow metadata"

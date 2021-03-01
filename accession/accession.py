@@ -396,7 +396,11 @@ class Accession(ABC):
                 docker_tag.split(":")[1] if docker_tag is not None else "",
             )
         ]
-        payload = accession_step.get_portal_step_run(aliases)
+        payload = EncodeStepRun.get_portal_object(
+            aliases=aliases,
+            common_metadata=self.common_metadata,
+            step_version=accession_step.step_version,
+        )
         posted, status_code = self.conn.post(
             payload,
             return_original_status_code=True,
