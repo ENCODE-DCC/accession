@@ -46,6 +46,9 @@
       "dcc_step_version": "/analysis-step-versions/histone-chip-signal-generation-step-v-1-0/",
       "wdl_files": [
         {
+          "callbacks": [
+            "maybe_preferred_default_bigwig"
+          ],
           "derived_from_files": [
             {
               "derived_from_filekey": "nodup_bam",
@@ -94,6 +97,9 @@
       "requires_replication": true,
       "wdl_files": [
         {
+          "callbacks": [
+            "maybe_preferred_default_bigwig"
+          ],
           "derived_from_files": [
             {
               "derived_from_filekey": "nodup_bam",

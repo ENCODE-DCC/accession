@@ -467,6 +467,28 @@ def test_accession_chip_add_mapped_run_type(
 
 
 @pytest.mark.parametrize(
+    "task_name,num_replicates,expected",
+    [
+        ("macs2_signal_track", 1, {"preferred_default": True}),
+        ("not_macs2", 1, {}),
+        ("macs2_signal_track", 2, {}),
+        ("macs2_signal_track_pooled", 3, {"preferred_default": True}),
+    ],
+)
+def test_accession_chip_atac_maybe_preferred_default_bigwig(
+    mocker, mock_accession_chip, gsfile, task_name, num_replicates, expected
+):
+    mocker.patch.object(
+        gsfile, "get_task", return_value=mocker.Mock(task_name=task_name)
+    )
+    mocker.patch.object(
+        mock_accession_chip, "get_number_of_replicates", return_value=num_replicates
+    )
+    result = mock_accession_chip.maybe_preferred_default_bigwig(gsfile)
+    assert result == expected
+
+
+@pytest.mark.parametrize(
     "gsfile_task,expected",
     [
         (Task("my_task", {"inputs": {"crop_length": 0}, "outputs": {}}), {}),

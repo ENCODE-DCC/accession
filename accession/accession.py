@@ -1774,6 +1774,15 @@ class AccessionAtacChip(Accession):
             return {"output_type": "conservative IDR thresholded peaks"}
         return {}
 
+    def maybe_preferred_default_bigwig(self, file: File) -> Dict[str, bool]:
+        task_name = file.get_task().task_name
+        if self.get_number_of_replicates() == 1 and task_name == "macs2_signal_track":
+            return {"preferred_default": True}
+        elif task_name == "macs2_signal_track_pooled":
+            return {"preferred_default": True}
+        else:
+            return {}
+
 
 class AccessionChip(AccessionAtacChip):
     QC_MAP = {
