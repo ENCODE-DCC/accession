@@ -246,7 +246,6 @@ def test_encode_file_from_template(encode_common_metadata):
         "lab": "/labs/lab/",
         "md5sum": "456",
         "output_type": "reads",
-        "status": "uploading",
         "step_run": "step_run_id",
         "submitted_file_name": "baz",
     }
@@ -413,6 +412,21 @@ def test_encode_quality_metric_get_portal_object(payload):
 def test_encode_step_run_init():
     run = EncodeStepRun({"@id": "1", "name": "foo"})
     assert run.at_id == "1"
+
+
+def test_encode_step_run_get_portal_object(encode_common_metadata):
+    result = EncodeStepRun.get_portal_object(
+        aliases=["foo"],
+        step_version="/analysis-step-versions/1-0/",
+        common_metadata=encode_common_metadata,
+    )
+    assert result == {
+        "_profile": "analysis_step_runs",
+        "aliases": ["foo"],
+        "analysis_step_version": "/analysis-step-versions/1-0/",
+        "award": "award",
+        "lab": "/labs/lab/",
+    }
 
 
 def test_encode_document_get_portal_object(mocker, encode_document):

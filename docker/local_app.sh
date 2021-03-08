@@ -1,8 +1,8 @@
 #!/bin/bash
-bin/dev-servers development.ini --app-name app --clear --init --load &
+dev-servers development.ini --app-name app --clear --init --load &
 PID_1=$!
 sleep 10
-bin/pserve development.ini &
+pserve development.ini &
 PID_2=$!
 
 # See https://docs.docker.com/config/containers/multi-service_container/
