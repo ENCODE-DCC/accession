@@ -29,6 +29,7 @@
   }] + (if is_atac then [] else [BedBigwigDerivedFromFiles(is_atac, ignore_pooled_peak_for_clarity)[1]]),
   local BigwigWdlFiles(is_atac=false) = [
     {
+      callbacks: ['maybe_preferred_default_bigwig'],
       derived_from_files: BedBigwigDerivedFromFiles(is_atac),
       file_format: 'bigWig',
       filekey: 'pval_bw',
