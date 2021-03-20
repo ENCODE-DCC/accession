@@ -86,6 +86,7 @@
           "file_format": "bed",
           "file_format_type": "bed9+",
           "filekey": "cpg_bed_no_header",
+          "maybe_preferred_default": true,
           "output_type": "methylation state at CpG",
           "quality_metrics": [
             "cpg_correlation"
@@ -105,6 +106,7 @@
           ],
           "file_format": "bigWig",
           "filekey": "plus_strand_bw",
+          "maybe_preferred_default": true,
           "output_type": "plus strand methylation state at CpG"
         },
         {
@@ -121,6 +123,7 @@
           ],
           "file_format": "bigWig",
           "filekey": "minus_strand_bw",
+          "maybe_preferred_default": true,
           "output_type": "minus strand methylation state at CpG"
         }
       ],
@@ -145,6 +148,7 @@
           "file_format": "bigBed",
           "file_format_type": "bed9+",
           "filekey": "cpg_bb",
+          "maybe_preferred_default": true,
           "output_type": "methylation state at CpG"
         }
       ],

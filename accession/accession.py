@@ -41,7 +41,13 @@ from accession.encode_models import (
     EncodeStepRun,
 )
 from accession.file import File, GSFile
-from accession.helpers import LruCache, flatten, impersonate_file, string_to_number
+from accession.helpers import (
+    LruCache,
+    PreferredDefaultFilePatch,
+    flatten,
+    impersonate_file,
+    string_to_number,
+)
 from accession.logger_factory import logger_factory
 from accession.metadata import Metadata, metadata_factory
 from accession.preflight import MatchingMd5Record, PreflightHelper
@@ -80,6 +86,7 @@ class Accession(ABC):
         self.private_filenames = private_filenames
         # keys are hex md5sums, values are lists of portal objects
         self.search_cache: LruCache[str, List[Dict[str, Any]]] = LruCache()
+        self.preferred_default_file_patches: Dict[str, PreferredDefaultFilePatch] = {}
         self._logger: Optional[logging.Logger] = None
         self._experiment: Optional[EncodeExperiment] = None
         self._preflight_helper: Optional[PreflightHelper] = None
@@ -163,6 +170,37 @@ class Accession(ABC):
             experiment_obj = self.conn.get(encode_file.dataset, frame="embedded")
             self._experiment = EncodeExperiment(experiment_obj)
         return self._experiment
+
+    def preferred_default_should_be_updated(
+        self, qc_value: Union[int, float], current_best_qc_value: Union[int, float]
+    ) -> Optional[Union[int, float]]:
+        """
+        Should return a value if the current file is has a qc value that is "better"
+        than the current best file, otherwise should return None. Should only be called
+        when the template specifies `maybe_preferred_default` for the file params, it is
+        an error to call this from an `Accession` subclass that doesn't override this
+        method. However, overriding is not strictly required since subclasses may
+        compute `preferred_default` differently, hence it is not an `abstractmethod`.
+        """
+        raise NotImplementedError(
+            (
+                "Subclasses using steps containing `maybe_preferred_default` must "
+                "implement `preferred_default_should_be_updated`"
+            )
+        )
+
+    def get_preferred_default_qc_value(self, file: File) -> Union[int, float]:
+        """
+        Returns the QC value to judge whether or not the given file should be
+        `preferred_default`. Similar reasoning as `preferred_default_should_be_updated`
+        applies here regarding this not being an `abstractmethod`.
+        """
+        raise NotImplementedError(
+            (
+                "Subclasses using steps containing `maybe_preferred_default` must "
+                "implement `get_preferred_default_qc_value`"
+            )
+        )
 
     def get_all_encode_files_matching_md5_of_blob(
         self, file: File
@@ -729,6 +767,39 @@ class Accession(ABC):
         payload = self.experiment.get_patchable_analysis_object(analysis_object.at_id)
         self.conn.patch(payload, extend_array_values=True)
 
+    def maybe_update_preferred_default_file_patches(
+        self, file_params: FileParams, encode_file: EncodeFile, file: File
+    ) -> None:
+        """
+        Checks if the current file should be the `preferred_default` and if adds it to
+        the queue of patches to apply, displacing the file (if any) in the queue with
+        the same `file_format`/`file_format_type` combination.
+        """
+        hash_key = f"{file_params.file_format}{file_params.file_format_type or ''}"
+        preferred_default_patch = self.preferred_default_file_patches.get(hash_key)
+        current_best_qc_value = (
+            None
+            if preferred_default_patch is None
+            else preferred_default_patch.qc_value
+        )
+        qc_value = self.get_preferred_default_qc_value(file)
+        if current_best_qc_value is None or self.preferred_default_should_be_updated(
+            qc_value, current_best_qc_value
+        ):
+            self.preferred_default_file_patches[hash_key] = PreferredDefaultFilePatch(
+                at_id=encode_file.at_id, qc_value=qc_value
+            )
+
+    def patch_preferred_default_files(self) -> None:
+        """
+        Patches the files that should be `preferred_default`
+        """
+        for (
+            preferred_default_file_patch
+        ) in self.preferred_default_file_patches.values():
+            payload = preferred_default_file_patch.get_portal_patch()
+            self.conn.patch(payload)
+
     def accession_step(
         self, single_step_params: AccessionStep, dry_run: bool = False
     ) -> Union[List[Optional[MatchingMd5Record]], List[EncodeFile], None]:
@@ -772,6 +843,10 @@ class Accession(ABC):
                             )
                             raise e
 
+                    if file_params.maybe_preferred_default:
+                        self.maybe_update_preferred_default_file_patches(
+                            file_params, encode_file, wdl_file
+                        )
                     for qc in file_params.quality_metrics:
                         qc_method = getattr(self, type(self).QC_MAP[qc])  # type: ignore
                         qc_method(encode_file, wdl_file)
@@ -845,6 +920,7 @@ class Accession(ABC):
 
         for step in self.steps.content:
             self.accession_step(step)
+        self.patch_preferred_default_files()
         self.post_qcs()
         analysis = self.post_analysis()
         for encode_file, file in self.upload_queue:
@@ -2317,6 +2393,17 @@ class AccessionWgbs(Accession):
             experiment_obj = self.conn.get(encode_file.dataset, frame="embedded")
             self._experiment = EncodeExperiment(experiment_obj)
         return self._experiment
+
+    def preferred_default_should_be_updated(
+        self, qc_value: Union[int, float], current_best_qc_value: Union[int, float]
+    ) -> Optional[Union[int, float]]:
+        return qc_value > current_best_qc_value
+
+    def get_preferred_default_qc_value(self, file: File) -> Union[int, float]:
+        gembs_map_qc = self.analysis.search_down(
+            file.get_task(), "qc_report", "portal_map_qc_json"
+        )[0].read_json()
+        return gembs_map_qc["average_coverage"]
 
     def make_gembs_alignment_qc(self, encode_file: EncodeFile, file: File) -> None:
         """

@@ -29,7 +29,7 @@ repos:
         args: [--severity=warning]
 
   - repo: https://github.com/p-sud/pre-commit-jsonnetfmt
-    rev: master
+    rev: 65329077c05ce8429350266ee4ae4101f3aaded8
     hooks:
       - id: jsonnetfmt
 
