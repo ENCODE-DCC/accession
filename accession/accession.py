@@ -171,36 +171,23 @@ class Accession(ABC):
             self._experiment = EncodeExperiment(experiment_obj)
         return self._experiment
 
+    @abstractmethod
     def preferred_default_should_be_updated(
         self, qc_value: Union[int, float], current_best_qc_value: Union[int, float]
     ) -> Optional[Union[int, float]]:
         """
         Should return a value if the current file is has a qc value that is "better"
-        than the current best file, otherwise should return None. Should only be called
-        when the template specifies `maybe_preferred_default` for the file params, it is
-        an error to call this from an `Accession` subclass that doesn't override this
-        method. However, overriding is not strictly required since subclasses may
-        compute `preferred_default` differently, hence it is not an `abstractmethod`.
+        than the current best file, otherwise should return None.
         """
-        raise NotImplementedError(
-            (
-                "Subclasses using steps containing `maybe_preferred_default` must "
-                "implement `preferred_default_should_be_updated`"
-            )
-        )
+        raise NotImplementedError
 
+    @abstractmethod
     def get_preferred_default_qc_value(self, file: File) -> Union[int, float]:
         """
         Returns the QC value to judge whether or not the given file should be
-        `preferred_default`. Similar reasoning as `preferred_default_should_be_updated`
-        applies here regarding this not being an `abstractmethod`.
+        `preferred_default`.
         """
-        raise NotImplementedError(
-            (
-                "Subclasses using steps containing `maybe_preferred_default` must "
-                "implement `get_preferred_default_qc_value`"
-            )
-        )
+        raise NotImplementedError
 
     def get_all_encode_files_matching_md5_of_blob(
         self, file: File
@@ -930,6 +917,24 @@ class Accession(ABC):
 
 
 class AccessionGenericRna(Accession):
+    def maybe_update_preferred_default_file_patches(
+        self, file_params: FileParams, encode_file: EncodeFile, file: File
+    ) -> None:
+        """
+        Dummy implementation since we don't have preferred_default specs for different
+        RNA pipelines yet.
+        """
+        return super().maybe_update_preferred_default_file_patches(
+            file_params, encode_file, file
+        )
+
+    def get_preferred_default_qc_value(self, file: File) -> Union[int, float]:
+        """
+        Dummy implementation since we don't have preferred_default specs for different
+        RNA pipelines yet.
+        """
+        return super().get_preferred_default_qc_value(file)
+
     def make_generic_correlation_qc(
         self,
         encode_file: EncodeFile,
@@ -1183,6 +1188,22 @@ class AccessionDnase(Accession):
     def assembly(self) -> str:
         filekey = "references.nuclear_chroms_gz"
         return self.find_portal_property_from_filekey(filekey, EncodeFile.ASSEMBLY)
+
+    def maybe_update_preferred_default_file_patches(
+        self, file_params: FileParams, encode_file: EncodeFile, file: File
+    ) -> None:
+        """
+        Dummy implementation since we don't have preferred_default specs for DNAse yet.
+        """
+        return super().maybe_update_preferred_default_file_patches(
+            file_params, encode_file, file
+        )
+
+    def get_preferred_default_qc_value(self, file: File) -> Union[int, float]:
+        """
+        Dummy implementation since we don't have preferred_default specs for DNAse yet.
+        """
+        return super().get_preferred_default_qc_value(file)
 
     def parse_dict_from_bytes(
         self, qc_bytes: bytes, parser: Callable[[str], Dict[str, Any]]
@@ -1598,6 +1619,22 @@ class AccessionDnaseStarchFromBam(Accession):
         filekey = "hotspot2_tar_gz"
         return self.find_portal_property_from_filekey(filekey, EncodeFile.ASSEMBLY)
 
+    def maybe_update_preferred_default_file_patches(
+        self, file_params: FileParams, encode_file: EncodeFile, file: File
+    ) -> None:
+        """
+        Dummy implementation since we don't have preferred_default specs for dnase yet.
+        """
+        return super().maybe_update_preferred_default_file_patches(
+            file_params, encode_file, file
+        )
+
+    def get_preferred_default_qc_value(self, file: File) -> Union[int, float]:
+        """
+        Dummy implementation since we don't have preferred_default specs for dnase yet.
+        """
+        return super().get_preferred_default_qc_value(file)
+
     def post_analysis(self) -> EncodeGenericObject:
         """
         For these hacky runs we need to patch into the existing Analysis objects.
@@ -1762,6 +1799,24 @@ class AccessionAtacChip(Accession):
         qc = self.analysis.get_files("qc_json")[0].read_json()
         version = qc["general"]["pipeline_ver"].lstrip("v")
         return version
+
+    def maybe_update_preferred_default_file_patches(
+        self, file_params: FileParams, encode_file: EncodeFile, file: File
+    ) -> None:
+        """
+        Dummy implementation since ATAC/ChIP have their own mechanism to compute
+        preferred_defaults.
+        """
+        return super().maybe_update_preferred_default_file_patches(
+            file_params, encode_file, file
+        )
+
+    def get_preferred_default_qc_value(self, file: File) -> Union[int, float]:
+        """
+        Dummy implementation since ATAC/ChIP have their own mechanism to compute
+        preferred_defaults.
+        """
+        return super().get_preferred_default_qc_value(file)
 
     def get_atac_chip_pipeline_replicate(self, file: File) -> str:
         """
