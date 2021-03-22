@@ -4,7 +4,6 @@ from typing import Dict, List
 
 import pytest
 from pytest_mock import MockerFixture
-from pytest_mock.plugin import MockFixture
 from requests import Response
 
 from accession.accession import (
@@ -544,7 +543,7 @@ def test_accession_patch_preferred_default_files_no_files_to_patch(
     mock_accession.conn.patch.assert_not_called()
 
 
-def test_accession_steps_dry_run(mocker: MockFixture, mock_accession: Accession):
+def test_accession_steps_dry_run(mocker: MockerFixture, mock_accession: Accession):
     task_name = "my_task"
     file_name = "gs://bam/a.bam"
     filekey = "bam"

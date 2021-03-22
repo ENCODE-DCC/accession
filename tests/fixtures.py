@@ -12,7 +12,7 @@ import encode_utils as eu
 import pytest
 import requests
 from encode_utils.connection import Connection
-from pytest_mock.plugin import MockFixture
+from pytest_mock.plugin import MockerFixture
 from WDL import parse_document
 
 import docker
@@ -157,7 +157,7 @@ def metadata_json_path() -> Path:
 
 @pytest.fixture
 def normal_analysis(
-    mock_gc_backend: MockFixture, metadata_json_path: Path
+    mock_gc_backend, metadata_json_path: Path
 ) -> Analysis:  # noqa: F811
     normal_analysis = Analysis(
         FileMetadata(metadata_json_path), backend=mock_gc_backend
@@ -339,7 +339,7 @@ def mock_accession_gc_backend(mocker):
 
 @pytest.fixture
 def accessioner_factory(
-    mocker: MockFixture,
+    mocker: MockerFixture,
     mock_accession_gc_backend,
     local_encoded_server: str,
     environ_api_credentials: None,
@@ -403,7 +403,7 @@ def mock_accession_steps():
 
 @pytest.fixture
 def mock_accession(
-    mocker: MockFixture,
+    mocker: MockerFixture,
     mock_accession_gc_backend,
     mock_metadata,
     mock_accession_steps: MockAccessionSteps,
@@ -474,7 +474,7 @@ def mock_accession_not_patched(
 
 @pytest.fixture
 def mock_accession_chip(
-    mocker: MockFixture,
+    mocker: MockerFixture,
     mock_accession_gc_backend,
     mock_metadata,
     mock_accession_steps: MockAccessionSteps,
@@ -521,7 +521,11 @@ def mock_accession_chip(
 
 @pytest.fixture
 def mock_accession_unreplicated(
-    mocker: MockFixture, mock_accession_gc_backend, mock_metadata, lab: str, award: str
+    mocker: MockerFixture,
+    mock_accession_gc_backend,
+    mock_metadata,
+    lab: str,
+    award: str,
 ) -> Accession:
     """
     Mocked accession instance with dummy __init__ that doesn't do anything and pre-baked
