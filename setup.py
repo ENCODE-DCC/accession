@@ -39,7 +39,7 @@ INSTALL_REQUIRES = [
 ]
 EXTRAS_REQUIRE = {
     "docs": ["sphinx"],
-    "tests": ["pytest", "pytest-cov", "pytest-mock==3.2.0", "docker"],
+    "tests": ["pytest", "pytest-cov", "pytest-mock>=3.3.0", "docker"],
 }
 EXTRAS_REQUIRE["dev"] = (
     EXTRAS_REQUIRE["docs"] + EXTRAS_REQUIRE["tests"] + ["pre-commit"]

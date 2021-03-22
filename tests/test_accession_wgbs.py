@@ -1,4 +1,5 @@
 import pytest
+from pytest_mock import MockerFixture
 
 from accession.accession import AccessionWgbs
 from accession.analysis import Analysis
@@ -44,7 +45,7 @@ def test_accession_wgbs_make_gembs_alignment_qc(
 
 
 def test_accession_wgbs_get_preferred_default_qc_value(
-    mocker, mock_accession_wgbs, gsfile
+    mocker: MockerFixture, mock_accession_wgbs, gsfile
 ):
     mocker.patch.object(gsfile, "read_json", return_value={"average_coverage": 30.0})
     result = mock_accession_wgbs.get_preferred_default_qc_value(gsfile)

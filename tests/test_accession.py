@@ -3,6 +3,7 @@ from contextlib import suppress as does_not_raise
 from typing import Dict, List
 
 import pytest
+from pytest_mock import MockerFixture
 from pytest_mock.plugin import MockFixture
 from requests import Response
 
@@ -455,7 +456,9 @@ def test_make_file_obj(mirna_accessioner):
     assert len(obj.get("derived_from")) == 3
 
 
-def test_accession_maybe_update_preferred_default_file_patches(mocker, mock_accession):
+def test_accession_maybe_update_preferred_default_file_patches(
+    mocker: MockerFixture, mock_accession
+):
     file_params = mocker.Mock(file_format="bed", file_format_type="bed9+")
     encode_file = EncodeFile({"@id": "/files/1/"})
     mocker.patch.object(
@@ -478,7 +481,7 @@ def test_accession_maybe_update_preferred_default_file_patches(mocker, mock_acce
 
 
 def test_accession_maybe_update_preferred_default_file_patches_no_file_with_hash(
-    mocker, mock_accession
+    mocker: MockerFixture, mock_accession
 ):
     file_params = mocker.Mock(file_format="bed", file_format_type="bed9+")
     encode_file = EncodeFile({"@id": "/files/1/"})
@@ -495,7 +498,7 @@ def test_accession_maybe_update_preferred_default_file_patches_no_file_with_hash
 
 
 def test_accession_maybe_update_preferred_default_file_patches_not_updated(
-    mocker, mock_accession
+    mocker: MockerFixture, mock_accession
 ):
     file_params = mocker.Mock(file_format="bed", file_format_type="bed9+")
     encode_file = EncodeFile({"@id": "/files/1/"})
@@ -516,6 +519,29 @@ def test_accession_maybe_update_preferred_default_file_patches_not_updated(
     assert mock_accession.preferred_default_file_patches[
         "bedbed9+"
     ] == PreferredDefaultFilePatch(at_id="foo", qc_value=3.0)
+
+
+def test_accession_patch_preferred_default_files(mocker: MockerFixture, mock_accession):
+    mocker.patch.object(mock_accession.conn, "patch")
+    mocker.patch.object(
+        mock_accession,
+        "preferred_default_file_patches",
+        {
+            "foo": PreferredDefaultFilePatch(at_id="foo", qc_value=3),
+            "bar": PreferredDefaultFilePatch(at_id="bar", qc_value=6),
+        },
+    )
+    mock_accession.patch_preferred_default_files()
+    assert mock_accession.conn.patch.call_count == 2
+
+
+def test_accession_patch_preferred_default_files_no_files_to_patch(
+    mocker: MockerFixture, mock_accession
+):
+    mocker.patch.object(mock_accession.conn, "patch")
+    mocker.patch.object(mock_accession, "preferred_default_file_patches", {})
+    mock_accession.patch_preferred_default_files()
+    mock_accession.conn.patch.assert_not_called()
 
 
 def test_accession_steps_dry_run(mocker: MockFixture, mock_accession: Accession):

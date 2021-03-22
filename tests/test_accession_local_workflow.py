@@ -23,6 +23,14 @@ class AccessionDummy(Accession):
     def genome_annotation(self):
         return "V19"
 
+    def get_preferred_default_qc_value(self, file):
+        return super().get_preferred_default_qc_value(file)
+
+    def preferred_default_should_be_updated(self, qc_value, current_best_qc_value):
+        return super().preferred_default_should_be_updated(
+            qc_value, current_best_qc_value
+        )
+
     def upload_file(self, *args, **kwargs):
         pass
 
