@@ -174,7 +174,7 @@ class Accession(ABC):
     @abstractmethod
     def preferred_default_should_be_updated(
         self, qc_value: Union[int, float], current_best_qc_value: Union[int, float]
-    ) -> Optional[Union[int, float]]:
+    ) -> bool:
         """
         Should return a value if the current file is has a qc value that is "better"
         than the current best file, otherwise should return None.
@@ -919,7 +919,7 @@ class Accession(ABC):
 class AccessionGenericRna(Accession):
     def preferred_default_should_be_updated(
         self, qc_value: Union[int, float], current_best_qc_value: Union[int, float]
-    ) -> Optional[Union[int, float]]:
+    ) -> bool:
         """
         Dummy implementation since we don't have preferred_default specs for different
         RNA pipelines yet.
@@ -1191,7 +1191,7 @@ class AccessionDnase(Accession):
 
     def preferred_default_should_be_updated(
         self, qc_value: Union[int, float], current_best_qc_value: Union[int, float]
-    ) -> Optional[Union[int, float]]:
+    ) -> bool:
         """
         Dummy implementation since we don't have preferred_default specs for DNAse yet.
         """
@@ -1621,7 +1621,7 @@ class AccessionDnaseStarchFromBam(Accession):
 
     def preferred_default_should_be_updated(
         self, qc_value: Union[int, float], current_best_qc_value: Union[int, float]
-    ) -> Optional[Union[int, float]]:
+    ) -> bool:
         """
         Dummy implementation since we don't have preferred_default specs for DNAse yet.
         """
@@ -1802,7 +1802,7 @@ class AccessionAtacChip(Accession):
 
     def preferred_default_should_be_updated(
         self, qc_value: Union[int, float], current_best_qc_value: Union[int, float]
-    ) -> Optional[Union[int, float]]:
+    ) -> bool:
         """
         Dummy implementation since ATAC/ChIP have their own mechanism to compute
         preferred_defaults.
@@ -2451,7 +2451,7 @@ class AccessionWgbs(Accession):
 
     def preferred_default_should_be_updated(
         self, qc_value: Union[int, float], current_best_qc_value: Union[int, float]
-    ) -> Optional[Union[int, float]]:
+    ) -> bool:
         return qc_value > current_best_qc_value
 
     def get_preferred_default_qc_value(self, file: File) -> Union[int, float]:
