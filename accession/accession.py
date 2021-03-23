@@ -2459,7 +2459,7 @@ class AccessionWgbs(Accession):
         gembs_map_qc = self.analysis.search_down(
             bam_file.get_task(), "qc_report", "portal_map_qc_json"
         )[0].read_json()
-        return gembs_map_qc["average_coverage"]
+        return gembs_map_qc["general_reads"]
 
     def make_gembs_alignment_qc(self, encode_file: EncodeFile, file: File) -> None:
         """
