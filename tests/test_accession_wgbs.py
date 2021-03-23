@@ -47,9 +47,14 @@ def test_accession_wgbs_make_gembs_alignment_qc(
 def test_accession_wgbs_get_preferred_default_qc_value(
     mocker: MockerFixture, mock_accession_wgbs, gsfile
 ):
-    mocker.patch.object(gsfile, "read_json", return_value={"average_coverage": 30.0})
+    mocker.patch.object(mock_accession_wgbs.analysis, "search_up")
+    mocker.patch.object(gsfile, "read_json", return_value={"general_reads": 30})
+    mocker.patch.object(
+        mock_accession_wgbs.analysis, "search_down", return_value=[gsfile]
+    )
     result = mock_accession_wgbs.get_preferred_default_qc_value(gsfile)
-    assert result == 30.0
+    mock_accession_wgbs.analysis.search_up.assert_called_once()
+    assert result == 30
 
 
 @pytest.mark.parametrize(

@@ -760,9 +760,9 @@ class Accession(ABC):
         """
         Checks if the current file should be the `preferred_default` and if adds it to
         the queue of patches to apply, displacing the file (if any) in the queue with
-        the same `file_format`/`file_format_type` combination.
+        the same `file_format`/`file_format_type`/`output_type` combination.
         """
-        hash_key = f"{file_params.file_format}{file_params.file_format_type or ''}"
+        hash_key = f"{file_params.file_format}{file_params.file_format_type or ''}{file_params.output_type}"
         preferred_default_patch = self.preferred_default_file_patches.get(hash_key)
         current_best_qc_value = (
             None

@@ -458,7 +458,9 @@ def test_make_file_obj(mirna_accessioner):
 def test_accession_maybe_update_preferred_default_file_patches(
     mocker: MockerFixture, mock_accession
 ):
-    file_params = mocker.Mock(file_format="bed", file_format_type="bed9+")
+    file_params = mocker.Mock(
+        file_format="bed", file_format_type="bed9+", output_type="foo"
+    )
     encode_file = EncodeFile({"@id": "/files/1/"})
     mocker.patch.object(
         mock_accession,
@@ -475,14 +477,16 @@ def test_accession_maybe_update_preferred_default_file_patches(
         file_params, encode_file, "fake_file"
     )
     assert mock_accession.preferred_default_file_patches[
-        "bedbed9+"
+        "bedbed9+foo"
     ] == PreferredDefaultFilePatch(at_id="/files/1/", qc_value=10.0)
 
 
 def test_accession_maybe_update_preferred_default_file_patches_no_file_with_hash(
     mocker: MockerFixture, mock_accession
 ):
-    file_params = mocker.Mock(file_format="bed", file_format_type="bed9+")
+    file_params = mocker.Mock(
+        file_format="bed", file_format_type="bed9+", output_type="foo"
+    )
     encode_file = EncodeFile({"@id": "/files/1/"})
     mocker.patch.object(mock_accession, "preferred_default_file_patches", {})
     mocker.patch.object(
@@ -492,7 +496,7 @@ def test_accession_maybe_update_preferred_default_file_patches_no_file_with_hash
         file_params, encode_file, "fake_file"
     )
     assert mock_accession.preferred_default_file_patches[
-        "bedbed9+"
+        "bedbed9+foo"
     ] == PreferredDefaultFilePatch(at_id="/files/1/", qc_value=10.0)
 
 
