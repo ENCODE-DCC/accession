@@ -2455,8 +2455,9 @@ class AccessionWgbs(Accession):
         return qc_value > current_best_qc_value
 
     def get_preferred_default_qc_value(self, file: File) -> Union[int, float]:
+        bam_file = self.analysis.search_up(file.get_task(), "map", "bam")[0]
         gembs_map_qc = self.analysis.search_down(
-            file.get_task(), "qc_report", "portal_map_qc_json"
+            bam_file.get_task(), "qc_report", "portal_map_qc_json"
         )[0].read_json()
         return gembs_map_qc["average_coverage"]
 
