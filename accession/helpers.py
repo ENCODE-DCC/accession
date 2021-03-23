@@ -2,11 +2,14 @@ import os
 import tempfile
 from collections import OrderedDict
 from contextlib import contextmanager
-from typing import Any, Generic, Iterator, List, Optional, TypeVar, Union
+from typing import Any, Dict, Generic, Iterator, List, Optional, TypeVar, Union
+
+from encode_utils.connection import Connection
 
 K = TypeVar("K")
 V = TypeVar("V")
 T = TypeVar("T")
+U = TypeVar("U", bound="PreferredDefaultFilePatch")
 
 
 class LruCache(Generic[K, V]):
@@ -53,6 +56,24 @@ class LruCache(Generic[K, V]):
         """
         if key in self.data.keys():
             del self.data[key]
+
+
+class PreferredDefaultFilePatch:
+    PROFILE_KEY = "file"
+
+    def __init__(self, at_id: str, qc_value: Union[int, float]) -> None:
+        self.at_id = at_id
+        self.qc_value = qc_value
+
+    def __eq__(self, other: "U") -> bool:  # type: ignore[override]
+        return all((self.at_id == other.at_id, self.qc_value == other.qc_value))
+
+    def get_portal_patch(self) -> Dict[str, Union[str, bool]]:
+        return {
+            "preferred_default": True,
+            Connection.PROFILE_KEY: self.PROFILE_KEY,
+            Connection.ENCID_KEY: self.at_id,
+        }
 
 
 def string_to_number(string: str) -> Union[float, str, int]:

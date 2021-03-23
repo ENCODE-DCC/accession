@@ -74,16 +74,19 @@
               quality_metrics: [
                 'cpg_correlation',
               ],
+              maybe_preferred_default: true,
             },
             {
               file_format: 'bigWig',
               filekey: 'plus_strand_bw',
               output_type: 'plus strand methylation state at CpG',
+              maybe_preferred_default: true,
             },
             {
               file_format: 'bigWig',
               filekey: 'minus_strand_bw',
               output_type: 'minus strand methylation state at CpG',
+              maybe_preferred_default: true,
             },
           ]
         ],
@@ -105,6 +108,7 @@
             file_format_type: 'bed9+',
             filekey: 'cpg_bb',
             output_type: 'methylation state at CpG',
+            maybe_preferred_default: true,
           },
         ],
         wdl_task_name: 'extract',

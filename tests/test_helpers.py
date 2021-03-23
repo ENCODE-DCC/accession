@@ -1,4 +1,10 @@
-from accession.helpers import LruCache, flatten, impersonate_file, string_to_number
+from accession.helpers import (
+    LruCache,
+    PreferredDefaultFilePatch,
+    flatten,
+    impersonate_file,
+    string_to_number,
+)
 
 
 def test_lru_cache_get_has_key_should_reorder():
@@ -46,6 +52,30 @@ def test_lru_cache_invalidate_key_not_in_cache_does_not_raise():
     cache.insert("foo", "bar")
     cache.invalidate("baz")
     assert "foo" in cache.data.keys()
+
+
+def test_preferred_default_file_patch_eq():
+    patch1 = PreferredDefaultFilePatch(at_id="foo", qc_value=3)
+    patch2 = PreferredDefaultFilePatch(at_id="foo", qc_value=3)
+    assert patch1 == patch2
+
+
+def test_preferred_default_file_patch_eq_not_equal_when_at_ids_different():
+    patch1 = PreferredDefaultFilePatch(at_id="foo", qc_value=3.0)
+    patch2 = PreferredDefaultFilePatch(at_id="bar", qc_value=3.0)
+    assert patch1 != patch2
+
+
+def test_preferred_default_file_patch_eq_not_equal_when_qc_values_different():
+    patch1 = PreferredDefaultFilePatch(at_id="foo", qc_value=3.0)
+    patch2 = PreferredDefaultFilePatch(at_id="foo", qc_value=4.0)
+    assert patch1 != patch2
+
+
+def test_preferred_default_file_patch_get_portal_patch():
+    patch = PreferredDefaultFilePatch(at_id="foo", qc_value=3)
+    result = patch.get_portal_patch()
+    assert result == {"_profile": "file", "_enc_id": "foo", "preferred_default": True}
 
 
 def test_string_to_number_not_string_return_input():

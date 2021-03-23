@@ -4,7 +4,6 @@ from unittest.mock import PropertyMock
 
 import pytest
 import requests
-from pytest_mock.plugin import MockFixture
 
 from accession.analysis import Analysis
 from accession.encode_models import EncodeExperiment
@@ -17,7 +16,7 @@ def mock_queue_qc(qc, *args, **kwargs):
 
 @pytest.fixture
 def mirna_replicated_analysis(
-    mock_accession_gc_backend: MockFixture, mirna_replicated_metadata_path: str
+    mock_accession_gc_backend, mirna_replicated_metadata_path: str
 ) -> Analysis:  # noqa: F811
     analysis = Analysis(
         FileMetadata(mirna_replicated_metadata_path), backend=mock_accession_gc_backend
