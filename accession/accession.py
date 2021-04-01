@@ -918,7 +918,7 @@ class Accession(ABC):
 
 class AccessionGenericRna(Accession):
     def preferred_default_should_be_updated(
-        self, qc_value: Union[int, float], current_best_qc_value: Union[int, float]
+        self, qc_value: Union[float, int], current_best_qc_value: Union[float, int]
     ) -> bool:
         """
         Dummy implementation since we don't have preferred_default specs for different
@@ -928,7 +928,7 @@ class AccessionGenericRna(Accession):
             qc_value, current_best_qc_value
         )
 
-    def get_preferred_default_qc_value(self, file: File) -> Union[int, float]:
+    def get_preferred_default_qc_value(self, file: File) -> Union[float, int]:
         """
         Dummy implementation since we don't have preferred_default specs for different
         RNA pipelines yet.
@@ -996,6 +996,17 @@ class AccessionBulkRna(AccessionGenericRna):
         return self.find_portal_property_from_filekey(
             filekey, EncodeFile.GENOME_ANNOTATION
         )
+
+    def preferred_default_should_be_updated(
+        self, qc_value: Union[float, int], current_best_qc_value: Union[float, int]
+    ) -> bool:
+        return qc_value > current_best_qc_value
+
+    def get_preferred_default_qc_value(self, file: File) -> Union[float, int]:
+        mapping_qc_file = self.analysis.search_up(file.get_task(), "align", "log_json")[
+            0
+        ].read_json()
+        return int(mapping_qc_file["star_log_qc"]["Uniquely mapped reads number"])
 
     def make_star_mapping_qc(self, encode_bam_file: EncodeFile, file: File) -> None:
         if encode_bam_file.has_qc("StarQualityMetric"):  # actual name of the object
