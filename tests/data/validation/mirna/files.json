@@ -313,9 +313,6 @@
     "output_category": "signal",
     "output_type": "minus strand signal of unique reads",
     "quality_metrics": [],
-    "replicate_libraries": [
-      "/libraries/ENCLB515LXI/"
-    ],
     "s3_uri": "s3://encode-public/2019/09/16/132adfb0-778e-4fd5-b1c7-36f4094af6f1/ENCFF525NSB.bigWig",
     "schema_version": "15",
     "status": "released",
@@ -667,9 +664,6 @@
     "output_category": "signal",
     "output_type": "plus strand signal of unique reads",
     "quality_metrics": [],
-    "replicate_libraries": [
-      "/libraries/ENCLB515LXI/"
-    ],
     "s3_uri": "s3://encode-public/2019/09/16/835b76d0-0ed0-483c-842b-f45f684bd199/ENCFF605MAA.bigWig",
     "schema_version": "15",
     "status": "released",
@@ -1021,9 +1015,6 @@
     "output_category": "signal",
     "output_type": "minus strand signal of all reads",
     "quality_metrics": [],
-    "replicate_libraries": [
-      "/libraries/ENCLB515LXI/"
-    ],
     "s3_uri": "s3://encode-public/2019/09/16/1439b390-797a-4e6a-8a58-dbacd7a8ab15/ENCFF440MCZ.bigWig",
     "schema_version": "15",
     "status": "released",
@@ -1375,9 +1366,6 @@
     "output_category": "signal",
     "output_type": "plus strand signal of all reads",
     "quality_metrics": [],
-    "replicate_libraries": [
-      "/libraries/ENCLB515LXI/"
-    ],
     "s3_uri": "s3://encode-public/2019/09/16/da29d1c5-7138-443e-ac0d-69d542bcf45d/ENCFF895PMT.bigWig",
     "schema_version": "15",
     "status": "released",
@@ -1729,9 +1717,6 @@
     "output_category": "signal",
     "output_type": "minus strand signal of unique reads",
     "quality_metrics": [],
-    "replicate_libraries": [
-      "/libraries/ENCLB794GIJ/"
-    ],
     "s3_uri": "s3://encode-public/2019/09/16/0bff5dd6-3d82-4189-9e0e-be285e4fb41c/ENCFF603TYA.bigWig",
     "schema_version": "15",
     "status": "released",
@@ -2083,9 +2068,6 @@
     "output_category": "signal",
     "output_type": "plus strand signal of unique reads",
     "quality_metrics": [],
-    "replicate_libraries": [
-      "/libraries/ENCLB794GIJ/"
-    ],
     "s3_uri": "s3://encode-public/2019/09/16/e21af8ad-721a-4fe8-8a48-dded535fad5d/ENCFF527GCC.bigWig",
     "schema_version": "15",
     "status": "released",
@@ -2437,9 +2419,6 @@
     "output_category": "signal",
     "output_type": "minus strand signal of all reads",
     "quality_metrics": [],
-    "replicate_libraries": [
-      "/libraries/ENCLB794GIJ/"
-    ],
     "s3_uri": "s3://encode-public/2019/09/16/73a6b7eb-8453-4caa-82f4-1bc7b9527e1b/ENCFF206IQT.bigWig",
     "schema_version": "15",
     "status": "released",
@@ -2791,9 +2770,6 @@
     "output_category": "signal",
     "output_type": "plus strand signal of all reads",
     "quality_metrics": [],
-    "replicate_libraries": [
-      "/libraries/ENCLB794GIJ/"
-    ],
     "s3_uri": "s3://encode-public/2019/09/16/806c5001-51c3-4c74-bbc6-df8d970e8fc5/ENCFF763ZUV.bigWig",
     "schema_version": "15",
     "status": "released",
@@ -3198,9 +3174,6 @@
         "submitted_by": "/users/473a72c0-6f20-4f81-9093-198e92fee470/",
         "uuid": "13f73e2c-c7cc-4dfb-b752-71832d5f4e45"
       }
-    ],
-    "replicate_libraries": [
-      "/libraries/ENCLB515LXI/"
     ],
     "s3_uri": "s3://encode-public/2019/09/16/5e4246d6-c7dd-44a2-80fd-b1da543cfa8c/ENCFF398EBM.tsv",
     "schema_version": "15",
@@ -3632,9 +3605,6 @@
         "uuid": "fbda3cc7-cf26-4223-905d-5be339456215"
       }
     ],
-    "replicate_libraries": [
-      "/libraries/ENCLB515LXI/"
-    ],
     "s3_uri": "s3://encode-public/2019/09/16/a1a93ac5-4a0c-4017-8b42-b4d3fe40f881/ENCFF924ETV.bam",
     "schema_version": "15",
     "status": "released",
@@ -4039,9 +4009,6 @@
         "submitted_by": "/users/473a72c0-6f20-4f81-9093-198e92fee470/",
         "uuid": "6cfac6cf-5024-4fd7-913e-8509b636d2d6"
       }
-    ],
-    "replicate_libraries": [
-      "/libraries/ENCLB794GIJ/"
     ],
     "s3_uri": "s3://encode-public/2019/09/16/9909aa33-2e91-4cda-9ef5-9164cc9071ca/ENCFF065GME.tsv",
     "schema_version": "15",
@@ -4473,9 +4440,6 @@
         "uuid": "1d842ebf-e04e-4269-a585-2c0ab207bac7"
       }
     ],
-    "replicate_libraries": [
-      "/libraries/ENCLB794GIJ/"
-    ],
     "s3_uri": "s3://encode-public/2019/09/16/b541a0da-d1a7-455d-82bb-56eb40cb7e43/ENCFF590YAX.bam",
     "schema_version": "15",
     "status": "released",
@@ -4555,9 +4519,6 @@
     "read_length": 50,
     "read_length_units": "nt",
     "replicate": "/replicates/2feea5c3-cf4b-1234-b73b-0202f00b631f/",
-    "replicate_libraries": [
-      "/libraries/ENCLB794GIJ/"
-    ],
     "run_type": "single-ended",
     "schema_version": "15",
     "status": "released",
@@ -4599,7 +4560,6 @@
     "output_category": "reference",
     "output_type": "genome index",
     "quality_metrics": [],
-    "replicate_libraries": [],
     "schema_version": "15",
     "status": "released",
     "submitted_by": "/users/df9f3c8e-b819-4885-8f16-08f6ef1231e8/",
@@ -4638,7 +4598,6 @@
     "output_category": "reference",
     "output_type": "genome reference",
     "quality_metrics": [],
-    "replicate_libraries": [],
     "schema_version": "15",
     "status": "released",
     "submitted_by": "/users/df9f3c8e-b819-4885-8f16-08f6ef1231e8/",
@@ -4690,9 +4649,6 @@
     "read_length": 50,
     "read_length_units": "nt",
     "replicate": "/replicates/4fccc5c3-cf4b-4420-b73b-0202f12b631f/",
-    "replicate_libraries": [
-      "/libraries/ENCLB515LXI/"
-    ],
     "run_type": "single-ended",
     "schema_version": "15",
     "status": "released",
@@ -5102,9 +5058,6 @@
         "uuid": "0bee78a7-b41a-43bd-847f-520bf5be8b87"
       }
     ],
-    "replicate_libraries": [
-      "/libraries/ENCLB242IQX/"
-    ],
     "s3_uri": "s3://encode-public/2019/09/16/e239c05c-99e3-4471-816a-07691ee2df19/ENCFF230QSC.bam",
     "schema_version": "15",
     "status": "released",
@@ -5478,9 +5431,6 @@
     "output_category": "signal",
     "output_type": "minus strand signal of all reads",
     "quality_metrics": [],
-    "replicate_libraries": [
-      "/libraries/ENCLB242IQX/"
-    ],
     "s3_uri": "s3://encode-public/2019/09/16/dd278b8a-3209-45d8-9161-2484952a704d/ENCFF894KUA.bigWig",
     "schema_version": "15",
     "status": "released",
@@ -5854,9 +5804,6 @@
     "output_category": "signal",
     "output_type": "plus strand signal of all reads",
     "quality_metrics": [],
-    "replicate_libraries": [
-      "/libraries/ENCLB242IQX/"
-    ],
     "s3_uri": "s3://encode-public/2019/09/16/e2639d2a-f492-4262-a1be-d0a996914f97/ENCFF178QFM.bigWig",
     "schema_version": "15",
     "status": "released",
@@ -6230,9 +6177,6 @@
     "output_category": "signal",
     "output_type": "plus strand signal of unique reads",
     "quality_metrics": [],
-    "replicate_libraries": [
-      "/libraries/ENCLB242IQX/"
-    ],
     "s3_uri": "s3://encode-public/2019/09/16/a71a4703-a59c-4dc7-b576-c329fb9f15c5/ENCFF413TVF.bigWig",
     "schema_version": "15",
     "status": "released",
@@ -6621,9 +6565,6 @@
         "uuid": "8e280018-7af0-4bac-b723-8adfdaa1f16c"
       }
     ],
-    "replicate_libraries": [
-      "/libraries/ENCLB242IQX/"
-    ],
     "s3_uri": "s3://encode-public/2019/09/16/0f319977-18c4-4444-8e72-da4ce7a3c374/ENCFF385QYX.tsv",
     "schema_version": "15",
     "status": "released",
@@ -6997,9 +6938,6 @@
     "output_category": "signal",
     "output_type": "minus strand signal of unique reads",
     "quality_metrics": [],
-    "replicate_libraries": [
-      "/libraries/ENCLB242IQX/"
-    ],
     "s3_uri": "s3://encode-public/2019/09/16/deeb143e-7dd4-494c-b7a1-3bd9b9fdac7a/ENCFF269MMV.bigWig",
     "schema_version": "15",
     "status": "released",
@@ -7077,7 +7015,6 @@
     "output_category": "reference",
     "output_type": "genome reference",
     "quality_metrics": [],
-    "replicate_libraries": [],
     "s3_uri": "s3://encode-public/2019/06/11/abf4548d-7834-4a84-8f9f-4a389b3d93b9/ENCFF470CZH.gtf.gz",
     "schema_version": "15",
     "status": "released",
@@ -7147,9 +7084,6 @@
     "read_length": 50,
     "read_length_units": "nt",
     "replicate": "/replicates/5a7a2e68-2b4e-459e-b554-204dbb1917b6/",
-    "replicate_libraries": [
-      "/libraries/ENCLB242IQX/"
-    ],
     "run_type": "single-ended",
     "s3_uri": "s3://encode-public/2017/01/31/5392551f-7bf3-4544-9460-81ac06297868/ENCFF096DFL.fastq.gz",
     "schema_version": "15",
@@ -7201,7 +7135,6 @@
     "output_category": "reference",
     "output_type": "genome index",
     "quality_metrics": [],
-    "replicate_libraries": [],
     "s3_uri": "s3://encode-public/2019/06/13/ae42d477-4dd7-47d4-9433-e7b4707bcc59/ENCFF123QLG.tar.gz",
     "schema_version": "15",
     "status": "released",
