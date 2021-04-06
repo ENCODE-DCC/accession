@@ -6,7 +6,7 @@ from typing import Dict, Optional
 
 import attr
 import google.auth
-from google.api_core.exceptions import GoogleAPICallError, NotFound, RetryError
+from google.api_core.exceptions import GoogleAPICallError, RetryError
 from google.cloud import tasks_v2
 from typing_extensions import TypedDict
 
@@ -190,12 +190,13 @@ class CloudTasksUploadClient:
     def validate_queue_info(self) -> None:
         try:
             self.client.get_queue(self.get_queue_path())
-        except NotFound as e:
+        except Exception as e:
             raise ValueError(
                 (
                     "Cloud tasks queue is invalid, check that the values of "
                     f"{QUEUE_NAME_ENVIRONMENT_VARIABLE} and "
-                    f"{QUEUE_REGION_ENVIRONMENT_VARIABLE} are correct"
+                    f"{QUEUE_REGION_ENVIRONMENT_VARIABLE} are correct. For valid "
+                    "regions see https://cloud.google.com/about/locations#region"
                 )
             ) from e
 
