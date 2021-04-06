@@ -1,5 +1,5 @@
 import pytest
-from google.api_core.exceptions import GoogleAPICallError, RetryError
+from google.api_core.exceptions import GoogleAPICallError, NotFound, RetryError
 
 from accession.cloud_tasks import (
     AwsCredentials,
@@ -49,6 +49,24 @@ def cloud_tasks_upload_client(mocker):
         QueueInfo(region="us-west1", name="queue"), no_log_file=True
     )
     return client
+
+
+def test_queue_info_from_env(mocker):
+    mocker.patch.dict(
+        "os.environ",
+        {
+            "ACCESSION_CLOUD_TASKS_QUEUE_NAME": "foo",
+            "ACCESSION_CLOUD_TASKS_QUEUE_REGION": "bar",
+        },
+    )
+    result = QueueInfo.from_env()
+    assert result == QueueInfo(name="foo", region="bar")
+
+
+def test_queue_info_from_env_env_vars_not_set_returns_none(mocker):
+    mocker.patch.dict("os.environ", {"ACCESSION_CLOUD_TASKS_QUEUE_NAME": "foo"})
+    result = QueueInfo.from_env()
+    assert result is None
 
 
 def test_aws_credentials_get_dict(aws_credentials):
@@ -103,6 +121,24 @@ def test_cloud_tasks_upload_client_get_queue_path(mocker, cloud_tasks_upload_cli
     assert cloud_tasks_upload_client.client.queue_path.called_once_with(
         "project-id", "us-west1", "queue"
     )
+
+
+def test_cloud_tasks_upload_client_validate_queue_info(
+    mocker, cloud_tasks_upload_client
+):
+    mocker.patch.object(cloud_tasks_upload_client, "get_queue_path")
+    cloud_tasks_upload_client.validate_queue_info()
+    cloud_tasks_upload_client.get_queue_path.assert_called_once()
+    cloud_tasks_upload_client.client.get_queue.assert_called_once()
+
+
+def test_cloud_tasks_upload_client_validate_queue_info_raises(
+    mocker, cloud_tasks_upload_client
+):
+    mocker.patch.object(cloud_tasks_upload_client, "get_queue_path")
+    cloud_tasks_upload_client.client.get_queue.side_effect = NotFound(message="failed")
+    with pytest.raises(ValueError):
+        cloud_tasks_upload_client.validate_queue_info()
 
 
 def test_cloud_tasks_upload_client_get_task_name(
