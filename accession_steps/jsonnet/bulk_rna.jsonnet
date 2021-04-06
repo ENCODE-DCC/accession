@@ -133,7 +133,6 @@
             file_format: 'bigWig',
             filekey: 'all_unstranded',
             output_type: 'signal of all reads',
-            maybe_preferred_default: true,
           },
           {
             derived_from_files: [
@@ -184,7 +183,6 @@
             file_format: 'bigWig',
             filekey: 'all_plus',
             output_type: 'plus strand signal of all reads',
-            maybe_preferred_default: true,
           },
           {
             derived_from_files: [
@@ -201,7 +199,6 @@
             file_format: 'bigWig',
             filekey: 'all_minus',
             output_type: 'minus strand signal of all reads',
-            maybe_preferred_default: true,
           },
         ],
         wdl_task_name: 'bam_to_signals',
