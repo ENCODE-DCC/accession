@@ -921,12 +921,9 @@ class AccessionGenericRna(Accession):
         self, qc_value: Union[float, int], current_best_qc_value: Union[float, int]
     ) -> bool:
         """
-        Dummy implementation since we don't have preferred_default specs for different
-        RNA pipelines yet.
+        All the RNA-pipelines compare values in the same way.
         """
-        return super().preferred_default_should_be_updated(
-            qc_value, current_best_qc_value
-        )
+        return qc_value > current_best_qc_value
 
     def get_preferred_default_qc_value(self, file: File) -> Union[float, int]:
         """
@@ -996,11 +993,6 @@ class AccessionBulkRna(AccessionGenericRna):
         return self.find_portal_property_from_filekey(
             filekey, EncodeFile.GENOME_ANNOTATION
         )
-
-    def preferred_default_should_be_updated(
-        self, qc_value: Union[float, int], current_best_qc_value: Union[float, int]
-    ) -> bool:
-        return qc_value > current_best_qc_value
 
     def get_preferred_default_qc_value(self, file: File) -> Union[float, int]:
         mapping_qc_file = self.analysis.search_up(file.get_task(), "align", "log_json")[
@@ -1557,6 +1549,12 @@ class AccessionLongReadRna(AccessionGenericRna):
                 f"Could not get genome annotation from annotation GTF {annotation_gtf.accession}"
             )
         return genome_annotation
+
+    def get_preferred_default_qc_value(self, file: File) -> Union[float, int]:
+        mapping_qc_file = self.analysis.search_up(
+            file.get_task(), "minimap2", "mapping_qc"
+        )[0].read_json()
+        return int(mapping_qc_file["full_length_non_chimeric_reads"]["flnc"])
 
     def make_long_read_rna_correlation_qc(
         self, encode_file: EncodeFile, file: File

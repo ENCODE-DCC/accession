@@ -107,6 +107,7 @@ three possible locations that they could appear.
             file_format: 'tsv',
             filekey: 'talon_abundance',
             output_type: 'transcript quantifications',
+            maybe_preferred_default: true,
             quality_metrics: [
               'long_read_rna_quantification',
               'long_read_rna_correlation',
