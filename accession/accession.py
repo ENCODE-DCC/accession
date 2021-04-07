@@ -1554,7 +1554,7 @@ class AccessionLongReadRna(AccessionGenericRna):
         mapping_qc_file = self.analysis.search_up(
             file.get_task(), "minimap2", "mapping_qc"
         )[0].read_json()
-        return int(mapping_qc_file["full_length_non_chimeric_read_count"])
+        return int(mapping_qc_file["full_length_non_chimeric_reads"]["flnc"])
 
     def make_long_read_rna_correlation_qc(
         self, encode_file: EncodeFile, file: File
