@@ -1195,18 +1195,20 @@ class AccessionDnase(Accession):
     def preferred_default_should_be_updated(
         self, qc_value: Union[int, float], current_best_qc_value: Union[int, float]
     ) -> bool:
-        """
-        Dummy implementation since we don't have preferred_default specs for DNAse yet.
-        """
-        return super().preferred_default_should_be_updated(
-            qc_value, current_best_qc_value
-        )
+        return qc_value > current_best_qc_value
 
     def get_preferred_default_qc_value(self, file: File) -> Union[int, float]:
         """
-        Dummy implementation since we don't have preferred_default specs for DNAse yet.
+        Find and parse the nuclear bam flagstats and get the number of "mapped" as int.
         """
-        return super().get_preferred_default_qc_value(file)
+        flagstats_file = self.analysis.get_files(
+            filename=file.get_task().outputs["anaysis"]["qc"]["nuclear_bam_qc"][
+                "flagstats"
+            ]
+        )[0]
+        flagstats_bytes = flagstats_file.read_bytes()
+        flagstats = self.parse_dict_from_bytes(flagstats_bytes, parse_flagstats)
+        return int(flagstats["mapped"])
 
     def parse_dict_from_bytes(
         self, qc_bytes: bytes, parser: Callable[[str], Dict[str, Any]]
