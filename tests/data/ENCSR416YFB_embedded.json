@@ -471,9 +471,6 @@
         "technical_replicate_number": 1,
         "uuid": "a2b28a10-3f63-41b5-9d6b-783fd29b8dd2"
       },
-      "replicate_libraries": [
-        "/libraries/ENCLB327TAV/"
-      ],
       "run_type": "paired-ended",
       "s3_uri": "s3://encode-private/2019/05/23/881a35f8-ef42-4393-9932-0094436819c5/ENCFF168ZWJ.fastq.gz",
       "schema_version": "17",
@@ -839,9 +836,6 @@
         "technical_replicate_number": 1,
         "uuid": "10e088a5-ae5a-4b64-86d4-426dab3aaa9d"
       },
-      "replicate_libraries": [
-        "/libraries/ENCLB764LBO/"
-      ],
       "run_type": "paired-ended",
       "s3_uri": "s3://encode-private/2019/05/23/efbb3d32-572e-473e-8faa-7569fa02230c/ENCFF373IOW.fastq.gz",
       "schema_version": "17",
@@ -1207,9 +1201,6 @@
         "technical_replicate_number": 1,
         "uuid": "a2b28a10-3f63-41b5-9d6b-783fd29b8dd2"
       },
-      "replicate_libraries": [
-        "/libraries/ENCLB327TAV/"
-      ],
       "run_type": "paired-ended",
       "s3_uri": "s3://encode-private/2019/05/23/35cffc7c-78f9-42e0-9764-77fda08260d2/ENCFF177PKE.fastq.gz",
       "schema_version": "17",
@@ -1575,9 +1566,6 @@
         "technical_replicate_number": 1,
         "uuid": "10e088a5-ae5a-4b64-86d4-426dab3aaa9d"
       },
-      "replicate_libraries": [
-        "/libraries/ENCLB764LBO/"
-      ],
       "run_type": "paired-ended",
       "s3_uri": "s3://encode-private/2019/05/23/4a74a8b6-71b3-43fa-b48a-e8311e07a3c8/ENCFF937QMD.fastq.gz",
       "schema_version": "17",
@@ -1900,9 +1888,6 @@
           "with_itself_qc_failed": 0
         }
       ],
-      "replicate_libraries": [
-        "/libraries/ENCLB764LBO/"
-      ],
       "s3_uri": "s3://encoded-files-dev/2020/02/21/ba6776ab-178d-45a9-a375-1c6809a8382d/TSTFF891220.bam",
       "schema_version": "17",
       "status": "in progress",
@@ -2095,9 +2080,6 @@
       "output_category": "signal",
       "output_type": "minus strand signal of unique reads",
       "quality_metrics": [],
-      "replicate_libraries": [
-        "/libraries/ENCLB327TAV/"
-      ],
       "s3_uri": "s3://encoded-files-dev/2020/02/21/d3ee604e-25f3-4b40-af19-49bd05bd86bd/TSTFF054479.bigWig",
       "schema_version": "17",
       "status": "in progress",
@@ -2290,9 +2272,6 @@
       "output_category": "signal",
       "output_type": "plus strand signal of unique reads",
       "quality_metrics": [],
-      "replicate_libraries": [
-        "/libraries/ENCLB764LBO/"
-      ],
       "s3_uri": "s3://encoded-files-dev/2020/02/21/649660cc-4881-4f42-a2f9-4c01900ea05a/TSTFF822870.bigWig",
       "schema_version": "17",
       "status": "in progress",
@@ -2485,9 +2464,6 @@
       "output_category": "signal",
       "output_type": "minus strand signal of unique reads",
       "quality_metrics": [],
-      "replicate_libraries": [
-        "/libraries/ENCLB764LBO/"
-      ],
       "s3_uri": "s3://encoded-files-dev/2020/02/21/61f69d6b-67f5-443d-b9da-0eca8f1dabc5/TSTFF671725.bigWig",
       "schema_version": "17",
       "status": "in progress",
@@ -2770,9 +2746,6 @@
           "with_itself_qc_failed": 0
         }
       ],
-      "replicate_libraries": [
-        "/libraries/ENCLB327TAV/"
-      ],
       "s3_uri": "s3://encoded-files-dev/2020/02/21/14ab71b0-5ccd-47ea-9fec-4b478fe19798/TSTFF576698.bam",
       "schema_version": "17",
       "status": "in progress",
@@ -2965,9 +2938,6 @@
       "output_category": "signal",
       "output_type": "plus strand signal of unique reads",
       "quality_metrics": [],
-      "replicate_libraries": [
-        "/libraries/ENCLB327TAV/"
-      ],
       "s3_uri": "s3://encoded-files-dev/2020/02/21/6fef62b1-b284-4685-947c-161435ff1c66/TSTFF739969.bigWig",
       "schema_version": "17",
       "status": "in progress",
@@ -3160,9 +3130,6 @@
       "output_category": "signal",
       "output_type": "minus strand signal of all reads",
       "quality_metrics": [],
-      "replicate_libraries": [
-        "/libraries/ENCLB327TAV/"
-      ],
       "s3_uri": "s3://encoded-files-dev/2020/02/21/96afc980-7441-40aa-8824-34d2ea5fc07b/TSTFF257071.bigWig",
       "schema_version": "17",
       "status": "in progress",
@@ -3445,9 +3412,6 @@
           "uuid": "429961ea-45ab-421a-b305-2cadd6cfd8c1"
         }
       ],
-      "replicate_libraries": [
-        "/libraries/ENCLB764LBO/"
-      ],
       "s3_uri": "s3://encoded-files-dev/2020/02/21/8890e1de-0855-418f-bc09-427902bc6272/TSTFF086372.bam",
       "schema_version": "17",
       "status": "in progress",
@@ -3640,9 +3604,6 @@
       "output_category": "signal",
       "output_type": "plus strand signal of all reads",
       "quality_metrics": [],
-      "replicate_libraries": [
-        "/libraries/ENCLB764LBO/"
-      ],
       "s3_uri": "s3://encoded-files-dev/2020/02/21/a2101a63-f6b2-45c1-af35-5962e0da21d9/TSTFF115769.bigWig",
       "schema_version": "17",
       "status": "in progress",
@@ -3880,9 +3841,6 @@
           "uuid": "96b12eaa-4095-476d-aa97-610727cc6fab"
         }
       ],
-      "replicate_libraries": [
-        "/libraries/ENCLB327TAV/"
-      ],
       "s3_uri": "s3://encoded-files-dev/2020/02/21/6f6e3c8f-51cc-42a8-9027-08f6e393eb6f/TSTFF983755.tsv",
       "schema_version": "17",
       "status": "in progress",
@@ -4069,9 +4027,6 @@
       "output_category": "quantification",
       "output_type": "transcript quantifications",
       "quality_metrics": [],
-      "replicate_libraries": [
-        "/libraries/ENCLB327TAV/"
-      ],
       "s3_uri": "s3://encoded-files-dev/2020/02/21/6c8293ed-8429-431f-8a24-4d60de710493/TSTFF816608.tsv",
       "schema_version": "17",
       "status": "in progress",
@@ -4390,9 +4345,6 @@
           "uuid": "3681cc78-2660-4685-959b-7a07575952a4"
         }
       ],
-      "replicate_libraries": [
-        "/libraries/ENCLB327TAV/"
-      ],
       "s3_uri": "s3://encoded-files-dev/2020/02/21/2f7ece8e-9cd0-4a20-ac87-e11922decff4/TSTFF815965.bam",
       "schema_version": "17",
       "status": "in progress",
@@ -4585,9 +4537,6 @@
       "output_category": "signal",
       "output_type": "plus strand signal of all reads",
       "quality_metrics": [],
-      "replicate_libraries": [
-        "/libraries/ENCLB327TAV/"
-      ],
       "s3_uri": "s3://encoded-files-dev/2020/02/21/4f94b767-2606-4336-ae7b-31d68ddfd555/TSTFF384309.bigWig",
       "schema_version": "17",
       "status": "in progress",
@@ -4780,9 +4729,6 @@
       "output_category": "signal",
       "output_type": "minus strand signal of all reads",
       "quality_metrics": [],
-      "replicate_libraries": [
-        "/libraries/ENCLB764LBO/"
-      ],
       "s3_uri": "s3://encoded-files-dev/2020/02/21/8740159e-beed-4fd3-b76f-5dd784f73721/TSTFF101201.bigWig",
       "schema_version": "17",
       "status": "in progress",
@@ -5020,9 +4966,6 @@
           "uuid": "26ddde8f-c9cb-45c6-9f28-3b633ec16323"
         }
       ],
-      "replicate_libraries": [
-        "/libraries/ENCLB764LBO/"
-      ],
       "s3_uri": "s3://encoded-files-dev/2020/02/27/765a4196-d244-4aaa-9233-c67e0a653e6a/TSTFF069215.tsv",
       "schema_version": "17",
       "status": "in progress",
@@ -5207,9 +5150,6 @@
       "output_category": "quantification",
       "output_type": "transcript quantifications",
       "quality_metrics": [],
-      "replicate_libraries": [
-        "/libraries/ENCLB764LBO/"
-      ],
       "s3_uri": "s3://encoded-files-dev/2020/02/27/5b984006-7434-4fb3-af79-eb746749975f/TSTFF265009.tsv",
       "schema_version": "17",
       "status": "in progress",
@@ -5396,9 +5336,6 @@
       "output_category": "quantification",
       "output_type": "transcript quantifications",
       "quality_metrics": [],
-      "replicate_libraries": [
-        "/libraries/ENCLB764LBO/"
-      ],
       "s3_uri": "s3://encoded-files-dev/2020/02/27/271c596a-be49-40f9-b3f5-1386e713b9e9/TSTFF536040.tsv",
       "schema_version": "17",
       "status": "in progress",
@@ -5583,9 +5520,6 @@
       "output_category": "quantification",
       "output_type": "transcript quantifications",
       "quality_metrics": [],
-      "replicate_libraries": [
-        "/libraries/ENCLB327TAV/"
-      ],
       "s3_uri": "s3://encoded-files-dev/2020/02/27/8499046b-f54e-4d72-a1a8-eae898123dab/TSTFF209605.tsv",
       "schema_version": "17",
       "status": "in progress",
