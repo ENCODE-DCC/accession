@@ -102,14 +102,6 @@ def check_or_set_lab_award(lab: Optional[str], award: Optional[str]) -> Tuple[st
     return lab, award
 
 
-def get_queue_info_from_env() -> Optional[QueueInfo]:
-    name = os.environ.get("ACCESSION_CLOUD_TASKS_QUEUE_NAME")
-    region = os.environ.get("ACCESSION_CLOUD_TASKS_QUEUE_REGION")
-    if name is None or region is None:
-        return None
-    return QueueInfo(name=name, region=region)
-
-
 def get_metadatas_from_args(args: argparse.Namespace) -> List[str]:
     """
     If there was only one metadata file/label provided, then returns a list containing
@@ -128,7 +120,7 @@ def main() -> None:
     parser = get_parser()
     args = parser.parse_args()
     lab, award = check_or_set_lab_award(args.lab, args.award)
-    queue_info = get_queue_info_from_env()
+    queue_info = QueueInfo.from_env()
     metadatas = get_metadatas_from_args(args)
     for metadata in metadatas:
         accessioner = accession_factory(
@@ -141,6 +133,8 @@ def main() -> None:
             no_log_file=args.no_log_file,
             queue_info=queue_info,
         )
+        if accessioner.cloud_tasks_upload_client is not None:
+            accessioner.cloud_tasks_upload_client.validate_queue_info()
         accessioner.accession_steps(args.dry_run, force=args.force)
 
 

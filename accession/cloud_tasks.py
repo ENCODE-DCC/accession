@@ -1,5 +1,6 @@
 import json
 import logging
+import os
 from hashlib import md5
 from typing import Dict, Optional
 
@@ -13,6 +14,8 @@ from accession.file import GSFile
 from accession.logger_factory import logger_factory
 
 APP_ENGINE_UPLOAD_ENDPOINT = "/upload"
+QUEUE_NAME_ENVIRONMENT_VARIABLE = "ACCESSION_CLOUD_TASKS_QUEUE_NAME"
+QUEUE_REGION_ENVIRONMENT_VARIABLE = "ACCESSION_CLOUD_TASKS_QUEUE_REGION"
 
 AppEngineHttpRequest = TypedDict(
     "AppEngineHttpRequest",
@@ -28,6 +31,14 @@ Task = TypedDict(
 class QueueInfo:
     name: str
     region: str
+
+    @classmethod
+    def from_env(cls) -> Optional["QueueInfo"]:
+        name = os.environ.get(QUEUE_NAME_ENVIRONMENT_VARIABLE)
+        region = os.environ.get(QUEUE_REGION_ENVIRONMENT_VARIABLE)
+        if name is None or region is None:
+            return None
+        return cls(name=name, region=region)
 
 
 @attr.s(auto_attribs=True)
@@ -175,6 +186,19 @@ class CloudTasksUploadClient:
             location=self.queue_info.region,
             queue=self.queue_info.name,
         )
+
+    def validate_queue_info(self) -> None:
+        try:
+            self.client.get_queue(self.get_queue_path())
+        except Exception as e:
+            raise ValueError(
+                (
+                    "Cloud tasks queue is invalid, check that the values of "
+                    f"{QUEUE_NAME_ENVIRONMENT_VARIABLE} and "
+                    f"{QUEUE_REGION_ENVIRONMENT_VARIABLE} are correct. For valid "
+                    "regions see https://cloud.google.com/about/locations#region"
+                )
+            ) from e
 
     def _get_task_name(self, payload: UploadPayload) -> str:
         """
