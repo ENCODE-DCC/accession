@@ -71,7 +71,7 @@
             {
               derived_from_filekey: 'idx_tar',
               derived_from_inputs: true,
-              derived_from_task: 'align',
+              derived_from_task: if separate_control_task then 'align_ctl' else 'align',
             },
             self.derived_from_files[0] { derived_from_filekey: 'fastqs_R1' },
             self.derived_from_files[0] { allow_empty: true, derived_from_filekey: 'fastqs_R2' },
@@ -115,7 +115,11 @@
               derived_from_task: 'tss_enrich',
               should_search_down: true,
             }] + atac_map_only_steps['accession.steps'][0].wdl_files[0].derived_from_files,
-            derived_from_files: (if is_atac then atac_filtered_bam_derived_from_files else $['chip_map_only_steps.json']['accession.steps'][0].wdl_files[0].derived_from_files),
+            derived_from_files: (
+              if is_atac then atac_filtered_bam_derived_from_files
+              else if separate_control_task then $['tf_chip_control_fastqs_steps.json']['accession.steps'][0].wdl_files[0].derived_from_files
+              else $['chip_map_only_steps.json']['accession.steps'][0].wdl_files[0].derived_from_files
+            ),
             file_format: 'bam',
             filekey: 'nodup_bam',
             output_type: if pbam then 'redacted alignments' else 'alignments',

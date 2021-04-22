@@ -15,18 +15,18 @@
             {
               "derived_from_filekey": "idx_tar",
               "derived_from_inputs": true,
-              "derived_from_task": "align"
+              "derived_from_task": "align_ctl"
             },
             {
               "derived_from_filekey": "fastqs_R1",
               "derived_from_inputs": true,
-              "derived_from_task": "align"
+              "derived_from_task": "align_ctl"
             },
             {
               "allow_empty": true,
               "derived_from_filekey": "fastqs_R2",
               "derived_from_inputs": true,
-              "derived_from_task": "align"
+              "derived_from_task": "align_ctl"
             }
           ],
           "file_format": "bam",
@@ -54,18 +54,18 @@
             {
               "derived_from_filekey": "idx_tar",
               "derived_from_inputs": true,
-              "derived_from_task": "align"
+              "derived_from_task": "align_ctl"
             },
             {
               "derived_from_filekey": "fastqs_R1",
               "derived_from_inputs": true,
-              "derived_from_task": "align"
+              "derived_from_task": "align_ctl"
             },
             {
               "allow_empty": true,
               "derived_from_filekey": "fastqs_R2",
               "derived_from_inputs": true,
-              "derived_from_task": "align"
+              "derived_from_task": "align_ctl"
             }
           ],
           "file_format": "bam",
