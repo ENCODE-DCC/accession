@@ -1836,9 +1836,14 @@ class AccessionAtacChip(Accession):
         in order to be able to identify the correct QC in the QC JSON.
         """
         task = file.get_task()
+        upstream_task_name = "align"
+        if task.task_name.endswith("ctl"):
+            upstream_task_name += "_ctl"
         parent_fastqs = [
             file.filename
-            for file in self.analysis.search_up(task, "align", "fastqs_R1", inputs=True)
+            for file in self.analysis.search_up(
+                task, upstream_task_name, "fastqs_R1", inputs=True
+            )
         ]
         pipeline_rep = None
         for k, v in self.analysis.metadata.content["inputs"].items():
@@ -1871,7 +1876,12 @@ class AccessionAtacChip(Accession):
         length log in the ancestor align task in the ChIP-seq pipeline.
         """
         task = file.get_task()
-        read_len_log = self.analysis.search_up(task, "align", "read_len_log")[0]
+        upstream_task_name = "align"
+        if task.task_name.endswith("ctl"):
+            upstream_task_name += "_ctl"
+        read_len_log = self.analysis.search_up(
+            task, upstream_task_name, "read_len_log"
+        )[0]
         log_contents = read_len_log.read_bytes()
         try:
             mapped_read_length = int(log_contents)
@@ -2042,11 +2052,14 @@ class AccessionChip(AccessionAtacChip):
         task = file.get_task()
         qc = self.analysis.get_files("qc_json")[0].read_json()
         replicate = self.get_atac_chip_pipeline_replicate(file)
+        upstream_task_name = "align"
+        if replicate.startswith("ctl"):
+            upstream_task_name += "ctl"
         key_to_match = "fastqs_R1"
         parent_fastqs = [
             file.filename
             for file in self.analysis.search_up(
-                task, "align", key_to_match, inputs=True
+                task, upstream_task_name, key_to_match, inputs=True
             )
         ]
         align_r1_tasks = self.analysis.get_tasks("align_R1")
