@@ -2010,8 +2010,8 @@ class AccessionChip(AccessionAtacChip):
         """
         align_task = self.analysis.get_tasks(task_name="align")[0]
         crop_length = align_task.inputs["crop_length"]
-        crop_length_tol = align_task.inputs["crop_length_tol"]
-        if crop_length == 0:
+        crop_length_tol = align_task.inputs.get("crop_length_tol")
+        if crop_length == 0 or crop_length_tol is None:
             return {}
         return {"cropped_read_length_tolerance": crop_length_tol}
 
