@@ -29,7 +29,7 @@ INSTALL_REQUIRES = [
     "google-cloud-storage==1.28.1",
     "attrs",
     "boto3==1.13.5",
-    "caper==1.0.0",
+    "caper==1.5.1",
     "google-cloud-tasks==1.5.0",
     "google-auth==1.18.0",
     "google-api-core==1.21.0",
