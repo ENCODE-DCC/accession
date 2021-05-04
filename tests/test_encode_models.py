@@ -379,10 +379,10 @@ def test_encode_experiment_get_patchable_internal_status(encode_experiment):
     }
 
 
-def test_encode_experiment_get_patchable_analysis_object(encode_experiment):
-    result = encode_experiment.get_patchable_analysis_object("foo")
+def test_encode_experiment_get_patchable_analyses(encode_experiment):
+    result = encode_experiment.get_patchable_analyses("foo")
     assert result == {
-        "analysis_objects": ["foo"],
+        "analyses": ["foo"],
         "_enc_id": "/experiments/foo/",
         "_profile": "experiment",
     }

@@ -748,10 +748,8 @@ class Accession(ABC):
         payload = self.experiment.get_patchable_internal_status()
         self.conn.patch(payload)
 
-    def patch_experiment_analysis_objects(
-        self, analysis_object: EncodeGenericObject
-    ) -> None:
-        payload = self.experiment.get_patchable_analysis_object(analysis_object.at_id)
+    def patch_experiment_analyses(self, analysis: EncodeGenericObject) -> None:
+        payload = self.experiment.get_patchable_analyses(analysis.at_id)
         self.conn.patch(payload, extend_array_values=True)
 
     def maybe_update_preferred_default_file_patches(
@@ -912,7 +910,7 @@ class Accession(ABC):
         analysis = self.post_analysis()
         for encode_file, file in self.upload_queue:
             self.upload_file(encode_file, file)
-        self.patch_experiment_analysis_objects(analysis)
+        self.patch_experiment_analyses(analysis)
         self.patch_experiment_internal_status()
 
 
