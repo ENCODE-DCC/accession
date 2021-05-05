@@ -42,7 +42,7 @@ EXTRAS_REQUIRE = {
     "tests": ["pytest", "pytest-cov", "pytest-mock>=3.3.0", "docker"],
 }
 EXTRAS_REQUIRE["dev"] = (
-    EXTRAS_REQUIRE["docs"] + EXTRAS_REQUIRE["tests"] + ["pre-commit"]
+    EXTRAS_REQUIRE["docs"] + EXTRAS_REQUIRE["tests"] + ["pre-commit", "boto3-stubs[s3]"]
 )
 HERE = os.path.abspath(os.path.dirname(__file__))
 

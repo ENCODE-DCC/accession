@@ -1,12 +1,17 @@
 import hashlib
+import io
 import json
 from abc import ABC, abstractmethod
 from base64 import b64decode
 from pathlib import Path
 from typing import Any, Dict, Optional
+from urllib.parse import urlparse
 
+import boto3
 from google.cloud.storage.blob import Blob
 from google.cloud.storage.client import Client
+from mypy_boto3_s3.client import S3Client
+from mypy_boto3_s3.type_defs import GetObjectOutputTypeDef, HeadObjectOutputTypeDef
 
 from accession.task import Task
 
@@ -46,10 +51,6 @@ class File(ABC):
         String representing the scheme for URIs for files represented by the class.
         """
         raise NotImplementedError("Derived classes should provide their own SCHEMEs")
-
-    @abstractmethod
-    def read(self, num_bytes: Optional[int] = None) -> bytes:
-        raise NotImplementedError
 
     @abstractmethod
     def read_bytes(self) -> bytes:
@@ -164,6 +165,99 @@ class GSFile(File):
         """
         Read file and convert to JSON
         """
+        return json.loads(self.read_bytes().decode())
+
+
+class S3File(File):
+    """
+    For s3 to s3 copy we can just pass the StreamingBody object returned by `get_object`
+    so the `read` method is not needed on this class.
+    """
+
+    SCHEME = "s3://"
+    MD5_CHUNKSIZE = 8192
+
+    def __init__(
+        self,
+        key: str,
+        name: str,
+        task: Optional[Task] = None,
+        used_by_task: Optional[Task] = None,
+        client: Optional[S3Client] = None,
+    ) -> None:
+        """
+        Initializes self.pos to 0 for keeping track of number of bytes read from file.
+        """
+        super().__init__(key, name, task, used_by_task)
+        self.pos = 0
+        self._md5sum: Optional[str] = None
+        self._object_metadata: Optional[HeadObjectOutputTypeDef] = None
+        self._client: Optional[S3Client] = client
+
+    @property
+    def object_metadata(self) -> HeadObjectOutputTypeDef:
+        """
+        Cache object metadata to avoid repeated calls to GetObject
+        """
+        if self._object_metadata is None:
+            self._object_metadata = self.client.head_object(
+                Bucket=self.bucket, Key=self.key
+            )
+        return self._object_metadata
+
+    @property
+    def client(self) -> S3Client:
+        if self._client is None:
+            client = boto3.client("s3")
+            self._client = client
+        return self._client
+
+    @property
+    def bucket(self) -> str:
+        return urlparse(self.filename, allow_fragments=False).netloc
+
+    @property
+    def key(self) -> str:
+        return urlparse(self.filename, allow_fragments=False).path
+
+    @property
+    def md5sum(self) -> str:
+        if self._md5sum is None:
+            etag = self.object_metadata["ETag"]
+            if "-" not in etag:
+                self._md5sum = etag
+            else:
+                self._md5sum = self._calculate_md5sum()
+        return self._md5sum
+
+    def _calculate_md5sum(self) -> str:
+        """
+        If file was uploaded via multipart then Etag is not the md5sum
+        """
+        md5_hash = hashlib.md5()
+        for chunk in self.get_object()["Body"].iter_chunks(self.MD5_CHUNKSIZE):
+            md5_hash.update(chunk)
+        return md5_hash.hexdigest()
+
+    def get_object(self) -> GetObjectOutputTypeDef:
+        return self.client.get_object(Bucket=self.bucket, Key=self.key)
+
+    @property
+    def size(self) -> int:
+        return self.object_metadata["ContentLength"]
+
+    def get_uri_without_scheme(self) -> str:
+        return f"{self.bucket}/{self.key}"
+
+    def read_bytes(self) -> bytes:
+        """
+        Download the whole file as bytes
+        """
+        buffer = io.BytesIO()
+        self.client.download_fileobj(Bucket=self.bucket, Key=self.key, Fileobj=buffer)
+        return buffer.getvalue()
+
+    def read_json(self) -> Dict[str, Any]:
         return json.loads(self.read_bytes().decode())
 
 
