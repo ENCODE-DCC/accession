@@ -1,11 +1,18 @@
 import pytest
 
-from accession.backends import GCBackend, LocalBackend, backend_factory
+from accession.backends import AwsBackend, GCBackend, LocalBackend, backend_factory
 
 
 @pytest.mark.parametrize("uri,expected", [("gs://foo/bar", True), ("not/valid", False)])
 def test_gc_backend_is_valid_uri(uri, expected):
     backend = GCBackend()
+    result = backend.is_valid_uri(uri)
+    assert result is expected
+
+
+@pytest.mark.parametrize("uri,expected", [("s3://foo/bar", True), ("not/valid", False)])
+def test_aws_backend_is_valid_uri(uri, expected):
+    backend = AwsBackend()
     result = backend.is_valid_uri(uri)
     assert result is expected
 
