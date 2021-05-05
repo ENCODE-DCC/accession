@@ -4,16 +4,18 @@ import json
 from abc import ABC, abstractmethod
 from base64 import b64decode
 from pathlib import Path
-from typing import Any, Dict, Optional
+from typing import TYPE_CHECKING, Any, Dict, Optional
 from urllib.parse import urlparse
 
 import boto3
 from google.cloud.storage.blob import Blob
 from google.cloud.storage.client import Client
-from mypy_boto3_s3.client import S3Client
-from mypy_boto3_s3.type_defs import GetObjectOutputTypeDef, HeadObjectOutputTypeDef
 
 from accession.task import Task
+
+if TYPE_CHECKING:
+    from mypy_boto3_s3.client import S3Client
+    from mypy_boto3_s3.type_defs import GetObjectOutputTypeDef, HeadObjectOutputTypeDef
 
 
 class File(ABC):
@@ -183,19 +185,18 @@ class S3File(File):
         name: str,
         task: Optional[Task] = None,
         used_by_task: Optional[Task] = None,
-        client: Optional[S3Client] = None,
+        client: Optional["S3Client"] = None,
     ) -> None:
         """
         Initializes self.pos to 0 for keeping track of number of bytes read from file.
         """
         super().__init__(key, name, task, used_by_task)
-        self.pos = 0
         self._md5sum: Optional[str] = None
-        self._object_metadata: Optional[HeadObjectOutputTypeDef] = None
-        self._client: Optional[S3Client] = client
+        self._object_metadata: Optional["HeadObjectOutputTypeDef"] = None
+        self._client: Optional["S3Client"] = client
 
     @property
-    def object_metadata(self) -> HeadObjectOutputTypeDef:
+    def object_metadata(self) -> "HeadObjectOutputTypeDef":
         """
         Cache object metadata to avoid repeated calls to GetObject
         """
@@ -206,7 +207,7 @@ class S3File(File):
         return self._object_metadata
 
     @property
-    def client(self) -> S3Client:
+    def client(self) -> "S3Client":
         if self._client is None:
             client = boto3.client("s3")
             self._client = client
@@ -218,7 +219,7 @@ class S3File(File):
 
     @property
     def key(self) -> str:
-        return urlparse(self.filename, allow_fragments=False).path
+        return urlparse(self.filename, allow_fragments=False).path.lstrip("/")
 
     @property
     def md5sum(self) -> str:
@@ -230,6 +231,10 @@ class S3File(File):
                 self._md5sum = self._calculate_md5sum()
         return self._md5sum
 
+    @property
+    def size(self) -> int:
+        return self.object_metadata["ContentLength"]
+
     def _calculate_md5sum(self) -> str:
         """
         If file was uploaded via multipart then Etag is not the md5sum
@@ -239,12 +244,8 @@ class S3File(File):
             md5_hash.update(chunk)
         return md5_hash.hexdigest()
 
-    def get_object(self) -> GetObjectOutputTypeDef:
+    def get_object(self) -> "GetObjectOutputTypeDef":
         return self.client.get_object(Bucket=self.bucket, Key=self.key)
-
-    @property
-    def size(self) -> int:
-        return self.object_metadata["ContentLength"]
 
     def get_uri_without_scheme(self) -> str:
         return f"{self.bucket}/{self.key}"

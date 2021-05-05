@@ -1,12 +1,14 @@
 from abc import ABC, abstractmethod
-from typing import Optional
+from typing import TYPE_CHECKING, Optional
 
 import boto3
 from google.cloud import storage
-from mypy_boto3_s3.client import S3Client
 
 from accession.file import File, GSFile, LocalFile, S3File
 from accession.task import Task
+
+if TYPE_CHECKING:
+    from mypy_boto3_s3.client import S3Client
 
 
 class Backend(ABC):
@@ -78,10 +80,10 @@ class AwsBackend(Backend):
     CAPER_NAME = "aws"
 
     def __init__(self) -> None:
-        self._client: Optional[S3Client] = None
+        self._client: Optional["S3Client"] = None
 
     @property
-    def client(self) -> S3Client:
+    def client(self) -> "S3Client":
         if self._client is None:
             self._client = boto3.client("s3")
         return self._client
