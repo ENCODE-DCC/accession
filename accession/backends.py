@@ -1,9 +1,11 @@
 from abc import ABC, abstractmethod
 from typing import Optional
 
+import boto3
 from google.cloud import storage
+from mypy_boto3_s3.client import S3Client
 
-from accession.file import File, GSFile, LocalFile
+from accession.file import File, GSFile, LocalFile, S3File
 from accession.task import Task
 
 
@@ -70,6 +72,38 @@ class GCBackend(Backend):
 
     def is_valid_uri(self, uri: str) -> bool:
         return uri.startswith(GSFile.SCHEME)
+
+
+class AwsBackend(Backend):
+    CAPER_NAME = "aws"
+
+    def __init__(self) -> None:
+        self._client: Optional[S3Client] = None
+
+    @property
+    def client(self) -> S3Client:
+        if self._client is None:
+            self._client = boto3.client("s3")
+        return self._client
+
+    def make_file(
+        self,
+        key: str,
+        filename: str,
+        task: Optional[Task] = None,
+        used_by_task: Optional[Task] = None,
+    ) -> S3File:
+        blob = S3File(
+            key=key,
+            name=filename,
+            task=task,
+            used_by_task=used_by_task,
+            client=self.client,
+        )
+        return blob
+
+    def is_valid_uri(self, uri: str) -> bool:
+        return uri.startswith(S3File.SCHEME)
 
 
 class LocalBackend(Backend):
