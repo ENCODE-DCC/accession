@@ -10,7 +10,9 @@ def test_gc_backend_is_valid_uri(uri, expected):
     assert result is expected
 
 
-@pytest.mark.parametrize("uri,expected", [("s3://foo/bar", True), ("not/valid", False)])
+@pytest.mark.parametrize(
+    "uri,expected", [("s3://foo/bar", True), ("/not/valid", False)]
+)
 def test_aws_backend_is_valid_uri(uri, expected):
     backend = AwsBackend()
     result = backend.is_valid_uri(uri)
