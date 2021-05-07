@@ -26,6 +26,7 @@ RUN apt-get update && apt-get install -y \
     graphviz \
     libjpeg8-dev \
     libpq-dev \
+    make \
     nginx \
     nodejs \
     openjdk-11-jdk \
@@ -50,8 +51,7 @@ RUN alias python=python3
 RUN git clone https://github.com/ENCODE-DCC/encoded.git --branch "${ENCODED_RELEASE_TAG}" --single-branch && \
     cd encoded && \
     pip3 install --upgrade pip setuptools==51.3.3 && \
-    pip3 install -e '.' && \
-    buildout
+    make install
 
 # encoded users needs write permission to be able to make ES scripts
 # nginx runs with encoded user, need permissions to various folders
@@ -79,7 +79,7 @@ RUN find ${INSERTS_DIR} -mindepth 1 -maxdepth 1 | grep -v "access_key.json" | xa
 COPY tests/data/inserts ${INSERTS_DIR}
 
 # Delete the line in the base.ini that specifies a specific aws config profile
-RUN LINENO=$(grep -n file_upload_profile_name base.ini | cut -f 1 -d :) && sed -i "${LINENO}d" base.ini
+RUN LINENO=$(grep -n file_upload_profile_name development.ini | cut -f 1 -d :) && sed -i "${LINENO}d" development.ini
 
 # Delete the line in the development.ini (testing = true) that creates testing-only
 # schemas that confuse encode utils
