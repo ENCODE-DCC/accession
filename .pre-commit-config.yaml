@@ -21,6 +21,8 @@ repos:
     rev: v0.800
     hooks:
       - id: mypy
+        additional_dependencies:
+          - boto3-stubs[s3]
 
   - repo: git://github.com/detailyang/pre-commit-shell
     rev: v1.0.6
