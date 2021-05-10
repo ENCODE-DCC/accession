@@ -224,7 +224,9 @@ class S3File(File):
     @property
     def md5sum(self) -> str:
         if self._md5sum is None:
+            print(self.filename)
             etag = self.object_metadata["ETag"]
+            print("etag: ", etag)
             if "-" not in etag:
                 self._md5sum = etag
             else:
