@@ -228,8 +228,10 @@ class S3File(File):
             etag = self.object_metadata["ETag"]
             print("etag: ", etag)
             if "-" not in etag:
+                print("etag does not have dash, not calculating md5sum")
                 self._md5sum = etag
             else:
+                print("etag has dash, calculating md5sum")
                 self._md5sum = self._calculate_md5sum()
         return self._md5sum
 
