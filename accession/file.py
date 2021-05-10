@@ -225,7 +225,7 @@ class S3File(File):
     def md5sum(self) -> str:
         if self._md5sum is None:
             print(self.filename)
-            etag = self.object_metadata["ETag"]
+            etag = self.object_metadata["ETag"].strip('"')
             print("etag: ", etag)
             if "-" not in etag:
                 print("etag does not have dash, not calculating md5sum")
