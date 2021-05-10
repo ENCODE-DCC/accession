@@ -139,6 +139,8 @@ def backend_factory(backend_name: str) -> Backend:
         return LocalBackend()
     elif backend_name == GCBackend.CAPER_NAME:
         return GCBackend()
+    elif backend_name == AwsBackend.CAPER_NAME:
+        return AwsBackend()
     elif backend_name == "sge":
         return LocalBackend()
     else:
