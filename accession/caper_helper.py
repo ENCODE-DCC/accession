@@ -19,6 +19,7 @@ class CaperHelper:
     def client(self) -> CromwellRestAPI:
         if self._client is None:
             _, conf = get_parser_and_defaults(conf_file=DEFAULT_CAPER_CONF)
+            print(conf)
             self._client = CromwellRestAPI(hostname=conf["hostname"], port=conf["port"])
         return self._client
 
