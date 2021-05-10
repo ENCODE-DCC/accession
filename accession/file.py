@@ -231,7 +231,7 @@ class S3File(File):
         if self._md5sum is None:
             # ETag is wrapped in quotes for some reason
             etag = self.object_metadata["ETag"].strip('"')
-            if "-" not in etag:
+            if len(etag) == 32 and "-" not in etag:
                 self._md5sum = etag
             else:
                 self._md5sum = self._calculate_md5sum()
