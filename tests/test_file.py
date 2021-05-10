@@ -139,7 +139,9 @@ def test_s3_file_bucket():
 def test_s3_file_md5sum_etag_is_md5sum(mocker):
     mocker.patch(
         "accession.file.S3File.object_metadata",
-        mocker.PropertyMock(return_value={"ETag": '"6640ff9ee51263e73c16cb84109365b3"'}),
+        mocker.PropertyMock(
+            return_value={"ETag": '"6640ff9ee51263e73c16cb84109365b3"'}
+        ),
     )
     s3_file = S3File(key="my_task", name="s3://foo/bar/baz.qux")
     assert s3_file.md5sum == "6640ff9ee51263e73c16cb84109365b3"
