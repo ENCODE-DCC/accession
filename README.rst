@@ -74,6 +74,10 @@ Next, provide your API keys from the ENCODE portal:
     $ export ACCESSION_CLOUD_TASKS_QUEUE_NAME=my-queue
     $ export ACCESSION_CLOUD_TASKS_QUEUE_REGION=us-west1
 
+| To accession workflows produced on AWS backend you will need to set up AWS
+  credentials. The easiest way to do this is to install the AWS CLI and run
+  `aws configure`
+
 Usage
 ======
 

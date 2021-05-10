@@ -1,10 +1,14 @@
 from abc import ABC, abstractmethod
-from typing import Optional
+from typing import TYPE_CHECKING, Optional
 
+import boto3
 from google.cloud import storage
 
-from accession.file import File, GSFile, LocalFile
+from accession.file import File, GSFile, LocalFile, S3File
 from accession.task import Task
+
+if TYPE_CHECKING:
+    from mypy_boto3_s3.client import S3Client
 
 
 class Backend(ABC):
@@ -72,6 +76,38 @@ class GCBackend(Backend):
         return uri.startswith(GSFile.SCHEME)
 
 
+class AwsBackend(Backend):
+    CAPER_NAME = "aws"
+
+    def __init__(self) -> None:
+        self._client: Optional["S3Client"] = None
+
+    @property
+    def client(self) -> "S3Client":
+        if self._client is None:
+            self._client = boto3.client("s3")
+        return self._client
+
+    def make_file(
+        self,
+        key: str,
+        filename: str,
+        task: Optional[Task] = None,
+        used_by_task: Optional[Task] = None,
+    ) -> S3File:
+        blob = S3File(
+            key=key,
+            name=filename,
+            task=task,
+            used_by_task=used_by_task,
+            client=self.client,
+        )
+        return blob
+
+    def is_valid_uri(self, uri: str) -> bool:
+        return uri.startswith(S3File.SCHEME)
+
+
 class LocalBackend(Backend):
     """
     Backend that creates instances of LocalFile for accessioning local workflows.
@@ -103,6 +139,8 @@ def backend_factory(backend_name: str) -> Backend:
         return LocalBackend()
     elif backend_name == GCBackend.CAPER_NAME:
         return GCBackend()
+    elif backend_name == AwsBackend.CAPER_NAME:
+        return AwsBackend()
     elif backend_name == "sge":
         return LocalBackend()
     else:

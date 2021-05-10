@@ -40,7 +40,7 @@ from accession.encode_models import (
     EncodeQualityMetric,
     EncodeStepRun,
 )
-from accession.file import File, GSFile
+from accession.file import File, GSFile, S3File
 from accession.helpers import (
     LruCache,
     PreferredDefaultFilePatch,
@@ -324,9 +324,9 @@ class Accession(ABC):
 
     def _upload_file_locally(self, encode_file: EncodeFile, file: File) -> None:
         """
-        At a high level, uploads the file from GCS to S3 by streaming bytes. As the s3
-        client reads chunks they are lazily fetched from GCS. Blocks until upload is
-        complete.
+        At a high level, uploads the file to S3 by streaming bytes. As the s3 client
+        reads chunks they are lazily fetched from GCS. Blocks until upload is complete.
+        Supports both GCS and S3 files as input.
 
         In more details, obtains STS credentials to upload to the portal file specified
         by `encode_file`, creates a s3 client, and uploads the file corresponding to
@@ -349,11 +349,12 @@ class Accession(ABC):
         bucket = path_parts.pop(0)
         key = "/".join(path_parts)
         multipart_chunksize = self._calculate_multipart_chunksize(file.size)
-        transfer_config = boto3.s3.transfer.TransferConfig(
+        transfer_config = boto3.s3.transfer.TransferConfig(  # type: ignore
             multipart_chunksize=multipart_chunksize
         )
+        fileobj = file.get_object()["Body"] if isinstance(file, S3File) else file
         self.logger.info("Uploading file %s to %s", file.filename, s3_uri)
-        s3.upload_fileobj(file, bucket, key, Config=transfer_config)
+        s3.upload_fileobj(fileobj, bucket, key, Config=transfer_config)
         self.logger.info("Finished uploading file %s", file.filename)
 
     def _calculate_multipart_chunksize(self, file_size_bytes: int) -> int:

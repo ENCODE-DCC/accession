@@ -1,6 +1,6 @@
 import pytest
 
-from accession.file import GSFile, LocalFile
+from accession.file import GSFile, LocalFile, S3File
 
 
 @pytest.fixture
@@ -124,6 +124,60 @@ def test_gs_file_read_amount_then_none(readable_gs_file):
     assert readable_gs_file.read(3) == b"abc"
     assert readable_gs_file.read() == b"123"
     assert readable_gs_file.read() == b""
+
+
+def test_s3_file_key():
+    s3_file = S3File(key="my_task", name="s3://foo/bar/baz.qux")
+    assert s3_file.key == "bar/baz.qux"
+
+
+def test_s3_file_bucket():
+    s3_file = S3File(key="my_task", name="s3://foo/bar/baz.qux")
+    assert s3_file.bucket == "foo"
+
+
+def test_s3_file_md5sum_etag_is_md5sum(mocker):
+    mocker.patch(
+        "accession.file.S3File.object_metadata",
+        mocker.PropertyMock(
+            return_value={"ETag": '"6640ff9ee51263e73c16cb84109365b3"'}
+        ),
+    )
+    s3_file = S3File(key="my_task", name="s3://foo/bar/baz.qux")
+    assert s3_file.md5sum == "6640ff9ee51263e73c16cb84109365b3"
+
+
+def test_s3_file_md5sum_etag_is_not_md5sum(mocker):
+    mocker.patch(
+        "accession.file.S3File.object_metadata",
+        mocker.PropertyMock(return_value={"ETag": "md5um-2"}),
+    )
+    mocker.patch("accession.file.S3File._calculate_md5sum", return_value="abc")
+    s3_file = S3File(key="my_task", name="s3://foo/bar/baz.qux")
+    assert s3_file.md5sum == "abc"
+
+
+def test_s3_file_calculate_md5sum(mocker):
+    mock_body = mocker.Mock()
+    mock_body.iter_chunks.return_value = [b"foo", b"bar"]
+    mock_object = {"Body": mock_body}
+    mocker.patch("accession.file.S3File.get_object", return_value=mock_object)
+    s3_file = S3File(key="my_task", name="s3://foo/bar/baz.qux")
+    assert s3_file._calculate_md5sum() == "3858f62230ac3c915f300c664312c63f"
+
+
+def test_s3_file_size(mocker):
+    mocker.patch(
+        "accession.file.S3File.object_metadata",
+        mocker.PropertyMock(return_value={"ContentLength": 123}),
+    )
+    s3_file = S3File(key="my_task", name="s3://foo/bar/baz.qux")
+    assert s3_file.size == 123
+
+
+def test_s3_file_get_uri_without_scheme():
+    s3_file = S3File(key="my_task", name="s3://foo/bar/baz.qux")
+    assert s3_file.get_uri_without_scheme() == "foo/bar/baz.qux"
 
 
 def test_local_file_md5sum(mocker, local_file):
