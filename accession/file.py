@@ -223,15 +223,17 @@ class S3File(File):
 
     @property
     def md5sum(self) -> str:
+        """
+        On S3 the ETag is the md5sum if the file was not uploaded with multipart upload.
+        If multipart upload was not used then we can tell from the `-` in the ETag and
+        we need to calculate the md5sums ourselves.
+        """
         if self._md5sum is None:
-            print(self.filename)
+            # ETag is wrapped in quotes for some reason
             etag = self.object_metadata["ETag"].strip('"')
-            print("etag: ", etag)
             if "-" not in etag:
-                print("etag does not have dash, not calculating md5sum")
                 self._md5sum = etag
             else:
-                print("etag has dash, calculating md5sum")
                 self._md5sum = self._calculate_md5sum()
         return self._md5sum
 
