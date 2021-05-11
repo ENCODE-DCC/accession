@@ -968,9 +968,9 @@ class Accession(ABC):
             self.patch_preferred_default_files()
             self.post_qcs()
             analysis = self.post_analysis()
+            self.patch_experiment_analyses(analysis)
             for encode_file, file in self.upload_queue:
                 self.upload_file(encode_file, file)
-            self.patch_experiment_analyses(analysis)
             self.patch_experiment_internal_status()
         except Exception:
             self.logger.exception("Failed to complete accessioning")
