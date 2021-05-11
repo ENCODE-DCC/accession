@@ -31,7 +31,7 @@ CURRENT_CENTURY_PREFIX = "20"
 
 class AbstractId(ABC):
     @abstractclassmethod
-    def from_string(cls, id: str):
+    def from_string(cls, id: str) -> "Optional[AbstractId]":
         raise NotImplementedError
 
     @abstractmethod

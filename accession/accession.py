@@ -665,7 +665,9 @@ class Accession(ABC):
                 **self.common_metadata,
             }
         )
-        modeled_qc = EncodeQualityMetric.from_payload_and_file_id(qc, encode_file.at_id)
+        modeled_qc: EncodeQualityMetric = EncodeQualityMetric.from_payload_and_file_id(
+            qc, encode_file.at_id
+        )
         if shared:
             for item in self.raw_qcs:
                 if item.payload == modeled_qc.payload:

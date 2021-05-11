@@ -2,7 +2,7 @@ import datetime
 from typing import Optional
 
 from sqlalchemy import and_
-from sqlalchemy.orm import Query
+from sqlalchemy.orm import Query, Session
 
 from accession.database.connection import DbSession
 from accession.database.models import Run, WorkflowLabel
@@ -13,7 +13,7 @@ class DbQuery:
         self._session = session
 
     @property
-    def session(self):
+    def session(self) -> Session:
         """
         Avoids an extra indirection by forwarding the session so we don't have to do
         `self.session.session.foo()` every time

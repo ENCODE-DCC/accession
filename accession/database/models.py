@@ -24,7 +24,7 @@ class RunStatus(enum.Enum):
     Succeeded = "succeeded"
     Failed = "failed"
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self.value
 
 
@@ -54,7 +54,7 @@ class WorkflowLabel(Base):
     value = Column(String, nullable=False)
     run = Column(Integer, ForeignKey(f"{RUN_TABLE_NAME}.id"))
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return self.value
 
 

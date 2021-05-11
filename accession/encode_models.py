@@ -2,7 +2,7 @@ import json
 from base64 import b64encode
 from collections import UserDict
 from enum import Enum
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple, TypeVar, Union
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple, Type, TypeVar, Union
 
 from encode_utils.connection import Connection
 
