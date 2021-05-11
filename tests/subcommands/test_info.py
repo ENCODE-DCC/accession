@@ -84,7 +84,7 @@ def test_make_queries_labels_and_date_range(db_query, run, additional_runs):
     results = make_queries(
         db_query,
         ids=["foo=bar", "60fb02a7-31ae-4e9e-8e77-9c2722189cb4", "ENCSR123ABC"],
-        date_range="3/10-3/11",
+        date_range="3/10/20-3/11/20",
     )
     assert len(results) == 2
 
@@ -97,7 +97,7 @@ def test_make_queries_labels_no_date_range(db_query, run, additional_runs):
 
 
 def test_make_queries_no_labels_date_range(db_query, run, additional_runs):
-    results = make_queries(db_query, date_range="3/11")
+    results = make_queries(db_query, date_range="3/11/20")
     assert len(results) == 1
 
 
