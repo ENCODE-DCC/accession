@@ -2659,6 +2659,7 @@ def accession_factory(
     no_log_file: bool = False,
     log_file_path: str = "accession.log",
     queue_info: Optional[QueueInfo] = None,
+    use_in_memory_db: bool = False,
 ) -> Accession:
     """
     Matches against the user-specified pipeline_type string and returns an instance of
@@ -2732,6 +2733,7 @@ def accession_factory(
         no_log_file=no_log_file,
         queue_info=queue_info,
         private_filenames=private_filenames,
+        use_in_memory_db=use_in_memory_db,
     )
 
 
