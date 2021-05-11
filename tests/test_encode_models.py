@@ -402,11 +402,7 @@ def test_encode_quality_metric_init(payload):
 def test_encode_quality_metric_get_portal_object(payload):
     qm = EncodeQualityMetric(payload, "my_id")
     result = qm.get_portal_object()
-    assert result == {
-        "foo": "bar",
-        "quality_metric_of": ["my_id"],
-        "status": "in progress",
-    }
+    assert result == {"foo": "bar", "quality_metric_of": ["my_id"]}
 
 
 def test_encode_step_run_init():

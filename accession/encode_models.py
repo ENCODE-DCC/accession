@@ -405,7 +405,7 @@ class EncodeQualityMetric:
         self.payload = payload
 
     def get_portal_object(self) -> Dict[str, Any]:
-        self.payload.update({"status": "in progress", "quality_metric_of": self.files})
+        self.payload.update({"quality_metric_of": self.files})
         return self.payload
 
 
