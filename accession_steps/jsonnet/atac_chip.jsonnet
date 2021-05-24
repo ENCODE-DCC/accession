@@ -49,11 +49,13 @@
     is_atac=false,
     separate_control_task=false,
     pbam=false,
+    bwa=false,
   ) = {
     local step_run = if is_atac then 'atac-seq-alignment-step-v-2' else 'chip-seq-alignment-step-v-2',
     local step_version =
       if is_atac then '/analysis-step-versions/atac-seq-alignment-step-v-2-1/'
       else if pbam then '/analysis-step-versions/chip-seq-alignment-step-v-2-1/'
+      else if bwa then '/analysis-step-versions/chip-seq-alignment-step-v-2-2/'
       else '/analysis-step-versions/chip-seq-alignment-step-v-2-0/',
     local unfiltered_bam = {
       dcc_step_run: step_run,
@@ -117,7 +119,7 @@
             }] + atac_map_only_steps['accession.steps'][0].wdl_files[0].derived_from_files,
             derived_from_files: (
               if is_atac then atac_filtered_bam_derived_from_files
-              else if separate_control_task then $['tf_chip_control_fastqs_steps.json']['accession.steps'][0].wdl_files[0].derived_from_files
+              else if separate_control_task then $['tf_chip_bwa_control_fastqs_steps.json']['accession.steps'][0].wdl_files[0].derived_from_files
               else $['chip_map_only_steps.json']['accession.steps'][0].wdl_files[0].derived_from_files
             ),
             file_format: 'bam',
@@ -385,6 +387,7 @@
   },
   local atac_map_only_steps = AtacChipMapOnlySteps(is_atac=true),
   local chip_pbam_map_only_steps = AtacChipMapOnlySteps(pbam=true),
+  local chip_bwa_map_only_steps = AtacChipMapOnlySteps(bwa=true),
   local atac_idr_peak_call_steps = AtacTfChipPeakCallOnlySteps(is_atac=true),
   local atac_overlap_peak_call_steps = AtacHistoneMintPeakCallSteps(is_atac=true),
   local control_chip_separate_control_task = AtacChipMapOnlySteps(is_control=true, separate_control_task=true),
@@ -398,8 +401,8 @@
     'accession.steps': $['chip_map_only_steps.json']['accession.steps'] + $['tf_chip_peak_call_only_steps.json']['accession.steps'],
     raw_fastqs_keys: $['chip_map_only_steps.json'].raw_fastqs_keys,
   },
-  'tf_chip_control_fastqs_steps.json': {
-    'accession.steps': control_chip_separate_control_task['accession.steps'] + $['chip_map_only_steps.json']['accession.steps'] + $['tf_chip_peak_call_only_steps.json']['accession.steps'],
+  'tf_chip_bwa_control_fastqs_steps.json': {
+    'accession.steps': control_chip_separate_control_task['accession.steps'] + chip_bwa_map_only_steps['accession.steps'] + $['tf_chip_peak_call_only_steps.json']['accession.steps'],
     raw_fastqs_keys: $['chip_map_only_steps.json'].raw_fastqs_keys,
   },
   'tf_chip_pbam_steps.json': {
