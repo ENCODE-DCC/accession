@@ -6,6 +6,7 @@ from accession.accession_steps import FileParams
 from accession.encode_models import (
     EncodeAnalysis,
     EncodeAttachment,
+    EncodeCommonMetadata,
     EncodeExperiment,
     EncodeFile,
     EncodeGenericObject,
@@ -29,11 +30,11 @@ def encode_file():
 
 
 @pytest.fixture
-def encode_analysis():
+def encode_analysis(encode_common_metadata):
     return EncodeAnalysis(
         files=[EncodeFile({"@id": "/files/1/"}), EncodeFile({"@id": "/files/2/"})],
         documents=[],
-        lab_pi="encode",
+        common_metadata=encode_common_metadata,
         workflow_id="123",
     )
 
@@ -261,7 +262,7 @@ def test_encode_file_from_template(encode_common_metadata):
                     EncodeFile({"@id": "/files/1/"}),
                 ],
                 documents=[],
-                lab_pi="/lab_pies/foo/",
+                common_metadata=EncodeCommonMetadata(lab="/lab_pies/foo/", award="123"),
                 workflow_id="123",
             ),
             True,
@@ -270,7 +271,7 @@ def test_encode_file_from_template(encode_common_metadata):
             EncodeAnalysis(
                 files=[EncodeFile({"@id": "/files/1/"})],
                 documents=[],
-                lab_pi="/labs/foo/",
+                common_metadata=EncodeCommonMetadata(lab="/labs/foo/", award="123"),
                 workflow_id="123",
             ),
             False,
@@ -287,11 +288,14 @@ def test_encode_analysis_str(encode_analysis):
     assert str(encode_analysis) == "['/files/1/', '/files/2/']"
 
 
-def test_encode_analysis_from_files_and_metadata(encode_file):
+def test_encode_analysis_from_files_and_metadata(encode_file, encode_common_metadata):
     result = EncodeAnalysis(
-        files=[encode_file], lab_pi="foo", workflow_id="bar", documents=[]
+        files=[encode_file],
+        common_metadata=encode_common_metadata,
+        workflow_id="bar",
+        documents=[],
     )
-    assert result.aliases == ["foo:bar"]
+    assert result.aliases == ["lab:bar"]
     assert result.pipeline_version is None
 
 
@@ -302,7 +306,7 @@ def test_encode_analysis_from_files_and_metadata(encode_file):
             EncodeAnalysis(
                 files=[EncodeFile({"@id": "foo"})],
                 documents=[],
-                lab_pi="encode",
+                common_metadata=EncodeCommonMetadata(lab="/labs/encode/", award="123"),
                 workflow_id="123",
             ),
             {
@@ -310,13 +314,15 @@ def test_encode_analysis_from_files_and_metadata(encode_file):
                 "_profile": "analysis",
                 "aliases": ["encode:123"],
                 "documents": [],
+                "lab": "/labs/encode/",
+                "award": "123",
             },
         ),
         (
             EncodeAnalysis(
                 files=[EncodeFile({"@id": "foo"})],
                 documents=[EncodeGenericObject({"@id": "bar"})],
-                lab_pi="encode",
+                common_metadata=EncodeCommonMetadata(lab="/labs/encode/", award="123"),
                 workflow_id="baz",
                 pipeline_version="1.0",
             ),
@@ -326,6 +332,8 @@ def test_encode_analysis_from_files_and_metadata(encode_file):
                 "documents": ["bar"],
                 "files": ["foo"],
                 "pipeline_version": "1.0",
+                "lab": "/labs/encode/",
+                "award": "123",
             },
         ),
     ],

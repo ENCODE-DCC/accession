@@ -279,6 +279,8 @@ def test_accession_post_analysis(mocker, mock_accession):
         "aliases": ["encode-processing-pipeline:123"],
         "documents": ["doc"],
         "pipeline_version": "1.2.3",
+        "award": "U24HG009397",
+        "lab": "/labs/encode-processing-pipeline/",
     }
 
 

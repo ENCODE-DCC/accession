@@ -722,7 +722,7 @@ class Accession(ABC):
             documents = [posted_document]
         current_analysis = EncodeAnalysis(
             files=self.new_files,
-            lab_pi=self.common_metadata.lab_pi,
+            common_metadata=self.common_metadata,
             workflow_id=self.analysis.workflow_id,
             documents=documents,
             pipeline_version=self.pipeline_version,
