@@ -2605,6 +2605,7 @@ def accession_factory(
         "long_read_rna": AccessionLongReadRna,
         "chip_map_only": AccessionChip,
         "tf_chip_peak_call_only": AccessionChip,
+        "tf_chip_bwa_control_fastqs": AccessionChip,
         "histone_chip_peak_call_only": AccessionChip,
         "mint_chip_peak_call_only": AccessionChip,
         "tf_chip": AccessionChip,
