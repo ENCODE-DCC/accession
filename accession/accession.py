@@ -750,14 +750,16 @@ class Accession(ABC):
         payload = self.experiment.get_patchable_internal_status()
         try:
             self.conn.patch(payload)
-        except HTTPError:
-            self.logger.warning(
-                (
-                    "Could not patch experiment internal status, this is normal for "
-                    "non-admin users"
+        except HTTPError as e:
+            if e.response.status_code == HTTPStatus.UNPROCESSABLE_ENTITY:
+                self.logger.warning(
+                    (
+                        "Could not patch experiment internal status, this is normal for "
+                        "non-admin users"
+                    )
                 )
-            )
-            return
+                return
+            raise e
 
     def patch_experiment_analyses(self, analysis: EncodeGenericObject) -> None:
         payload = self.experiment.get_patchable_analyses(analysis.at_id)
