@@ -12,6 +12,7 @@ from qc_utils.parsers import (
     parse_picard_duplication_metrics,
     parse_samtools_stats,
 )
+from requests.exceptions import HTTPError
 
 from accession.accession_steps import (
     AccessionStep,
@@ -747,7 +748,16 @@ class Accession(ABC):
         accessioning has completed.
         """
         payload = self.experiment.get_patchable_internal_status()
-        self.conn.patch(payload)
+        try:
+            self.conn.patch(payload)
+        except HTTPError:
+            self.logger.warning(
+                (
+                    "Could not patch experiment internal status, this is normal for "
+                    "non-admin users"
+                )
+            )
+            return
 
     def patch_experiment_analyses(self, analysis: EncodeGenericObject) -> None:
         payload = self.experiment.get_patchable_analyses(analysis.at_id)
