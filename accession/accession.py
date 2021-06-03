@@ -12,6 +12,7 @@ from qc_utils.parsers import (
     parse_picard_duplication_metrics,
     parse_samtools_stats,
 )
+from requests.exceptions import HTTPError
 
 from accession.accession_steps import (
     AccessionStep,
@@ -722,7 +723,7 @@ class Accession(ABC):
             documents = [posted_document]
         current_analysis = EncodeAnalysis(
             files=self.new_files,
-            lab_pi=self.common_metadata.lab_pi,
+            common_metadata=self.common_metadata,
             workflow_id=self.analysis.workflow_id,
             documents=documents,
             pipeline_version=self.pipeline_version,
@@ -747,7 +748,18 @@ class Accession(ABC):
         accessioning has completed.
         """
         payload = self.experiment.get_patchable_internal_status()
-        self.conn.patch(payload)
+        try:
+            self.conn.patch(payload)
+        except HTTPError as e:
+            if e.response.status_code == HTTPStatus.UNPROCESSABLE_ENTITY:
+                self.logger.warning(
+                    (
+                        "Could not patch experiment internal status, this is normal for "
+                        "non-admin users"
+                    )
+                )
+                return
+            raise e
 
     def patch_experiment_analyses(self, analysis: EncodeGenericObject) -> None:
         payload = self.experiment.get_patchable_analyses(analysis.at_id)
@@ -2605,10 +2617,10 @@ def accession_factory(
         "long_read_rna": AccessionLongReadRna,
         "chip_map_only": AccessionChip,
         "tf_chip_peak_call_only": AccessionChip,
+        "tf_chip_bwa_control_fastqs": AccessionChip,
         "histone_chip_peak_call_only": AccessionChip,
         "mint_chip_peak_call_only": AccessionChip,
         "tf_chip": AccessionChip,
-        "tf_chip_control_fastqs": AccessionChip,
         "histone_chip": AccessionChip,
         "mint_chip": AccessionChip,
         "control_chip": AccessionChip,

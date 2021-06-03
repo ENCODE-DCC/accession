@@ -224,7 +224,7 @@ class EncodeAnalysis:
         self,
         files: List[EncodeFile],
         documents: List[EncodeGenericObject],
-        lab_pi: str,
+        common_metadata: EncodeCommonMetadata,
         workflow_id: str,
         pipeline_version: Optional[str] = None,
     ) -> None:
@@ -233,7 +233,8 @@ class EncodeAnalysis:
         document internals except for the `@id`.
         """
         self.files = files
-        self.aliases = self.get_aliases(lab_pi, workflow_id)
+        self.common_metadata = common_metadata
+        self.workflow_id = workflow_id
         self.documents = documents
         self.pipeline_version = pipeline_version
 
@@ -253,9 +254,9 @@ class EncodeAnalysis:
     def __str__(self) -> str:
         return str([str(f) for f in self.files])
 
-    @staticmethod
-    def get_aliases(lab: str, workflow_id: str) -> List[str]:
-        return [f"{lab}:{workflow_id}"]
+    @property
+    def aliases(self) -> List[str]:
+        return [f"{self.common_metadata.lab_pi}:{self.workflow_id}"]
 
     def get_portal_object(self) -> Dict[str, Any]:
         """
@@ -269,6 +270,7 @@ class EncodeAnalysis:
             "documents": [d.at_id for d in self.documents],
             "files": [f.at_id for f in self.files],
         }
+        payload.update(self.common_metadata)
         if self.pipeline_version is not None:
             payload["pipeline_version"] = self.pipeline_version
         return payload
