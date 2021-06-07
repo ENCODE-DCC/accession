@@ -138,6 +138,9 @@ def test_s3_file_bucket():
 
 def test_s3_file_md5sum_etag_is_md5sum(mocker):
     mocker.patch(
+        "accession.file.S3File._get_md5sum_from_object_tagging", return_value=None
+    )
+    mocker.patch(
         "accession.file.S3File.object_metadata",
         mocker.PropertyMock(
             return_value={"ETag": '"6640ff9ee51263e73c16cb84109365b3"'}
@@ -149,12 +152,23 @@ def test_s3_file_md5sum_etag_is_md5sum(mocker):
 
 def test_s3_file_md5sum_etag_is_not_md5sum(mocker):
     mocker.patch(
+        "accession.file.S3File._get_md5sum_from_object_tagging", return_value=None
+    )
+    mocker.patch(
         "accession.file.S3File.object_metadata",
         mocker.PropertyMock(return_value={"ETag": "md5um-2"}),
     )
     mocker.patch("accession.file.S3File._calculate_md5sum", return_value="abc")
     s3_file = S3File(key="my_task", name="s3://foo/bar/baz.qux")
     assert s3_file.md5sum == "abc"
+
+
+def test_s3_file_md5sum_from_object_tagging(mocker):
+    mocker.patch(
+        "accession.file.S3File._get_md5sum_from_object_tagging", return_value="foo"
+    )
+    s3_file = S3File(key="my_task", name="s3://foo/bar/baz.qux")
+    assert s3_file.md5sum == "foo"
 
 
 def test_s3_file_calculate_md5sum(mocker):
@@ -164,6 +178,28 @@ def test_s3_file_calculate_md5sum(mocker):
     mocker.patch("accession.file.S3File.get_object", return_value=mock_object)
     s3_file = S3File(key="my_task", name="s3://foo/bar/baz.qux")
     assert s3_file._calculate_md5sum() == "3858f62230ac3c915f300c664312c63f"
+
+
+def test_s3_file_get_md5sum_from_object_tagging(mocker):
+    stub_client = mocker.Mock()
+    stub_client.get_object_tagging.return_value = {
+        "TagSet": [{"Key": "md5sum", "Value": "123"}]
+    }
+    mocker.patch(
+        "accession.file.S3File.client", mocker.PropertyMock(return_value=stub_client)
+    )
+    s3_file = S3File(key="my_task", name="s3://foo/bar/baz.qux")
+    assert s3_file._get_md5sum_from_object_tagging() == "123"
+
+
+def test_s3_file_get_md5sum_from_object_tagging_md5sum_not_in_tagging(mocker):
+    stub_client = mocker.Mock()
+    stub_client.get_object_tagging.return_value = {"TagSet": []}
+    mocker.patch(
+        "accession.file.S3File.client", mocker.PropertyMock(return_value=stub_client)
+    )
+    s3_file = S3File(key="my_task", name="s3://foo/bar/baz.qux")
+    assert s3_file._get_md5sum_from_object_tagging() is None
 
 
 def test_s3_file_size(mocker):

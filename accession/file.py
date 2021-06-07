@@ -178,6 +178,7 @@ class S3File(File):
 
     SCHEME = "s3://"
     MD5_CHUNKSIZE = 8192
+    MD5SUM_TAG_KEY = "md5sum"
 
     def __init__(
         self,
@@ -227,8 +228,14 @@ class S3File(File):
         On S3 the ETag is the md5sum if the file was not uploaded with multipart upload.
         If multipart upload was not used then we can tell from the `-` in the ETag and
         we need to calculate the md5sums ourselves.
+
+        MD5 calculation is also bypassed if there is an "md5sum" key in the object tags
         """
         if self._md5sum is None:
+            md5sum_from_tagging = self._get_md5sum_from_object_tagging()
+            if md5sum_from_tagging is not None:
+                self._md5sum = md5sum_from_tagging
+                return md5sum_from_tagging
             # ETag is wrapped in quotes for some reason
             etag = self.object_metadata["ETag"].strip('"')
             if len(etag) == 32 and "-" not in etag:
@@ -249,6 +256,19 @@ class S3File(File):
         for chunk in self.get_object()["Body"].iter_chunks(self.MD5_CHUNKSIZE):
             md5_hash.update(chunk)
         return md5_hash.hexdigest()
+
+    def _get_md5sum_from_object_tagging(self) -> Optional[str]:
+        """
+        Tries to pull md5sum from the object tags, as is the case if the md5sum was
+        precalculated with https://github.com/ENCODE-DCC/s3-md5-hash.
+        """
+        tagging = self.client.get_object_tagging(Bucket=self.bucket, Key=self.key)
+        md5sum_tag = [
+            tag for tag in tagging["TagSet"] if tag["Key"] == self.MD5SUM_TAG_KEY
+        ]
+        if not md5sum_tag:
+            return None
+        return md5sum_tag[0]["Value"]
 
     def get_object(self) -> "GetObjectOutputTypeDef":
         return self.client.get_object(Bucket=self.bucket, Key=self.key)
