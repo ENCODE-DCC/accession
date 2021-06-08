@@ -1,0 +1,136 @@
+{
+  "accession.steps": [
+    {
+      "dcc_step_run": "hic-alignment-merging-filtering-step-v-1",
+      "dcc_step_version": "/analysis-step-versions/hic-alignment-merging-filtering-step-v-1-0/",
+      "wdl_files": [
+        {
+          "derived_from_files": [
+            {
+              "derived_from_filekey": "replicate.read_1",
+              "derived_from_inputs": true,
+              "derived_from_task": "ScatterAt72_17"
+            },
+            {
+              "derived_from_filekey": "replicate.read_2",
+              "derived_from_inputs": true,
+              "derived_from_task": "ScatterAt72_17"
+            },
+            {
+              "derived_from_filekey": "reference_index",
+              "derived_from_inputs": true,
+              "derived_from_task": "ScatterAt72_17"
+            },
+            {
+              "derived_from_filekey": "restriction_sites",
+              "derived_from_inputs": true,
+              "derived_from_task": "ScatterAt91_21"
+            }
+          ],
+          "file_format": "bam",
+          "filekey": "deduped_bam",
+          "output_type": "alignments",
+          "quality_metrics": [
+            "hic"
+          ]
+        }
+      ],
+      "wdl_task_name": "dedup"
+    },
+    {
+      "dcc_step_run": "hic-pairs-generation-step-v-1",
+      "dcc_step_version": "/analysis-step-versions/hic-pairs-generation-step-v-1-0/",
+      "wdl_files": [
+        {
+          "derived_from_files": [
+            {
+              "derived_from_filekey": "deduped_bam",
+              "derived_from_task": "dedup"
+            },
+            {
+              "derived_from_filekey": "chrz_",
+              "derived_from_inputs": true,
+              "derived_from_task": "bam2pairs"
+            }
+          ],
+          "file_format": "pairs",
+          "filekey": "out_file",
+          "output_type": "pairs",
+          "quality_metrics": []
+        }
+      ],
+      "wdl_task_name": "bam2pairs"
+    },
+    {
+      "dcc_step_run": "hic-merging-quantification-interaction-calling-step-v-1",
+      "dcc_step_version": "/analysis-step-versions/hic-merging-quantification-interaction-calling-step-v-1-0/",
+      "wdl_files": [
+        {
+          "callbacks": [
+            "maybe_update_output_type"
+          ],
+          "derived_from_files": [
+            {
+              "derived_from_filekey": "deduped_bam",
+              "derived_from_task": "dedup"
+            },
+            {
+              "derived_from_filekey": "restriction_sites",
+              "derived_from_inputs": true,
+              "derived_from_task": "create_hic"
+            }
+          ],
+          "file_format": "hic",
+          "filekey": "out_file",
+          "output_type": "chromatin interactions",
+          "quality_metrics": [
+            "hic"
+          ]
+        }
+      ],
+      "wdl_task_name": "create_hic"
+    },
+    {
+      "dcc_step_run": "hic-tads-calling-step-v-1",
+      "dcc_step_version": "/analysis-step-versions/hic-tads-calling-step-v-1-0/",
+      "wdl_files": [
+        {
+          "derived_from_files": [
+            {
+              "derived_from_filekey": "create_hic",
+              "derived_from_task": "out_file"
+            }
+          ],
+          "file_format": "bedpe",
+          "filekey": "out_file",
+          "output_type": "topologically associated domains",
+          "quality_metrics": []
+        }
+      ],
+      "wdl_task_name": "arrowhead"
+    },
+    {
+      "dcc_step_run": "hic-loop-calling-step-v-1",
+      "dcc_step_version": "/analysis-step-versions/hic-loop-calling-step-v-1-0",
+      "wdl_files": [
+        {
+          "derived_from_files": [
+            {
+              "derived_from_filekey": "create_hic",
+              "derived_from_task": "out_file"
+            }
+          ],
+          "file_format": "bedpe",
+          "filekey": "out_file",
+          "output_type": "long range chromatin interactions",
+          "quality_metrics": []
+        }
+      ],
+      "wdl_task_name": "hiccups"
+    }
+  ],
+  "raw_fastqs_keys": [
+    "replicate.read_1",
+    "replicate.read_2"
+  ]
+}
