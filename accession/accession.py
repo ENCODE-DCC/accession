@@ -2796,16 +2796,18 @@ class AccessionHic(Accession):
         return {}
 
     def make_hic_qc(self, encode_file: EncodeFile, file: File) -> None:
-        self._make_hic_qc(encode_file, file, task_name="calculate_stats")
-
-    def make_hic_library_qc(self, encode_file: EncodeFile, file: File) -> None:
-        self._make_hic_qc(encode_file, file, task_name="calculate_stats_on_library")
-
-    def _make_hic_qc(self, encode_file: EncodeFile, file: File, task_name: str) -> None:
         if encode_file.has_qc("HicQualityMetric"):
             return
         task = file.get_task()
-        hic_qc_file = self.analysis.search_down(task, task_name, "stats_json")[0]
+        hic_qc_file = self.analysis.search_up(task, "calculate_stats", "stats_json")[0]
+        hic_qc = hic_qc_file.read_json()
+        return self.queue_qc(hic_qc, encode_file, "hic-quality-metric")
+
+    def make_hic_library_qc(self, encode_file: EncodeFile, file: File) -> None:
+        if encode_file.has_qc("HicQualityMetric"):
+            return
+        task = file.get_task()
+        hic_qc_file = self.analysis.search_down(task, "calculate_stats_on_library", "stats_json")[0]
         hic_qc = hic_qc_file.read_json()
         return self.queue_qc(hic_qc, encode_file, "hic-quality-metric")
 
