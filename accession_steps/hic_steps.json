@@ -128,7 +128,6 @@
     }
   ],
   "raw_fastqs_keys": [
-    "replicate.read_1",
-    "replicate.read_2"
+    "replicate"
   ]
 }
