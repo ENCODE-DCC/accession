@@ -59,7 +59,10 @@ class Analysis:
 
     # Makes an instance of task with input and output GSFile instances
     def make_task(self, task_name: str, task: Dict[str, Any]) -> Task:
-        new_task = Task(task_name.split(".")[1], task)
+        """
+        Handles tasks with task names like `workflow.task` and `scatterAt-12-34`
+        """
+        new_task = Task(task_name.split(".")[-1], task)
         return new_task
 
     def get_or_make_files(
