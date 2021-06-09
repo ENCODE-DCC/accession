@@ -2789,6 +2789,12 @@ class AccessionHic(Accession):
             return {"preferred_default": True}
         return {}
 
+    def maybe_update_output_type(self, file: File) -> Dict[str, str]:
+        quality = file.get_task().inputs["quality"]
+        if quality == 30:
+            return {"output_type": "mapping quality thresholded chromatin interactions"}
+        return {}
+
     def make_hic_qc(self, encode_file: EncodeFile, file: File) -> None:
         self._make_hic_qc(encode_file, file, task_name="calculate_stats")
 
