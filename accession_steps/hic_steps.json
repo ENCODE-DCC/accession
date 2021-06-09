@@ -7,12 +7,7 @@
         {
           "derived_from_files": [
             {
-              "derived_from_filekey": "replicate.read_1",
-              "derived_from_inputs": true,
-              "derived_from_task": "ScatterAt72_17"
-            },
-            {
-              "derived_from_filekey": "replicate.read_2",
+              "derived_from_filekey": "replicate",
               "derived_from_inputs": true,
               "derived_from_task": "ScatterAt72_17"
             },
@@ -31,7 +26,7 @@
           "filekey": "deduped_bam",
           "output_type": "alignments",
           "quality_metrics": [
-            "hic"
+            "hic_library"
           ]
         }
       ],
@@ -67,7 +62,8 @@
       "wdl_files": [
         {
           "callbacks": [
-            "maybe_update_output_type"
+            "maybe_update_output_type",
+            "maybe_preferred_default"
           ],
           "derived_from_files": [
             {
@@ -93,6 +89,7 @@
     {
       "dcc_step_run": "hic-tads-calling-step-v-1",
       "dcc_step_version": "/analysis-step-versions/hic-tads-calling-step-v-1-0/",
+      "maybe_preferred_default": true,
       "wdl_files": [
         {
           "derived_from_files": [
@@ -112,6 +109,7 @@
     {
       "dcc_step_run": "hic-loop-calling-step-v-1",
       "dcc_step_version": "/analysis-step-versions/hic-loop-calling-step-v-1-0",
+      "maybe_preferred_default": true,
       "wdl_files": [
         {
           "derived_from_files": [

@@ -2756,6 +2756,54 @@ class AccessionWgbs(Accession):
         )
 
 
+class AccessionHic(Accession):
+    QC_MAP = {"hic": "make_hic_qc", "hic_library": "make_hic_library_qc"}
+
+    @property
+    def assembly(self) -> str:
+        filekey = "reference_index"
+        return self.find_portal_property_from_filekey(filekey, EncodeFile.ASSEMBLY)
+
+    def preferred_default_should_be_updated(
+        self, qc_value: Union[int, float], current_best_qc_value: Union[int, float]
+    ) -> bool:
+        """
+        There is only one set of loop and TAD calls per Hi-C experiment so it's OK to
+        always update the preferred_default for those files.
+        """
+        return True
+
+    def get_preferred_default_qc_value(self, file: File) -> Union[int, float]:
+        """
+        Just a dummy value since there is only one set of loops/TADs per experiment
+        """
+        return 1
+
+    def maybe_preferred_default(self, file: File) -> Dict[str, bool]:
+        """
+        Needed for the .hic files. For in-situ Hi-C MAPQ>=30 should be the default and
+        for intact Hi-C it should be the MAPQ>=1 map. However there is no reliable way
+        to distinguish this in the portal metadata so we just use the MAPQ>=30 for now.
+        """
+        if file.get_task().inputs["quality"] == 30:
+            return {"preferred_default": True}
+        return {}
+
+    def make_hic_qc(self, encode_file: EncodeFile, file: File) -> None:
+        self._make_hic_qc(encode_file, file, task_name="calculate_stats")
+
+    def make_hic_library_qc(self, encode_file: EncodeFile, file: File) -> None:
+        self._make_hic_qc(encode_file, file, task_name="calculate_stats_on_library")
+
+    def _make_hic_qc(self, encode_file: EncodeFile, file: File, task_name: str) -> None:
+        if encode_file.has_qc("HicQualityMetric"):
+            return
+        task = file.get_task()
+        hic_qc_file = self.analysis.search_down(task, task_name, "stats_json")[0]
+        hic_qc = hic_qc_file.read_json()
+        return self.queue_qc(hic_qc, encode_file, "hic-quality-metric")
+
+
 def accession_factory(
     pipeline_type: str,
     accession_metadata: str,
@@ -2793,6 +2841,7 @@ def accession_factory(
         "dnase_no_footprints": AccessionDnase,
         "dnase_starch_from_bam": AccessionDnaseStarchFromBam,
         "wgbs": AccessionWgbs,
+        "hic": AccessionHic,
     }
     selected_accession: Optional[Type[Accession]] = None
     try:
