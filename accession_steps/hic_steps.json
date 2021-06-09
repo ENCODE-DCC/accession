@@ -94,8 +94,8 @@
         {
           "derived_from_files": [
             {
-              "derived_from_filekey": "create_hic",
-              "derived_from_task": "output_hic"
+              "derived_from_filekey": "output_hic",
+              "derived_from_task": "create_hic"
             }
           ],
           "file_format": "bedpe",
@@ -115,7 +115,7 @@
           "derived_from_files": [
             {
               "derived_from_filekey": "output_hic",
-              "derived_from_task": "out_file"
+              "derived_from_task": "create_hic"
             }
           ],
           "file_format": "bedpe",

@@ -2807,7 +2807,9 @@ class AccessionHic(Accession):
         if encode_file.has_qc("HicQualityMetric"):
             return
         task = file.get_task()
-        hic_qc_file = self.analysis.search_down(task, "calculate_stats_on_library", "stats_json")[0]
+        hic_qc_file = self.analysis.search_down(
+            task, "calculate_stats_on_library", "stats_json"
+        )[0]
         hic_qc = hic_qc_file.read_json()
         return self.queue_qc(hic_qc, encode_file, "hic-quality-metric")
 
