@@ -394,6 +394,7 @@ def mock_metadata(wdl_workflow):
 class MockAccessionSteps:
     path_to_json = "/dev/null"
     content = {"accession.steps": [{"a": "b"}]}
+    pipeline_type_in_analysis_aliases = False
 
 
 @pytest.fixture
