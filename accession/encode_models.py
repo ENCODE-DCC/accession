@@ -227,6 +227,7 @@ class EncodeAnalysis:
         common_metadata: EncodeCommonMetadata,
         workflow_id: str,
         pipeline_version: Optional[str] = None,
+        pipeline_type: Optional[str] = None,
     ) -> None:
         """
         `documents` is a list of `EncodeGenericObject` that gives no access to the
@@ -237,6 +238,7 @@ class EncodeAnalysis:
         self.workflow_id = workflow_id
         self.documents = documents
         self.pipeline_version = pipeline_version
+        self.pipeline_type = pipeline_type
 
     def __eq__(  # type: ignore  # https://github.com/python/mypy/issues/2783
         self, other
@@ -256,7 +258,12 @@ class EncodeAnalysis:
 
     @property
     def aliases(self) -> List[str]:
-        return [f"{self.common_metadata.lab_pi}:{self.workflow_id}"]
+        return [
+            (
+                f"{self.common_metadata.lab_pi}:{self.workflow_id}"
+                f"{'-' + self.pipeline_type if self.pipeline_type is not None else ''}"
+            )
+        ]
 
     def get_portal_object(self) -> Dict[str, Any]:
         """

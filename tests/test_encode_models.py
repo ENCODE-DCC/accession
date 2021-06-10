@@ -299,6 +299,17 @@ def test_encode_analysis_from_files_and_metadata(encode_file, encode_common_meta
     assert result.pipeline_version is None
 
 
+def test_encode_analysis_aliases(encode_file, encode_common_metadata):
+    result = EncodeAnalysis(
+        files=[encode_file],
+        common_metadata=encode_common_metadata,
+        workflow_id="bar",
+        documents=[],
+        pipeline_type="pipeline",
+    )
+    assert result.aliases == ["lab:bar-pipeline"]
+
+
 @pytest.mark.parametrize(
     "analysis,expected",
     [

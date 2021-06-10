@@ -73,6 +73,7 @@ class Accession(ABC):
         no_log_file: bool = False,
         queue_info: Optional[QueueInfo] = None,
         private_filenames: bool = False,
+        pipeline_type: Optional[str] = None,
     ) -> None:
         self.analysis = analysis
         self.steps = steps
@@ -85,6 +86,7 @@ class Accession(ABC):
         self.log_file_path = log_file_path
         self.no_log_file = no_log_file
         self.private_filenames = private_filenames
+        self.pipeline_type = pipeline_type
         # keys are hex md5sums, values are lists of portal objects
         self.search_cache: LruCache[str, List[Dict[str, Any]]] = LruCache()
         self.preferred_default_file_patches: Dict[str, PreferredDefaultFilePatch] = {}
@@ -721,12 +723,16 @@ class Accession(ABC):
             )
             posted_document = self.post_document(document)
             documents = [posted_document]
+        pipeline_type = (
+            self.pipeline_type if self.steps.pipeline_type_in_analysis_aliases else None
+        )
         current_analysis = EncodeAnalysis(
             files=self.new_files,
             common_metadata=self.common_metadata,
             workflow_id=self.analysis.workflow_id,
             documents=documents,
             pipeline_version=self.pipeline_version,
+            pipeline_type=pipeline_type,
         )
         payload = current_analysis.get_portal_object()
         response, status_code = self.conn.post(
@@ -2617,6 +2623,7 @@ def accession_factory(
         "long_read_rna": AccessionLongReadRna,
         "chip_map_only": AccessionChip,
         "tf_chip_peak_call_only": AccessionChip,
+        "control_chip_bwa_control_fastqs": AccessionChip,
         "tf_chip_bwa_control_fastqs": AccessionChip,
         "histone_chip_peak_call_only": AccessionChip,
         "mint_chip_peak_call_only": AccessionChip,
@@ -2677,6 +2684,7 @@ def accession_factory(
         no_log_file=no_log_file,
         queue_info=queue_info,
         private_filenames=private_filenames,
+        pipeline_type=pipeline_type,
     )
 
 

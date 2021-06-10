@@ -52,6 +52,10 @@ class AccessionSteps:
     def raw_fastqs_can_have_task(self) -> bool:
         return self.steps.get("raw_fastqs_can_have_task", False)
 
+    @property
+    def pipeline_type_in_analysis_aliases(self) -> bool:
+        return self.steps.get("pipeline_type_in_analysis_aliases", False)
+
 
 class DerivedFromFile:
     def __init__(self, derived_from_file: Dict[str, Any]) -> None:

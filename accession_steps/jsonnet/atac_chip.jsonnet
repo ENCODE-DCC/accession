@@ -390,7 +390,7 @@
   local chip_bwa_map_only_steps = AtacChipMapOnlySteps(bwa=true),
   local atac_idr_peak_call_steps = AtacTfChipPeakCallOnlySteps(is_atac=true),
   local atac_overlap_peak_call_steps = AtacHistoneMintPeakCallSteps(is_atac=true),
-  local control_chip_separate_control_task = AtacChipMapOnlySteps(is_control=true, separate_control_task=true, bwa=true),
+  'control_chip_bwa_control_fastqs_steps.json': AtacChipMapOnlySteps(is_control=true, separate_control_task=true, bwa=true) + { pipeline_type_in_analysis_aliases: true },
   'chip_map_only_steps.json': AtacChipMapOnlySteps(),
   'control_chip_steps.json': AtacChipMapOnlySteps(is_control=true),
   'control_chip_pbam_steps.json': AtacChipMapOnlySteps(is_control=true, pbam=true),
@@ -402,7 +402,8 @@
     raw_fastqs_keys: $['chip_map_only_steps.json'].raw_fastqs_keys,
   },
   'tf_chip_bwa_control_fastqs_steps.json': {
-    'accession.steps': control_chip_separate_control_task['accession.steps'] + chip_bwa_map_only_steps['accession.steps'] + $['tf_chip_peak_call_only_steps.json']['accession.steps'],
+    'accession.steps': chip_bwa_map_only_steps['accession.steps'] + $['tf_chip_peak_call_only_steps.json']['accession.steps'],
+    pipeline_type_in_analysis_aliases: true,
     raw_fastqs_keys: $['chip_map_only_steps.json'].raw_fastqs_keys,
   },
   'tf_chip_pbam_steps.json': {
