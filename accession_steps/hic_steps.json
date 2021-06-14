@@ -119,7 +119,7 @@
             }
           ],
           "file_format": "bedpe",
-          "filekey": "out_file",
+          "filekey": "merged_loops",
           "output_type": "long range chromatin interactions",
           "quality_metrics": []
         }
