@@ -2,7 +2,7 @@ import os
 import tempfile
 from collections import OrderedDict
 from contextlib import contextmanager
-from typing import Any, Dict, Generic, Iterator, List, Optional, TypeVar, Union
+from typing import Any, Dict, Generic, Iterator, List, Optional, Tuple, TypeVar, Union
 
 from encode_utils.connection import Connection
 
@@ -118,3 +118,12 @@ def impersonate_file(data: bytes) -> Iterator[str]:
         yield temporary_file.name
     finally:
         os.unlink(temporary_file.name)
+
+
+def get_api_keys_from_env() -> Tuple[str, str]:
+    """
+    Extracted from encode_utils.connection.Connection
+    """
+    api_key = os.environ["DCC_API_KEY"]
+    secret_key = os.environ["DCC_SECRET_KEY"]
+    return api_key, secret_key

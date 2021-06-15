@@ -8,9 +8,11 @@ from typing import TYPE_CHECKING, Any, Dict, Optional
 from urllib.parse import urlparse
 
 import boto3
+import requests
 from google.cloud.storage.blob import Blob
 from google.cloud.storage.client import Client
 
+from accession.helpers import get_api_keys_from_env
 from accession.task import Task
 
 if TYPE_CHECKING:
@@ -179,6 +181,12 @@ class S3File(File):
     SCHEME = "s3://"
     MD5_CHUNKSIZE = 8192
     MD5SUM_TAG_KEY = "md5sum"
+    PORTAL_BUCKETS = (
+        "encode-public",
+        "encode-private",
+        "encode-files",
+        "encode-files-dev",
+    )
 
     def __init__(
         self,
@@ -232,6 +240,9 @@ class S3File(File):
         MD5 calculation is also bypassed if there is an "md5sum" key in the object tags
         """
         if self._md5sum is None:
+            if self.bucket in self.PORTAL_BUCKETS:
+                self._md5sum = self._get_md5sum_from_portal()
+                return self._md5sum
             md5sum_from_tagging = self._get_md5sum_from_object_tagging()
             if md5sum_from_tagging is not None:
                 self._md5sum = md5sum_from_tagging
@@ -269,6 +280,24 @@ class S3File(File):
         if not md5sum_tag:
             return None
         return md5sum_tag[0]["Value"]
+
+    def _get_md5sum_from_portal(self) -> str:
+        """
+        Will error if the md5sum could not be found on the portal, most likely to occur
+        when file is not in ES for some reason.
+        """
+        auth = get_api_keys_from_env()
+        response = requests.get(
+            f"https://www.encodeproject.org/search/?type=File&field=md5sum&s3_uri={self.filename}",
+            auth=auth,
+        )
+        response.raise_for_status()
+        data = response.json()
+        if len(data["@graph"]) != 1:
+            raise ValueError(
+                f"Could not find file on portal with s3_uri {self.filename}"
+            )
+        return data["@graph"][0]["md5sum"]
 
     def get_object(self) -> "GetObjectOutputTypeDef":
         return self.client.get_object(Bucket=self.bucket, Key=self.key)
