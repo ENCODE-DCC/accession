@@ -12,6 +12,7 @@ import requests
 from google.cloud.storage.blob import Blob
 from google.cloud.storage.client import Client
 
+from accession.helpers import get_api_keys_from_env
 from accession.task import Task
 
 if TYPE_CHECKING:
@@ -281,8 +282,14 @@ class S3File(File):
         return md5sum_tag[0]["Value"]
 
     def _get_md5sum_from_portal(self) -> str:
+        """
+        Will error if the md5sum could not be found on the portal, most likely to occur
+        when file is not in ES for some reason.
+        """
+        auth = get_api_keys_from_env()
         response = requests.get(
-            f"https://www.encodeproject.org/search/?type=File&field=md5sum&s3_uri={self.filename}"
+            f"https://www.encodeproject.org/search/?type=File&field=md5sum&s3_uri={self.filename}",
+            auth=auth,
         )
         response.raise_for_status()
         data = response.json()

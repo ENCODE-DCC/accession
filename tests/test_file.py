@@ -30,6 +30,11 @@ def gs_file_with_name_and_bucket(mocker):
     return file
 
 
+@pytest.fixture
+def auth(mocker):
+    mocker.patch.dict("os.environ", {"DCC_API_KEY": "foo", "DCC_SECRET_KEY": "bar"})
+
+
 def stub_download_as_string(start=None, end=None, data=b"abc123"):
     if start is None:
         start = 0
@@ -171,12 +176,27 @@ def test_s3_file_md5sum_from_object_tagging(mocker):
     assert s3_file.md5sum == "foo"
 
 
-def test_s3_file_md5sum_from_portal(mocker):
+def test_s3_file_md5sum_from_portal(mocker, auth):
+    mocker.patch("accession.file.S3File._get_md5usm_from_portal", return_value="12")
+    s3_file = S3File(key="my_task", name="s3://encode-files/bar/baz.qux")
+    assert s3_file._get_md5sum_from_portal() == "12"
+
+
+def test_s3_file_get_md5sum_from_portal(mocker, auth):
     stub_response = mocker.Mock()
     stub_response.json.return_value = {"@graph": [{"md5sum": "123abc"}]}
     mocker.patch("requests.get", return_value=stub_response)
     s3_file = S3File(key="my_task", name="s3://encode-files/bar/baz.qux")
-    assert s3_file.md5sum == "123abc"
+    assert s3_file._get_md5sum_from_portal() == "123abc"
+
+
+def test_s3_file_get_md5sum_from_portal_no_results_raises(mocker, auth):
+    stub_response = mocker.Mock()
+    stub_response.json.return_value = {"@graph": []}
+    mocker.patch("requests.get", return_value=stub_response)
+    s3_file = S3File(key="my_task", name="s3://encode-files/bar/baz.qux")
+    with pytest.raises(ValueError):
+        s3_file._get_md5sum_from_portal()
 
 
 def test_s3_file_calculate_md5sum(mocker):
