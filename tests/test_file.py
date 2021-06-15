@@ -177,7 +177,7 @@ def test_s3_file_md5sum_from_object_tagging(mocker):
 
 
 def test_s3_file_md5sum_from_portal(mocker, auth):
-    mocker.patch("accession.file.S3File._get_md5usm_from_portal", return_value="12")
+    mocker.patch("accession.file.S3File._get_md5sum_from_portal", return_value="12")
     s3_file = S3File(key="my_task", name="s3://encode-files/bar/baz.qux")
     assert s3_file._get_md5sum_from_portal() == "12"
 
