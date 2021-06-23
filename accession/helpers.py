@@ -149,3 +149,10 @@ def get_api_keys_from_env() -> Tuple[str, str]:
     api_key = os.environ["DCC_API_KEY"]
     secret_key = os.environ["DCC_SECRET_KEY"]
     return api_key, secret_key
+
+
+def get_bucket_and_key_from_s3_uri(s3_uri: str) -> Tuple[str, str]:
+    path_parts = s3_uri.replace("s3://", "").split("/")
+    bucket = path_parts.pop(0)
+    key = "/".join(path_parts)
+    return bucket, key

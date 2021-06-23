@@ -81,6 +81,7 @@ class AwsBackend(Backend):
 
     def __init__(self) -> None:
         self._client: Optional["S3Client"] = None
+        self._account_id: Optional[str] = None
 
     @property
     def client(self) -> "S3Client":
@@ -106,6 +107,15 @@ class AwsBackend(Backend):
 
     def is_valid_uri(self, uri: str) -> bool:
         return uri.startswith(S3File.SCHEME)
+
+    @property
+    def account_id(self) -> str:
+        """
+        Needed for file upload
+        """
+        if self._account_id is None:
+            self._account_id = boto3.client("sts").get_caller_identity()["Account"]
+        return self._account_id
 
 
 class LocalBackend(Backend):

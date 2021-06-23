@@ -2,9 +2,21 @@ import logging
 from abc import ABC, abstractmethod
 from http import HTTPStatus
 from pathlib import Path
-from typing import Any, Callable, Dict, List, Optional, Tuple, Type, Union, cast
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Callable,
+    Dict,
+    List,
+    Optional,
+    Tuple,
+    Type,
+    Union,
+    cast,
+)
 
 import boto3
+from boto3.s3.transfer import TransferConfig
 from encode_utils.connection import Connection
 from qc_utils.parsers import (
     parse_flagstats,
@@ -56,12 +68,17 @@ from accession.helpers import (
     PreferredDefaultFilePatch,
     Recorder,
     flatten,
+    get_bucket_and_key_from_s3_uri,
     impersonate_file,
     string_to_number,
 )
 from accession.logger_factory import logger_factory
 from accession.metadata import Metadata, metadata_factory
 from accession.preflight import MatchingMd5Record, PreflightHelper
+
+if TYPE_CHECKING:
+    from mypy_boto3_s3.client import S3Client
+    from mypy_boto3_s3.type_defs import CopySourceTypeDef
 
 BOTO3_DEFAULT_MULTIPART_CHUNKSIZE = 8_388_608
 BOTO3_MULTIPART_MAX_PARTS = 10_000
@@ -321,6 +338,9 @@ class Accession(ABC):
         the environment) then will upload using Cloud Tasks, otherwise will fallback
         to local file upload if the file is on Google Cloud Storage.
         """
+        if isinstance(file, S3File):
+            self._upload_file_s3_to_s3(encode_file, file)
+            return
         if self.cloud_tasks_upload_client is None:
             self.logger.info(
                 (
@@ -334,6 +354,45 @@ class Accession(ABC):
         if not isinstance(file, GSFile):
             raise ValueError("Cannot upload local files via Cloud Tasks")
         self._upload_file_using_cloud_tasks(encode_file, file)
+
+    def _get_s3_client_and_credentials(
+        self, encode_file: EncodeFile
+    ) -> "Tuple[S3Client,Dict[str,str]]":
+        credentials = self.conn.regenerate_aws_upload_creds(encode_file.accession)
+        client = boto3.client(
+            "s3",
+            aws_access_key_id=credentials["access_key"],
+            aws_secret_access_key=credentials["secret_key"],
+            aws_session_token=credentials["session_token"],
+        )
+        return client, credentials
+
+    def _get_s3_transfer_config(self, file_size: int) -> TransferConfig:
+        multipart_chunksize = self._calculate_multipart_chunksize(file_size)
+        transfer_config = TransferConfig(multipart_chunksize=multipart_chunksize)
+        return transfer_config
+
+    def _upload_file_s3_to_s3(self, encode_file: EncodeFile, s3_file: S3File) -> None:
+        """
+        The S3 client `copy` works about as well as AWS CLI, should expect ~150 MB/s
+        copy speed on a decent connection. Requires that the ENCODE AWS account have
+        read access to the objects to be uploaded, this can be set in the bucket policy.
+        """
+        s3_client, credentials = self._get_s3_client_and_credentials(encode_file)
+        destination_s3_uri = credentials["upload_url"]
+        bucket, key = get_bucket_and_key_from_s3_uri(destination_s3_uri)
+        transfer_config = self._get_s3_transfer_config(s3_file.size)
+        copy_source: "CopySourceTypeDef" = {
+            "Bucket": s3_file.bucket,
+            "Key": s3_file.key,
+        }
+        self.logger.info(
+            "Uploading file %s to %s", s3_file.filename, destination_s3_uri
+        )
+        s3_client.copy(
+            Bucket=bucket, Key=key, CopySource=copy_source, Config=transfer_config
+        )
+        self.logger.info("Finished uploading file %s", s3_file.filename)
 
     def _upload_file_locally(self, encode_file: EncodeFile, file: File) -> None:
         """
@@ -350,24 +409,12 @@ class Accession(ABC):
         Extensive testing revealed that for the boto3 default transfer config performed
         satisfactorily, see PIP-745
         """
-        credentials = self.conn.regenerate_aws_upload_creds(encode_file.accession)
-        s3 = boto3.client(
-            "s3",
-            aws_access_key_id=credentials["access_key"],
-            aws_secret_access_key=credentials["secret_key"],
-            aws_session_token=credentials["session_token"],
-        )
+        s3, credentials = self._get_s3_client_and_credentials(encode_file)
         s3_uri = credentials["upload_url"]
-        path_parts = s3_uri.replace("s3://", "").split("/")
-        bucket = path_parts.pop(0)
-        key = "/".join(path_parts)
-        multipart_chunksize = self._calculate_multipart_chunksize(file.size)
-        transfer_config = boto3.s3.transfer.TransferConfig(  # type: ignore
-            multipart_chunksize=multipart_chunksize
-        )
-        fileobj = file.get_object()["Body"] if isinstance(file, S3File) else file
+        bucket, key = get_bucket_and_key_from_s3_uri(s3_uri)
+        transfer_config = self._get_s3_transfer_config(file.size)
         self.logger.info("Uploading file %s to %s", file.filename, s3_uri)
-        s3.upload_fileobj(fileobj, bucket, key, Config=transfer_config)
+        s3.upload_fileobj(file, bucket, key, Config=transfer_config)  # type: ignore
         self.logger.info("Finished uploading file %s", file.filename)
 
     def _calculate_multipart_chunksize(self, file_size_bytes: int) -> int:
@@ -400,9 +447,7 @@ class Accession(ABC):
             aws_session_token=credentials["session_token"],
         )
         s3_uri = credentials["upload_url"]
-        path_parts = s3_uri.replace("s3://", "").split("/")
-        bucket = path_parts.pop(0)
-        key = "/".join(path_parts)
+        bucket, key = get_bucket_and_key_from_s3_uri(s3_uri)
         aws_s3_object = AwsS3Object(bucket=bucket, key=key)
         upload_payload = UploadPayload(
             aws_credentials=aws_credentials, aws_s3_object=aws_s3_object, gcs_blob=file

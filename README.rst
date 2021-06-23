@@ -23,7 +23,7 @@ accession
 Installation
 =============
 
-Note: intallation requires Python >= 3.6
+Note: installation requires Python >= 3.6
 
 .. code-block:: console
 
@@ -104,6 +104,45 @@ Deploying on Google Cloud
   `hostname` and use `8000` for the `port`. For the connection to work the Caper VM
   will need to have the tag `caper-server`. Also note that the deployment assumes the
   Cromwell server port is set to `8000`.
+
+AWS Notes
+=========
+
+To enable S3 to S3 copy from the pipeline buckets to the ENCODE buckets, ensure that the
+pipeline bucket policy grants read access to the ENCODE account. Here is an example
+policy:
+
+.. code-block:: json
+
+    {
+        "Version": "2012-10-17",
+        "Statement": [
+            {
+                "Sid": "DelegateS3AccessGet",
+                "Effect": "Allow",
+                "Principal": {
+                    "AWS": [
+                        "arn:aws:iam::618537831167:root",
+                        "arn:aws:iam::159877419961:root"
+                    ]
+                },
+                "Action": "s3:GetObject",
+                "Resource": "arn:aws:s3:::PIPELINE-BUCKET/*"
+            },
+            {
+                "Sid": "DelegateS3AccessList",
+                "Effect": "Allow",
+                "Principal": {
+                    "AWS": [
+                        "arn:aws:iam::618537831167:root",
+                        "arn:aws:iam::159877419961:root"
+                    ]
+                },
+                "Action": "s3:ListBucket",
+                "Resource": "arn:aws:s3:::PIPELINE-BUCKET"
+            }
+        ]
+    }
 
 .. short-intro-end
 

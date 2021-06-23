@@ -2,6 +2,7 @@ from accession.helpers import (
     LruCache,
     PreferredDefaultFilePatch,
     flatten,
+    get_bucket_and_key_from_s3_uri,
     impersonate_file,
     string_to_number,
 )
@@ -117,3 +118,8 @@ def test_impersonate_file() -> None:
     assert len(data) == 2
     assert isinstance(data[0], str)
     assert data[1] == "secondline\n"
+
+
+def test_get_bucket_and_key_from_s3_uri():
+    result = get_bucket_and_key_from_s3_uri("s3://foo/bar.baz")
+    assert result == ("foo", "bar.baz")
