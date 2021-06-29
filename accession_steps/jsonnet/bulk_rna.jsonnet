@@ -222,6 +222,7 @@
             file_format: 'tsv',
             filekey: 'genes_results',
             output_type: 'gene quantifications',
+            maybe_preferred_default: true,
             quality_metrics: [
               'number_of_genes_detected_qc',
               'mad_qc_metric',
