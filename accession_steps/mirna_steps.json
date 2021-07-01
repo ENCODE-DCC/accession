@@ -51,6 +51,7 @@
           "file_format": "tsv",
           "filekey": "tsv",
           "output_type": "microRNA quantifications",
+          "maybe_preferred_default": true,
           "quality_metrics": [
             "mirna_quantification",
             "mirna_correlation"
