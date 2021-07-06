@@ -6,6 +6,7 @@ from accession.accession import AccessionChip
 from accession.analysis import Analysis
 from accession.encode_models import EncodeFile
 from accession.file import GSFile
+from accession.helpers import Recorder
 from accession.task import Task
 
 
@@ -72,6 +73,7 @@ def mock_accession_chip_unpatched_properties(
         Analysis(mock_metadata, backend=mock_accession_gc_backend),
         server_name,
         common_metadata,
+        Recorder(use_in_memory_db=True),
         no_log_file=True,
     )
     return mocked_accession

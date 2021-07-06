@@ -37,6 +37,7 @@ from accession.encode_models import (
     EncodeFile,
 )
 from accession.file import GSFile
+from accession.helpers import Recorder
 from accession.metadata import FileMetadata
 from accession.task import Task
 
@@ -502,6 +503,7 @@ def mock_accession(
         Analysis(mock_metadata, backend=mock_accession_gc_backend),
         create_autospec(Connection, dcc_url=server_name),
         common_metadata,
+        Recorder(use_in_memory_db=True),
         no_log_file=True,
     )
     return mocked_accession
@@ -525,6 +527,7 @@ def mock_accession_not_patched(
         Analysis(mock_metadata, backend=mock_accession_gc_backend),
         create_autospec(Connection, dcc_url=server_name),
         common_metadata,
+        Recorder(use_in_memory_db=True),
         no_log_file=True,
     )
     return mock_accession
@@ -572,6 +575,7 @@ def mock_accession_chip(
         Analysis(mock_metadata, backend=mock_accession_gc_backend),
         server_name,
         common_metadata,
+        Recorder(use_in_memory_db=True),
         no_log_file=True,
     )
     return mocked_accession
@@ -609,6 +613,7 @@ def mock_accession_unreplicated(
         Analysis(mock_metadata, backend=mock_accession_gc_backend),
         "mock_server.biz",
         EncodeCommonMetadata(lab, award),
+        Recorder(use_in_memory_db=True),
         no_log_file=True,
     )
     return mocked_accession

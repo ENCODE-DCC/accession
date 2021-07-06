@@ -29,7 +29,6 @@ from accession.cloud_tasks import (
     QueueInfo,
     UploadPayload,
 )
-from accession.database.connection import DbSession
 from accession.database.models import (
     DbFile,
     QualityMetric,
@@ -52,8 +51,10 @@ from accession.encode_models import (
 )
 from accession.file import File, GSFile, S3File
 from accession.helpers import (
+    AbstractRecorder,
     LruCache,
     PreferredDefaultFilePatch,
+    Recorder,
     flatten,
     impersonate_file,
     string_to_number,
@@ -78,20 +79,17 @@ class Accession(ABC):
         analysis: Analysis,
         connection: Connection,
         common_metadata: EncodeCommonMetadata,
+        recorder: AbstractRecorder,
         log_file_path: str = "accession.log",
         no_log_file: bool = False,
         queue_info: Optional[QueueInfo] = None,
         private_filenames: bool = False,
-        use_in_memory_db: bool = False,
     ) -> None:
         self.analysis = analysis
         self.steps = steps
         self.conn = connection
         self.common_metadata = common_metadata
-        if use_in_memory_db:
-            self.db_session = DbSession.with_in_memory_db()
-        else:
-            self.db_session = DbSession.with_home_dir_db_path()
+        self.recorder = recorder
         self.new_files: List[EncodeFile] = []
         self.upload_queue: List[Tuple[EncodeFile, File]] = []
         self.new_qcs: List[EncodeQualityMetric] = []
@@ -813,7 +811,7 @@ class Accession(ABC):
             payload = preferred_default_file_patch.get_portal_patch()
             self.conn.patch(payload)
 
-    def add_run_to_db(self, run_status: RunStatus) -> None:
+    def record_run(self, run_status: RunStatus) -> None:
         workflow_labels = [
             WorkflowLabel(key=key, value=value)
             for key, value in self.analysis.metadata.get_filtered_labels().items()
@@ -843,8 +841,7 @@ class Accession(ABC):
             workflow_labels=workflow_labels,
             files=files,
         )
-        self.db_session.session.add(run)
-        self.db_session.session.commit()
+        self.recorder.record(run)
 
     def accession_step(
         self, single_step_params: AccessionStep, dry_run: bool = False
@@ -976,10 +973,10 @@ class Accession(ABC):
             self.patch_experiment_internal_status()
         except Exception:
             self.logger.exception("Failed to complete accessioning")
-            self.add_run_to_db(run_status=RunStatus.Failed)
+            self.record_run(run_status=RunStatus.Failed)
             raise
         else:
-            self.add_run_to_db(run_status=RunStatus.Succeeded)
+            self.record_run(run_status=RunStatus.Succeeded)
 
 
 class AccessionGenericRna(Accession):
@@ -2724,6 +2721,7 @@ def accession_factory(
     )
     connection = Connection(server, no_log_file=True)
     common_metadata = EncodeCommonMetadata(lab, award)
+    recorder = Recorder(use_in_memory_db=use_in_memory_db)
     return selected_accession(
         accession_steps,
         analysis,
@@ -2733,7 +2731,7 @@ def accession_factory(
         no_log_file=no_log_file,
         queue_info=queue_info,
         private_filenames=private_filenames,
-        use_in_memory_db=use_in_memory_db,
+        recorder=recorder,
     )
 
 

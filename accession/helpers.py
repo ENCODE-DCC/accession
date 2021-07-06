@@ -1,10 +1,14 @@
 import os
 import tempfile
+from abc import ABC, abstractmethod
 from collections import OrderedDict
 from contextlib import contextmanager
 from typing import Any, Dict, Generic, Iterator, List, Optional, Tuple, TypeVar, Union
 
 from encode_utils.connection import Connection
+
+from accession.database.connection import DbSession
+from accession.database.models import Run
 
 K = TypeVar("K")
 V = TypeVar("V")
@@ -74,6 +78,24 @@ class PreferredDefaultFilePatch:
             Connection.PROFILE_KEY: self.PROFILE_KEY,
             Connection.ENCID_KEY: self.at_id,
         }
+
+
+class AbstractRecorder(ABC):
+    @abstractmethod
+    def record(self, run: Run) -> None:
+        raise NotImplementedError
+
+
+class Recorder(AbstractRecorder):
+    def __init__(self, use_in_memory_db: bool = False) -> None:
+        if use_in_memory_db:
+            self.db_session = DbSession.with_in_memory_db()
+        else:
+            self.db_session = DbSession.with_home_dir_db_path()
+
+    def record(self, run: Run) -> None:
+        self.db_session.session.add(run)
+        self.db_session.session.commit()
 
 
 def string_to_number(string: str) -> Union[float, str, int]:

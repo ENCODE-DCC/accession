@@ -3,6 +3,7 @@ from pytest_mock import MockerFixture
 
 from accession.accession import AccessionWgbs
 from accession.analysis import Analysis
+from accession.helpers import Recorder
 
 
 @pytest.fixture
@@ -20,6 +21,7 @@ def mock_accession_wgbs(
         Analysis(mock_metadata, backend=mock_accession_gc_backend),
         server_name,
         common_metadata,
+        Recorder(use_in_memory_db=True),
         no_log_file=True,
     )
     mocker.patch.object(mocked_accession.analysis, "get_files", return_value=[gsfile])
