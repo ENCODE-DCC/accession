@@ -1719,6 +1719,12 @@ class AccessionMicroRna(AccessionGenericRna):
             filekey, EncodeFile.GENOME_ANNOTATION
         )
 
+    def get_preferred_default_qc_value(self, file: File) -> Union[float, int]:
+        mapping_qc_file = self.analysis.search_up(
+            file.get_task(), "star", "star_qc_json"
+        )[0].read_json()
+        return int(mapping_qc_file["aligned_reads"]["aligned_reads"])
+
     def make_microrna_quantification_qc(
         self, encode_file: EncodeFile, file: File
     ) -> None:
