@@ -2,7 +2,7 @@ import json
 from base64 import b64encode
 from collections import UserDict
 from enum import Enum
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple, TypeVar, Union
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple, Type, TypeVar, Union
 
 from encode_utils.connection import Connection
 
@@ -11,10 +11,13 @@ from accession.accession_steps import FileParams
 T = TypeVar("T")
 U = TypeVar("U")
 V = TypeVar("V", bound="EncodeFile")
+_EncodeQualityMetric = TypeVar("_EncodeQualityMetric", bound="EncodeQualityMetric")
 if TYPE_CHECKING:
     UserDictLike = UserDict[str, str]
 else:
     UserDictLike = UserDict
+W = TypeVar("W", bound="EncodeAnalysis")
+AnalysisPayload = Dict[str, List[str]]
 
 
 class EncodeGenericObject:
@@ -46,6 +49,37 @@ class EncodeCommonMetadata(UserDictLike):
     @property
     def lab_pi(self) -> str:
         return self.lab.split("/labs/")[1].split("/")[0]
+
+
+class FileStatus(Enum):
+    """
+    See https://www.encodeproject.org/profiles/file for allowed values
+    """
+
+    Uploading = "uploading"
+    UploadFailed = "upload failed"
+    InProgress = "in progress"
+    Released = "released"
+    Archived = "archived"
+    Deleted = "deleted"
+    Replaced = "replaced"
+    Revoked = "revoked"
+    ContentError = "content error"
+
+    def __len__(self) -> int:
+        """
+        Needed for creating preflight tables
+        """
+        return len(self.value)
+
+    def __str__(self) -> str:
+        """
+        Needed for creating preflight tables
+        """
+        return self.value
+
+    def __repr__(self) -> str:
+        return self.value
 
 
 class EncodeFile:
@@ -94,8 +128,14 @@ class EncodeFile:
         return self.portal_file["output_type"]
 
     @property
-    def status(self) -> str:
-        return self.portal_file["status"]
+    def status(self) -> FileStatus:
+        portal_file_status = self.portal_file["status"]
+        for variant in FileStatus:
+            if variant.value == portal_file_status:
+                return variant
+        raise ValueError(
+            f"Could not find appropriate status in enum for status {portal_file_status}"
+        )
 
     @property
     def dataset(self) -> str:
@@ -144,7 +184,11 @@ class EncodeFile:
     @staticmethod
     def filter_encode_files_by_status(
         encode_files: List[V],
-        forbidden_statuses: Tuple[str, ...] = ("replaced", "revoked", "deleted"),
+        forbidden_statuses: Tuple[FileStatus, ...] = (
+            FileStatus.Replaced,
+            FileStatus.Revoked,
+            FileStatus.Deleted,
+        ),
     ) -> List[V]:
         """
         Filter out files whose statuses are not allowed. From list of EncodeFile
@@ -398,15 +442,32 @@ class EncodeAttachment:
 
 
 class EncodeQualityMetric:
-    def __init__(self, payload: Dict[str, Any], file_id: str):
-        if not file_id:
+    def __init__(self, payload: Dict[str, Any], files: List[str]):
+        self.files = files
+        self.payload = payload
+
+    @classmethod
+    def from_payload_and_file_id(
+        cls: Type[_EncodeQualityMetric], payload: Dict[str, Any], file_id: str
+    ) -> _EncodeQualityMetric:
+        return cls(payload, [file_id])
+
+    @classmethod
+    def from_portal_object(
+        cls: Type[_EncodeQualityMetric], portal_object: Dict[str, Any]
+    ) -> _EncodeQualityMetric:
+        return cls(portal_object, portal_object["quality_metric_of"])
+
+    @property
+    def at_id(self) -> Optional[str]:
+        return self.payload.get("@id")
+
+    def get_portal_object(self) -> Dict[str, Any]:
+        self.payload.update({"quality_metric_of": self.files})
+        if self.files is None:
             raise ValueError(
                 "No file_id specified, QC metric needs an accessioned file"
             )
-        self.files = [file_id]
-        self.payload = payload
-
-    def get_portal_object(self) -> Dict[str, Any]:
         self.payload.update({"quality_metric_of": self.files})
         return self.payload
 

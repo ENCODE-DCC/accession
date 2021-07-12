@@ -642,6 +642,7 @@ def test_accession_steps_matches_with_force(
     )
     mocker.patch.object(mock_accession, "accession_step")
     mocker.patch.object(mock_accession, "post_analysis")
+    mocker.patch.object(mock_accession, "record_run")
     mock_accession.accession_steps(force=True)
     assert "continuing accessioning" in caplog.text
     mock_accession.accession_step.assert_called()

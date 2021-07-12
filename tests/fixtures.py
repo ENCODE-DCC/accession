@@ -1,3 +1,4 @@
+import datetime
 import json
 import os
 import shutil
@@ -24,6 +25,9 @@ from accession.accession import (
     accession_factory,
 )
 from accession.analysis import Analysis
+from accession.database.connection import DbSession
+from accession.database.models import Run, RunStatus, WorkflowLabel
+from accession.database.query import DbQuery
 from accession.encode_models import (
     EncodeAttachment,
     EncodeCommonMetadata,
@@ -33,6 +37,7 @@ from accession.encode_models import (
     EncodeFile,
 )
 from accession.file import GSFile
+from accession.helpers import Recorder
 from accession.metadata import FileMetadata
 from accession.task import Task
 
@@ -111,6 +116,59 @@ def local_encoded_server(
         raise RuntimeError("Elasticsearch took too long to index")
     yield server_address
     container.kill()
+
+
+@pytest.fixture(scope="session")
+def db_session():
+    return DbSession("sqlite:///:memory:", echo=True)
+
+
+@pytest.fixture(scope="session")
+def db_query(db_session):
+    return DbQuery(db_session)
+
+
+@pytest.fixture(scope="session")
+def date():
+    return datetime.date(1999, 9, 9)
+
+
+@pytest.fixture(scope="session")
+def run(db_session, date):
+    label = WorkflowLabel(key="foo", value="bar")
+    run = Run(
+        experiment_at_id="ABC",
+        workflow_id="123",
+        date_created=date,
+        status=RunStatus.Succeeded,
+        workflow_labels=[label],
+    )
+    db_session.session.add(run)
+    yield run
+    db_session.session.delete(run)
+
+
+@pytest.fixture(scope="session")
+def additional_runs(db_session):
+    run = Run(
+        experiment_at_id="/experiments/ENCSR123ABC/",
+        workflow_id="456",
+        date_created=datetime.date(2020, 3, 10),
+        status=RunStatus.Succeeded,
+        workflow_labels=[WorkflowLabel(key="caper-str-label", value="bar")],
+    )
+    run2 = Run(
+        experiment_at_id="/experiments/ENCSR456DEF/",
+        workflow_id="60fb02a7-31ae-4e9e-8e77-9c2722189cb4",
+        date_created=datetime.date(2020, 3, 11),
+        status=RunStatus.Succeeded,
+        workflow_labels=[WorkflowLabel(key="caper-str-label", value="baz")],
+    )
+    db_session.session.add(run)
+    db_session.session.add(run2)
+    yield
+    db_session.session.delete(run)
+    db_session.session.delete(run2)
 
 
 @pytest.fixture
@@ -364,6 +422,7 @@ def accessioner_factory(
             award,
             backend=mock_accession_gc_backend,
             no_log_file=True,
+            use_in_memory_db=True,
         )
 
         mocker.patch.object(
@@ -444,6 +503,7 @@ def mock_accession(
         Analysis(mock_metadata, backend=mock_accession_gc_backend),
         create_autospec(Connection, dcc_url=server_name),
         common_metadata,
+        Recorder(use_in_memory_db=True),
         no_log_file=True,
     )
     return mocked_accession
@@ -467,6 +527,7 @@ def mock_accession_not_patched(
         Analysis(mock_metadata, backend=mock_accession_gc_backend),
         create_autospec(Connection, dcc_url=server_name),
         common_metadata,
+        Recorder(use_in_memory_db=True),
         no_log_file=True,
     )
     return mock_accession
@@ -514,6 +575,7 @@ def mock_accession_chip(
         Analysis(mock_metadata, backend=mock_accession_gc_backend),
         server_name,
         common_metadata,
+        Recorder(use_in_memory_db=True),
         no_log_file=True,
     )
     return mocked_accession
@@ -551,6 +613,7 @@ def mock_accession_unreplicated(
         Analysis(mock_metadata, backend=mock_accession_gc_backend),
         "mock_server.biz",
         EncodeCommonMetadata(lab, award),
+        Recorder(use_in_memory_db=True),
         no_log_file=True,
     )
     return mocked_accession

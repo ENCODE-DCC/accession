@@ -6,6 +6,7 @@ from accession.accession import AccessionChip
 from accession.analysis import Analysis
 from accession.encode_models import EncodeFile
 from accession.file import GSFile
+from accession.helpers import Recorder
 from accession.task import Task
 
 
@@ -72,6 +73,7 @@ def mock_accession_chip_unpatched_properties(
         Analysis(mock_metadata, backend=mock_accession_gc_backend),
         server_name,
         common_metadata,
+        Recorder(use_in_memory_db=True),
         no_log_file=True,
     )
     return mocked_accession
@@ -640,14 +642,13 @@ def test_make_chip_library_qc(
 
 
 def test_get_atac_chip_pipeline_replicate(mocker, mock_accession_chip, gsfile):
+    class StubMetadata:
+        content = {"inputs": {"fastqs_rep1_R1": ["gs://abc/spam.fastq.gz"]}}
+
     mocker.patch.object(
         mock_accession_chip.analysis, "search_up", return_value=[gsfile]
     )
-    mocker.patch.object(
-        mock_accession_chip.analysis.metadata,
-        "content",
-        {"inputs": {"fastqs_rep1_R1": ["gs://abc/spam.fastq.gz"]}},
-    )
+    mocker.patch.object(mock_accession_chip.analysis, "metadata", StubMetadata())
     rep = mock_accession_chip.get_atac_chip_pipeline_replicate(gsfile)
     assert rep == "rep1"
 
@@ -666,14 +667,13 @@ def test_get_atac_chip_pipeline_replicate_control(mocker, mock_accession_chip, g
 
 
 def test_get_atac_chip_pipeline_replicate_raises(mocker, mock_accession_chip, gsfile):
+    class StubMetadata:
+        content = {"inputs": {"fastqs_rep1_R1": ["gs://abc/eggs.fastq.gz"]}}
+
     mocker.patch.object(
         mock_accession_chip.analysis, "search_up", return_value=[gsfile]
     )
-    mocker.patch.object(
-        mock_accession_chip.analysis.metadata,
-        "content",
-        {"inputs": {"fastqs_rep1_R1": ["gs://abc/eggs.fastq.gz"]}},
-    )
+    mocker.patch.object(mock_accession_chip.analysis, "metadata", StubMetadata())
     with pytest.raises(ValueError):
         mock_accession_chip.get_atac_chip_pipeline_replicate(gsfile)
 
