@@ -106,7 +106,7 @@ def local_encoded_server(
             container.kill()
             response.raise_for_status()
         res = response.json()
-        if res.get("state", {}).get("status") == "done":
+        if res["results"] and res["results"][0]["status"] == "done":
             break
         if retries_left > 0:
             retries_left -= 1
