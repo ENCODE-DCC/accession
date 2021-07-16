@@ -82,10 +82,9 @@ def local_accessioner(
         raw_fastqs_keys=accession_steps.raw_fastqs_keys,
         raw_fastqs_can_have_task=accession_steps.raw_fastqs_can_have_task,
         backend=backend,
-        recorder=Recorder(use_in_memory_db=True),
     )
     connection = Connection(local_encoded_server, no_log_file=True)
-    return AccessionDummy(accession_steps, analysis, connection, common_metadata)
+    return AccessionDummy(accession_steps, analysis, connection, common_metadata, Recorder(use_in_memory_db=True))
 
 
 @pytest.mark.docker
