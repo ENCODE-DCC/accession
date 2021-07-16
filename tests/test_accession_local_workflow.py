@@ -1,4 +1,3 @@
-from accession.helpers import Recorder
 import os
 import shutil
 from pathlib import Path
@@ -10,6 +9,7 @@ from accession.accession import Accession
 from accession.accession_steps import AccessionSteps
 from accession.analysis import Analysis
 from accession.backends import backend_factory
+from accession.helpers import Recorder
 from accession.metadata import FileMetadata
 
 
