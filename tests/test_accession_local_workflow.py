@@ -84,7 +84,13 @@ def local_accessioner(
         backend=backend,
     )
     connection = Connection(local_encoded_server, no_log_file=True)
-    return AccessionDummy(accession_steps, analysis, connection, common_metadata, Recorder(use_in_memory_db=True))
+    return AccessionDummy(
+        accession_steps,
+        analysis,
+        connection,
+        common_metadata,
+        Recorder(use_in_memory_db=True),
+    )
 
 
 @pytest.mark.docker
