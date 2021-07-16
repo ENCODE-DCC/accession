@@ -44,7 +44,7 @@ from accession.task import Task
 
 @pytest.fixture(scope="session")
 def local_encoded_server(
-    api_credentials: Tuple[str, str], encoded_docker_image: str
+    encoded_docker_image: str
 ) -> Iterator[str]:
     """
     Spin up the encoded local app (using default command and user) bound to host port
@@ -93,9 +93,8 @@ def local_encoded_server(
             raise RuntimeError("Container unexpectedly exited early")
         try:
             response = requests.get(
-                urljoin(f"http://{server_address}", "_indexer_state"),
+                urljoin(f"http://{server_address}", "_indexer"),
                 headers={"Accept": "application/json"},
-                auth=api_credentials,
             )
         except requests.ConnectionError:
             retries_left -= 1
