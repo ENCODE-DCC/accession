@@ -43,9 +43,7 @@ from accession.task import Task
 
 
 @pytest.fixture(scope="session")
-def local_encoded_server(
-    encoded_docker_image: str
-) -> Iterator[str]:
+def local_encoded_server(encoded_docker_image: str) -> Iterator[str]:
     """
     Spin up the encoded local app (using default command and user) bound to host port
     8000, and kill the container when done.  Running the tests requires docker daemon to
