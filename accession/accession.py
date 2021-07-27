@@ -1083,7 +1083,7 @@ class AccessionBulkRna(AccessionGenericRna):
         )
         star_qc_metric["attachment"] = attachment
         return self.queue_qc(
-            star_qc_metric, encode_bam_file, "star-quality-metric"
+            star_qc_metric, encode_bam_file, "star-quality-metric", shared=True
         )  # backend mapping adding hyphens and removing caps
 
     def format_reads_by_gene_type_qc(
