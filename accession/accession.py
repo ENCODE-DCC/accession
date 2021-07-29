@@ -424,9 +424,20 @@ class Accession(ABC):
         encode_utils.connection.Connection.post() does not fail on alias conflict, here
         we log if there was a 409 conflict.
         """
-        docker_tag = self.analysis.get_tasks(accession_step.wdl_task_name)[
-            0
-        ].docker_image
+        tasks = self.analysis.get_tasks(accession_step.wdl_task_name)
+        if not tasks:
+            error_message = (
+                f"Could not find task {accession_step.wdl_task_name} in workflow."
+            )
+            if accession_step.requires_replication:
+                error_message += (
+                    "This step run requires the workflow to be replicated, you may "
+                    "need to check that the number of replicates in the workflow "
+                    "matches the number of replicates on the portal with a status in "
+                    f"{EncodeExperiment.ALLOWED_REPLICATE_STATUSES}"
+                )
+            raise ValueError(error_message)
+        docker_tag = tasks[0].docker_image
         aliases = [
             "{}:{}-{}-{}".format(
                 self.common_metadata.lab_pi,
