@@ -40,7 +40,7 @@ three possible locations that they could appear.
       derived_from_inputs: true,
       derived_from_task: 'combined_spikeins',
     }] else [],
-
+    quality_standard: '/quality-standards/encode4-long-read-rna/',
     'accession.steps': [
       {
         dcc_step_run: '/analysis-steps/long-read-rna-seq-alignments-step-v-2/',

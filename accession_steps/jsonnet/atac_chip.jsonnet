@@ -391,35 +391,38 @@
   local atac_idr_peak_call_steps = AtacTfChipPeakCallOnlySteps(is_atac=true),
   local atac_overlap_peak_call_steps = AtacHistoneMintPeakCallSteps(is_atac=true),
   local control_chip_separate_control_task = AtacChipMapOnlySteps(is_control=true, separate_control_task=true, bwa=true),
+  local common_properties = {
+    raw_fastqs_keys: $['chip_map_only_steps.json'].raw_fastqs_keys,
+  },
+  local tf_common_properties = common_properties {
+    quality_standard: '/quality-standards/encode4-tf-chip/',
+  },
+  local histone_common_properties = common_properties {
+    quality_standard: '/quality-standards/encode4-histone-chip/',
+  },
   'chip_map_only_steps.json': AtacChipMapOnlySteps(),
   'control_chip_steps.json': AtacChipMapOnlySteps(is_control=true),
   'control_chip_pbam_steps.json': AtacChipMapOnlySteps(is_control=true, pbam=true),
   'tf_chip_peak_call_only_steps.json': AtacTfChipPeakCallOnlySteps(),
   'histone_chip_peak_call_only_steps.json': AtacHistoneMintPeakCallSteps(),
   'mint_chip_peak_call_only_steps.json': AtacHistoneMintPeakCallSteps(blacklist_derived_from_task='pool_blacklist', blacklist_derived_from_filekey='tas'),
-  'tf_chip_steps.json': {
+  'tf_chip_steps.json': tf_common_properties {
     'accession.steps': $['chip_map_only_steps.json']['accession.steps'] + $['tf_chip_peak_call_only_steps.json']['accession.steps'],
-    raw_fastqs_keys: $['chip_map_only_steps.json'].raw_fastqs_keys,
   },
-  'tf_chip_bwa_control_fastqs_steps.json': {
+  'tf_chip_bwa_control_fastqs_steps.json': tf_common_properties {
     'accession.steps': control_chip_separate_control_task['accession.steps'] + chip_bwa_map_only_steps['accession.steps'] + $['tf_chip_peak_call_only_steps.json']['accession.steps'],
-    raw_fastqs_keys: $['chip_map_only_steps.json'].raw_fastqs_keys,
   },
-  'tf_chip_pbam_steps.json': {
+  'tf_chip_pbam_steps.json': tf_common_properties {
     'accession.steps': chip_pbam_map_only_steps['accession.steps'] + $['tf_chip_peak_call_only_steps.json']['accession.steps'],
-    raw_fastqs_keys: $['chip_map_only_steps.json'].raw_fastqs_keys,
   },
-  'histone_chip_steps.json': {
+  'histone_chip_steps.json': histone_common_properties {
     'accession.steps': $['chip_map_only_steps.json']['accession.steps'] + $['histone_chip_peak_call_only_steps.json']['accession.steps'],
-    raw_fastqs_keys: $['chip_map_only_steps.json'].raw_fastqs_keys,
   },
-  'histone_chip_pbam_steps.json': {
+  'histone_chip_pbam_steps.json': histone_common_properties {
     'accession.steps': chip_pbam_map_only_steps['accession.steps'] + $['histone_chip_peak_call_only_steps.json']['accession.steps'],
-    raw_fastqs_keys: $['chip_map_only_steps.json'].raw_fastqs_keys,
   },
-  'mint_chip_steps.json': {
+  'mint_chip_steps.json': common_properties {
     'accession.steps': $['chip_map_only_steps.json']['accession.steps'] + $['mint_chip_peak_call_only_steps.json']['accession.steps'],
-    raw_fastqs_keys: $['chip_map_only_steps.json'].raw_fastqs_keys,
   },
   'atac_steps.json': {
     'accession.steps': atac_map_only_steps['accession.steps'] + atac_idr_peak_call_steps['accession.steps'] + atac_overlap_peak_call_steps['accession.steps'],

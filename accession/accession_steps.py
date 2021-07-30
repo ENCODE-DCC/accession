@@ -52,6 +52,10 @@ class AccessionSteps:
     def raw_fastqs_can_have_task(self) -> bool:
         return self.steps.get("raw_fastqs_can_have_task", False)
 
+    @property
+    def quality_standard(self) -> Optional[str]:
+        return self.steps.get("quality_standard")
+
 
 class DerivedFromFile:
     def __init__(self, derived_from_file: Dict[str, Any]) -> None:

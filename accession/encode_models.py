@@ -271,6 +271,7 @@ class EncodeAnalysis:
         common_metadata: EncodeCommonMetadata,
         workflow_id: str,
         pipeline_version: Optional[str] = None,
+        quality_standard: Optional[str] = None,
     ) -> None:
         """
         `documents` is a list of `EncodeGenericObject` that gives no access to the
@@ -281,6 +282,7 @@ class EncodeAnalysis:
         self.workflow_id = workflow_id
         self.documents = documents
         self.pipeline_version = pipeline_version
+        self.quality_standard = quality_standard
 
     def __eq__(  # type: ignore  # https://github.com/python/mypy/issues/2783
         self, other
@@ -317,6 +319,8 @@ class EncodeAnalysis:
         payload.update(self.common_metadata)
         if self.pipeline_version is not None:
             payload["pipeline_version"] = self.pipeline_version
+        if self.quality_standard is not None:
+            payload["quality_standard"] = self.quality_standard
         return payload
 
 

@@ -751,6 +751,7 @@ class Accession(ABC):
             workflow_id=self.analysis.workflow_id,
             documents=documents,
             pipeline_version=self.pipeline_version,
+            quality_standard=self.steps.quality_standard,
         )
         payload = current_analysis.get_portal_object()
         response, status_code = self.conn.post(
