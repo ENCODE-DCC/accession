@@ -281,6 +281,7 @@ def test_accession_post_analysis(mocker, mock_accession):
         "pipeline_version": "1.2.3",
         "award": "U24HG009397",
         "lab": "/labs/encode-processing-pipeline/",
+        "quality_standard": "/quality-standards/bar/",
     }
 
 

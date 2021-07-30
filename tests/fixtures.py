@@ -453,6 +453,7 @@ def mock_metadata(wdl_workflow):
 class MockAccessionSteps:
     path_to_json = "/dev/null"
     content = {"accession.steps": [{"a": "b"}]}
+    quality_standard = "/quality-standards/bar/"
 
 
 @pytest.fixture
