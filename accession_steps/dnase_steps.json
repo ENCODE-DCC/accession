@@ -316,6 +316,7 @@
       "wdl_task_name": "dnase_replicate"
     }
   ],
+  "quality_standard": "/quality-standards/encode4-dnase/",
   "raw_fastqs_can_have_task": true,
   "raw_fastqs_keys": [
     "replicate.pe_fastqs",

@@ -331,6 +331,7 @@
       "wdl_task_name": "overlap"
     }
   ],
+  "quality_standard": "/quality-standards/encode4-histone-chip/",
   "raw_fastqs_keys": [
     "fastqs_R1",
     "fastqs_R2"

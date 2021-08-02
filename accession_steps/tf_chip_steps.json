@@ -435,6 +435,7 @@
       "wdl_task_name": "idr"
     }
   ],
+  "quality_standard": "/quality-standards/encode4-tf-chip/",
   "raw_fastqs_keys": [
     "fastqs_R1",
     "fastqs_R2"

@@ -26,6 +26,7 @@
       "wdl_task_name": "hotspot2"
     }
   ],
+  "quality_standard": "/quality-standards/encode4-dnase/",
   "raw_fastqs_keys": [
     "nuclear_bam"
   ]
