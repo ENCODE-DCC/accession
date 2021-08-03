@@ -107,4 +107,7 @@ class FileParams:
         self.file_format_type: Optional[str] = file_params.get("file_format_type")
         self.callbacks: List[str] = file_params.get("callbacks", [])
         self.quality_metrics: List[str] = file_params.get("quality_metrics", [])
-        self.maybe_preferred_default = file_params.get("maybe_preferred_default", False)
+        self.maybe_preferred_default: bool = file_params.get(
+            "maybe_preferred_default", False
+        )
+        self.filter_type: Optional[str] = file_params.get("filter_type")

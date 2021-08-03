@@ -2795,6 +2795,9 @@ class AccessionHic(Accession):
             return {"output_type": "mapping quality thresholded chromatin interactions"}
         return {}
 
+    def add_filter_value(self, file: File) -> Dict[str, str]:
+        return {"filter_value": file.get_task().inputs["quality"]}
+
     def make_hic_qc(self, encode_file: EncodeFile, file: File) -> None:
         if encode_file.has_qc("HicQualityMetric"):
             return

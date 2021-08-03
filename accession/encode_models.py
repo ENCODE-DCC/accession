@@ -249,6 +249,8 @@ class EncodeFile:
             obj["genome_annotation"] = genome_annotation
         if submitted_file_name is not None:
             obj["submitted_file_name"] = submitted_file_name
+        if file_params.filter_type is not None:
+            obj["filter_type"] = file_params.filter_type
         if extras is not None:
             obj.update(extras)
         obj[Connection.PROFILE_KEY] = "file"
