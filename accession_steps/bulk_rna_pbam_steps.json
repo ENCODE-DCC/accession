@@ -37,10 +37,11 @@
         }
       ],
       "wdl_task_name": "make_genome_pbam"
-    },  
+    },
     {
       "dcc_step_run": "/analysis-steps/bulk-rna-seq-alignment-step-v-1/",
       "dcc_step_version": "/analysis-step-versions/bulk-rna-seq-alignment-step-v-1-0/",
+      "wdl_files": [
         {
           "derived_from_files": [
             {
@@ -98,8 +99,8 @@
               "derived_from_task": "bam_to_signals"
             },
             {
-              "derived_from_filekey": "genomebam",
-              "derived_from_task": "align"
+              "derived_from_filekey": "out",
+              "derived_from_task": "genome_pbam"
             }
           ],
           "file_format": "bigWig",
@@ -115,8 +116,8 @@
               "derived_from_task": "bam_to_signals"
             },
             {
-              "derived_from_filekey": "genomebam",
-              "derived_from_task": "align"
+              "derived_from_filekey": "out",
+              "derived_from_task": "genome_pbam"
             }
           ],
           "file_format": "bigWig",
@@ -131,8 +132,8 @@
               "derived_from_task": "bam_to_signals"
             },
             {
-              "derived_from_filekey": "genomebam",
-              "derived_from_task": "align"
+              "derived_from_filekey": "out",
+              "derived_from_task": "genome_pbam"
             }
           ],
           "file_format": "bigWig",
@@ -148,8 +149,8 @@
               "derived_from_task": "bam_to_signals"
             },
             {
-              "derived_from_filekey": "genomebam",
-              "derived_from_task": "align"
+              "derived_from_filekey": "out",
+              "derived_from_task": "genome_pbam"
             }
           ],
           "file_format": "bigWig",
@@ -165,8 +166,8 @@
               "derived_from_task": "bam_to_signals"
             },
             {
-              "derived_from_filekey": "genomebam",
-              "derived_from_task": "align"
+              "derived_from_filekey": "out",
+              "derived_from_task": "genome_pbam"
             }
           ],
           "file_format": "bigWig",
@@ -181,8 +182,8 @@
               "derived_from_task": "bam_to_signals"
             },
             {
-              "derived_from_filekey": "genomebam",
-              "derived_from_task": "align"
+              "derived_from_filekey": "out",
+              "derived_from_task": "genome_pbam"
             }
           ],
           "file_format": "bigWig",
@@ -204,8 +205,8 @@
               "derived_from_task": "rsem_quant"
             },
             {
-              "derived_from_filekey": "annobam",
-              "derived_from_task": "align"
+              "derived_from_filekey": "out",
+              "derived_from_task": "anno_pbam"
             }
           ],
           "file_format": "tsv",
@@ -225,8 +226,8 @@
               "derived_from_task": "rsem_quant"
             },
             {
-              "derived_from_filekey": "annobam",
-              "derived_from_task": "align"
+              "derived_from_filekey": "out",
+              "derived_from_task": "anno_pbam"
             }
           ],
           "file_format": "tsv",

@@ -1246,6 +1246,60 @@ class AccessionBulkRna(AccessionGenericRna):
             return
 
 
+class AccessionBulkRnaPbam(AccessionBulkRna):
+    def make_star_mapping_qc(self, encode_bam_file: EncodeFile, file: File) -> None:
+        if encode_bam_file.has_qc("StarQualityMetric"):  # actual name of the object
+            return
+        task = file.get_task()
+        qc_file = self.analysis.search_up(
+            task, "align", "log_json"  # task output name
+        )[0]
+        qc = qc_file.read_json()
+        star_qc_metric = qc["star_log_qc"]  # what the key is in actual qc json file
+        del star_qc_metric["Started job on"]
+        del star_qc_metric["Started mapping on"]
+        del star_qc_metric["Finished on"]
+        del star_qc_metric["Deletion average length"]
+        del star_qc_metric["Deletion rate per base"]
+        del star_qc_metric["Insertion average length"]
+        del star_qc_metric["Insertion rate per base"]
+        del star_qc_metric["Mismatch rate per base, %"]
+        for key, value in star_qc_metric.items():
+            star_qc_metric[key] = string_to_number(value)
+        return self.queue_qc(
+            star_qc_metric, encode_bam_file, "star-quality-metric", shared=True
+        )  # backend mapping adding hyphens and removing caps
+
+    def make_flagstat_qc(
+        self,
+        encode_file: EncodeFile,
+        file: File,
+        task_output_name: str,
+        qc_dictionary_key: str,
+        convert_to_string: List[str,] = [
+            "mapped_pct",
+            "paired_properly_pct",
+            "singletons_pct",
+        ],
+    ) -> None:
+        if encode_file.has_qc("SamtoolsFlagstatsQualityMetric"):
+            return
+        task = file.get_task()
+        qc_file = self.analysis.search_up(task, "align", task_output_name)[0]
+        qc = qc_file.read_json()
+        output_qc = qc[qc_dictionary_key]
+        for key in convert_to_string:
+            # paired_properly_pct and singletons_pct are not there in single-ended
+            try:
+                output_qc[key] = str(output_qc[key])
+            except KeyError:
+                continue
+
+        return self.queue_qc(
+            output_qc, encode_file, "samtools-flagstats-quality-metric"
+        )
+
+
 class AccessionDnase(Accession):
     QC_MAP = {
         "unfiltered_flagstats": "make_unfiltered_flagstats_qc",
@@ -2684,6 +2738,7 @@ def accession_factory(
     pipeline_type_map = {
         "bulk_rna": AccessionBulkRna,
         "bulk_rna_no_kallisto": AccessionBulkRna,
+        "bulk_rna_pbam": AccessionBulkRnaPbam,
         "mirna": AccessionMicroRna,
         "long_read_rna": AccessionLongReadRna,
         "chip_map_only": AccessionChip,
