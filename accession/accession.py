@@ -2785,7 +2785,7 @@ class AccessionHic(Accession):
         for intact Hi-C it should be the MAPQ>=1 map. However there is no reliable way
         to distinguish this in the portal metadata so we just use the MAPQ>=30 for now.
         """
-        if file.get_task().inputs["quality"] == 30:
+        if file.get_task().inputs["quality"] == 1:
             return {"preferred_default": True}
         return {}
 
