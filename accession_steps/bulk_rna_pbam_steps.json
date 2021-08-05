@@ -36,7 +36,7 @@
           ]
         }
       ],
-      "wdl_task_name": "make_genome_pbam"
+      "wdl_task_name": "genome_pbam"
     },
     {
       "dcc_step_run": "/analysis-steps/bulk-rna-seq-alignment-step-v-1/",
@@ -85,7 +85,7 @@
           ]
         }
       ],
-      "wdl_task_name": "make_transcriptome_pbam"
+      "wdl_task_name": "anno_pbam"
     },
     {
       "dcc_step_run": "/analysis-steps/bulk-rna-seq-star-signal-generation-step-v-1/",
