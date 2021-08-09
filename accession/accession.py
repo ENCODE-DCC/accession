@@ -1157,11 +1157,7 @@ class AccessionBulkRna(AccessionGenericRna):
         qc_dictionary_key: str,
     ) -> None:
 
-        convert_to_string = (
-            "mapped_pct",
-            "paired_properly_pct",
-            "singletons_pct",
-        )
+        convert_to_string = ("mapped_pct", "paired_properly_pct", "singletons_pct")
         if encode_file.has_qc("SamtoolsFlagstatsQualityMetric"):
             return
         qc_file = self.analysis.get_files(
@@ -1278,11 +1274,7 @@ class AccessionBulkRnaPbam(AccessionBulkRna):
         task_output_name: str,
         qc_dictionary_key: str,
     ) -> None:
-        convert_to_string = (
-            "mapped_pct",
-            "paired_properly_pct",
-            "singletons_pct",
-        )
+        convert_to_string = ("mapped_pct", "paired_properly_pct", "singletons_pct")
         if encode_file.has_qc("SamtoolsFlagstatsQualityMetric"):
             return
         task = file.get_task()
