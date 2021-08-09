@@ -2771,6 +2771,9 @@ def accession_factory(
             pipeline_type = pipeline_type + "_pbam"
             private_filenames = True
 
+    if pipeline_type == "bulk_rna_pbam":
+        private_filenames = True
+
     steps_json_path = (
         current_dir.parents[1] / "accession_steps" / f"{pipeline_type}_steps.json"
     )
