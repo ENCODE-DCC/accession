@@ -2,7 +2,7 @@
   "accession.steps": [
     {
       "dcc_step_run": "/analysis-steps/bulk-rna-seq-alignment-step-v-1/",
-      "dcc_step_version": "/analysis-step-versions/bulk-rna-seq-alignment-step-v-1-0/",
+      "dcc_step_version": "/analysis-step-versions/bulk-rna-seq-alignment-step-v-1-1/",
       "wdl_files": [
         {
           "derived_from_files": [
@@ -40,7 +40,7 @@
     },
     {
       "dcc_step_run": "/analysis-steps/bulk-rna-seq-alignment-step-v-1/",
-      "dcc_step_version": "/analysis-step-versions/bulk-rna-seq-alignment-step-v-1-0/",
+      "dcc_step_version": "/analysis-step-versions/bulk-rna-seq-alignment-step-v-1-1/",
       "wdl_files": [
         {
           "derived_from_files": [
