@@ -26,7 +26,7 @@ INSTALL_REQUIRES = [
     "SQLAlchemy==1.3.17",
     "attrs",
     "boto3==1.13.5",
-    "caper==1.0.0",
+    "caper==1.5.1",
     "encode_utils==2.10.0",
     "flatdict==4.0.1",
     "google-api-core==1.21.0",
