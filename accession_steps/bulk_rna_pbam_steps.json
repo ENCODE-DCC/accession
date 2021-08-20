@@ -1,0 +1,245 @@
+{
+  "accession.steps": [
+    {
+      "dcc_step_run": "/analysis-steps/bulk-rna-seq-alignment-step-v-1/",
+      "dcc_step_version": "/analysis-step-versions/bulk-rna-seq-alignment-step-v-1-1/",
+      "wdl_files": [
+        {
+          "derived_from_files": [
+            {
+              "derived_from_filekey": "fastqs_R1",
+              "derived_from_inputs": true,
+              "derived_from_task": "align"
+            },
+            {
+              "derived_from_filekey": "fastqs_R2",
+              "derived_from_inputs": true,
+              "derived_from_task": "align"
+            },
+            {
+              "derived_from_filekey": "index",
+              "derived_from_inputs": true,
+              "derived_from_task": "align"
+            },
+            {
+              "derived_from_filekey": "input_file",
+              "derived_from_inputs": true,
+              "derived_from_task": "reference_genome_decompressed"
+            }
+          ],
+          "file_format": "bam",
+          "filekey": "out",
+          "output_type": "redacted alignments",
+          "quality_metrics": [
+            "star_mapping_qc",
+            "genome_flagstat_qc"
+          ]
+        }
+      ],
+      "wdl_task_name": "genome_pbam"
+    },
+    {
+      "dcc_step_run": "/analysis-steps/bulk-rna-seq-alignment-step-v-1/",
+      "dcc_step_version": "/analysis-step-versions/bulk-rna-seq-alignment-step-v-1-1/",
+      "wdl_files": [
+        {
+          "derived_from_files": [
+            {
+              "derived_from_filekey": "fastqs_R1",
+              "derived_from_inputs": true,
+              "derived_from_task": "align"
+            },
+            {
+              "derived_from_filekey": "fastqs_R2",
+              "derived_from_inputs": true,
+              "derived_from_task": "align"
+            },
+            {
+              "derived_from_filekey": "index",
+              "derived_from_inputs": true,
+              "derived_from_task": "align"
+            },
+            {
+              "derived_from_filekey": "input_file",
+              "derived_from_inputs": true,
+              "derived_from_task": "reference_genome_decompressed"
+            },
+            {
+              "derived_from_filekey": "input_file",
+              "derived_from_inputs": true,
+              "derived_from_task": "reference_transcriptome_decompressed"
+            },
+            {
+              "derived_from_filekey": "files",
+              "derived_from_inputs": true,
+              "derived_from_task": "combined_gtf_gz"
+            }
+          ],
+          "file_format": "bam",
+          "filekey": "out",
+          "output_type": "redacted transcriptome alignments",
+          "quality_metrics": [
+            "star_mapping_qc",
+            "anno_flagstat_qc",
+            "reads_by_gene_type_qc"
+          ]
+        }
+      ],
+      "wdl_task_name": "anno_pbam"
+    },
+    {
+      "dcc_step_run": "/analysis-steps/bulk-rna-seq-star-signal-generation-step-v-1/",
+      "dcc_step_version": "/analysis-step-versions/bulk-rna-seq-star-signal-generation-step-v-1-0/",
+      "wdl_files": [
+        {
+          "derived_from_files": [
+            {
+              "derived_from_filekey": "chrom_sizes",
+              "derived_from_inputs": true,
+              "derived_from_task": "bam_to_signals"
+            },
+            {
+              "derived_from_filekey": "out",
+              "derived_from_task": "genome_pbam"
+            }
+          ],
+          "file_format": "bigWig",
+          "filekey": "unique_unstranded",
+          "maybe_preferred_default": true,
+          "output_type": "signal of unique reads"
+        },
+        {
+          "derived_from_files": [
+            {
+              "derived_from_filekey": "chrom_sizes",
+              "derived_from_inputs": true,
+              "derived_from_task": "bam_to_signals"
+            },
+            {
+              "derived_from_filekey": "out",
+              "derived_from_task": "genome_pbam"
+            }
+          ],
+          "file_format": "bigWig",
+          "filekey": "all_unstranded",
+          "output_type": "signal of all reads"
+        },
+        {
+          "derived_from_files": [
+            {
+              "derived_from_filekey": "chrom_sizes",
+              "derived_from_inputs": true,
+              "derived_from_task": "bam_to_signals"
+            },
+            {
+              "derived_from_filekey": "out",
+              "derived_from_task": "genome_pbam"
+            }
+          ],
+          "file_format": "bigWig",
+          "filekey": "unique_plus",
+          "maybe_preferred_default": true,
+          "output_type": "plus strand signal of unique reads"
+        },
+        {
+          "derived_from_files": [
+            {
+              "derived_from_filekey": "chrom_sizes",
+              "derived_from_inputs": true,
+              "derived_from_task": "bam_to_signals"
+            },
+            {
+              "derived_from_filekey": "out",
+              "derived_from_task": "genome_pbam"
+            }
+          ],
+          "file_format": "bigWig",
+          "filekey": "unique_minus",
+          "maybe_preferred_default": true,
+          "output_type": "minus strand signal of unique reads"
+        },
+        {
+          "derived_from_files": [
+            {
+              "derived_from_filekey": "chrom_sizes",
+              "derived_from_inputs": true,
+              "derived_from_task": "bam_to_signals"
+            },
+            {
+              "derived_from_filekey": "out",
+              "derived_from_task": "genome_pbam"
+            }
+          ],
+          "file_format": "bigWig",
+          "filekey": "all_plus",
+          "output_type": "plus strand signal of all reads"
+        },
+        {
+          "derived_from_files": [
+            {
+              "derived_from_filekey": "chrom_sizes",
+              "derived_from_inputs": true,
+              "derived_from_task": "bam_to_signals"
+            },
+            {
+              "derived_from_filekey": "out",
+              "derived_from_task": "genome_pbam"
+            }
+          ],
+          "file_format": "bigWig",
+          "filekey": "all_minus",
+          "output_type": "minus strand signal of all reads"
+        }
+      ],
+      "wdl_task_name": "bam_to_signals"
+    },
+    {
+      "dcc_step_run": "/analysis-steps/bulk-rna-seq-rsem-quantification-step-v-1/",
+      "dcc_step_version": "/analysis-step-versions/bulk-rna-seq-rsem-quantification-step-v-1-0/",
+      "wdl_files": [
+        {
+          "derived_from_files": [
+            {
+              "derived_from_filekey": "rsem_index",
+              "derived_from_inputs": true,
+              "derived_from_task": "rsem_quant"
+            },
+            {
+              "derived_from_filekey": "out",
+              "derived_from_task": "anno_pbam"
+            }
+          ],
+          "file_format": "tsv",
+          "filekey": "genes_results",
+          "maybe_preferred_default": true,
+          "output_type": "gene quantifications",
+          "quality_metrics": [
+            "number_of_genes_detected_qc",
+            "mad_qc_metric"
+          ]
+        },
+        {
+          "derived_from_files": [
+            {
+              "derived_from_filekey": "rsem_index",
+              "derived_from_inputs": true,
+              "derived_from_task": "rsem_quant"
+            },
+            {
+              "derived_from_filekey": "out",
+              "derived_from_task": "anno_pbam"
+            }
+          ],
+          "file_format": "tsv",
+          "filekey": "isoforms_results",
+          "output_type": "transcript quantifications"
+        }
+      ],
+      "wdl_task_name": "rsem_quant"
+    }
+  ],
+  "raw_fastqs_keys": [
+    "fastqs_R1",
+    "fastqs_R2"
+  ]
+}

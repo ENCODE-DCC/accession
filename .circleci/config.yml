@@ -14,7 +14,7 @@ defaults: &defaults
 machine_defaults: &machine_defaults
   machine:
     image: ubuntu-2004:202104-01
-  resource_class: 2large
+  resource_class: 2xlarge
   working_directory: ~/accession
 
 make_tag: &make_tag
