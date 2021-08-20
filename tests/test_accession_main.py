@@ -56,16 +56,18 @@ def test_parser():
 
 def test_parser_info_subcommand_no_args_provided_is_valid():
     parser = get_parser()
-    parser.parse_args(["info"])
+    result = parser.parse_args(["info"])
+    assert result.ids is None
+    assert result.date is None
 
 
 def test_parser_info_subcommand_date_range_escape():
     parser = get_parser()
     args = parser.parse_args(["info", "-d", "\\-6/24"])
-    assert args.ids == []
+    assert args.ids is None
 
 
 def test_parser_info_subcommand_multiple_ids():
     parser = get_parser()
-    args = parser.parse_args(["info", "ENCSR123ABC", "21345", "my-wf"])
+    args = parser.parse_args(["info", "-i", "ENCSR123ABC", "21345", "my-wf"])
     assert args.ids == ["ENCSR123ABC", "21345", "my-wf"]

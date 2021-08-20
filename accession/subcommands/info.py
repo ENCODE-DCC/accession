@@ -165,7 +165,7 @@ def make_queries(
     Transforms user parameters into queries, executes them with additional filtering and
     aggregation, and returns the query results.
     """
-    if ids is not None:
+    if ids is not None and ids:
         parsed_ids = parse_ids(ids)
         queries = [i.get_query(db_query) for i in parsed_ids]
         if len(queries) > 1:

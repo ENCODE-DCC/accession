@@ -84,16 +84,17 @@ def get_parser() -> argparse.ArgumentParser:
         help="Obtain accessioning results in a tabular format",
     )
     info_parser.add_argument(
-        "ids",
+        "-i",
+        "--ids",
         help=(
-            "Zero or more experiment accessions or `@id`s, e.g. /experiments/ENCSR123ABC/"
+            "One or more experiment accessions or `@id`s, e.g. /experiments/ENCSR123ABC/"
             "or ENCSR456DEF, Cromwell workflow IDs (can specify whole ID or only the "
             "first few digits, a la `git`), `caper-str-label`s, or other Crowmell "
             "workflow labels in key=value form, e.g. my-label=foo. These can be "
             "combined in arbitrary fashion. If no filters are specified, then info "
             "about all accessioning runs will be returned."
         ),
-        nargs="*",
+        nargs="+",
     )
     info_parser.add_argument(
         "-d",
