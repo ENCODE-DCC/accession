@@ -1,5 +1,5 @@
 __title__ = "accession"
-__version__ = "4.0.1"
+__version__ = "4.0.2"
 __description__ = "Tool to submit genomics pipeline outputs to the ENCODE Portal"
 __url__ = "https://github.com/ENCODE-DCC/accession"
 __uri__ = __url__
