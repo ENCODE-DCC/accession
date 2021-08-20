@@ -71,3 +71,9 @@ def test_parser_info_subcommand_multiple_ids():
     parser = get_parser()
     args = parser.parse_args(["info", "-i", "ENCSR123ABC", "21345", "my-wf"])
     assert args.ids == ["ENCSR123ABC", "21345", "my-wf"]
+
+
+def test_parser_info_subcommand_bare_ids_flag_should_fail():
+    parser = get_parser()
+    with pytest.raises(SystemExit):
+        parser.parse_args(["info", "-i"])
