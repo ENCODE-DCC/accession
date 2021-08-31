@@ -69,6 +69,8 @@
     {
       "dcc_step_run": "/analysis-steps/dnase-peak-calling-step-v-1/",
       "dcc_step_version": "/analysis-step-versions/dnase-peak-calling-step-v-1-0/",
+      "filter_type": "false discovery rate percentage",
+      "filter_value": 0.1,
       "wdl_files": [
         {
           "derived_from_files": [
@@ -165,6 +167,8 @@
     {
       "dcc_step_run": "/analysis-steps/dnase-peak-calling-step-v-1/",
       "dcc_step_version": "/analysis-step-versions/dnase-peak-calling-step-v-1-0/",
+      "filter_type": "false discovery rate percentage",
+      "filter_value": 5.0,
       "wdl_files": [
         {
           "derived_from_files": [
@@ -192,6 +196,8 @@
     {
       "dcc_step_run": "/analysis-steps/dnase-peak-calling-step-v-1/",
       "dcc_step_version": "/analysis-step-versions/dnase-peak-calling-step-v-1-0/",
+      "filter_type": "false discovery rate percentage",
+      "filter_value": 0.1,
       "wdl_files": [
         {
           "derived_from_files": [
@@ -220,6 +226,8 @@
     {
       "dcc_step_run": "/analysis-steps/dnase-tenth-of-percent-peaks-file-format-conversion-step-v-1/",
       "dcc_step_version": "/analysis-step-versions/dnase-tenth-of-percent-peaks-file-format-conversion-step-v-1-0/",
+      "filter_type": "false discovery rate percentage",
+      "filter_value": 0.1,
       "wdl_files": [
         {
           "derived_from_files": [
@@ -241,6 +249,8 @@
     {
       "dcc_step_run": "/analysis-steps/dnase-five-percent-peaks-file-format-conversion-step-v-1/",
       "dcc_step_version": "/analysis-step-versions/dnase-five-percent-peaks-file-format-conversion-step-v-1-0/",
+      "filter_type": "false discovery rate percentage",
+      "filter_value": 5.0,
       "wdl_files": [
         {
           "derived_from_files": [
