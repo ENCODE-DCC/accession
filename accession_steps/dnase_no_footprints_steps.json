@@ -69,8 +69,6 @@
     {
       "dcc_step_run": "/analysis-steps/dnase-peak-calling-step-v-1/",
       "dcc_step_version": "/analysis-step-versions/dnase-peak-calling-step-v-1-0/",
-      "filter_type": "false discovery rate percentage",
-      "filter_value": 0.1,
       "wdl_files": [
         {
           "derived_from_files": [
@@ -86,6 +84,8 @@
           ],
           "file_format": "starch",
           "filekey": "analysis.tenth_of_one_percent_peaks_starch",
+          "filter_type": "false discovery rate percentage",
+          "filter_value": 0.1,
           "output_type": "peaks",
           "quality_metrics": []
         }
@@ -111,6 +111,8 @@
           "file_format": "bed",
           "file_format_type": "bed3+",
           "filekey": "analysis.five_percent_allcalls_bed_gz",
+          "filter_type": "false discovery rate percentage",
+          "filter_value": 5.0,
           "output_type": "FDR cut rate",
           "quality_metrics": [
             "five_percent_allcalls_qc"
@@ -158,6 +160,8 @@
           "file_format": "bigBed",
           "file_format_type": "bed3+",
           "filekey": "analysis.five_percent_allcalls_bigbed",
+          "filter_type": "false discovery rate percentage",
+          "filter_value": 5.0,
           "output_type": "FDR cut rate",
           "quality_metrics": []
         }
@@ -167,8 +171,6 @@
     {
       "dcc_step_run": "/analysis-steps/dnase-peak-calling-step-v-1/",
       "dcc_step_version": "/analysis-step-versions/dnase-peak-calling-step-v-1-0/",
-      "filter_type": "false discovery rate percentage",
-      "filter_value": 5.0,
       "wdl_files": [
         {
           "derived_from_files": [
@@ -185,6 +187,8 @@
           "file_format": "bed",
           "file_format_type": "narrowPeak",
           "filekey": "analysis.five_percent_narrowpeaks_bed_gz",
+          "filter_type": "false discovery rate percentage",
+          "filter_value": 5.0,
           "output_type": "peaks",
           "quality_metrics": [
             "five_percent_narrowpeaks_qc"
@@ -196,8 +200,6 @@
     {
       "dcc_step_run": "/analysis-steps/dnase-peak-calling-step-v-1/",
       "dcc_step_version": "/analysis-step-versions/dnase-peak-calling-step-v-1-0/",
-      "filter_type": "false discovery rate percentage",
-      "filter_value": 0.1,
       "wdl_files": [
         {
           "derived_from_files": [
@@ -214,6 +216,8 @@
           "file_format": "bed",
           "file_format_type": "narrowPeak",
           "filekey": "analysis.tenth_of_one_percent_narrowpeaks_bed_gz",
+          "filter_type": "false discovery rate percentage",
+          "filter_value": 0.1,
           "maybe_preferred_default": true,
           "output_type": "peaks",
           "quality_metrics": [
@@ -226,8 +230,6 @@
     {
       "dcc_step_run": "/analysis-steps/dnase-tenth-of-percent-peaks-file-format-conversion-step-v-1/",
       "dcc_step_version": "/analysis-step-versions/dnase-tenth-of-percent-peaks-file-format-conversion-step-v-1-0/",
-      "filter_type": "false discovery rate percentage",
-      "filter_value": 0.1,
       "wdl_files": [
         {
           "derived_from_files": [
@@ -239,6 +241,8 @@
           "file_format": "bigBed",
           "file_format_type": "narrowPeak",
           "filekey": "analysis.tenth_of_one_percent_narrowpeaks_bigbed",
+          "filter_type": "false discovery rate percentage",
+          "filter_value": 0.1,
           "maybe_preferred_default": true,
           "output_type": "peaks",
           "quality_metrics": []
@@ -249,8 +253,6 @@
     {
       "dcc_step_run": "/analysis-steps/dnase-five-percent-peaks-file-format-conversion-step-v-1/",
       "dcc_step_version": "/analysis-step-versions/dnase-five-percent-peaks-file-format-conversion-step-v-1-0/",
-      "filter_type": "false discovery rate percentage",
-      "filter_value": 5.0,
       "wdl_files": [
         {
           "derived_from_files": [
@@ -262,6 +264,8 @@
           "file_format": "bigBed",
           "file_format_type": "narrowPeak",
           "filekey": "analysis.five_percent_narrowpeaks_bigbed",
+          "filter_type": "false discovery rate percentage",
+          "filter_value": 5.0,
           "output_type": "peaks",
           "quality_metrics": []
         }
