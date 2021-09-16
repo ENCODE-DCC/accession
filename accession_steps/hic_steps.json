@@ -9,17 +9,17 @@
             {
               "derived_from_filekey": "replicate",
               "derived_from_inputs": true,
-              "derived_from_task": "ScatterAt73_17"
+              "derived_from_task": "ScatterAt74_17"
             },
             {
               "derived_from_filekey": "reference_index",
               "derived_from_inputs": true,
-              "derived_from_task": "ScatterAt73_17"
+              "derived_from_task": "ScatterAt74_17"
             },
             {
               "derived_from_filekey": "restriction_sites",
               "derived_from_inputs": true,
-              "derived_from_task": "ScatterAt92_21"
+              "derived_from_task": "ScatterAt93_21"
             }
           ],
           "file_format": "bam",
@@ -33,14 +33,33 @@
       "wdl_task_name": "dedup"
     },
     {
-      "dcc_step_run": "hic-pairs-generation-step-v-1",
-      "dcc_step_version": "/analysis-step-versions/hic-pairs-generation-step-v-1-0/",
+      "dcc_step_run": "hic-alignment-merging-filtering-step-v-1",
+      "dcc_step_version": "/analysis-step-versions/hic-alignment-merging-filtering-step-v-1-0/",
       "wdl_files": [
         {
           "derived_from_files": [
             {
               "derived_from_filekey": "deduped_bam",
               "derived_from_task": "dedup"
+            }
+          ],
+          "file_format": "bam",
+          "filekey": "bam",
+          "output_type": "alignments",
+          "quality_metrics": []
+        }
+      ],
+      "wdl_task_name": "merge_replicates"
+    },
+    {
+      "dcc_step_run": "hic-pairs-generation-step-v-1",
+      "dcc_step_version": "/analysis-step-versions/hic-pairs-generation-step-v-1-0/",
+      "wdl_files": [
+        {
+          "derived_from_files": [
+            {
+              "derived_from_filekey": "bam",
+              "derived_from_task": "merge_replicates"
             },
             {
               "derived_from_filekey": "chrsz_",
@@ -68,8 +87,8 @@
           ],
           "derived_from_files": [
             {
-              "derived_from_filekey": "deduped_bam",
-              "derived_from_task": "dedup"
+              "derived_from_filekey": "bam",
+              "derived_from_task": "merge_replicates"
             },
             {
               "derived_from_filekey": "restriction_sites",
@@ -86,9 +105,13 @@
           ]
         }
       ],
-      "wdl_task_name": "create_hic"
+      "wdl_task_name": "add_norm"
     },
     {
+      "callbacks": [
+        "maybe_preferred_default",
+        "add_filter_value"
+      ],
       "dcc_step_run": "hic-tads-calling-step-v-1",
       "dcc_step_version": "/analysis-step-versions/hic-tads-calling-step-v-1-0/",
       "wdl_files": [
@@ -96,12 +119,12 @@
           "derived_from_files": [
             {
               "derived_from_filekey": "output_hic",
-              "derived_from_task": "create_hic"
+              "derived_from_task": "add_norm"
             }
           ],
           "file_format": "bedpe",
           "filekey": "out_file",
-          "maybe_preferred_default": true,
+          "filter_type": "mapping quality",
           "output_type": "topologically associated domains",
           "quality_metrics": []
         }
@@ -109,6 +132,10 @@
       "wdl_task_name": "arrowhead"
     },
     {
+      "callbacks": [
+        "maybe_preferred_default",
+        "add_filter_value"
+      ],
       "dcc_step_run": "hic-loop-calling-step-v-1",
       "dcc_step_version": "/analysis-step-versions/hic-loop-calling-step-v-1-0",
       "wdl_files": [
@@ -116,17 +143,65 @@
           "derived_from_files": [
             {
               "derived_from_filekey": "output_hic",
-              "derived_from_task": "create_hic"
+              "derived_from_task": "add_norm"
             }
           ],
           "file_format": "bedpe",
           "filekey": "merged_loops",
-          "maybe_preferred_default": true,
+          "filter_type": "mapping quality",
           "output_type": "long range chromatin interactions",
           "quality_metrics": []
         }
       ],
       "wdl_task_name": "hiccups"
+    },
+    {
+      "callbacks": [
+        "maybe_preferred_default"
+      ],
+      "dcc_step_run": "hic-loop-calling-step-v-1",
+      "dcc_step_version": "/analysis-step-versions/hic-loop-calling-step-v-1-0",
+      "wdl_files": [
+        {
+          "derived_from_files": [
+            {
+              "derived_from_filekey": "output_hic",
+              "derived_from_task": "add_norm"
+            }
+          ],
+          "file_format": "bigwig",
+          "filekey": "eigenvector_bigwig",
+          "filter_type": "bin size (kb)",
+          "filter_value": 5,
+          "output_type": "genome compartments",
+          "quality_metrics": []
+        }
+      ],
+      "wdl_task_name": "create_eigenvector"
+    },
+    {
+      "callbacks": [
+        "maybe_preferred_default"
+      ],
+      "dcc_step_run": "hic-loop-calling-step-v-1",
+      "dcc_step_version": "/analysis-step-versions/hic-loop-calling-step-v-1-0",
+      "wdl_files": [
+        {
+          "derived_from_files": [
+            {
+              "derived_from_filekey": "output_hic",
+              "derived_from_task": "add_norm"
+            }
+          ],
+          "file_format": "bigwig",
+          "filekey": "eigenvector_bigwig",
+          "filter_type": "bin size (kb)",
+          "filter_value": 10,
+          "output_type": "genome compartments",
+          "quality_metrics": []
+        }
+      ],
+      "wdl_task_name": "create_eigenvector_10kb"
     }
   ],
   "raw_fastqs_keys": [

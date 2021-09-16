@@ -2764,21 +2764,6 @@ class AccessionHic(Accession):
         filekey = "reference_index"
         return self.find_portal_property_from_filekey(filekey, EncodeFile.ASSEMBLY)
 
-    def preferred_default_should_be_updated(
-        self, qc_value: Union[int, float], current_best_qc_value: Union[int, float]
-    ) -> bool:
-        """
-        There is only one set of loop and TAD calls per Hi-C experiment so it's OK to
-        always update the preferred_default for those files.
-        """
-        return True
-
-    def get_preferred_default_qc_value(self, file: File) -> Union[int, float]:
-        """
-        Just a dummy value since there is only one set of loops/TADs per experiment
-        """
-        return 1
-
     def maybe_preferred_default(self, file: File) -> Dict[str, bool]:
         """
         Needed for the .hic files. For in-situ Hi-C MAPQ>=30 should be the default and
