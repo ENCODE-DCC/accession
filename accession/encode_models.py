@@ -251,6 +251,8 @@ class EncodeFile:
             obj["submitted_file_name"] = submitted_file_name
         if file_params.filter_type is not None:
             obj["filter_type"] = file_params.filter_type
+        if file_params.filter_value is not None:
+            obj["filter_value"] = file_params.filter_value
         if extras is not None:
             obj.update(extras)
         obj[Connection.PROFILE_KEY] = "file"

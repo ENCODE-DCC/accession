@@ -111,3 +111,4 @@ class FileParams:
             "maybe_preferred_default", False
         )
         self.filter_type: Optional[str] = file_params.get("filter_type")
+        self.filter_value: Optional[int] = file_params.get("filter_value")

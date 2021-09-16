@@ -169,7 +169,7 @@
               "derived_from_task": "add_norm"
             }
           ],
-          "file_format": "bigwig",
+          "file_format": "bigWig",
           "filekey": "eigenvector_bigwig",
           "filter_type": "bin size (kb)",
           "filter_value": 5,
@@ -190,7 +190,7 @@
               "derived_from_task": "add_norm"
             }
           ],
-          "file_format": "bigwig",
+          "file_format": "bigWig",
           "filekey": "eigenvector_bigwig",
           "filter_type": "bin size (kb)",
           "filter_value": 10,
