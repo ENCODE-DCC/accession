@@ -1,9 +1,9 @@
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Tuple
 
 from caper.caper_args import DEFAULT_CAPER_CONF, get_parser_and_defaults
 from caper.caper_labels import CaperLabels
-from caper.cromwell_rest_api import CromwellRestAPI
+from caper.cromwell_rest_api import CromwellRestAPI, has_wildcard, is_valid_uuid
 
 
 class CaperHelper:
@@ -32,12 +32,27 @@ class CaperHelper:
         `caper.caper_client.CaperClient.metadata`, see
         https://github.com/ENCODE-DCC/caper/blob/v1.0.0/caper/caper_client.py
         """
-        metadata_results = self.client.get_metadata(
-            workflow_ids_or_labels,
-            [(CaperLabels.KEY_CAPER_STR_LABEL, v) for v in workflow_ids_or_labels],
-            embed_subworkflow=True,
+        workflow_ids, labels = self._split_workflow_ids_and_labels(
+            workflow_ids_or_labels
         )
-        return metadata_results
+
+        return self.client.get_metadata(workflow_ids, labels, embed_subworkflow=True)
+
+    def _split_workflow_ids_and_labels(
+        self, workflow_ids_or_labels: List[str]
+    ) -> Tuple[List[str], List[Tuple[str, str]]]:
+        workflow_ids: List[str] = []
+        labels: List[Tuple[str, str]] = []
+
+        for query in workflow_ids_or_labels:
+            if is_valid_uuid(query):
+                workflow_ids.append(query)
+            else:
+                labels.append((CaperLabels.KEY_CAPER_STR_LABEL, query))
+                if has_wildcard(query):
+                    workflow_ids.append(query)
+
+        return workflow_ids, labels
 
 
 def caper_conf_exists() -> bool:
