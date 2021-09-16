@@ -2764,6 +2764,14 @@ class AccessionHic(Accession):
         filekey = "reference_index"
         return self.find_portal_property_from_filekey(filekey, EncodeFile.ASSEMBLY)
 
+    def get_preferred_default_qc_value(self, file: File) -> Union[int, float]:
+        raise NotImplementedError
+
+    def preferred_default_should_be_updated(
+        self, qc_value: Union[int, float], current_best_qc_value: Union[int, float]
+    ) -> bool:
+        raise NotImplementedError
+
     def maybe_preferred_default(self, file: File) -> Dict[str, bool]:
         """
         Needed for the .hic files. For in-situ Hi-C MAPQ>=30 should be the default and
