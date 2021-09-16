@@ -2778,8 +2778,13 @@ class AccessionHic(Accession):
         for intact Hi-C it should be the MAPQ>=1 map. However there is no reliable way
         to distinguish this in the portal metadata so we just use the MAPQ>=30 for now.
         """
-        if file.get_task().inputs["quality"] == 1:
-            return {"preferred_default": True}
+        task = file.get_task()
+        preferred_default_payload = {"preferred_default": True}
+        if task.task_name == "create_eigenvector":
+            if task.inputs["output_filename_suffix"] == "_30":
+                return preferred_default_payload
+        elif task.inputs["quality"] == 30:
+            return preferred_default_payload
         return {}
 
     def maybe_update_output_type(self, file: File) -> Dict[str, str]:

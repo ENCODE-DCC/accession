@@ -108,14 +108,14 @@
       "wdl_task_name": "add_norm"
     },
     {
-      "callbacks": [
-        "maybe_preferred_default",
-        "add_filter_value"
-      ],
       "dcc_step_run": "hic-tads-calling-step-v-1",
       "dcc_step_version": "/analysis-step-versions/hic-tads-calling-step-v-1-0/",
       "wdl_files": [
         {
+          "callbacks": [
+            "maybe_preferred_default",
+            "add_filter_value"
+          ],
           "derived_from_files": [
             {
               "derived_from_filekey": "output_hic",
@@ -132,14 +132,14 @@
       "wdl_task_name": "arrowhead"
     },
     {
-      "callbacks": [
-        "maybe_preferred_default",
-        "add_filter_value"
-      ],
       "dcc_step_run": "hic-loop-calling-step-v-1",
       "dcc_step_version": "/analysis-step-versions/hic-loop-calling-step-v-1-0",
       "wdl_files": [
         {
+          "callbacks": [
+            "maybe_preferred_default",
+            "add_filter_value"
+          ],
           "derived_from_files": [
             {
               "derived_from_filekey": "output_hic",
@@ -156,13 +156,13 @@
       "wdl_task_name": "hiccups"
     },
     {
-      "callbacks": [
-        "maybe_preferred_default"
-      ],
       "dcc_step_run": "hic-loop-calling-step-v-1",
       "dcc_step_version": "/analysis-step-versions/hic-loop-calling-step-v-1-0",
       "wdl_files": [
         {
+          "callbacks": [
+            "maybe_preferred_default"
+          ],
           "derived_from_files": [
             {
               "derived_from_filekey": "output_hic",
@@ -180,9 +180,6 @@
       "wdl_task_name": "create_eigenvector"
     },
     {
-      "callbacks": [
-        "maybe_preferred_default"
-      ],
       "dcc_step_run": "hic-loop-calling-step-v-1",
       "dcc_step_version": "/analysis-step-versions/hic-loop-calling-step-v-1-0",
       "wdl_files": [
