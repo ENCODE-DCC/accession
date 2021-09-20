@@ -33,8 +33,8 @@
       "wdl_task_name": "dedup"
     },
     {
-      "dcc_step_run": "hic-alignment-merging-filtering-step-v-1",
-      "dcc_step_version": "/analysis-step-versions/hic-alignment-merging-filtering-step-v-1-0/",
+      "dcc_step_run": "hic-bam-merging-step-v-1",
+      "dcc_step_version": "/analysis-step-versions/hic-bam-merging-step-v-1-0/",
       "wdl_files": [
         {
           "derived_from_files": [
@@ -133,7 +133,7 @@
     },
     {
       "dcc_step_run": "hic-loop-calling-step-v-1",
-      "dcc_step_version": "/analysis-step-versions/hic-loop-calling-step-v-1-0",
+      "dcc_step_version": "/analysis-step-versions/hic-loop-calling-step-v-1-0/",
       "wdl_files": [
         {
           "callbacks": [
@@ -156,8 +156,8 @@
       "wdl_task_name": "hiccups"
     },
     {
-      "dcc_step_run": "hic-loop-calling-step-v-1",
-      "dcc_step_version": "/analysis-step-versions/hic-loop-calling-step-v-1-0",
+      "dcc_step_run": "hic-eigenvector-creation-step-v-1",
+      "dcc_step_version": "/analysis-step-versions/hic-eigenvector-creation-step-v-1-0/",
       "wdl_files": [
         {
           "callbacks": [
@@ -180,8 +180,8 @@
       "wdl_task_name": "create_eigenvector"
     },
     {
-      "dcc_step_run": "hic-loop-calling-step-v-1",
-      "dcc_step_version": "/analysis-step-versions/hic-loop-calling-step-v-1-0",
+      "dcc_step_run": "hic-eigenvector-creation-step-v-1",
+      "dcc_step_version": "/analysis-step-versions/hic-eigenvector-creation-step-v-1-0/",
       "wdl_files": [
         {
           "derived_from_files": [
