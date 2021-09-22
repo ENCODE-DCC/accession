@@ -240,6 +240,7 @@
       "wdl_task_name": "rsem_quant"
     }
   ],
+  "quality_standard": "/quality-standards/encode3-bulk-rna/",
   "raw_fastqs_keys": [
     "fastqs_R1",
     "fastqs_R2"
