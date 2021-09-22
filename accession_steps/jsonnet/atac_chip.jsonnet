@@ -421,7 +421,7 @@
   'histone_chip_pbam_steps.json': histone_common_properties {
     'accession.steps': chip_pbam_map_only_steps['accession.steps'] + $['histone_chip_peak_call_only_steps.json']['accession.steps'],
   },
-  'mint_chip_steps.json': common_properties {
+  'mint_chip_steps.json': histone_common_properties {
     'accession.steps': $['chip_map_only_steps.json']['accession.steps'] + $['mint_chip_peak_call_only_steps.json']['accession.steps'],
   },
   'atac_steps.json': {
