@@ -426,6 +426,7 @@
   },
   'atac_steps.json': {
     'accession.steps': atac_map_only_steps['accession.steps'] + atac_idr_peak_call_steps['accession.steps'] + atac_overlap_peak_call_steps['accession.steps'],
+    quality_standard: '/quality-standards/encode4-atac-seq/',
     raw_fastqs_keys: atac_map_only_steps.raw_fastqs_keys,
   },
 }
