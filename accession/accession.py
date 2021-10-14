@@ -2757,7 +2757,7 @@ class AccessionWgbs(Accession):
 
 
 class AccessionHic(Accession):
-    QC_MAP = {"hic": "make_hic_qc", "hic_library": "make_hic_library_qc"}
+    QC_MAP = {"hic": "make_hic_qc"}
 
     @property
     def assembly(self) -> str:
@@ -2800,18 +2800,26 @@ class AccessionHic(Accession):
         if encode_file.has_qc("HicQualityMetric"):
             return
         task = file.get_task()
-        hic_qc_file = self.analysis.search_up(task, "calculate_stats", "stats_json")[0]
+        if task.task_name == "dedup":
+            hic_qc_file = self.analysis.search_down(
+                task, "calculate_stats_on_library", "stats_json"
+            )[0]
+            hic_qc_text = self.analysis.search_down(
+                task, "calculate_stats_on_library", "stats"
+            )[0]
+        else:
+            hic_qc_file = self.analysis.search_up(
+                task, "calculate_stats", "stats_json"
+            )[0]
+            hic_qc_text = self.analysis.search_up(task, "calculate_stats", "stats")[0]
         hic_qc = hic_qc_file.read_json()
-        return self.queue_qc(hic_qc, encode_file, "hic-quality-metric")
-
-    def make_hic_library_qc(self, encode_file: EncodeFile, file: File) -> None:
-        if encode_file.has_qc("HicQualityMetric"):
-            return
-        task = file.get_task()
-        hic_qc_file = self.analysis.search_down(
-            task, "calculate_stats_on_library", "stats_json"
-        )[0]
-        hic_qc = hic_qc_file.read_json()
+        modeled_attachment = EncodeAttachment(
+            hic_qc_text.read_bytes(), hic_qc_text.filename
+        )
+        attachment = modeled_attachment.get_portal_object(
+            mime_type="application/json", additional_extension=".json"
+        )
+        hic_qc["attachment"] = attachment
         return self.queue_qc(hic_qc, encode_file, "hic-quality-metric")
 
 

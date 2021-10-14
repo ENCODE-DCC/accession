@@ -26,30 +26,11 @@
           "filekey": "deduped_bam",
           "output_type": "alignments",
           "quality_metrics": [
-            "hic_library"
+            "hic"
           ]
         }
       ],
       "wdl_task_name": "dedup"
-    },
-    {
-      "dcc_step_run": "hic-bam-merging-step-v-1",
-      "dcc_step_version": "/analysis-step-versions/hic-bam-merging-step-v-1-0/",
-      "wdl_files": [
-        {
-          "derived_from_files": [
-            {
-              "derived_from_filekey": "deduped_bam",
-              "derived_from_task": "dedup"
-            }
-          ],
-          "file_format": "bam",
-          "filekey": "bam",
-          "output_type": "alignments",
-          "quality_metrics": []
-        }
-      ],
-      "wdl_task_name": "merge_replicates"
     },
     {
       "dcc_step_run": "hic-pairs-generation-step-v-1",
@@ -58,8 +39,8 @@
         {
           "derived_from_files": [
             {
-              "derived_from_filekey": "bam",
-              "derived_from_task": "merge_replicates"
+              "derived_from_filekey": "deduped_bam",
+              "derived_from_task": "dedup"
             },
             {
               "derived_from_filekey": "chrsz_",
@@ -87,8 +68,8 @@
           ],
           "derived_from_files": [
             {
-              "derived_from_filekey": "bam",
-              "derived_from_task": "merge_replicates"
+              "derived_from_filekey": "deduped_bam",
+              "derived_from_task": "dedup"
             },
             {
               "derived_from_filekey": "restriction_sites",
