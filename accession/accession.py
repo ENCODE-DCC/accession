@@ -2814,11 +2814,9 @@ class AccessionHic(Accession):
             hic_qc_text = self.analysis.search_up(task, "calculate_stats", "stats")[0]
         hic_qc = hic_qc_file.read_json()
         modeled_attachment = EncodeAttachment(
-            hic_qc_text.read_bytes(), hic_qc_text.filename
+            hic_qc_text.read_bytes(), hic_qc_text.filename, mime_type="text/plain"
         )
-        attachment = modeled_attachment.get_portal_object(
-            mime_type="application/json", additional_extension=".json"
-        )
+        attachment = modeled_attachment.get_portal_object()
         hic_qc["attachment"] = attachment
         return self.queue_qc(hic_qc, encode_file, "hic-quality-metric")
 
