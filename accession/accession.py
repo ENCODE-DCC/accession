@@ -2756,6 +2756,71 @@ class AccessionWgbs(Accession):
         )
 
 
+class AccessionHic(Accession):
+    QC_MAP = {"hic": "make_hic_qc"}
+
+    @property
+    def assembly(self) -> str:
+        filekey = "reference_index"
+        return self.find_portal_property_from_filekey(filekey, EncodeFile.ASSEMBLY)
+
+    def get_preferred_default_qc_value(self, file: File) -> Union[int, float]:
+        raise NotImplementedError
+
+    def preferred_default_should_be_updated(
+        self, qc_value: Union[int, float], current_best_qc_value: Union[int, float]
+    ) -> bool:
+        raise NotImplementedError
+
+    def maybe_preferred_default(self, file: File) -> Dict[str, bool]:
+        """
+        Needed for the .hic files. For in-situ Hi-C MAPQ>=30 should be the default and
+        for intact Hi-C it should be the MAPQ>=1 map. However there is no reliable way
+        to distinguish this in the portal metadata so we just use the MAPQ>=30 for now.
+        """
+        task = file.get_task()
+        preferred_default_payload = {"preferred_default": True}
+        if task.task_name == "create_eigenvector":
+            if task.inputs["output_filename_suffix"] == "_30":
+                return preferred_default_payload
+        elif task.inputs["quality"] == 30:
+            return preferred_default_payload
+        return {}
+
+    def maybe_update_output_type(self, file: File) -> Dict[str, str]:
+        quality = file.get_task().inputs["quality"]
+        if quality == 30:
+            return {"output_type": "mapping quality thresholded chromatin interactions"}
+        return {}
+
+    def add_filter_value(self, file: File) -> Dict[str, str]:
+        return {"filter_value": file.get_task().inputs["quality"]}
+
+    def make_hic_qc(self, encode_file: EncodeFile, file: File) -> None:
+        if encode_file.has_qc("HicQualityMetric"):
+            return
+        task = file.get_task()
+        if task.task_name == "dedup":
+            hic_qc_file = self.analysis.search_down(
+                task, "calculate_stats_on_library", "stats_json"
+            )[0]
+            hic_qc_text = self.analysis.search_down(
+                task, "calculate_stats_on_library", "stats"
+            )[0]
+        else:
+            hic_qc_file = self.analysis.search_up(
+                task, "calculate_stats", "stats_json"
+            )[0]
+            hic_qc_text = self.analysis.search_up(task, "calculate_stats", "stats")[0]
+        hic_qc = hic_qc_file.read_json()
+        modeled_attachment = EncodeAttachment(
+            hic_qc_text.read_bytes(), hic_qc_text.filename, mime_type="text/plain"
+        )
+        attachment = modeled_attachment.get_portal_object()
+        hic_qc["attachment"] = attachment
+        return self.queue_qc(hic_qc, encode_file, "hic-quality-metric")
+
+
 def accession_factory(
     pipeline_type: str,
     accession_metadata: str,
@@ -2793,6 +2858,7 @@ def accession_factory(
         "dnase_no_footprints": AccessionDnase,
         "dnase_starch_from_bam": AccessionDnaseStarchFromBam,
         "wgbs": AccessionWgbs,
+        "hic": AccessionHic,
     }
     selected_accession: Optional[Type[Accession]] = None
     try:
