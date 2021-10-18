@@ -2827,6 +2827,8 @@ class AccessionHic(Accession):
 
 
 class AccessionSegway(Accession):
+    QC_MAP: Dict[str, str] = {}
+
     @property
     def assembly(self) -> str:
         filekey = "reference_index"
