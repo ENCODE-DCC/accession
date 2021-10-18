@@ -2832,7 +2832,7 @@ class AccessionSegway(Accession):
 
     @property
     def assembly(self) -> str:
-        filekey = "reference_index"
+        filekey = "chrom_sizes"
         return self.find_portal_property_from_filekey(filekey, EncodeFile.ASSEMBLY)
 
     def get_preferred_default_qc_value(self, file: File) -> Union[int, float]:
