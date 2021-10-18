@@ -101,6 +101,7 @@ class Accession(ABC):
         no_log_file: bool = False,
         queue_info: Optional[QueueInfo] = None,
         private_filenames: bool = False,
+        annotation_accession: Optional[str] = None,
     ) -> None:
         self.analysis = analysis
         self.steps = steps
@@ -120,6 +121,7 @@ class Accession(ABC):
         self._logger: Optional[logging.Logger] = None
         self._experiment: Optional[EncodeExperiment] = None
         self._preflight_helper: Optional[PreflightHelper] = None
+        self._annotation_accession = annotation_accession
 
         self.cloud_tasks_upload_client: Optional[CloudTasksUploadClient] = None
         if queue_info is not None:
@@ -2838,6 +2840,18 @@ class AccessionSegway(Accession):
     ) -> bool:
         raise NotImplementedError
 
+    @property
+    def experiment(self) -> EncodeExperiment:
+        """
+        Override the base class implementation, we are accessioning files to an
+        Annotation, and the dataset property of the input bigwigs points to other
+        experiments. So instead we need to just use the passed-in Annotation accession.
+        """
+        if self._experiment is None:
+            experiment_obj = self.conn.get(self._annotation_accession, frame="embedded")
+            self._experiment = EncodeExperiment(experiment_obj)
+        return self._experiment
+
 
 def accession_factory(
     pipeline_type: str,
@@ -2850,6 +2864,7 @@ def accession_factory(
     log_file_path: str = "accession.log",
     queue_info: Optional[QueueInfo] = None,
     use_in_memory_db: bool = False,
+    annotation_accession: Optional[str] = None,
 ) -> Accession:
     """
     Matches against the user-specified pipeline_type string and returns an instance of
@@ -2931,6 +2946,7 @@ def accession_factory(
         queue_info=queue_info,
         private_filenames=private_filenames,
         recorder=recorder,
+        annotation_accession=annotation_accession,
     )
 
 

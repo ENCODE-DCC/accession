@@ -47,8 +47,5 @@
       ],
       "wdl_task_name": "recolored_bed_to_bigbed"
     }
-  ],
-  "raw_fastqs_keys": [
-    "bigwigs"
   ]
 }

@@ -58,6 +58,11 @@ def get_parser() -> argparse.ArgumentParser:
         "-s", "--server", default="dev", help="Server the files will be accessioned to"
     )
     parser.add_argument(
+        "-a",
+        "--annotation-accession",
+        help="Accession of annotation to accession to, only valid with `-p segway`",
+    )
+    parser.add_argument(
         "--no-log-file",
         action="store_true",
         help=(
@@ -138,6 +143,13 @@ def check_or_set_lab_award(lab: Optional[str], award: Optional[str]) -> Tuple[st
     return lab, award
 
 
+def _check_accession_only_allowed_for_segway(
+    accession: Optional[str], pipeline_type: str
+) -> None:
+    if accession is not None and pipeline_type != "segway":
+        raise ValueError("Can only specify accession for pipeline type segway")
+
+
 def get_metadatas_from_args(args: argparse.Namespace) -> List[str]:
     """
     If there was only one metadata file/label provided, then returns a list containing
@@ -156,6 +168,9 @@ def main() -> None:
     parser = get_parser()
     args = parser.parse_args()
     lab, award = check_or_set_lab_award(args.lab, args.award)
+    _check_accession_only_allowed_for_segway(
+        args.annotation_accession, args.pipeline_type
+    )
     queue_info = QueueInfo.from_env()
     if args.accession_metadata is not None or args.metadata_list is not None:
         metadatas = get_metadatas_from_args(args)
@@ -169,6 +184,7 @@ def main() -> None:
                 log_file_path=args.log_file_path,
                 no_log_file=args.no_log_file,
                 queue_info=queue_info,
+                annotation_accession=args.annotation_accession,
             )
             if accessioner.cloud_tasks_upload_client is not None:
                 accessioner.cloud_tasks_upload_client.validate_queue_info()
