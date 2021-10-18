@@ -469,6 +469,8 @@ class Accession(ABC):
         encode_utils.connection.Connection.post() does not fail on alias conflict, here
         we log if there was a 409 conflict.
         """
+        if accession_step.step_version is None:
+            raise ValueError("Cannot create step run, missing step version")
         tasks = self.analysis.get_tasks(accession_step.wdl_task_name)
         if not tasks:
             error_message = (
@@ -916,7 +918,8 @@ class Accession(ABC):
             if not self.experiment.is_replicated:
                 return None
         if not dry_run:
-            step_run = self.get_or_make_step_run(single_step_params)
+            if single_step_params.step_version is not None:
+                step_run = self.get_or_make_step_run(single_step_params)
             accessioned_files: List[EncodeFile] = []
         else:
             matching_records: List[Optional[MatchingMd5Record]] = []
@@ -2821,6 +2824,21 @@ class AccessionHic(Accession):
         return self.queue_qc(hic_qc, encode_file, "hic-quality-metric")
 
 
+class AccessionSegway(Accession):
+    @property
+    def assembly(self) -> str:
+        filekey = "reference_index"
+        return self.find_portal_property_from_filekey(filekey, EncodeFile.ASSEMBLY)
+
+    def get_preferred_default_qc_value(self, file: File) -> Union[int, float]:
+        raise NotImplementedError
+
+    def preferred_default_should_be_updated(
+        self, qc_value: Union[int, float], current_best_qc_value: Union[int, float]
+    ) -> bool:
+        raise NotImplementedError
+
+
 def accession_factory(
     pipeline_type: str,
     accession_metadata: str,
@@ -2859,6 +2877,7 @@ def accession_factory(
         "dnase_starch_from_bam": AccessionDnaseStarchFromBam,
         "wgbs": AccessionWgbs,
         "hic": AccessionHic,
+        "segway": AccessionSegway,
     }
     selected_accession: Optional[Type[Accession]] = None
     try:

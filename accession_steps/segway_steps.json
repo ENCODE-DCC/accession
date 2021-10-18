@@ -1,0 +1,54 @@
+{
+  "accession.steps": [
+    {
+      "wdl_files": [
+        {
+          "derived_from_files": [
+            {
+              "derived_from_filekey": "bigwigs",
+              "derived_from_inputs": true,
+              "derived_from_task": "make_genomedata"
+            },
+            {
+              "derived_from_filekey": "chrom_sizes",
+              "derived_from_inputs": true,
+              "derived_from_task": "make_genomedata"
+            }
+          ],
+          "file_format": "bed",
+          "file_format_type": "bed9",
+          "filekey": "recolored_bed",
+          "output_type": "semi-automated genome annotation",
+          "quality_metrics": []
+        }
+      ],
+      "wdl_task_name": "recolor_bed"
+    },
+    {
+      "wdl_files": [
+        {
+          "derived_from_files": [
+            {
+              "derived_from_filekey": "recolored_bed",
+              "derived_from_task": "recolor_bed"
+            },
+            {
+              "derived_from_filekey": "chrom_sizes",
+              "derived_from_inputs": true,
+              "derived_from_task": "make_genomedata"
+            }
+          ],
+          "file_format": "bigBed",
+          "file_format_type": "bed9",
+          "filekey": "output_bigbed",
+          "output_type": "semi-automated genome annotation",
+          "quality_metrics": []
+        }
+      ],
+      "wdl_task_name": "recolored_bed_to_bigbed"
+    }
+  ],
+  "raw_fastqs_keys": [
+    "bigwigs"
+  ]
+}

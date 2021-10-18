@@ -10,8 +10,8 @@ class AccessionStep:
     """
 
     def __init__(self, step_params: Dict[str, Any]):
-        self.step_run: str = step_params["dcc_step_run"]
-        self.step_version: str = step_params["dcc_step_version"]
+        self.step_run: Optional[str] = step_params.get("dcc_step_run")
+        self.step_version: Optional[str] = step_params.get("dcc_step_version")
         self.wdl_task_name: str = step_params["wdl_task_name"]
         self.requires_replication: bool = step_params.get("requires_replication", False)
         self.wdl_files: List[FileParams] = [
