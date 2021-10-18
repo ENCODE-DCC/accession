@@ -656,7 +656,7 @@ class Accession(ABC):
         return new
 
     def make_file_obj(
-        self, file: File, file_params: FileParams, step_run: EncodeStepRun
+        self, file: File, file_params: FileParams, step_run: Optional[EncodeStepRun]
     ) -> Dict[str, Any]:
         """
         Obtains a file object postable to the ENCODE portal. Slashes `/` are not allowed
@@ -688,7 +688,7 @@ class Accession(ABC):
             file_params=file_params,
             file_size=file.size,
             file_md5sum=file.md5sum,
-            step_run_id=step_run.at_id,
+            step_run_id=step_run.at_id if step_run is not None else None,
             submitted_file_name=file.filename if not self.private_filenames else None,
             genome_annotation=self.genome_annotation,
             extras=extras,
@@ -920,6 +920,7 @@ class Accession(ABC):
             if not self.experiment.is_replicated:
                 return None
         if not dry_run:
+            step_run = None
             if single_step_params.step_version is not None:
                 step_run = self.get_or_make_step_run(single_step_params)
             accessioned_files: List[EncodeFile] = []
