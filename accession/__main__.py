@@ -148,6 +148,8 @@ def _check_accession_only_allowed_for_segway(
 ) -> None:
     if accession is not None and pipeline_type != "segway":
         raise ValueError("Can only specify accession for pipeline type segway")
+    if accession is None and pipeline_type == "segway":
+        raise ValueError("Must specify accession for segway pipeline type")
 
 
 def get_metadatas_from_args(args: argparse.Namespace) -> List[str]:
