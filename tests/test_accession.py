@@ -15,7 +15,7 @@ from accession.accession import (
     accession_factory,
 )
 from accession.accession_steps import AccessionStep, DerivedFromFile
-from accession.encode_models import EncodeExperiment, EncodeFile, EncodeGenericObject
+from accession.encode_models import EncodeDataset, EncodeFile, EncodeGenericObject
 from accession.file import GSFile
 from accession.helpers import PreferredDefaultFilePatch
 from accession.metadata import FileMetadata
@@ -107,7 +107,7 @@ def test_accession_experiment_fastqs_not_on_portal(
         return_value=None,
     )
     with pytest.raises(ValueError):
-        foo = mock_accession_not_patched.experiment  # noqa: F841
+        foo = mock_accession_not_patched.dataset  # noqa: F841
 
 
 def test_accession_experiment(mocker, mock_accession):
@@ -116,9 +116,9 @@ def test_accession_experiment(mocker, mock_accession):
         "get_encode_file_matching_md5_of_blob",
         EncodeFile({"@id": "baz", "dataset": "foo"}),
     )
-    experiment = EncodeExperiment({"@id": "/experiments/foo/"})
-    mocker.patch.object(mock_accession.conn, "get", experiment.portal_properties)
-    assert mock_accession.experiment.at_id == experiment.at_id
+    dataset = EncodeDataset({"@id": "/experiments/foo/"})
+    mocker.patch.object(mock_accession.conn, "get", dataset.portal_properties)
+    assert mock_accession.dataset.at_id == dataset.at_id
 
 
 @pytest.mark.docker

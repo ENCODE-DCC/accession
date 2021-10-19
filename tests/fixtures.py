@@ -31,9 +31,9 @@ from accession.database.query import DbQuery
 from accession.encode_models import (
     EncodeAttachment,
     EncodeCommonMetadata,
+    EncodeDataset,
     EncodeDocument,
     EncodeDocumentType,
-    EncodeExperiment,
     EncodeFile,
 )
 from accession.file import GSFile
@@ -484,11 +484,12 @@ def mock_accession(
     )
     mocker.patch.object(
         Accession,
-        "experiment",
+        "dataset",
         new_callable=PropertyMock(
-            return_value=EncodeExperiment(
+            return_value=EncodeDataset(
                 {
                     "@id": "/experiments/foo/",
+                    "@type": ["Experiment", "Dataset", "Item"],
                     "assay_term_name": "microRNA",
                     "replicates": [
                         {"biological_replicate_number": 1},
@@ -557,9 +558,9 @@ def mock_accession_chip(
     )
     mocker.patch.object(
         Accession,
-        "experiment",
+        "dataset",
         new_callable=PropertyMock(
-            return_value=EncodeExperiment(
+            return_value=EncodeDataset(
                 {
                     "@id": "foo",
                     "assay_term_name": "TF ChIP-seq",
@@ -596,9 +597,9 @@ def mock_accession_unreplicated(
     """
     mocker.patch.object(
         Accession,
-        "experiment",
+        "dataset",
         new_callable=PropertyMock(
-            return_value=EncodeExperiment(
+            return_value=EncodeDataset(
                 {
                     "@id": "foo",
                     "assay_term_name": "microRNA",

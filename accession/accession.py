@@ -49,12 +49,13 @@ from accession.database.models import (
     WorkflowLabel,
 )
 from accession.encode_models import (
+    DatasetType,
     EncodeAnalysis,
     EncodeAttachment,
     EncodeCommonMetadata,
+    EncodeDataset,
     EncodeDocument,
     EncodeDocumentType,
-    EncodeExperiment,
     EncodeFile,
     EncodeGenericObject,
     EncodeQualityMetric,
@@ -119,7 +120,7 @@ class Accession(ABC):
         self.search_cache: LruCache[str, List[Dict[str, Any]]] = LruCache()
         self.preferred_default_file_patches: Dict[str, PreferredDefaultFilePatch] = {}
         self._logger: Optional[logging.Logger] = None
-        self._experiment: Optional[EncodeExperiment] = None
+        self._dataset: Optional[EncodeDataset] = None
         self._preflight_helper: Optional[PreflightHelper] = None
         self._annotation_accession = annotation_accession
 
@@ -192,16 +193,16 @@ class Accession(ABC):
         return self._preflight_helper
 
     @property
-    def experiment(self) -> EncodeExperiment:
-        if self._experiment is None:
+    def dataset(self) -> EncodeDataset:
+        if self._dataset is None:
             encode_file = self.get_encode_file_matching_md5_of_blob(
                 self.analysis.raw_fastqs[0]
             )
             if encode_file is None:
                 raise ValueError("Could not find raw fastqs on the portal")
             experiment_obj = self.conn.get(encode_file.dataset, frame="embedded")
-            self._experiment = EncodeExperiment(experiment_obj)
-        return self._experiment
+            self._dataset = EncodeDataset(experiment_obj)
+        return self._dataset
 
     @abstractmethod
     def preferred_default_should_be_updated(
@@ -483,7 +484,7 @@ class Accession(ABC):
                     "This step run requires the workflow to be replicated, you may "
                     "need to check that the number of replicates in the workflow "
                     "matches the number of replicates on the portal with a status in "
-                    f"{EncodeExperiment.ALLOWED_REPLICATE_STATUSES}"
+                    f"{EncodeDataset.ALLOWED_REPLICATE_STATUSES}"
                 )
             raise ValueError(error_message)
         docker_tag = tasks[0].docker_image
@@ -683,7 +684,7 @@ class Accession(ABC):
             ],
             assembly=self.assembly,
             common_metadata=self.common_metadata,
-            dataset=self.experiment.at_id,
+            dataset=self.dataset.at_id,
             derived_from=derived_from,
             file_params=file_params,
             file_size=file.size,
@@ -718,7 +719,7 @@ class Accession(ABC):
         qc.update(
             {
                 "step_run": encode_file.step_run_id,
-                "assay_term_name": self.experiment.assay_term_name,
+                "assay_term_name": self.dataset.assay_term_name,
                 self.conn.PROFILE_KEY: profile,
                 **self.common_metadata,
             }
@@ -784,7 +785,7 @@ class Accession(ABC):
                 f"{self.common_metadata.lab_pi}:cromwell-metadata-{self.analysis.workflow_id}"
             ]
             document_attachment = self.analysis.metadata.get_as_attachment(
-                filename_prefix=self.experiment.accession
+                filename_prefix=self.dataset.accession
             )
             document = EncodeDocument(
                 attachment=document_attachment,
@@ -821,7 +822,7 @@ class Accession(ABC):
         Patches the internal_status of the experiment being accessioned to indicate
         accessioning has completed.
         """
-        payload = self.experiment.get_patchable_internal_status()
+        payload = self.dataset.get_patchable_internal_status()
         try:
             self.conn.patch(payload)
         except HTTPError as e:
@@ -835,8 +836,8 @@ class Accession(ABC):
                 return
             raise e
 
-    def patch_experiment_analyses(self, analysis: EncodeGenericObject) -> None:
-        payload = self.experiment.get_patchable_analyses(analysis.at_id)
+    def patch_dataset_analyses(self, analysis: EncodeGenericObject) -> None:
+        payload = self.dataset.get_patchable_analyses(analysis.at_id)
         self.conn.patch(payload, extend_array_values=True)
 
     def maybe_update_preferred_default_file_patches(
@@ -896,7 +897,7 @@ class Accession(ABC):
             db_file.quality_metrics = file_qcs
             files.append(db_file)
         run = Run(  # type: ignore
-            experiment_at_id=self.experiment.at_id,
+            experiment_at_id=self.dataset.at_id,
             workflow_id=self.analysis.workflow_id,
             status=run_status,
             workflow_labels=workflow_labels,
@@ -917,7 +918,7 @@ class Accession(ABC):
         for example pooled IDR in the ChIP-seq pipeline.
         """
         if single_step_params.requires_replication:
-            if not self.experiment.is_replicated:
+            if not self.dataset.is_replicated:
                 return None
         if not dry_run:
             step_run = None
@@ -1030,10 +1031,11 @@ class Accession(ABC):
             self.patch_preferred_default_files()
             self.post_qcs()
             analysis = self.post_analysis()
-            self.patch_experiment_analyses(analysis)
+            self.patch_dataset_analyses(analysis)
             for encode_file, file in self.upload_queue:
                 self.upload_file(encode_file, file)
-            self.patch_experiment_internal_status()
+            if self.dataset.dataset_type is DatasetType.Experiment:
+                self.patch_experiment_internal_status()
         except Exception:
             self.logger.exception("Failed to complete accessioning")
             self.record_run(run_status=RunStatus.Failed)
@@ -1072,7 +1074,7 @@ class AccessionGenericRna(Accession):
         """
         if (
             encode_file.has_qc(qc_schema_name)
-            or self.experiment.get_number_of_biological_replicates() != 2
+            or self.dataset.get_number_of_biological_replicates() != 2
         ):
             return
         qc = handler(file)
@@ -1279,14 +1281,12 @@ class AccessionBulkRna(AccessionGenericRna):
         if encode_file.has_qc("MadQualityMetric"):
             return
 
-        num_biological_replicates = (
-            self.experiment.get_number_of_biological_replicates()
-        )
+        num_biological_replicates = self.dataset.get_number_of_biological_replicates()
         if num_biological_replicates > 2:
             return
         elif (
             num_biological_replicates == 1
-            and self.experiment.get_number_of_technical_replicates() == 2
+            and self.dataset.get_number_of_technical_replicates() == 2
         ) or num_biological_replicates == 2:
             mad_qc = self.prepare_mad_qc_metric(file)
             return self.queue_qc(mad_qc, encode_file, "mad-quality-metric", shared=True)
@@ -1827,7 +1827,7 @@ class AccessionDnaseStarchFromBam(Accession):
             f"{self.common_metadata.lab_pi}:cromwell-metadata-{self.analysis.workflow_id}"
         ]
         document_attachment = self.analysis.metadata.get_as_attachment(
-            filename_prefix=self.experiment.accession
+            filename_prefix=self.dataset.accession
         )
         document = EncodeDocument(
             attachment=document_attachment,
@@ -1920,7 +1920,7 @@ class AccessionMicroRna(AccessionGenericRna):
         """
         if (
             encode_file.has_qc("CorrelationQualityMetric")
-            or self.experiment.get_number_of_biological_replicates() != 2
+            or self.dataset.get_number_of_biological_replicates() != 2
         ):
             return
         task = file.get_task()
@@ -2632,7 +2632,7 @@ class AccessionWgbs(Accession):
         return self.find_portal_property_from_filekey(filekey, EncodeFile.ASSEMBLY)
 
     @property
-    def experiment(self) -> EncodeExperiment:
+    def dataset(self) -> EncodeDataset:
         """
         We override the implementation in the base class because in the WGBS pipeline
         both the `make_metadata_csv` and `map` tasks have `fastqs` as input, but in one
@@ -2640,7 +2640,7 @@ class AccessionWgbs(Accession):
         which is not present on the portal. So we need to manually dig up one of the
         fastqs to find on the portal.
         """
-        if self._experiment is None:
+        if self._dataset is None:
             map_task = self.analysis.get_tasks("map")[0]
             fastq_filename = map_task.inputs["fastqs"][0]
             encode_file = self.get_encode_file_matching_md5_of_blob(
@@ -2649,8 +2649,8 @@ class AccessionWgbs(Accession):
             if encode_file is None:
                 raise ValueError("Could not find raw fastqs on the portal")
             experiment_obj = self.conn.get(encode_file.dataset, frame="embedded")
-            self._experiment = EncodeExperiment(experiment_obj)
-        return self._experiment
+            self._dataset = EncodeDataset(experiment_obj)
+        return self._dataset
 
     def preferred_default_should_be_updated(
         self, qc_value: Union[int, float], current_best_qc_value: Union[int, float]
@@ -2844,16 +2844,16 @@ class AccessionSegway(Accession):
         raise NotImplementedError
 
     @property
-    def experiment(self) -> EncodeExperiment:
+    def dataset(self) -> EncodeDataset:
         """
         Override the base class implementation, we are accessioning files to an
         Annotation, and the dataset property of the input bigwigs points to other
         experiments. So instead we need to just use the passed-in Annotation accession.
         """
-        if self._experiment is None:
+        if self._dataset is None:
             experiment_obj = self.conn.get(self._annotation_accession, frame="embedded")
-            self._experiment = EncodeExperiment(experiment_obj)
-        return self._experiment
+            self._dataset = EncodeDataset(experiment_obj)
+        return self._dataset
 
 
 def accession_factory(

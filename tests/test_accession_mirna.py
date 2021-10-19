@@ -6,7 +6,7 @@ import pytest
 import requests
 
 from accession.analysis import Analysis
-from accession.encode_models import EncodeExperiment
+from accession.encode_models import EncodeDataset
 from accession.metadata import FileMetadata
 
 
@@ -34,9 +34,9 @@ def mock_replicated_mirna_accession(mocker, mirna_replicated_analysis, mock_acce
     mocker.patch.object(mock_accession, "queue_qc", mock_queue_qc)
     mocker.patch.object(
         mock_accession,
-        "experiment",
+        "dataset",
         new_callable=PropertyMock(
-            return_value=EncodeExperiment(
+            return_value=EncodeDataset(
                 {
                     "@id": "foo",
                     "assay_term_name": "microRNA",

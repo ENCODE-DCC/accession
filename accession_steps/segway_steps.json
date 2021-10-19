@@ -40,7 +40,7 @@
           ],
           "file_format": "bigBed",
           "file_format_type": "bed9",
-          "filekey": "output_bigbed",
+          "filekey": "output_big_bed",
           "output_type": "semi-automated genome annotation",
           "quality_metrics": []
         }
