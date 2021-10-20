@@ -222,7 +222,7 @@ class EncodeFile:
         file_params: FileParams,
         file_size: int,
         file_md5sum: str,
-        step_run_id: Optional[str],
+        step_run_id: str,
         submitted_file_name: Optional[str] = None,
         genome_annotation: Optional[str] = None,
         extras: Optional[Dict[str, Any]] = None,
@@ -238,12 +238,11 @@ class EncodeFile:
             "output_type": file_params.output_type,
             "assembly": assembly,
             "dataset": dataset,
+            "step_run": step_run_id,
             "derived_from": derived_from,
             "file_size": file_size,
             "md5sum": file_md5sum,
         }
-        if step_run_id is not None:
-            obj["step_run"] = step_run_id
         if file_params.file_format_type:
             obj["file_format_type"] = file_params.file_format_type
         if genome_annotation is not None:
