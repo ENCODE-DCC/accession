@@ -1,6 +1,8 @@
 {
   "accession.steps": [
     {
+      "dcc_step_run": "segway-annotation-step-v-1",
+      "dcc_step_version": "/analysis-step-versions/segway-annotation-step-v-1-0/",
       "wdl_files": [
         {
           "derived_from_files": [
@@ -25,6 +27,8 @@
       "wdl_task_name": "recolor_bed"
     },
     {
+      "dcc_step_run": "segway-bed-to-bigbed-step-v-1",
+      "dcc_step_version": "/analysis-step-versions/segway-bed-to-bigbed-step-v-1-0/",
       "wdl_files": [
         {
           "derived_from_files": [
