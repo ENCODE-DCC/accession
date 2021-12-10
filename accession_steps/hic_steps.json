@@ -45,7 +45,7 @@
             {
               "derived_from_filekey": "chrsz_",
               "derived_from_inputs": true,
-              "derived_from_task": "bam2pairs"
+              "derived_from_task": "pre_to_pairs"
             }
           ],
           "file_format": "pairs",
@@ -54,7 +54,7 @@
           "quality_metrics": []
         }
       ],
-      "wdl_task_name": "bam2pairs"
+      "wdl_task_name": "pre_to_pairs"
     },
     {
       "dcc_step_run": "hic-merging-quantification-interaction-calling-step-v-1",
