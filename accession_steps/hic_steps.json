@@ -43,7 +43,7 @@
               "derived_from_task": "dedup"
             },
             {
-              "derived_from_filekey": "chrsz_",
+              "derived_from_filekey": "chrom_sizes",
               "derived_from_inputs": true,
               "derived_from_task": "pre_to_pairs"
             }
