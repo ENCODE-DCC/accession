@@ -9,17 +9,17 @@
             {
               "derived_from_filekey": "replicate",
               "derived_from_inputs": true,
-              "derived_from_task": "ScatterAt74_17"
+              "derived_from_task": "ScatterAt72_17"
             },
             {
               "derived_from_filekey": "reference_index",
               "derived_from_inputs": true,
-              "derived_from_task": "ScatterAt74_17"
+              "derived_from_task": "ScatterAt72_17"
             },
             {
               "derived_from_filekey": "restriction_sites",
               "derived_from_inputs": true,
-              "derived_from_task": "ScatterAt93_21"
+              "derived_from_task": "ScatterAt92_21"
             }
           ],
           "file_format": "bam",
