@@ -41,13 +41,13 @@
           ],
           "file_format": "bed",
           "file_format_type": "bed9",
-          "filekey": "bed_no_header",
+          "filekey": "recolored_bed",
           "maybe_preferred_default": true,
           "output_type": "semi-automated genome annotation",
           "quality_metrics": []
         }
       ],
-      "wdl_task_name": "recolored_bed_to_bigbed"
+      "wdl_task_name": "recolor_bed"
     },
     {
       "dcc_step_run": "segway-bed-to-bigbed-step-v-1",
@@ -56,13 +56,13 @@
         {
           "derived_from_files": [
             {
-              "derived_from_filekey": "bed_no_header",
-              "derived_from_task": "recolored_bed_to_bigbed"
+              "derived_from_filekey": "recolored_bed",
+              "derived_from_task": "recolor_bed"
             },
             {
               "derived_from_filekey": "chrom_sizes",
               "derived_from_inputs": true,
-              "derived_from_task": "make_genomedata"
+              "derived_from_task": "bed_to_bigbed"
             }
           ],
           "file_format": "bigBed",
