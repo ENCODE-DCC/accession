@@ -62,7 +62,7 @@
             {
               "derived_from_filekey": "chrom_sizes",
               "derived_from_inputs": true,
-              "derived_from_task": "bed_to_bigbed"
+              "derived_from_task": "recolored_bed_to_bigbed"
             }
           ],
           "file_format": "bigBed",
