@@ -716,10 +716,16 @@ class Accession(ABC):
         Shared QCs will have two or more file ids under the 'quality_metric_of' property
         and payload must be the same for all.
         """
+        try:
+            assay_term_name = self.dataset.assay_term_name
+            qc["assay_term_name"] = assay_term_name
+        except KeyError:
+            if not isinstance(self, AccessionSegway):
+                raise
+            pass
         qc.update(
             {
                 "step_run": encode_file.step_run_id,
-                "assay_term_name": self.dataset.assay_term_name,
                 self.conn.PROFILE_KEY: profile,
                 **self.common_metadata,
             }
