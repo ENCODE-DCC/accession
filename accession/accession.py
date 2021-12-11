@@ -2873,7 +2873,10 @@ class AccessionSegway(Accession):
         ):
             qc_file = self.analysis.search_down(task, "segtools", file_key)[0]
             modeled_attachment = EncodeAttachment(
-                qc_file.read_bytes(), qc_file.filename, mime_type="text/plain"
+                qc_file.read_bytes(),
+                qc_file.filename,
+                mime_type="text/plain",
+                additional_extension=".txt",
             )
             attachment = modeled_attachment.get_portal_object()
             qc[file_key] = attachment
