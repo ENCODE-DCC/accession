@@ -21,7 +21,9 @@
           "file_format_type": "bed9",
           "filekey": "output_bed",
           "output_type": "semi-automated genome annotation",
-          "quality_metrics": []
+          "quality_metrics": [
+            "segway"
+          ]
         }
       ],
       "wdl_task_name": "segway_annotate"
@@ -40,6 +42,7 @@
           "file_format": "bed",
           "file_format_type": "bed9",
           "filekey": "bed_no_header",
+          "maybe_preferred_default": true,
           "output_type": "semi-automated genome annotation",
           "quality_metrics": []
         }
@@ -65,6 +68,7 @@
           "file_format": "bigBed",
           "file_format_type": "bed9",
           "filekey": "bigbed",
+          "maybe_preferred_default": true,
           "output_type": "semi-automated genome annotation",
           "quality_metrics": []
         }

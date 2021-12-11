@@ -2827,7 +2827,7 @@ class AccessionHic(Accession):
 
 
 class AccessionSegway(Accession):
-    QC_MAP: Dict[str, str] = {}
+    QC_MAP: Dict[str, str] = {"segway": "make_segway_qc"}
 
     @property
     def assembly(self) -> str:
@@ -2835,12 +2835,12 @@ class AccessionSegway(Accession):
         return self.find_portal_property_from_filekey(filekey, EncodeFile.ASSEMBLY)
 
     def get_preferred_default_qc_value(self, file: File) -> Union[int, float]:
-        raise NotImplementedError
+        return 0
 
     def preferred_default_should_be_updated(
         self, qc_value: Union[int, float], current_best_qc_value: Union[int, float]
     ) -> bool:
-        raise NotImplementedError
+        return True
 
     @property
     def dataset(self) -> EncodeDataset:
@@ -2853,6 +2853,25 @@ class AccessionSegway(Accession):
             experiment_obj = self.conn.get(self._annotation_accession, frame="embedded")
             self._dataset = EncodeDataset(experiment_obj)
         return self._dataset
+
+    def make_segway_qc(self, encode_file: EncodeFile, file: File) -> None:
+        if encode_file.has_qc("SegwayQualityMetric"):
+            return
+        task = file.get_task()
+        qc = {}
+        for file_key in (
+            "feature_aggregation_tab",
+            "length_distribution_tab",
+            "segment_sizes_tab",
+            "signal_distribution_tab",
+        ):
+            qc_file = self.analysis.search_down(task, "segtools", file_key)[0]
+            modeled_attachment = EncodeAttachment(
+                qc_file.read_bytes(), qc_file.filename, mime_type="text/plain"
+            )
+            attachment = modeled_attachment.get_portal_object()
+            qc[file_key] = attachment
+        return self.queue_qc(qc, encode_file, "segway-quality-metric")
 
 
 def accession_factory(
