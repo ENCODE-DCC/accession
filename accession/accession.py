@@ -626,6 +626,11 @@ class Accession(ABC):
             ]
         )
         if not derived_from_accession_ids and not ancestor.allow_empty:
+            print(
+                ancestor.derived_from_task,
+                ancestor.derived_from_filekey,
+                ancestor.derived_from_inputs,
+            )
             raise Exception(
                 f"Missing all of the derived_from files on the portal: {missing}"
             )
