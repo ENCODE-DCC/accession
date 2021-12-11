@@ -2861,7 +2861,6 @@ class AccessionSegway(Accession):
         return self._dataset
 
     def make_segway_qc(self, encode_file: EncodeFile, file: File) -> None:
-        self.logger.info("MAKING SEGWAY QC")
         if encode_file.has_qc("SegwayQualityMetric"):
             return
         task = file.get_task()
