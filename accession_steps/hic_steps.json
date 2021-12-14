@@ -198,7 +198,7 @@
           "filekey": "subcompartments",
           "filter_type": "bin size (kb)",
           "filter_value": 100,
-          "output_type": "genome compartments",
+          "output_type": "genome subcompartments",
           "quality_metrics": []
         }
       ],
@@ -219,7 +219,7 @@
           "filekey": "subcompartments",
           "filter_type": "bin size (kb)",
           "filter_value": 50,
-          "output_type": "genome compartments",
+          "output_type": "genome subcompartments",
           "quality_metrics": []
         }
       ],
@@ -240,7 +240,7 @@
           "filekey": "subcompartments",
           "filter_type": "bin size (kb)",
           "filter_value": 25,
-          "output_type": "genome compartments",
+          "output_type": "genome subcompartments",
           "quality_metrics": []
         }
       ],
