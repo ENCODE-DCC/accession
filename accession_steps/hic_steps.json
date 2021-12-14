@@ -182,6 +182,124 @@
         }
       ],
       "wdl_task_name": "create_eigenvector_10kb"
+    },
+    {
+      "dcc_step_run": "hic-genome-compartments-identification-step-v-1",
+      "dcc_step_version": "/analysis-step-versions/hic-genome-compartments-identification-step-v-1-0/",
+      "wdl_files": [
+        {
+          "derived_from_files": [
+            {
+              "derived_from_filekey": "output_hic",
+              "derived_from_task": "add_norm"
+            }
+          ],
+          "file_format": "bed",
+          "filekey": "subcompartments",
+          "filter_type": "bin size (kb)",
+          "filter_value": 100,
+          "output_type": "genome compartments",
+          "quality_metrics": []
+        }
+      ],
+      "wdl_task_name": "slice_100kb"
+    },
+    {
+      "dcc_step_run": "hic-genome-compartments-identification-step-v-1",
+      "dcc_step_version": "/analysis-step-versions/hic-genome-compartments-identification-step-v-1-0/",
+      "wdl_files": [
+        {
+          "derived_from_files": [
+            {
+              "derived_from_filekey": "output_hic",
+              "derived_from_task": "add_norm"
+            }
+          ],
+          "file_format": "bed",
+          "filekey": "subcompartments",
+          "filter_type": "bin size (kb)",
+          "filter_value": 50,
+          "output_type": "genome compartments",
+          "quality_metrics": []
+        }
+      ],
+      "wdl_task_name": "slice_50kb"
+    },
+    {
+      "dcc_step_run": "hic-genome-compartments-identification-step-v-1",
+      "dcc_step_version": "/analysis-step-versions/hic-genome-compartments-identification-step-v-1-0/",
+      "wdl_files": [
+        {
+          "derived_from_files": [
+            {
+              "derived_from_filekey": "output_hic",
+              "derived_from_task": "add_norm"
+            }
+          ],
+          "file_format": "bed",
+          "filekey": "subcompartments",
+          "filter_type": "bin size (kb)",
+          "filter_value": 25,
+          "output_type": "genome compartments",
+          "quality_metrics": []
+        }
+      ],
+      "wdl_task_name": "slice_25kb"
+    },
+    {
+      "dcc_step_run": "hic-delta-step-v-1",
+      "dcc_step_version": "/analysis-step-versions/hic-delta-step-v-1-0/",
+      "wdl_files": [
+        {
+          "derived_from_files": [
+            {
+              "derived_from_filekey": "output_hic",
+              "derived_from_task": "add_norm"
+            }
+          ],
+          "file_format": "bedpe",
+          "filekey": "loops",
+          "output_type": "long range chromatin interactions",
+          "quality_metrics": []
+        },
+        {
+          "derived_from_files": [
+            {
+              "derived_from_filekey": "output_hic",
+              "derived_from_task": "add_norm"
+            }
+          ],
+          "file_format": "bedpe",
+          "filekey": "domains",
+          "output_type": "topologically associated domains",
+          "quality_metrics": []
+        },
+        {
+          "derived_from_files": [
+            {
+              "derived_from_filekey": "output_hic",
+              "derived_from_task": "add_norm"
+            }
+          ],
+          "file_format": "bedpe",
+          "filekey": "stripes",
+          "output_type": "chromatin stripes",
+          "quality_metrics": []
+        },
+        {
+          "derived_from_files": [
+            {
+              "derived_from_filekey": "output_hic",
+              "derived_from_task": "add_norm"
+            }
+          ],
+          "file_format": "bedpe",
+          "filekey": "loop_domains",
+          "output_type": "long range chromatin interactions",
+          "quality_metrics": []
+        }
+      ],
+      "wdl_task_name": "delta"
     }
   ],
   "raw_fastqs_keys": [
