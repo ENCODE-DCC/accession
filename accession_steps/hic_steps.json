@@ -195,6 +195,7 @@
             }
           ],
           "file_format": "bed",
+          "file_format_type": "bed9+",
           "filekey": "subcompartments",
           "filter_type": "bin size (kb)",
           "filter_value": 100,
@@ -216,6 +217,7 @@
             }
           ],
           "file_format": "bed",
+          "file_format_type": "bed9+",
           "filekey": "subcompartments",
           "filter_type": "bin size (kb)",
           "filter_value": 50,
@@ -237,6 +239,7 @@
             }
           ],
           "file_format": "bed",
+          "file_format_type": "bed9+",
           "filekey": "subcompartments",
           "filter_type": "bin size (kb)",
           "filter_value": 25,
