@@ -547,6 +547,12 @@ class Accession(ABC):
         newly posted file.
         """
         task = file.get_task()
+        self.logger.debug(
+            "Searching from %s to ancestor %s, file %s",
+            task.task_name,
+            ancestor.derived_from_task,
+            ancestor.derived_from_filekey,
+        )
         try:
             if ancestor.should_search_down:
                 derived_from_files = self.analysis.search_down(

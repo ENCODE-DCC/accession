@@ -9,17 +9,18 @@
             {
               "derived_from_filekey": "replicate",
               "derived_from_inputs": true,
-              "derived_from_task": "ScatterAt72_17"
+              "derived_from_task": "ScatterAt90_17"
             },
             {
               "derived_from_filekey": "reference_index",
               "derived_from_inputs": true,
-              "derived_from_task": "ScatterAt72_17"
+              "derived_from_task": "ScatterAt90_17"
             },
             {
+              "allow_empty": true,
               "derived_from_filekey": "restriction_sites",
               "derived_from_inputs": true,
-              "derived_from_task": "ScatterAt92_21"
+              "derived_from_task": "ScatterAt110_21"
             }
           ],
           "file_format": "bam",
@@ -72,6 +73,7 @@
               "derived_from_task": "dedup"
             },
             {
+              "allow_empty": true,
               "derived_from_filekey": "restriction_sites",
               "derived_from_inputs": true,
               "derived_from_task": "create_hic"
