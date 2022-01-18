@@ -328,14 +328,19 @@ class EncodeAnalysis:
         return payload
 
 
-class EncodeExperiment:
+class DatasetType(Enum):
+    Annotation = "Annotation"
+    Experiment = "Experiment"
+
+
+class EncodeDataset:
     INTERNAL_STATUS_KEY = "internal_status"
     INTERNAL_STATUS_POST_ACCESSIONING = "pipeline completed"
     ALLOWED_REPLICATE_STATUSES = ("released", "in progress")
 
-    def __init__(self, portal_experiment: Dict[str, Any]):
-        self.at_id = portal_experiment["@id"]
-        self.portal_properties = portal_experiment
+    def __init__(self, portal_properties: Dict[str, Any]):
+        self.at_id = portal_properties["@id"]
+        self.portal_properties = portal_properties
 
     @property
     def assay_term_name(self) -> str:
@@ -348,6 +353,14 @@ class EncodeExperiment:
     @property
     def accession(self) -> str:
         return self.at_id.split("/")[-2]
+
+    @property
+    def dataset_type(self) -> DatasetType:
+        dataset_type = self.portal_properties["@type"][0]
+        for type_ in DatasetType:
+            if dataset_type == type_.value:
+                return type_
+        raise ValueError(f"Dataset type {dataset_type} is not supported")
 
     def get_number_of_biological_replicates(self) -> int:
         bio_reps = set(

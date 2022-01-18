@@ -1,3 +1,10 @@
 [build-system]
 requires = ["setuptools>=41.0.1", "wheel"]
 build-backend = "setuptools.build_meta"
+
+[tool.pyright]
+exclude = [  # Need to add these to all these to keep pyright from choking
+    ".tox",
+    "build",
+    "venv",
+]

@@ -7,7 +7,7 @@ from accession.encode_models import (
     EncodeAnalysis,
     EncodeAttachment,
     EncodeCommonMetadata,
-    EncodeExperiment,
+    EncodeDataset,
     EncodeFile,
     EncodeGenericObject,
     EncodeQualityMetric,
@@ -51,7 +51,7 @@ def encode_experiment():
             {"technical_replicate_number": 42, "status": "released"},
         ],
     }
-    return EncodeExperiment(properties)
+    return EncodeDataset(properties)
 
 
 @pytest.fixture(scope="module")
@@ -66,7 +66,7 @@ def encode_experiment_ignored_replicates():
             {"technical_replicate_number": 44, "status": "revoked"},
         ],
     }
-    return EncodeExperiment(properties)
+    return EncodeDataset(properties)
 
 
 @pytest.fixture
