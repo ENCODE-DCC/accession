@@ -7,6 +7,7 @@ import pytest
 from accession.metadata import (
     CaperMetadata,
     FileMetadata,
+    MetadataPreprocessor,
     metadata_factory,
     parse_metadata_list,
 )
@@ -32,7 +33,7 @@ def test_metadata_backend_name(file_metadata):
 def test_metadata_get_filtered_labels(mocker):
     mocker.patch.object(
         FileMetadata,
-        "content",
+        "original_content",
         new_callable=mocker.PropertyMock(
             return_value={
                 "labels": {
@@ -69,8 +70,8 @@ def test_metadata_get_parsed_workflow(file_metadata):
 
 
 def test_file_metadata(file_metadata):
-    assert file_metadata.content["id"] == "foo"
-    assert file_metadata.content["foo"] == "bar"
+    assert file_metadata.original_content["id"] == "foo"
+    assert file_metadata.original_content["foo"] == "bar"
 
 
 @pytest.mark.parametrize(
@@ -84,8 +85,26 @@ def test_caper_metadata(mocker, condition, returned, expected):
     caper_metadata = CaperMetadata("foo")
     mocker.patch.object(caper_metadata.caper_helper, "metadata", return_value=returned)
     with condition:
-        result = caper_metadata.content
+        result = caper_metadata.original_content
         assert result == expected
+
+
+def test_metadata_with_preprocessors(mocker):
+    mocker.patch.object(
+        FileMetadata,
+        "original_content",
+        new_callable=mocker.PropertyMock(return_value={"foo": "bar"}),
+    )
+
+    class TestMetadataPreprocessor(MetadataPreprocessor):
+        def process(self, metadata):
+            return {"foo": metadata["foo"] + "baz"}
+
+    test_preprocessor = TestMetadataPreprocessor()
+
+    metadata = FileMetadata("foo.json", preprocessors=[test_preprocessor])
+    result = metadata.content
+    assert result == {"foo": "barbaz"}
 
 
 def test_metadata_factory_file_metadata(tmp_path):

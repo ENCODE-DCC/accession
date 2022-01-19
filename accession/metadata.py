@@ -1,13 +1,19 @@
 import json
 from abc import ABC, abstractmethod
 from pathlib import Path
-from typing import Any, Dict, List, Optional, TextIO, Union
+from typing import Any, Dict, Iterable, List, Optional, TextIO, Union
 
 import WDL
 from caper.caper_labels import CaperLabels
 
 from accession.caper_helper import CaperHelper, caper_conf_exists
 from accession.encode_models import EncodeAttachment
+
+
+class MetadataPreprocessor(ABC):
+    @abstractmethod
+    def process(self, metadata: Dict[str, Any]) -> Dict[str, Any]:
+        raise NotImplementedError
 
 
 class Metadata(ABC):
@@ -17,9 +23,17 @@ class Metadata(ABC):
         "cromwell-workflow-id",
     )
 
+    @abstractmethod
+    def __init__(
+        self, preprocessors: Optional[Iterable[MetadataPreprocessor]] = None
+    ) -> None:
+        self._original_content: Optional[Dict[str, Any]] = None
+        self._content: Optional[Dict[str, Any]] = None
+        self._preprocessors = preprocessors
+
     @property
     @abstractmethod
-    def content(self) -> Dict[str, Any]:
+    def original_content(self) -> Dict[str, Any]:
         raise NotImplementedError
 
     @property
@@ -34,6 +48,17 @@ class Metadata(ABC):
     def labels(self) -> Dict[str, str]:
         return self.content["labels"]
 
+    @property
+    def content(self) -> Dict[str, Any]:
+        if self._content is None:
+            content = self.original_content
+            if self._preprocessors is not None:
+                for preprocessor in self._preprocessors:
+                    new_content = preprocessor.process(content)
+                    content = new_content
+            self._content = content
+        return self._content
+
     def get_filename(self, prefix: str = "") -> str:
         """
         Construct an artificial filename for the metadata JSON. We do this because it
@@ -47,7 +72,7 @@ class Metadata(ABC):
         """
         Get the representation of the attachment on the portal
         """
-        metadata_bytes = EncodeAttachment.get_bytes_from_dict(self.content)
+        metadata_bytes = EncodeAttachment.get_bytes_from_dict(self.original_content)
         attachment = EncodeAttachment(
             metadata_bytes,
             self.get_filename(prefix=filename_prefix),
@@ -70,12 +95,16 @@ class Metadata(ABC):
 
 
 class FileMetadata(Metadata):
-    def __init__(self, metadata_filepath: Union[str, Path]) -> None:
+    def __init__(
+        self,
+        metadata_filepath: Union[str, Path],
+        preprocessors: Optional[Iterable[MetadataPreprocessor]] = None,
+    ) -> None:
         self._metadata_filepath = metadata_filepath
-        self._content: Optional[Dict[str, Any]] = None
+        super().__init__(preprocessors=preprocessors)
 
     @property
-    def content(self) -> Dict[str, Any]:
+    def original_content(self) -> Dict[str, Any]:
         if self._content is None:
             with open(self._metadata_filepath) as fp:
                 self._content = json.load(fp)
@@ -83,13 +112,17 @@ class FileMetadata(Metadata):
 
 
 class CaperMetadata(Metadata):
-    def __init__(self, workflow_id_or_label: str) -> None:
+    def __init__(
+        self,
+        workflow_id_or_label: str,
+        preprocessors: Optional[Iterable[MetadataPreprocessor]] = None,
+    ) -> None:
         self.workflow_id_or_label = workflow_id_or_label
         self.caper_helper = CaperHelper()
-        self._content: Optional[Dict[str, Any]] = None
+        super().__init__(preprocessors=preprocessors)
 
     @property
-    def content(self) -> Dict[str, Any]:
+    def original_content(self) -> Dict[str, Any]:
         if self._content is None:
             metadata = self.caper_helper.metadata([self.workflow_id_or_label])
             if len(metadata) != 1:
@@ -98,7 +131,10 @@ class CaperMetadata(Metadata):
         return self._content
 
 
-def metadata_factory(path_or_caper_id: str) -> Metadata:
+def metadata_factory(
+    path_or_caper_id: str,
+    preprocessors: Optional[Iterable[MetadataPreprocessor]] = None,
+) -> Metadata:
     """
     Generates instance of FileMetadata or CaperMetadata. First assumes the input is a
     file path, if that doesn't exist it falls back to assuming it is a Caper ID or
@@ -107,9 +143,9 @@ def metadata_factory(path_or_caper_id: str) -> Metadata:
     """
     metadata_path = Path(path_or_caper_id)
     if metadata_path.exists():
-        return FileMetadata(metadata_path)
+        return FileMetadata(metadata_path, preprocessors=preprocessors)
     if caper_conf_exists():
-        return CaperMetadata(path_or_caper_id)
+        return CaperMetadata(path_or_caper_id, preprocessors=preprocessors)
     raise ValueError("Could not initialize metadata")
 
 

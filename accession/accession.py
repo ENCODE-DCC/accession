@@ -7,6 +7,7 @@ from typing import (
     Any,
     Callable,
     Dict,
+    Iterable,
     List,
     Optional,
     Tuple,
@@ -74,7 +75,8 @@ from accession.helpers import (
     string_to_number,
 )
 from accession.logger_factory import logger_factory
-from accession.metadata import Metadata, metadata_factory
+from accession.metadata import Metadata, MetadataPreprocessor, metadata_factory
+from accession.metadata_preprocessors import HicMetadataPreprocessor
 from accession.preflight import MatchingMd5Record, PreflightHelper
 
 if TYPE_CHECKING:
@@ -2940,7 +2942,11 @@ def accession_factory(
         ) from e
     current_dir = Path(__file__).resolve()
 
-    metadata = metadata_factory(accession_metadata)
+    preprocessors: Optional[Iterable[MetadataPreprocessor]] = None
+    if pipeline_type == "hic":
+        preprocessors = [HicMetadataPreprocessor()]
+    metadata = metadata_factory(accession_metadata, preprocessors=preprocessors)
+
     if pipeline_type == "long_read_rna":
         pipeline_type = _get_long_read_rna_steps_json_name_prefix_from_metadata(
             metadata
