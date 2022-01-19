@@ -2946,6 +2946,7 @@ def accession_factory(
     if pipeline_type == "hic":
         preprocessors = [HicMetadataPreprocessor()]
     metadata = metadata_factory(accession_metadata, preprocessors=preprocessors)
+
     if pipeline_type == "long_read_rna":
         pipeline_type = _get_long_read_rna_steps_json_name_prefix_from_metadata(
             metadata
