@@ -312,8 +312,8 @@
       "wdl_task_name": "localizer_delta"
     },
     {
-      "dcc_step_run": "hic-pairs-generation-step-v-1",
-      "dcc_step_version": "/analysis-step-versions/hic-pairs-generation-step-v-1-0/",
+      "dcc_step_run": "hic-dhs-accessibility-step-v-1",
+      "dcc_step_version": "/analysis-step-versions/hic-dhs-accessibility-step-v-1-0/",
       "wdl_files": [
         {
           "derived_from_files": [
