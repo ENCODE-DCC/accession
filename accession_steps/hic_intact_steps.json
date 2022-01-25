@@ -116,7 +116,7 @@
     },
     {
       "dcc_step_run": "hic-loop-calling-step-v-1",
-      "dcc_step_version": "/analysis-step-versions/hic-loop-calling-step-v-1-0/",
+      "dcc_step_version": "/analysis-step-versions/hic-loop-calling-step-v-1-2/",
       "wdl_files": [
         {
           "callbacks": [
@@ -130,13 +130,13 @@
             }
           ],
           "file_format": "bedpe",
-          "filekey": "merged_loops",
+          "filekey": "localized_loops",
           "filter_type": "mapping quality",
           "output_type": "long range chromatin interactions",
           "quality_metrics": []
         }
       ],
-      "wdl_task_name": "hiccups"
+      "wdl_task_name": "localizer_intact"
     },
     {
       "dcc_step_run": "hic-eigenvector-creation-step-v-1",
@@ -261,18 +261,6 @@
             }
           ],
           "file_format": "bedpe",
-          "filekey": "loops",
-          "output_type": "long range chromatin interactions",
-          "quality_metrics": []
-        },
-        {
-          "derived_from_files": [
-            {
-              "derived_from_filekey": "output_hic",
-              "derived_from_task": "add_norm"
-            }
-          ],
-          "file_format": "bedpe",
           "filekey": "domains",
           "output_type": "topologically associated domains",
           "quality_metrics": []
@@ -303,6 +291,49 @@
         }
       ],
       "wdl_task_name": "delta"
+    },
+    {
+      "dcc_step_run": "hic-delta-step-v-1",
+      "dcc_step_version": "/analysis-step-versions/hic-delta-step-v-1-0/",
+      "wdl_files": [
+        {
+          "derived_from_files": [
+            {
+              "derived_from_filekey": "output_hic",
+              "derived_from_task": "add_norm"
+            }
+          ],
+          "file_format": "bedpe",
+          "filekey": "localized_loops",
+          "output_type": "long range chromatin interactions",
+          "quality_metrics": []
+        }
+      ],
+      "wdl_task_name": "localizer_delta"
+    },
+    {
+      "dcc_step_run": "hic-pairs-generation-step-v-1",
+      "dcc_step_version": "/analysis-step-versions/hic-pairs-generation-step-v-1-0/",
+      "wdl_files": [
+        {
+          "derived_from_files": [
+            {
+              "derived_from_filekey": "deduped_bam",
+              "derived_from_task": "dedup"
+            },
+            {
+              "derived_from_filekey": "chrom_sizes",
+              "derived_from_inputs": true,
+              "derived_from_task": "create_accessibility_track"
+            }
+          ],
+          "file_format": "bigWig",
+          "filekey": "bigwig",
+          "output_type": "raw signal",
+          "quality_metrics": []
+        }
+      ],
+      "wdl_task_name": "create_accessibility_track"
     }
   ],
   "raw_fastqs_keys": [

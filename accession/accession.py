@@ -2952,6 +2952,9 @@ def accession_factory(
             metadata
         )
 
+    if pipeline_type == "hic":
+        pipeline_type = _get_hic_steps_json_name_prefix_from_metadata(metadata)
+
     private_filenames = False
     if pipeline_type in ("control_chip", "tf_chip", "histone_chip"):
         if _chip_pbam_used(metadata):
@@ -3003,6 +3006,17 @@ def _get_long_read_rna_steps_json_name_prefix_from_metadata(metadata: Metadata) 
     if num_spikeins == 1:
         return "long_read_rna_one_spikein"
     return "long_read_rna_two_or_more_spikeins"
+
+
+def _get_hic_steps_json_name_prefix_from_metadata(metadata: Metadata) -> str:
+    """
+    The JSON template to use for long read RNA depends on the number of spikeins, this
+    function determines the appropriate one to use from the metadata.
+    """
+    intact = metadata.content["inputs"]["intact"]
+    if intact:
+        return "hic_intact"
+    return "hic"
 
 
 def _chip_pbam_used(metadata: Metadata) -> bool:
