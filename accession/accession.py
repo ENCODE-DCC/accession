@@ -3013,7 +3013,7 @@ def _get_hic_steps_json_name_prefix_from_metadata(metadata: Metadata) -> str:
     The JSON template to use for long read RNA depends on the number of spikeins, this
     function determines the appropriate one to use from the metadata.
     """
-    intact = metadata.content["inputs"]["intact"]
+    intact = metadata.content["inputs"].get("intact")
     if intact:
         return "hic_intact"
     return "hic"
