@@ -84,6 +84,8 @@
           ],
           "file_format": "starch",
           "filekey": "analysis.tenth_of_one_percent_peaks_starch",
+          "filter_type": "false discovery rate percentage",
+          "filter_value": 0.1,
           "output_type": "peaks",
           "quality_metrics": []
         }
@@ -109,6 +111,8 @@
           "file_format": "bed",
           "file_format_type": "bed3+",
           "filekey": "analysis.five_percent_allcalls_bed_gz",
+          "filter_type": "false discovery rate percentage",
+          "filter_value": 5.0,
           "output_type": "FDR cut rate",
           "quality_metrics": [
             "five_percent_allcalls_qc"
@@ -156,6 +160,8 @@
           "file_format": "bigBed",
           "file_format_type": "bed3+",
           "filekey": "analysis.five_percent_allcalls_bigbed",
+          "filter_type": "false discovery rate percentage",
+          "filter_value": 5.0,
           "output_type": "FDR cut rate",
           "quality_metrics": []
         }
@@ -181,6 +187,8 @@
           "file_format": "bed",
           "file_format_type": "narrowPeak",
           "filekey": "analysis.five_percent_narrowpeaks_bed_gz",
+          "filter_type": "false discovery rate percentage",
+          "filter_value": 5.0,
           "output_type": "peaks",
           "quality_metrics": [
             "five_percent_narrowpeaks_qc"
@@ -208,6 +216,8 @@
           "file_format": "bed",
           "file_format_type": "narrowPeak",
           "filekey": "analysis.tenth_of_one_percent_narrowpeaks_bed_gz",
+          "filter_type": "false discovery rate percentage",
+          "filter_value": 0.1,
           "maybe_preferred_default": true,
           "output_type": "peaks",
           "quality_metrics": [
@@ -231,6 +241,8 @@
           "file_format": "bigBed",
           "file_format_type": "narrowPeak",
           "filekey": "analysis.tenth_of_one_percent_narrowpeaks_bigbed",
+          "filter_type": "false discovery rate percentage",
+          "filter_value": 0.1,
           "maybe_preferred_default": true,
           "output_type": "peaks",
           "quality_metrics": []
@@ -252,6 +264,8 @@
           "file_format": "bigBed",
           "file_format_type": "narrowPeak",
           "filekey": "analysis.five_percent_narrowpeaks_bigbed",
+          "filter_type": "false discovery rate percentage",
+          "filter_value": 5.0,
           "output_type": "peaks",
           "quality_metrics": []
         }

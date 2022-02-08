@@ -311,6 +311,8 @@
           "file_format": "bed",
           "file_format_type": "narrowPeak",
           "filekey": "bfilt_idr_peak",
+          "filter_type": "IDR",
+          "filter_value": 0.05,
           "output_type": "IDR thresholded peaks",
           "quality_metrics": [
             "chip_replication",
@@ -372,6 +374,8 @@
           "file_format": "bed",
           "file_format_type": "narrowPeak",
           "filekey": "bfilt_idr_peak",
+          "filter_type": "IDR",
+          "filter_value": 0.05,
           "output_type": "IDR thresholded peaks",
           "quality_metrics": [
             "chip_replication",
@@ -435,6 +439,8 @@
           "file_format": "bed",
           "file_format_type": "narrowPeak",
           "filekey": "bfilt_idr_peak",
+          "filter_type": "IDR",
+          "filter_value": 0.05,
           "output_type": "IDR thresholded peaks",
           "quality_metrics": [
             "chip_replication",
@@ -461,6 +467,8 @@
           "file_format": "bigBed",
           "file_format_type": "narrowPeak",
           "filekey": "bfilt_idr_peak_bb",
+          "filter_type": "IDR",
+          "filter_value": 0.05,
           "output_type": "IDR thresholded peaks"
         }
       ],
@@ -484,6 +492,8 @@
           "file_format": "bigBed",
           "file_format_type": "narrowPeak",
           "filekey": "bfilt_idr_peak_bb",
+          "filter_type": "IDR",
+          "filter_value": 0.05,
           "output_type": "IDR thresholded peaks"
         }
       ],
@@ -508,6 +518,8 @@
           "file_format": "bigBed",
           "file_format_type": "narrowPeak",
           "filekey": "bfilt_idr_peak_bb",
+          "filter_type": "IDR",
+          "filter_value": 0.05,
           "output_type": "IDR thresholded peaks"
         }
       ],
