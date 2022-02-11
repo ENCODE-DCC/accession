@@ -1,6 +1,8 @@
 import json
 from abc import ABC, abstractmethod
+from multiprocessing.sharedctypes import Value
 from pathlib import Path
+import re
 from typing import Any, Dict, Iterable, List, Optional, TextIO, Union
 
 import WDL
@@ -59,6 +61,10 @@ class Metadata(ABC):
             self._content = content
         return self._content
 
+    @property
+    def workflow(self) -> str:
+        return self.content["submittedFiles"]["workflow"]
+
     def get_filename(self, prefix: str = "") -> str:
         """
         Construct an artificial filename for the metadata JSON. We do this because it
@@ -81,7 +87,13 @@ class Metadata(ABC):
         return attachment
 
     def get_parsed_workflow(self) -> WDL.Tree.Document:
-        return WDL.parse_document(self.content["submittedFiles"]["workflow"])
+        return WDL.parse_document(self.workflow)
+
+    def get_pipeline_version_using_regex(self) -> str:
+        match = re.search(r"version: \"(?P<version>\d+.\d+.\d+)", self.workflow)
+        if match is None:
+            raise ValueError("Couldn't determine pipeline version via regex")
+        return match.group("version")
 
     def get_filtered_labels(self) -> Dict[str, str]:
         """
