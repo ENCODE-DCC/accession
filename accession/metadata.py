@@ -1,8 +1,7 @@
 import json
-from abc import ABC, abstractmethod
-from multiprocessing.sharedctypes import Value
-from pathlib import Path
 import re
+from abc import ABC, abstractmethod
+from pathlib import Path
 from typing import Any, Dict, Iterable, List, Optional, TextIO, Union
 
 import WDL
