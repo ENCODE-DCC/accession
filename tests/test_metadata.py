@@ -1,6 +1,7 @@
 import json
 from contextlib import suppress as does_not_raise
 from io import StringIO
+from pathlib import Path
 
 import pytest
 
@@ -67,6 +68,13 @@ def test_metadata_get_as_attachment(file_metadata):
 def test_metadata_get_parsed_workflow(file_metadata):
     result = file_metadata.get_parsed_workflow()
     assert result.workflow.meta["version"] == "v1.2.3"
+
+
+def test_metadata_get_pipeline_version_using_regex():
+    metadata_json_path = Path(__file__).resolve().parent / "data" / "bulkrnameta.json"
+    metadata = FileMetadata(metadata_json_path)
+    result = metadata.get_pipeline_version_using_regex()
+    assert result == "1.2.4"
 
 
 def test_file_metadata(file_metadata):

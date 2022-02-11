@@ -1135,6 +1135,10 @@ class AccessionBulkRna(AccessionGenericRna):
             filekey, EncodeFile.GENOME_ANNOTATION
         )
 
+    @property
+    def pipeline_version(self) -> str:
+        return self.analysis.metadata.get_pipeline_version_using_regex()
+
     def get_preferred_default_qc_value(self, file: File) -> Union[float, int]:
         mapping_qc_file = self.analysis.search_up(file.get_task(), "align", "log_json")[
             0

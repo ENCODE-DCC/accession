@@ -1,0 +1,3398 @@
+{
+  "actualWorkflowLanguage": "WDL",
+  "actualWorkflowLanguageVersion": "1.0",
+  "calls": {
+    "rna.align": [
+      {
+        "attempt": 1,
+        "backend": "gcp",
+        "backendLabels": {
+          "cromwell-workflow-id": "cromwell-ce5f9715-4b2f-455a-ab56-872d1f550994",
+          "wdl-task-name": "align"
+        },
+        "backendLogs": {
+          "log": "gs://encode-processing/caper_out_v04_05/rna/ce5f9715-4b2f-455a-ab56-872d1f550994/call-align/shard-0/align-0.log"
+        },
+        "backendStatus": "Success",
+        "callCaching": {
+          "allowResultReuse": true,
+          "effectiveCallCachingMode": "ReadAndWriteCache",
+          "hashes": {
+            "backend name": "50F66ECBC45488EE5826941BFBC50411",
+            "command template": "00C55461E9685640CE240AB1C4B99057",
+            "input": {
+              "File fastqs_R1": [
+                "hXX8lQ=="
+              ],
+              "File fastqs_R2": [
+                "hXX8lQ=="
+              ],
+              "File index": "RUtLTw==",
+              "Int ncpus": "6364D3F0F495B6AB9DCF8D3B5C6E0B01",
+              "Int ramGB": "DA4FB5C6E93E74D3DF8527599FA62642",
+              "String bamroot": "176EAF83C4C8B3AB1F72FD5CC6C87B39",
+              "String disks": "E0247C4B903832B99105AF09710172C9",
+              "String endedness": "94A63A451F1A2204A927F8EB05439D1B",
+              "String runtime_environment": {
+                "docker": "95E42DD9B3F87F770395AB70D66058AB",
+                "singularity": "CFF5D03D15A6A6A29CBF82531C176D5E"
+              }
+            },
+            "input count": "D3D9446802A44259755D38E6D163E820",
+            "output count": "45C48CCE2E2D7FBDEA1AFC51C7C6AD26",
+            "output expression": {
+              "File anno_flagstat": "574AAEBEA9CC71284CDFB26CBF528F39",
+              "File anno_flagstat_json": "A1F4DAF95D8F578EBA0C974D6DD36D3E",
+              "File annobam": "EC4E6A51417B7FE0C92FCAD1606767B7",
+              "File genome_flagstat": "079BC1208216AFFD4F1E282E20DC156C",
+              "File genome_flagstat_json": "B58824543C76DF472E51AC6BFEF0B8F8",
+              "File genomebam": "7CEF347AF16140B965CDA7784A9889ED",
+              "File log": "0A75E336F0AE37668DC5E9B99D183837",
+              "File log_json": "8046499670F1E070A6DC2ED436368900",
+              "File python_log": "0B01FF1DEA1DAB05A54A451592535807"
+            },
+            "runtime attribute": {
+              "continueOnReturnCode": "CFCD208495D565EF66E7DFF9F98764DA",
+              "docker": "D6B20BC300EFB33CEEDC19C177FC2211",
+              "failOnStderr": "68934A3E9455FA72420237EB05902327"
+            }
+          },
+          "hit": false,
+          "result": "Cache Miss"
+        },
+        "callRoot": "gs://encode-processing/caper_out_v04_05/rna/ce5f9715-4b2f-455a-ab56-872d1f550994/call-align/shard-0",
+        "commandLine": "python3 $(which align.py) \\\n    --fastqs_R1 /cromwell_root/encode-processing/caper_out_v04_05/.caper_tmp/634ce00618cfb70541a5fe1deb90070c/ENCFF236TUH.fastq.gz \\\n    --fastqs_R2 /cromwell_root/encode-processing/caper_out_v04_05/.caper_tmp/634ce00618cfb70541a5fe1deb90070c/ENCFF236TUH.fastq.gz \\\n    --endedness single \\\n    --index /cromwell_root/encode-processing/caper_out_v04_05/.caper_tmp/e3931d8cf8de5001a1751b8f2f17a648/ENCFF795ZFF.tar.gz \\\n    --bamroot rep1ENCSR967IKT \\\n    --ncpus 32 \\\n    --ramGB 120",
+        "compressedDockerSize": 567470316,
+        "dockerImageUsed": "encodedcc/rna-seq-pipeline@sha256:d03fab15b42ca2cb6eb627c72885c0c818574cbaee5b1fdc82e5a12ca28b627c",
+        "end": "2022-02-10T05:33:01.018Z",
+        "executionEvents": [
+          {
+            "description": "A resource limit has delayed the operation: generic::resource_exhausted: allocating: selecting resources: selecting region and zone: no available zones: us-central1: 513 DISKS_TOTAL_GB (166/204800 available) usage too high",
+            "endTime": "2022-02-10T04:48:59.188Z",
+            "startTime": "2022-02-10T04:33:50.925Z"
+          },
+          {
+            "description": "Localization",
+            "endTime": "2022-02-10T05:08:08.770Z",
+            "startTime": "2022-02-10T05:05:24.254Z"
+          },
+          {
+            "description": "PreparingJob",
+            "endTime": "2022-02-10T03:38:13.879Z",
+            "startTime": "2022-02-10T03:38:13.853Z"
+          },
+          {
+            "description": "A resource limit has delayed the operation: generic::resource_exhausted: allocating: selecting resources: selecting region and zone: no available zones: us-central1: 513 DISKS_TOTAL_GB (510/204800 available) usage too high",
+            "endTime": "2022-02-10T05:04:06.862Z",
+            "startTime": "2022-02-10T04:48:59.188Z"
+          },
+          {
+            "description": "A resource limit has delayed the operation: generic::resource_exhausted: allocating: selecting resources: selecting region and zone: no available zones: us-central1: 513 DISKS_TOTAL_GB (63/204800 available) usage too high",
+            "endTime": "2022-02-10T04:33:50.925Z",
+            "startTime": "2022-02-10T04:18:43.554Z"
+          },
+          {
+            "description": "CallCacheReading",
+            "endTime": "2022-02-10T03:38:13.882Z",
+            "startTime": "2022-02-10T03:38:13.879Z"
+          },
+          {
+            "description": "A resource limit has delayed the operation: generic::resource_exhausted: allocating: selecting resources: selecting region and zone: no available zones: us-central1: 513 DISKS_TOTAL_GB (68/204800 available) usage too high",
+            "endTime": "2022-02-10T04:03:36.422Z",
+            "startTime": "2022-02-10T03:48:29.355Z"
+          },
+          {
+            "description": "waiting for quota",
+            "endTime": "2022-02-10T03:38:25.374Z",
+            "startTime": "2022-02-10T03:38:18.050Z"
+          },
+          {
+            "description": "RequestingExecutionToken",
+            "endTime": "2022-02-10T03:38:13.853Z",
+            "startTime": "2022-02-10T03:38:13.654Z"
+          },
+          {
+            "description": "UserAction",
+            "endTime": "2022-02-10T05:26:16.921Z",
+            "startTime": "2022-02-10T05:08:08.770Z"
+          },
+          {
+            "description": "Worker released",
+            "endTime": "2022-02-10T05:27:28.315Z",
+            "startTime": "2022-02-10T05:27:28.315Z"
+          },
+          {
+            "description": "Worker \"google-pipelines-worker-0310430924e9ccdf776e68e746ed1faf\" assigned in \"us-central1-b\" on a \"custom-32-122880\" machine",
+            "endTime": "2022-02-10T05:04:30.607Z",
+            "startTime": "2022-02-10T05:04:06.862Z"
+          },
+          {
+            "description": "Delocalization",
+            "endTime": "2022-02-10T05:27:28.315Z",
+            "startTime": "2022-02-10T05:26:16.921Z"
+          },
+          {
+            "description": "Pending",
+            "endTime": "2022-02-10T03:38:13.654Z",
+            "startTime": "2022-02-10T03:38:13.654Z"
+          },
+          {
+            "description": "Worker released",
+            "endTime": "2022-02-10T03:48:29.355Z",
+            "startTime": "2022-02-10T03:48:29.317Z"
+          },
+          {
+            "description": "Pulling \"encodedcc/rna-seq-pipeline@sha256:d03fab15b42ca2cb6eb627c72885c0c818574cbaee5b1fdc82e5a12ca28b627c\"",
+            "endTime": "2022-02-10T05:05:20.456Z",
+            "startTime": "2022-02-10T05:04:41.462Z"
+          },
+          {
+            "description": "ContainerSetup",
+            "endTime": "2022-02-10T05:05:23.801Z",
+            "startTime": "2022-02-10T05:05:20.456Z"
+          },
+          {
+            "description": "Worker \"google-pipelines-worker-7e19cfd96d154bb07e7ca4dbf1b5023c\" assigned in \"us-central1-b\" on a \"custom-32-122880\" machine",
+            "endTime": "2022-02-10T03:48:29.317Z",
+            "startTime": "2022-02-10T03:38:25.374Z"
+          },
+          {
+            "description": "Pulling \"gcr.io/google.com/cloudsdktool/cloud-sdk:276.0.0-slim\"",
+            "endTime": "2022-02-10T05:04:41.462Z",
+            "startTime": "2022-02-10T05:04:30.607Z"
+          },
+          {
+            "description": "RunningJob",
+            "endTime": "2022-02-10T03:38:18.050Z",
+            "startTime": "2022-02-10T03:38:13.882Z"
+          },
+          {
+            "description": "WaitingForValueStore",
+            "endTime": "2022-02-10T03:38:13.853Z",
+            "startTime": "2022-02-10T03:38:13.853Z"
+          },
+          {
+            "description": "Background",
+            "endTime": "2022-02-10T05:05:24.254Z",
+            "startTime": "2022-02-10T05:05:23.801Z"
+          },
+          {
+            "description": "UpdatingCallCache",
+            "endTime": "2022-02-10T05:32:59.978Z",
+            "startTime": "2022-02-10T05:32:58.322Z"
+          },
+          {
+            "description": "Complete in GCE / Cromwell Poll Interval",
+            "endTime": "2022-02-10T05:32:58.322Z",
+            "startTime": "2022-02-10T05:27:28.315Z"
+          },
+          {
+            "description": "A resource limit has delayed the operation: generic::resource_exhausted: allocating: selecting resources: selecting region and zone: no available zones: us-central1: 513 DISKS_TOTAL_GB (132/204800 available) usage too high",
+            "endTime": "2022-02-10T04:18:43.554Z",
+            "startTime": "2022-02-10T04:03:36.422Z"
+          },
+          {
+            "description": "UpdatingJobStore",
+            "endTime": "2022-02-10T05:33:01.018Z",
+            "startTime": "2022-02-10T05:32:59.978Z"
+          }
+        ],
+        "executionStatus": "Done",
+        "inputs": {
+          "bamroot": "rep1ENCSR967IKT",
+          "disks": "local-disk 500 HDD",
+          "endedness": "single",
+          "fastqs_R1": [
+            "gs://encode-processing/caper_out_v04_05/.caper_tmp/634ce00618cfb70541a5fe1deb90070c/ENCFF236TUH.fastq.gz"
+          ],
+          "fastqs_R2": [
+            "gs://encode-processing/caper_out_v04_05/.caper_tmp/634ce00618cfb70541a5fe1deb90070c/ENCFF236TUH.fastq.gz"
+          ],
+          "index": "gs://encode-processing/caper_out_v04_05/.caper_tmp/e3931d8cf8de5001a1751b8f2f17a648/ENCFF795ZFF.tar.gz",
+          "ncpus": 32,
+          "ramGB": 120,
+          "runtime_environment": {
+            "docker": "encodedcc/rna-seq-pipeline:1.2.4",
+            "singularity": "docker://encodedcc/rna-seq-pipeline:1.2.4"
+          }
+        },
+        "jes": {
+          "endpointUrl": "https://lifesciences.googleapis.com/",
+          "executionBucket": "gs://encode-processing/caper_out_v04_05",
+          "googleProject": "encode-processing",
+          "instanceName": "google-pipelines-worker-0310430924e9ccdf776e68e746ed1faf",
+          "machineType": "custom-32-122880",
+          "monitoringScript": "gs://caper-data/scripts/resource_monitor/resource_monitor.sh",
+          "zone": "us-central1-b"
+        },
+        "jobId": "projects/118693909002/locations/us-central1/operations/1995144045096187493",
+        "labels": {
+          "cromwell-workflow-id": "cromwell-ce5f9715-4b2f-455a-ab56-872d1f550994",
+          "wdl-task-name": "align"
+        },
+        "monitoringLog": "gs://encode-processing/caper_out_v04_05/rna/ce5f9715-4b2f-455a-ab56-872d1f550994/call-align/shard-0/monitoring.log",
+        "outputs": {
+          "anno_flagstat": "gs://encode-processing/caper_out_v04_05/rna/ce5f9715-4b2f-455a-ab56-872d1f550994/call-align/shard-0/rep1ENCSR967IKT_anno_flagstat.txt",
+          "anno_flagstat_json": "gs://encode-processing/caper_out_v04_05/rna/ce5f9715-4b2f-455a-ab56-872d1f550994/call-align/shard-0/rep1ENCSR967IKT_anno_flagstat.json",
+          "annobam": "gs://encode-processing/caper_out_v04_05/rna/ce5f9715-4b2f-455a-ab56-872d1f550994/call-align/shard-0/rep1ENCSR967IKT_anno.bam",
+          "genome_flagstat": "gs://encode-processing/caper_out_v04_05/rna/ce5f9715-4b2f-455a-ab56-872d1f550994/call-align/shard-0/rep1ENCSR967IKT_genome_flagstat.txt",
+          "genome_flagstat_json": "gs://encode-processing/caper_out_v04_05/rna/ce5f9715-4b2f-455a-ab56-872d1f550994/call-align/shard-0/rep1ENCSR967IKT_genome_flagstat.json",
+          "genomebam": "gs://encode-processing/caper_out_v04_05/rna/ce5f9715-4b2f-455a-ab56-872d1f550994/call-align/shard-0/rep1ENCSR967IKT_genome.bam",
+          "log": "gs://encode-processing/caper_out_v04_05/rna/ce5f9715-4b2f-455a-ab56-872d1f550994/call-align/shard-0/rep1ENCSR967IKT_Log.final.out",
+          "log_json": "gs://encode-processing/caper_out_v04_05/rna/ce5f9715-4b2f-455a-ab56-872d1f550994/call-align/shard-0/rep1ENCSR967IKT_Log.final.json",
+          "python_log": "gs://encode-processing/caper_out_v04_05/rna/ce5f9715-4b2f-455a-ab56-872d1f550994/call-align/shard-0/align.log"
+        },
+        "preemptible": false,
+        "returnCode": 0,
+        "runtimeAttributes": {
+          "bootDiskSizeGb": "10",
+          "continueOnReturnCode": "0",
+          "cpu": "32",
+          "cpuMin": "1",
+          "disks": "local-disk 500 HDD",
+          "docker": "encodedcc/rna-seq-pipeline:1.2.4",
+          "failOnStderr": "false",
+          "maxRetries": "1",
+          "memory": "120 GB",
+          "memoryMin": "2 GB",
+          "noAddress": "false",
+          "preemptible": "0",
+          "zones": "us-central1-b"
+        },
+        "shardIndex": 0,
+        "start": "2022-02-10T03:38:13.654Z",
+        "stderr": "gs://encode-processing/caper_out_v04_05/rna/ce5f9715-4b2f-455a-ab56-872d1f550994/call-align/shard-0/stderr",
+        "stdout": "gs://encode-processing/caper_out_v04_05/rna/ce5f9715-4b2f-455a-ab56-872d1f550994/call-align/shard-0/stdout"
+      },
+      {
+        "attempt": 1,
+        "backend": "gcp",
+        "backendLabels": {
+          "cromwell-workflow-id": "cromwell-ce5f9715-4b2f-455a-ab56-872d1f550994",
+          "wdl-task-name": "align"
+        },
+        "backendLogs": {
+          "log": "gs://encode-processing/caper_out_v04_05/rna/ce5f9715-4b2f-455a-ab56-872d1f550994/call-align/shard-1/align-1.log"
+        },
+        "backendStatus": "Success",
+        "callCaching": {
+          "allowResultReuse": true,
+          "effectiveCallCachingMode": "ReadAndWriteCache",
+          "hashes": {
+            "backend name": "50F66ECBC45488EE5826941BFBC50411",
+            "command template": "00C55461E9685640CE240AB1C4B99057",
+            "input": {
+              "File fastqs_R1": [
+                "b4EKSw=="
+              ],
+              "File fastqs_R2": [
+                "b4EKSw=="
+              ],
+              "File index": "RUtLTw==",
+              "Int ncpus": "6364D3F0F495B6AB9DCF8D3B5C6E0B01",
+              "Int ramGB": "DA4FB5C6E93E74D3DF8527599FA62642",
+              "String bamroot": "B97AFDA205DD2BD28ECD5C69F66ACA90",
+              "String disks": "E0247C4B903832B99105AF09710172C9",
+              "String endedness": "94A63A451F1A2204A927F8EB05439D1B",
+              "String runtime_environment": {
+                "docker": "95E42DD9B3F87F770395AB70D66058AB",
+                "singularity": "CFF5D03D15A6A6A29CBF82531C176D5E"
+              }
+            },
+            "input count": "D3D9446802A44259755D38E6D163E820",
+            "output count": "45C48CCE2E2D7FBDEA1AFC51C7C6AD26",
+            "output expression": {
+              "File anno_flagstat": "574AAEBEA9CC71284CDFB26CBF528F39",
+              "File anno_flagstat_json": "A1F4DAF95D8F578EBA0C974D6DD36D3E",
+              "File annobam": "EC4E6A51417B7FE0C92FCAD1606767B7",
+              "File genome_flagstat": "079BC1208216AFFD4F1E282E20DC156C",
+              "File genome_flagstat_json": "B58824543C76DF472E51AC6BFEF0B8F8",
+              "File genomebam": "7CEF347AF16140B965CDA7784A9889ED",
+              "File log": "0A75E336F0AE37668DC5E9B99D183837",
+              "File log_json": "8046499670F1E070A6DC2ED436368900",
+              "File python_log": "0B01FF1DEA1DAB05A54A451592535807"
+            },
+            "runtime attribute": {
+              "continueOnReturnCode": "CFCD208495D565EF66E7DFF9F98764DA",
+              "docker": "D6B20BC300EFB33CEEDC19C177FC2211",
+              "failOnStderr": "68934A3E9455FA72420237EB05902327"
+            }
+          },
+          "hit": false,
+          "result": "Cache Miss"
+        },
+        "callRoot": "gs://encode-processing/caper_out_v04_05/rna/ce5f9715-4b2f-455a-ab56-872d1f550994/call-align/shard-1",
+        "commandLine": "python3 $(which align.py) \\\n    --fastqs_R1 /cromwell_root/encode-processing/caper_out_v04_05/.caper_tmp/9b8383db1e5b623d057250932ebfd0c7/ENCFF804UQS.fastq.gz \\\n    --fastqs_R2 /cromwell_root/encode-processing/caper_out_v04_05/.caper_tmp/9b8383db1e5b623d057250932ebfd0c7/ENCFF804UQS.fastq.gz \\\n    --endedness single \\\n    --index /cromwell_root/encode-processing/caper_out_v04_05/.caper_tmp/e3931d8cf8de5001a1751b8f2f17a648/ENCFF795ZFF.tar.gz \\\n    --bamroot rep2ENCSR967IKT \\\n    --ncpus 32 \\\n    --ramGB 120",
+        "compressedDockerSize": 567470316,
+        "dockerImageUsed": "encodedcc/rna-seq-pipeline@sha256:d03fab15b42ca2cb6eb627c72885c0c818574cbaee5b1fdc82e5a12ca28b627c",
+        "end": "2022-02-10T04:01:08.704Z",
+        "executionEvents": [
+          {
+            "description": "Pending",
+            "endTime": "2022-02-10T03:38:13.654Z",
+            "startTime": "2022-02-10T03:38:13.654Z"
+          },
+          {
+            "description": "PreparingJob",
+            "endTime": "2022-02-10T03:38:15.858Z",
+            "startTime": "2022-02-10T03:38:15.853Z"
+          },
+          {
+            "description": "UpdatingCallCache",
+            "endTime": "2022-02-10T04:01:08.675Z",
+            "startTime": "2022-02-10T04:01:08.344Z"
+          },
+          {
+            "description": "Background",
+            "endTime": "2022-02-10T03:39:43.067Z",
+            "startTime": "2022-02-10T03:39:42.958Z"
+          },
+          {
+            "description": "ContainerSetup",
+            "endTime": "2022-02-10T03:39:42.696Z",
+            "startTime": "2022-02-10T03:39:39.688Z"
+          },
+          {
+            "description": "RequestingExecutionToken",
+            "endTime": "2022-02-10T03:38:15.853Z",
+            "startTime": "2022-02-10T03:38:13.654Z"
+          },
+          {
+            "description": "Pulling \"gcr.io/google.com/cloudsdktool/cloud-sdk:276.0.0-slim\"",
+            "endTime": "2022-02-10T03:39:02.130Z",
+            "startTime": "2022-02-10T03:38:50.356Z"
+          },
+          {
+            "description": "Pulling \"encodedcc/rna-seq-pipeline@sha256:d03fab15b42ca2cb6eb627c72885c0c818574cbaee5b1fdc82e5a12ca28b627c\"",
+            "endTime": "2022-02-10T03:39:39.688Z",
+            "startTime": "2022-02-10T03:39:02.130Z"
+          },
+          {
+            "description": "CallCacheReading",
+            "endTime": "2022-02-10T03:38:15.861Z",
+            "startTime": "2022-02-10T03:38:15.858Z"
+          },
+          {
+            "description": "Worker released",
+            "endTime": "2022-02-10T03:59:23.531Z",
+            "startTime": "2022-02-10T03:59:23.531Z"
+          },
+          {
+            "description": "RunningJob",
+            "endTime": "2022-02-10T03:38:18.049Z",
+            "startTime": "2022-02-10T03:38:15.861Z"
+          },
+          {
+            "description": "Worker \"google-pipelines-worker-cdb3aa780ece5e08754a9406b6d204e0\" assigned in \"us-central1-b\" on a \"custom-32-122880\" machine",
+            "endTime": "2022-02-10T03:38:50.356Z",
+            "startTime": "2022-02-10T03:38:25.374Z"
+          },
+          {
+            "description": "WaitingForValueStore",
+            "endTime": "2022-02-10T03:38:15.853Z",
+            "startTime": "2022-02-10T03:38:15.853Z"
+          },
+          {
+            "description": "Delocalization",
+            "endTime": "2022-02-10T03:59:23.531Z",
+            "startTime": "2022-02-10T03:58:14.919Z"
+          },
+          {
+            "description": "Localization",
+            "endTime": "2022-02-10T03:41:17.426Z",
+            "startTime": "2022-02-10T03:39:43.067Z"
+          },
+          {
+            "description": "UpdatingJobStore",
+            "endTime": "2022-02-10T04:01:08.704Z",
+            "startTime": "2022-02-10T04:01:08.675Z"
+          },
+          {
+            "description": "waiting for quota",
+            "endTime": "2022-02-10T03:38:25.374Z",
+            "startTime": "2022-02-10T03:38:18.049Z"
+          },
+          {
+            "description": "UserAction",
+            "endTime": "2022-02-10T03:58:14.919Z",
+            "startTime": "2022-02-10T03:41:17.426Z"
+          },
+          {
+            "description": "Complete in GCE / Cromwell Poll Interval",
+            "endTime": "2022-02-10T04:01:08.344Z",
+            "startTime": "2022-02-10T03:59:23.531Z"
+          }
+        ],
+        "executionStatus": "Done",
+        "inputs": {
+          "bamroot": "rep2ENCSR967IKT",
+          "disks": "local-disk 500 HDD",
+          "endedness": "single",
+          "fastqs_R1": [
+            "gs://encode-processing/caper_out_v04_05/.caper_tmp/9b8383db1e5b623d057250932ebfd0c7/ENCFF804UQS.fastq.gz"
+          ],
+          "fastqs_R2": [
+            "gs://encode-processing/caper_out_v04_05/.caper_tmp/9b8383db1e5b623d057250932ebfd0c7/ENCFF804UQS.fastq.gz"
+          ],
+          "index": "gs://encode-processing/caper_out_v04_05/.caper_tmp/e3931d8cf8de5001a1751b8f2f17a648/ENCFF795ZFF.tar.gz",
+          "ncpus": 32,
+          "ramGB": 120,
+          "runtime_environment": {
+            "docker": "encodedcc/rna-seq-pipeline:1.2.4",
+            "singularity": "docker://encodedcc/rna-seq-pipeline:1.2.4"
+          }
+        },
+        "jes": {
+          "endpointUrl": "https://lifesciences.googleapis.com/",
+          "executionBucket": "gs://encode-processing/caper_out_v04_05",
+          "googleProject": "encode-processing",
+          "instanceName": "google-pipelines-worker-cdb3aa780ece5e08754a9406b6d204e0",
+          "machineType": "custom-32-122880",
+          "monitoringScript": "gs://caper-data/scripts/resource_monitor/resource_monitor.sh",
+          "zone": "us-central1-b"
+        },
+        "jobId": "projects/118693909002/locations/us-central1/operations/17251337357278688035",
+        "labels": {
+          "cromwell-workflow-id": "cromwell-ce5f9715-4b2f-455a-ab56-872d1f550994",
+          "wdl-task-name": "align"
+        },
+        "monitoringLog": "gs://encode-processing/caper_out_v04_05/rna/ce5f9715-4b2f-455a-ab56-872d1f550994/call-align/shard-1/monitoring.log",
+        "outputs": {
+          "anno_flagstat": "gs://encode-processing/caper_out_v04_05/rna/ce5f9715-4b2f-455a-ab56-872d1f550994/call-align/shard-1/rep2ENCSR967IKT_anno_flagstat.txt",
+          "anno_flagstat_json": "gs://encode-processing/caper_out_v04_05/rna/ce5f9715-4b2f-455a-ab56-872d1f550994/call-align/shard-1/rep2ENCSR967IKT_anno_flagstat.json",
+          "annobam": "gs://encode-processing/caper_out_v04_05/rna/ce5f9715-4b2f-455a-ab56-872d1f550994/call-align/shard-1/rep2ENCSR967IKT_anno.bam",
+          "genome_flagstat": "gs://encode-processing/caper_out_v04_05/rna/ce5f9715-4b2f-455a-ab56-872d1f550994/call-align/shard-1/rep2ENCSR967IKT_genome_flagstat.txt",
+          "genome_flagstat_json": "gs://encode-processing/caper_out_v04_05/rna/ce5f9715-4b2f-455a-ab56-872d1f550994/call-align/shard-1/rep2ENCSR967IKT_genome_flagstat.json",
+          "genomebam": "gs://encode-processing/caper_out_v04_05/rna/ce5f9715-4b2f-455a-ab56-872d1f550994/call-align/shard-1/rep2ENCSR967IKT_genome.bam",
+          "log": "gs://encode-processing/caper_out_v04_05/rna/ce5f9715-4b2f-455a-ab56-872d1f550994/call-align/shard-1/rep2ENCSR967IKT_Log.final.out",
+          "log_json": "gs://encode-processing/caper_out_v04_05/rna/ce5f9715-4b2f-455a-ab56-872d1f550994/call-align/shard-1/rep2ENCSR967IKT_Log.final.json",
+          "python_log": "gs://encode-processing/caper_out_v04_05/rna/ce5f9715-4b2f-455a-ab56-872d1f550994/call-align/shard-1/align.log"
+        },
+        "preemptible": false,
+        "returnCode": 0,
+        "runtimeAttributes": {
+          "bootDiskSizeGb": "10",
+          "continueOnReturnCode": "0",
+          "cpu": "32",
+          "cpuMin": "1",
+          "disks": "local-disk 500 HDD",
+          "docker": "encodedcc/rna-seq-pipeline:1.2.4",
+          "failOnStderr": "false",
+          "maxRetries": "1",
+          "memory": "120 GB",
+          "memoryMin": "2 GB",
+          "noAddress": "false",
+          "preemptible": "0",
+          "zones": "us-central1-b"
+        },
+        "shardIndex": 1,
+        "start": "2022-02-10T03:38:13.654Z",
+        "stderr": "gs://encode-processing/caper_out_v04_05/rna/ce5f9715-4b2f-455a-ab56-872d1f550994/call-align/shard-1/stderr",
+        "stdout": "gs://encode-processing/caper_out_v04_05/rna/ce5f9715-4b2f-455a-ab56-872d1f550994/call-align/shard-1/stdout"
+      }
+    ],
+    "rna.bam_to_signals": [
+      {
+        "attempt": 1,
+        "backend": "gcp",
+        "backendLabels": {
+          "cromwell-workflow-id": "cromwell-ce5f9715-4b2f-455a-ab56-872d1f550994",
+          "wdl-task-name": "bam-to-signals"
+        },
+        "backendLogs": {
+          "log": "gs://encode-processing/caper_out_v04_05/rna/ce5f9715-4b2f-455a-ab56-872d1f550994/call-bam_to_signals/shard-0/bam_to_signals-0.log"
+        },
+        "backendStatus": "Success",
+        "callCaching": {
+          "allowResultReuse": true,
+          "effectiveCallCachingMode": "ReadAndWriteCache",
+          "hashes": {
+            "backend name": "50F66ECBC45488EE5826941BFBC50411",
+            "command template": "DCD84DD13710F11202AA0D70A31B5528",
+            "input": {
+              "File chrom_sizes": "k+GV9Q==",
+              "File input_bam": "Ia5eTA==",
+              "Int ncpus": "C9F0F895FB98AB9159F51FD0297E236D",
+              "Int ramGB": "34173CB38F07F89DDBEBC2AC9128303F",
+              "String bamroot": "5D76F6DF0E9B77940CFAF2CE975E2374",
+              "String disks": "0904BC8E2CCF38A5A358509F10313397",
+              "String runtime_environment": {
+                "docker": "95E42DD9B3F87F770395AB70D66058AB",
+                "singularity": "CFF5D03D15A6A6A29CBF82531C176D5E"
+              },
+              "String strandedness": "E7B489B7322CAC17A1E9F1B3EEEE1E41"
+            },
+            "input count": "45C48CCE2E2D7FBDEA1AFC51C7C6AD26",
+            "output count": "8F14E45FCEEA167A5A36DEDD4BEA2543",
+            "output expression": {
+              "File python_log": "177004999E90D49C5FD5EA9EC9A5EA93",
+              "Optional(File) all_minus": "F78811654F578E412B021BA4919CDBD8",
+              "Optional(File) all_plus": "E8225D6104076582D84159CBDCCF6736",
+              "Optional(File) all_unstranded": "3758ACFF98C3C22ADF1115A0F05D0AFD",
+              "Optional(File) unique_minus": "AA3B056BDECE9B4E5677BD27CE5ACF96",
+              "Optional(File) unique_plus": "3DC2993C2F23779676CCD216AE7CF7AC",
+              "Optional(File) unique_unstranded": "A481E82B415CCEFA4BD1BF0142727EEB"
+            },
+            "runtime attribute": {
+              "continueOnReturnCode": "CFCD208495D565EF66E7DFF9F98764DA",
+              "docker": "D6B20BC300EFB33CEEDC19C177FC2211",
+              "failOnStderr": "68934A3E9455FA72420237EB05902327"
+            }
+          },
+          "hit": false,
+          "result": "Cache Miss"
+        },
+        "callRoot": "gs://encode-processing/caper_out_v04_05/rna/ce5f9715-4b2f-455a-ab56-872d1f550994/call-bam_to_signals/shard-0",
+        "commandLine": "python3 $(which bam_to_signals.py) \\\n    --bamfile /cromwell_root/encode-processing/caper_out_v04_05/rna/ce5f9715-4b2f-455a-ab56-872d1f550994/call-align/shard-0/rep1ENCSR967IKT_genome.bam \\\n    --chrom_sizes /cromwell_root/encode-processing/caper_out_v04_05/.caper_tmp/a4733a4e097a19c869b1cb1aae1b33c9/mm10_no_alt.chrom.sizes.tsv \\\n    --strandedness stranded \\\n    --bamroot rep1ENCSR967IKT_genome",
+        "compressedDockerSize": 567470316,
+        "dockerImageUsed": "encodedcc/rna-seq-pipeline@sha256:d03fab15b42ca2cb6eb627c72885c0c818574cbaee5b1fdc82e5a12ca28b627c",
+        "end": "2022-02-10T06:00:14.702Z",
+        "executionEvents": [
+          {
+            "description": "waiting for quota",
+            "endTime": "2022-02-10T05:33:36.353Z",
+            "startTime": "2022-02-10T05:33:28.756Z"
+          },
+          {
+            "description": "CallCacheReading",
+            "endTime": "2022-02-10T05:33:09.859Z",
+            "startTime": "2022-02-10T05:33:09.856Z"
+          },
+          {
+            "description": "WaitingForValueStore",
+            "endTime": "2022-02-10T05:33:09.853Z",
+            "startTime": "2022-02-10T05:33:09.853Z"
+          },
+          {
+            "description": "RequestingExecutionToken",
+            "endTime": "2022-02-10T05:33:09.853Z",
+            "startTime": "2022-02-10T05:33:03.524Z"
+          },
+          {
+            "description": "ContainerSetup",
+            "endTime": "2022-02-10T05:50:03.118Z",
+            "startTime": "2022-02-10T05:50:00.040Z"
+          },
+          {
+            "description": "UserAction",
+            "endTime": "2022-02-10T05:56:48.110Z",
+            "startTime": "2022-02-10T05:50:42.945Z"
+          },
+          {
+            "description": "Pulling \"encodedcc/rna-seq-pipeline@sha256:d03fab15b42ca2cb6eb627c72885c0c818574cbaee5b1fdc82e5a12ca28b627c\"",
+            "endTime": "2022-02-10T05:50:00.040Z",
+            "startTime": "2022-02-10T05:49:20.874Z"
+          },
+          {
+            "description": "PreparingJob",
+            "endTime": "2022-02-10T05:33:09.856Z",
+            "startTime": "2022-02-10T05:33:09.853Z"
+          },
+          {
+            "description": "UpdatingJobStore",
+            "endTime": "2022-02-10T06:00:14.702Z",
+            "startTime": "2022-02-10T06:00:14.671Z"
+          },
+          {
+            "description": "Worker released",
+            "endTime": "2022-02-10T05:57:22.718Z",
+            "startTime": "2022-02-10T05:57:22.718Z"
+          },
+          {
+            "description": "Worker \"google-pipelines-worker-06385389792c443be6a26f0412393651\" assigned in \"us-central1-b\" on a \"custom-8-30720\" machine",
+            "endTime": "2022-02-10T05:49:08.471Z",
+            "startTime": "2022-02-10T05:48:43.464Z"
+          },
+          {
+            "description": "Delocalization",
+            "endTime": "2022-02-10T05:57:22.718Z",
+            "startTime": "2022-02-10T05:56:48.960Z"
+          },
+          {
+            "description": "Complete in GCE / Cromwell Poll Interval",
+            "endTime": "2022-02-10T06:00:13.500Z",
+            "startTime": "2022-02-10T05:57:22.718Z"
+          },
+          {
+            "description": "Pulling \"gcr.io/google.com/cloudsdktool/cloud-sdk:276.0.0-slim\"",
+            "endTime": "2022-02-10T05:49:20.874Z",
+            "startTime": "2022-02-10T05:49:08.471Z"
+          },
+          {
+            "description": "Background",
+            "endTime": "2022-02-10T05:50:03.485Z",
+            "startTime": "2022-02-10T05:50:03.329Z"
+          },
+          {
+            "description": "Localization",
+            "endTime": "2022-02-10T05:50:42.945Z",
+            "startTime": "2022-02-10T05:50:03.485Z"
+          },
+          {
+            "description": "Pending",
+            "endTime": "2022-02-10T05:33:03.524Z",
+            "startTime": "2022-02-10T05:33:03.524Z"
+          },
+          {
+            "description": "UpdatingCallCache",
+            "endTime": "2022-02-10T06:00:14.671Z",
+            "startTime": "2022-02-10T06:00:13.500Z"
+          },
+          {
+            "description": "RunningJob",
+            "endTime": "2022-02-10T05:33:28.756Z",
+            "startTime": "2022-02-10T05:33:09.859Z"
+          },
+          {
+            "description": "A resource limit has delayed the operation: generic::resource_exhausted: allocating: selecting resources: selecting region and zone: no available zones: us-central1: 213 DISKS_TOTAL_GB (142/204800 available) usage too high",
+            "endTime": "2022-02-10T05:48:43.464Z",
+            "startTime": "2022-02-10T05:33:36.353Z"
+          }
+        ],
+        "executionStatus": "Done",
+        "inputs": {
+          "bamroot": "rep1ENCSR967IKT_genome",
+          "chrom_sizes": "gs://encode-processing/caper_out_v04_05/.caper_tmp/a4733a4e097a19c869b1cb1aae1b33c9/mm10_no_alt.chrom.sizes.tsv",
+          "disks": "local-disk 200 HDD",
+          "input_bam": "gs://encode-processing/caper_out_v04_05/rna/ce5f9715-4b2f-455a-ab56-872d1f550994/call-align/shard-0/rep1ENCSR967IKT_genome.bam",
+          "ncpus": 8,
+          "null": null,
+          "ramGB": 30,
+          "runtime_environment": {
+            "docker": "encodedcc/rna-seq-pipeline:1.2.4",
+            "singularity": "docker://encodedcc/rna-seq-pipeline:1.2.4"
+          },
+          "strandedness": "stranded"
+        },
+        "jes": {
+          "endpointUrl": "https://lifesciences.googleapis.com/",
+          "executionBucket": "gs://encode-processing/caper_out_v04_05",
+          "googleProject": "encode-processing",
+          "instanceName": "google-pipelines-worker-06385389792c443be6a26f0412393651",
+          "machineType": "custom-8-30720",
+          "monitoringScript": "gs://caper-data/scripts/resource_monitor/resource_monitor.sh",
+          "zone": "us-central1-b"
+        },
+        "jobId": "projects/118693909002/locations/us-central1/operations/7167163252450013760",
+        "labels": {
+          "cromwell-workflow-id": "cromwell-ce5f9715-4b2f-455a-ab56-872d1f550994",
+          "wdl-task-name": "bam_to_signals"
+        },
+        "monitoringLog": "gs://encode-processing/caper_out_v04_05/rna/ce5f9715-4b2f-455a-ab56-872d1f550994/call-bam_to_signals/shard-0/monitoring.log",
+        "outputs": {
+          "all_minus": "gs://encode-processing/caper_out_v04_05/rna/ce5f9715-4b2f-455a-ab56-872d1f550994/call-bam_to_signals/shard-0/glob-0be8b00c6881ee205adffa940ec5045d/rep1ENCSR967IKT_genome_minusAll.bw",
+          "all_plus": "gs://encode-processing/caper_out_v04_05/rna/ce5f9715-4b2f-455a-ab56-872d1f550994/call-bam_to_signals/shard-0/glob-30b04c06dd4a6aac247ff3b82eadec1b/rep1ENCSR967IKT_genome_plusAll.bw",
+          "all_unstranded": null,
+          "python_log": "gs://encode-processing/caper_out_v04_05/rna/ce5f9715-4b2f-455a-ab56-872d1f550994/call-bam_to_signals/shard-0/bam_to_signals.log",
+          "unique_minus": "gs://encode-processing/caper_out_v04_05/rna/ce5f9715-4b2f-455a-ab56-872d1f550994/call-bam_to_signals/shard-0/glob-b1f717d7f19cd2629e443e4a3f43f8de/rep1ENCSR967IKT_genome_minusUniq.bw",
+          "unique_plus": "gs://encode-processing/caper_out_v04_05/rna/ce5f9715-4b2f-455a-ab56-872d1f550994/call-bam_to_signals/shard-0/glob-43ccac0a8440af82e485a4b3b17d3d92/rep1ENCSR967IKT_genome_plusUniq.bw",
+          "unique_unstranded": null
+        },
+        "preemptible": false,
+        "returnCode": 0,
+        "runtimeAttributes": {
+          "bootDiskSizeGb": "10",
+          "continueOnReturnCode": "0",
+          "cpu": "8",
+          "cpuMin": "1",
+          "disks": "local-disk 200 HDD",
+          "docker": "encodedcc/rna-seq-pipeline:1.2.4",
+          "failOnStderr": "false",
+          "maxRetries": "1",
+          "memory": "30 GB",
+          "memoryMin": "2 GB",
+          "noAddress": "false",
+          "preemptible": "0",
+          "zones": "us-central1-b"
+        },
+        "shardIndex": 0,
+        "start": "2022-02-10T05:33:03.524Z",
+        "stderr": "gs://encode-processing/caper_out_v04_05/rna/ce5f9715-4b2f-455a-ab56-872d1f550994/call-bam_to_signals/shard-0/stderr",
+        "stdout": "gs://encode-processing/caper_out_v04_05/rna/ce5f9715-4b2f-455a-ab56-872d1f550994/call-bam_to_signals/shard-0/stdout"
+      },
+      {
+        "attempt": 1,
+        "backend": "gcp",
+        "backendLabels": {
+          "cromwell-workflow-id": "cromwell-ce5f9715-4b2f-455a-ab56-872d1f550994",
+          "wdl-task-name": "bam-to-signals"
+        },
+        "backendLogs": {
+          "log": "gs://encode-processing/caper_out_v04_05/rna/ce5f9715-4b2f-455a-ab56-872d1f550994/call-bam_to_signals/shard-1/bam_to_signals-1.log"
+        },
+        "backendStatus": "Success",
+        "callCaching": {
+          "allowResultReuse": true,
+          "effectiveCallCachingMode": "ReadAndWriteCache",
+          "hashes": {
+            "backend name": "50F66ECBC45488EE5826941BFBC50411",
+            "command template": "DCD84DD13710F11202AA0D70A31B5528",
+            "input": {
+              "File chrom_sizes": "k+GV9Q==",
+              "File input_bam": "vv0W2w==",
+              "Int ncpus": "C9F0F895FB98AB9159F51FD0297E236D",
+              "Int ramGB": "34173CB38F07F89DDBEBC2AC9128303F",
+              "String bamroot": "F7E71CF8892D164CBFFFE96DBD348249",
+              "String disks": "0904BC8E2CCF38A5A358509F10313397",
+              "String runtime_environment": {
+                "docker": "95E42DD9B3F87F770395AB70D66058AB",
+                "singularity": "CFF5D03D15A6A6A29CBF82531C176D5E"
+              },
+              "String strandedness": "E7B489B7322CAC17A1E9F1B3EEEE1E41"
+            },
+            "input count": "45C48CCE2E2D7FBDEA1AFC51C7C6AD26",
+            "output count": "8F14E45FCEEA167A5A36DEDD4BEA2543",
+            "output expression": {
+              "File python_log": "177004999E90D49C5FD5EA9EC9A5EA93",
+              "Optional(File) all_minus": "F78811654F578E412B021BA4919CDBD8",
+              "Optional(File) all_plus": "E8225D6104076582D84159CBDCCF6736",
+              "Optional(File) all_unstranded": "3758ACFF98C3C22ADF1115A0F05D0AFD",
+              "Optional(File) unique_minus": "AA3B056BDECE9B4E5677BD27CE5ACF96",
+              "Optional(File) unique_plus": "3DC2993C2F23779676CCD216AE7CF7AC",
+              "Optional(File) unique_unstranded": "A481E82B415CCEFA4BD1BF0142727EEB"
+            },
+            "runtime attribute": {
+              "continueOnReturnCode": "CFCD208495D565EF66E7DFF9F98764DA",
+              "docker": "D6B20BC300EFB33CEEDC19C177FC2211",
+              "failOnStderr": "68934A3E9455FA72420237EB05902327"
+            }
+          },
+          "hit": false,
+          "result": "Cache Miss"
+        },
+        "callRoot": "gs://encode-processing/caper_out_v04_05/rna/ce5f9715-4b2f-455a-ab56-872d1f550994/call-bam_to_signals/shard-1",
+        "commandLine": "python3 $(which bam_to_signals.py) \\\n    --bamfile /cromwell_root/encode-processing/caper_out_v04_05/rna/ce5f9715-4b2f-455a-ab56-872d1f550994/call-align/shard-1/rep2ENCSR967IKT_genome.bam \\\n    --chrom_sizes /cromwell_root/encode-processing/caper_out_v04_05/.caper_tmp/a4733a4e097a19c869b1cb1aae1b33c9/mm10_no_alt.chrom.sizes.tsv \\\n    --strandedness stranded \\\n    --bamroot rep2ENCSR967IKT_genome",
+        "compressedDockerSize": 567470316,
+        "dockerImageUsed": "encodedcc/rna-seq-pipeline@sha256:d03fab15b42ca2cb6eb627c72885c0c818574cbaee5b1fdc82e5a12ca28b627c",
+        "end": "2022-02-10T04:10:38.702Z",
+        "executionEvents": [
+          {
+            "description": "RequestingExecutionToken",
+            "endTime": "2022-02-10T04:01:23.853Z",
+            "startTime": "2022-02-10T04:01:11.654Z"
+          },
+          {
+            "description": "Pulling \"gcr.io/google.com/cloudsdktool/cloud-sdk:276.0.0-slim\"",
+            "endTime": "2022-02-10T04:02:31.826Z",
+            "startTime": "2022-02-10T04:02:18.895Z"
+          },
+          {
+            "description": "CallCacheReading",
+            "endTime": "2022-02-10T04:01:23.860Z",
+            "startTime": "2022-02-10T04:01:23.857Z"
+          },
+          {
+            "description": "UserAction",
+            "endTime": "2022-02-10T04:09:49.621Z",
+            "startTime": "2022-02-10T04:03:51.627Z"
+          },
+          {
+            "description": "waiting for quota",
+            "endTime": "2022-02-10T04:01:48.334Z",
+            "startTime": "2022-02-10T04:01:40.772Z"
+          },
+          {
+            "description": "PreparingJob",
+            "endTime": "2022-02-10T04:01:23.857Z",
+            "startTime": "2022-02-10T04:01:23.853Z"
+          },
+          {
+            "description": "Delocalization",
+            "endTime": "2022-02-10T04:10:28.517Z",
+            "startTime": "2022-02-10T04:09:49.621Z"
+          },
+          {
+            "description": "Pending",
+            "endTime": "2022-02-10T04:01:11.654Z",
+            "startTime": "2022-02-10T04:01:11.654Z"
+          },
+          {
+            "description": "Background",
+            "endTime": "2022-02-10T04:03:14.584Z",
+            "startTime": "2022-02-10T04:03:14.478Z"
+          },
+          {
+            "description": "UpdatingCallCache",
+            "endTime": "2022-02-10T04:10:38.674Z",
+            "startTime": "2022-02-10T04:10:38.538Z"
+          },
+          {
+            "description": "ContainerSetup",
+            "endTime": "2022-02-10T04:03:14.478Z",
+            "startTime": "2022-02-10T04:03:11.347Z"
+          },
+          {
+            "description": "Complete in GCE / Cromwell Poll Interval",
+            "endTime": "2022-02-10T04:10:38.538Z",
+            "startTime": "2022-02-10T04:10:28.517Z"
+          },
+          {
+            "description": "Worker \"google-pipelines-worker-a9ae9d6a5d1199439bd5ca66dbda8448\" assigned in \"us-central1-b\" on a \"custom-8-30720\" machine",
+            "endTime": "2022-02-10T04:02:18.895Z",
+            "startTime": "2022-02-10T04:01:48.334Z"
+          },
+          {
+            "description": "RunningJob",
+            "endTime": "2022-02-10T04:01:40.772Z",
+            "startTime": "2022-02-10T04:01:23.860Z"
+          },
+          {
+            "description": "Pulling \"encodedcc/rna-seq-pipeline@sha256:d03fab15b42ca2cb6eb627c72885c0c818574cbaee5b1fdc82e5a12ca28b627c\"",
+            "endTime": "2022-02-10T04:03:11.347Z",
+            "startTime": "2022-02-10T04:02:31.826Z"
+          },
+          {
+            "description": "WaitingForValueStore",
+            "endTime": "2022-02-10T04:01:23.853Z",
+            "startTime": "2022-02-10T04:01:23.853Z"
+          },
+          {
+            "description": "UpdatingJobStore",
+            "endTime": "2022-02-10T04:10:38.702Z",
+            "startTime": "2022-02-10T04:10:38.674Z"
+          },
+          {
+            "description": "Localization",
+            "endTime": "2022-02-10T04:03:51.627Z",
+            "startTime": "2022-02-10T04:03:14.833Z"
+          },
+          {
+            "description": "Worker released",
+            "endTime": "2022-02-10T04:10:28.517Z",
+            "startTime": "2022-02-10T04:10:28.517Z"
+          }
+        ],
+        "executionStatus": "Done",
+        "inputs": {
+          "bamroot": "rep2ENCSR967IKT_genome",
+          "chrom_sizes": "gs://encode-processing/caper_out_v04_05/.caper_tmp/a4733a4e097a19c869b1cb1aae1b33c9/mm10_no_alt.chrom.sizes.tsv",
+          "disks": "local-disk 200 HDD",
+          "input_bam": "gs://encode-processing/caper_out_v04_05/rna/ce5f9715-4b2f-455a-ab56-872d1f550994/call-align/shard-1/rep2ENCSR967IKT_genome.bam",
+          "ncpus": 8,
+          "null": null,
+          "ramGB": 30,
+          "runtime_environment": {
+            "docker": "encodedcc/rna-seq-pipeline:1.2.4",
+            "singularity": "docker://encodedcc/rna-seq-pipeline:1.2.4"
+          },
+          "strandedness": "stranded"
+        },
+        "jes": {
+          "endpointUrl": "https://lifesciences.googleapis.com/",
+          "executionBucket": "gs://encode-processing/caper_out_v04_05",
+          "googleProject": "encode-processing",
+          "instanceName": "google-pipelines-worker-a9ae9d6a5d1199439bd5ca66dbda8448",
+          "machineType": "custom-8-30720",
+          "monitoringScript": "gs://caper-data/scripts/resource_monitor/resource_monitor.sh",
+          "zone": "us-central1-b"
+        },
+        "jobId": "projects/118693909002/locations/us-central1/operations/6961278086099742186",
+        "labels": {
+          "cromwell-workflow-id": "cromwell-ce5f9715-4b2f-455a-ab56-872d1f550994",
+          "wdl-task-name": "bam_to_signals"
+        },
+        "monitoringLog": "gs://encode-processing/caper_out_v04_05/rna/ce5f9715-4b2f-455a-ab56-872d1f550994/call-bam_to_signals/shard-1/monitoring.log",
+        "outputs": {
+          "all_minus": "gs://encode-processing/caper_out_v04_05/rna/ce5f9715-4b2f-455a-ab56-872d1f550994/call-bam_to_signals/shard-1/glob-0be8b00c6881ee205adffa940ec5045d/rep2ENCSR967IKT_genome_minusAll.bw",
+          "all_plus": "gs://encode-processing/caper_out_v04_05/rna/ce5f9715-4b2f-455a-ab56-872d1f550994/call-bam_to_signals/shard-1/glob-30b04c06dd4a6aac247ff3b82eadec1b/rep2ENCSR967IKT_genome_plusAll.bw",
+          "all_unstranded": null,
+          "python_log": "gs://encode-processing/caper_out_v04_05/rna/ce5f9715-4b2f-455a-ab56-872d1f550994/call-bam_to_signals/shard-1/bam_to_signals.log",
+          "unique_minus": "gs://encode-processing/caper_out_v04_05/rna/ce5f9715-4b2f-455a-ab56-872d1f550994/call-bam_to_signals/shard-1/glob-b1f717d7f19cd2629e443e4a3f43f8de/rep2ENCSR967IKT_genome_minusUniq.bw",
+          "unique_plus": "gs://encode-processing/caper_out_v04_05/rna/ce5f9715-4b2f-455a-ab56-872d1f550994/call-bam_to_signals/shard-1/glob-43ccac0a8440af82e485a4b3b17d3d92/rep2ENCSR967IKT_genome_plusUniq.bw",
+          "unique_unstranded": null
+        },
+        "preemptible": false,
+        "returnCode": 0,
+        "runtimeAttributes": {
+          "bootDiskSizeGb": "10",
+          "continueOnReturnCode": "0",
+          "cpu": "8",
+          "cpuMin": "1",
+          "disks": "local-disk 200 HDD",
+          "docker": "encodedcc/rna-seq-pipeline:1.2.4",
+          "failOnStderr": "false",
+          "maxRetries": "1",
+          "memory": "30 GB",
+          "memoryMin": "2 GB",
+          "noAddress": "false",
+          "preemptible": "0",
+          "zones": "us-central1-b"
+        },
+        "shardIndex": 1,
+        "start": "2022-02-10T04:01:11.654Z",
+        "stderr": "gs://encode-processing/caper_out_v04_05/rna/ce5f9715-4b2f-455a-ab56-872d1f550994/call-bam_to_signals/shard-1/stderr",
+        "stdout": "gs://encode-processing/caper_out_v04_05/rna/ce5f9715-4b2f-455a-ab56-872d1f550994/call-bam_to_signals/shard-1/stdout"
+      }
+    ],
+    "rna.check_anno": [
+      {
+        "attempt": 1,
+        "backend": "gcp",
+        "backendLabels": {
+          "cromwell-workflow-id": "cromwell-ce5f9715-4b2f-455a-ab56-872d1f550994",
+          "wdl-call-alias": "check-anno",
+          "wdl-task-name": "samtools-quickcheck"
+        },
+        "backendLogs": {
+          "log": "gs://encode-processing/caper_out_v04_05/rna/ce5f9715-4b2f-455a-ab56-872d1f550994/call-check_anno/shard-0/check_anno-0.log"
+        },
+        "backendStatus": "Success",
+        "callCaching": {
+          "allowResultReuse": true,
+          "effectiveCallCachingMode": "ReadAndWriteCache",
+          "hashes": {
+            "backend name": "50F66ECBC45488EE5826941BFBC50411",
+            "command template": "CE9E896E68A3661D44DF0EBBBEB7B49B",
+            "input": {
+              "File bam": "4URcuw==",
+              "Int ncpus": "C9F0F895FB98AB9159F51FD0297E236D",
+              "Int ramGB": "34173CB38F07F89DDBEBC2AC9128303F",
+              "String disks": "0904BC8E2CCF38A5A358509F10313397",
+              "String runtime_environment": {
+                "docker": "95E42DD9B3F87F770395AB70D66058AB",
+                "singularity": "CFF5D03D15A6A6A29CBF82531C176D5E"
+              }
+            },
+            "input count": "1679091C5A880FAF6FB5E6087EB1B2DC",
+            "output count": "CFCD208495D565EF66E7DFF9F98764DA",
+            "runtime attribute": {
+              "continueOnReturnCode": "CFCD208495D565EF66E7DFF9F98764DA",
+              "docker": "D6B20BC300EFB33CEEDC19C177FC2211",
+              "failOnStderr": "68934A3E9455FA72420237EB05902327"
+            }
+          },
+          "hit": false,
+          "result": "Cache Miss"
+        },
+        "callRoot": "gs://encode-processing/caper_out_v04_05/rna/ce5f9715-4b2f-455a-ab56-872d1f550994/call-check_anno/shard-0",
+        "commandLine": "samtools quickcheck /cromwell_root/encode-processing/caper_out_v04_05/rna/ce5f9715-4b2f-455a-ab56-872d1f550994/call-align/shard-0/rep1ENCSR967IKT_anno.bam",
+        "compressedDockerSize": 567470316,
+        "dockerImageUsed": "encodedcc/rna-seq-pipeline@sha256:d03fab15b42ca2cb6eb627c72885c0c818574cbaee5b1fdc82e5a12ca28b627c",
+        "end": "2022-02-10T05:36:20.704Z",
+        "executionEvents": [
+          {
+            "description": "RunningJob",
+            "endTime": "2022-02-10T05:33:28.755Z",
+            "startTime": "2022-02-10T05:33:08.329Z"
+          },
+          {
+            "description": "PreparingJob",
+            "endTime": "2022-02-10T05:33:05.858Z",
+            "startTime": "2022-02-10T05:33:05.853Z"
+          },
+          {
+            "description": "ContainerSetup",
+            "endTime": "2022-02-10T05:34:57.635Z",
+            "startTime": "2022-02-10T05:34:54.614Z"
+          },
+          {
+            "description": "CallCacheReading",
+            "endTime": "2022-02-10T05:33:08.329Z",
+            "startTime": "2022-02-10T05:33:05.858Z"
+          },
+          {
+            "description": "Delocalization",
+            "endTime": "2022-02-10T05:36:05.365Z",
+            "startTime": "2022-02-10T05:35:50.942Z"
+          },
+          {
+            "description": "RequestingExecutionToken",
+            "endTime": "2022-02-10T05:33:05.853Z",
+            "startTime": "2022-02-10T05:33:02.504Z"
+          },
+          {
+            "description": "Background",
+            "endTime": "2022-02-10T05:34:57.989Z",
+            "startTime": "2022-02-10T05:34:57.851Z"
+          },
+          {
+            "description": "Localization",
+            "endTime": "2022-02-10T05:35:43.654Z",
+            "startTime": "2022-02-10T05:34:57.989Z"
+          },
+          {
+            "description": "UpdatingJobStore",
+            "endTime": "2022-02-10T05:36:20.704Z",
+            "startTime": "2022-02-10T05:36:20.686Z"
+          },
+          {
+            "description": "Worker released",
+            "endTime": "2022-02-10T05:36:05.365Z",
+            "startTime": "2022-02-10T05:36:05.365Z"
+          },
+          {
+            "description": "Complete in GCE / Cromwell Poll Interval",
+            "endTime": "2022-02-10T05:36:18.318Z",
+            "startTime": "2022-02-10T05:36:05.365Z"
+          },
+          {
+            "description": "WaitingForValueStore",
+            "endTime": "2022-02-10T05:33:05.853Z",
+            "startTime": "2022-02-10T05:33:05.853Z"
+          },
+          {
+            "description": "UserAction",
+            "endTime": "2022-02-10T05:35:50.942Z",
+            "startTime": "2022-02-10T05:35:43.654Z"
+          },
+          {
+            "description": "UpdatingCallCache",
+            "endTime": "2022-02-10T05:36:20.686Z",
+            "startTime": "2022-02-10T05:36:18.318Z"
+          },
+          {
+            "description": "waiting for quota",
+            "endTime": "2022-02-10T05:33:36.355Z",
+            "startTime": "2022-02-10T05:33:28.755Z"
+          },
+          {
+            "description": "Pulling \"encodedcc/rna-seq-pipeline@sha256:d03fab15b42ca2cb6eb627c72885c0c818574cbaee5b1fdc82e5a12ca28b627c\"",
+            "endTime": "2022-02-10T05:34:54.614Z",
+            "startTime": "2022-02-10T05:34:15.628Z"
+          },
+          {
+            "description": "Pulling \"gcr.io/google.com/cloudsdktool/cloud-sdk:276.0.0-slim\"",
+            "endTime": "2022-02-10T05:34:15.628Z",
+            "startTime": "2022-02-10T05:34:02.941Z"
+          },
+          {
+            "description": "Pending",
+            "endTime": "2022-02-10T05:33:02.504Z",
+            "startTime": "2022-02-10T05:33:02.504Z"
+          },
+          {
+            "description": "Worker \"google-pipelines-worker-a646219cad4146258deb8f9d243779e2\" assigned in \"us-central1-b\" on a \"custom-8-30720\" machine",
+            "endTime": "2022-02-10T05:34:02.941Z",
+            "startTime": "2022-02-10T05:33:36.355Z"
+          }
+        ],
+        "executionStatus": "Done",
+        "inputs": {
+          "bam": "gs://encode-processing/caper_out_v04_05/rna/ce5f9715-4b2f-455a-ab56-872d1f550994/call-align/shard-0/rep1ENCSR967IKT_anno.bam",
+          "disks": "local-disk 200 HDD",
+          "ncpus": 8,
+          "ramGB": 30,
+          "runtime_environment": {
+            "docker": "encodedcc/rna-seq-pipeline:1.2.4",
+            "singularity": "docker://encodedcc/rna-seq-pipeline:1.2.4"
+          }
+        },
+        "jes": {
+          "endpointUrl": "https://lifesciences.googleapis.com/",
+          "executionBucket": "gs://encode-processing/caper_out_v04_05",
+          "googleProject": "encode-processing",
+          "instanceName": "google-pipelines-worker-a646219cad4146258deb8f9d243779e2",
+          "machineType": "custom-8-30720",
+          "monitoringScript": "gs://caper-data/scripts/resource_monitor/resource_monitor.sh",
+          "zone": "us-central1-b"
+        },
+        "jobId": "projects/118693909002/locations/us-central1/operations/13929976557587284107",
+        "labels": {
+          "cromwell-workflow-id": "cromwell-ce5f9715-4b2f-455a-ab56-872d1f550994",
+          "wdl-call-alias": "check_anno",
+          "wdl-task-name": "samtools_quickcheck"
+        },
+        "monitoringLog": "gs://encode-processing/caper_out_v04_05/rna/ce5f9715-4b2f-455a-ab56-872d1f550994/call-check_anno/shard-0/monitoring.log",
+        "outputs": {},
+        "preemptible": false,
+        "returnCode": 0,
+        "runtimeAttributes": {
+          "bootDiskSizeGb": "10",
+          "continueOnReturnCode": "0",
+          "cpu": "8",
+          "cpuMin": "1",
+          "disks": "local-disk 200 HDD",
+          "docker": "encodedcc/rna-seq-pipeline:1.2.4",
+          "failOnStderr": "false",
+          "maxRetries": "1",
+          "memory": "30 GB",
+          "memoryMin": "2 GB",
+          "noAddress": "false",
+          "preemptible": "0",
+          "zones": "us-central1-b"
+        },
+        "shardIndex": 0,
+        "start": "2022-02-10T05:33:02.504Z",
+        "stderr": "gs://encode-processing/caper_out_v04_05/rna/ce5f9715-4b2f-455a-ab56-872d1f550994/call-check_anno/shard-0/stderr",
+        "stdout": "gs://encode-processing/caper_out_v04_05/rna/ce5f9715-4b2f-455a-ab56-872d1f550994/call-check_anno/shard-0/stdout"
+      },
+      {
+        "attempt": 1,
+        "backend": "gcp",
+        "backendLabels": {
+          "cromwell-workflow-id": "cromwell-ce5f9715-4b2f-455a-ab56-872d1f550994",
+          "wdl-call-alias": "check-anno",
+          "wdl-task-name": "samtools-quickcheck"
+        },
+        "backendLogs": {
+          "log": "gs://encode-processing/caper_out_v04_05/rna/ce5f9715-4b2f-455a-ab56-872d1f550994/call-check_anno/shard-1/check_anno-1.log"
+        },
+        "backendStatus": "Success",
+        "callCaching": {
+          "allowResultReuse": true,
+          "effectiveCallCachingMode": "ReadAndWriteCache",
+          "hashes": {
+            "backend name": "50F66ECBC45488EE5826941BFBC50411",
+            "command template": "CE9E896E68A3661D44DF0EBBBEB7B49B",
+            "input": {
+              "File bam": "OUR0dg==",
+              "Int ncpus": "C9F0F895FB98AB9159F51FD0297E236D",
+              "Int ramGB": "34173CB38F07F89DDBEBC2AC9128303F",
+              "String disks": "0904BC8E2CCF38A5A358509F10313397",
+              "String runtime_environment": {
+                "docker": "95E42DD9B3F87F770395AB70D66058AB",
+                "singularity": "CFF5D03D15A6A6A29CBF82531C176D5E"
+              }
+            },
+            "input count": "1679091C5A880FAF6FB5E6087EB1B2DC",
+            "output count": "CFCD208495D565EF66E7DFF9F98764DA",
+            "runtime attribute": {
+              "continueOnReturnCode": "CFCD208495D565EF66E7DFF9F98764DA",
+              "docker": "D6B20BC300EFB33CEEDC19C177FC2211",
+              "failOnStderr": "68934A3E9455FA72420237EB05902327"
+            }
+          },
+          "hit": false,
+          "result": "Cache Miss"
+        },
+        "callRoot": "gs://encode-processing/caper_out_v04_05/rna/ce5f9715-4b2f-455a-ab56-872d1f550994/call-check_anno/shard-1",
+        "commandLine": "samtools quickcheck /cromwell_root/encode-processing/caper_out_v04_05/rna/ce5f9715-4b2f-455a-ab56-872d1f550994/call-align/shard-1/rep2ENCSR967IKT_anno.bam",
+        "compressedDockerSize": 567470316,
+        "dockerImageUsed": "encodedcc/rna-seq-pipeline@sha256:d03fab15b42ca2cb6eb627c72885c0c818574cbaee5b1fdc82e5a12ca28b627c",
+        "end": "2022-02-10T04:04:29.698Z",
+        "executionEvents": [
+          {
+            "description": "waiting for quota",
+            "endTime": "2022-02-10T04:01:48.324Z",
+            "startTime": "2022-02-10T04:01:40.767Z"
+          },
+          {
+            "description": "Localization",
+            "endTime": "2022-02-10T04:03:58.965Z",
+            "startTime": "2022-02-10T04:03:13.171Z"
+          },
+          {
+            "description": "Pulling \"encodedcc/rna-seq-pipeline@sha256:d03fab15b42ca2cb6eb627c72885c0c818574cbaee5b1fdc82e5a12ca28b627c\"",
+            "endTime": "2022-02-10T04:03:09.727Z",
+            "startTime": "2022-02-10T04:02:30.651Z"
+          },
+          {
+            "description": "ContainerSetup",
+            "endTime": "2022-02-10T04:03:12.772Z",
+            "startTime": "2022-02-10T04:03:09.727Z"
+          },
+          {
+            "description": "Delocalization",
+            "endTime": "2022-02-10T04:04:22.203Z",
+            "startTime": "2022-02-10T04:04:02.252Z"
+          },
+          {
+            "description": "UpdatingCallCache",
+            "endTime": "2022-02-10T04:04:29.676Z",
+            "startTime": "2022-02-10T04:04:28.338Z"
+          },
+          {
+            "description": "CallCacheReading",
+            "endTime": "2022-02-10T04:01:13.337Z",
+            "startTime": "2022-02-10T04:01:11.858Z"
+          },
+          {
+            "description": "Complete in GCE / Cromwell Poll Interval",
+            "endTime": "2022-02-10T04:04:28.338Z",
+            "startTime": "2022-02-10T04:04:22.203Z"
+          },
+          {
+            "description": "Pending",
+            "endTime": "2022-02-10T04:01:10.634Z",
+            "startTime": "2022-02-10T04:01:10.634Z"
+          },
+          {
+            "description": "Background",
+            "endTime": "2022-02-10T04:03:13.171Z",
+            "startTime": "2022-02-10T04:03:12.878Z"
+          },
+          {
+            "description": "WaitingForValueStore",
+            "endTime": "2022-02-10T04:01:11.853Z",
+            "startTime": "2022-02-10T04:01:11.852Z"
+          },
+          {
+            "description": "UserAction",
+            "endTime": "2022-02-10T04:04:02.252Z",
+            "startTime": "2022-02-10T04:03:58.965Z"
+          },
+          {
+            "description": "Pulling \"gcr.io/google.com/cloudsdktool/cloud-sdk:276.0.0-slim\"",
+            "endTime": "2022-02-10T04:02:30.651Z",
+            "startTime": "2022-02-10T04:02:18.297Z"
+          },
+          {
+            "description": "Worker released",
+            "endTime": "2022-02-10T04:04:22.203Z",
+            "startTime": "2022-02-10T04:04:22.203Z"
+          },
+          {
+            "description": "PreparingJob",
+            "endTime": "2022-02-10T04:01:11.858Z",
+            "startTime": "2022-02-10T04:01:11.853Z"
+          },
+          {
+            "description": "RequestingExecutionToken",
+            "endTime": "2022-02-10T04:01:11.852Z",
+            "startTime": "2022-02-10T04:01:10.634Z"
+          },
+          {
+            "description": "RunningJob",
+            "endTime": "2022-02-10T04:01:40.767Z",
+            "startTime": "2022-02-10T04:01:13.337Z"
+          },
+          {
+            "description": "Worker \"google-pipelines-worker-6dc9aff2e1d96a9361dcee404ec4a39c\" assigned in \"us-central1-b\" on a \"custom-8-30720\" machine",
+            "endTime": "2022-02-10T04:02:18.297Z",
+            "startTime": "2022-02-10T04:01:48.324Z"
+          },
+          {
+            "description": "UpdatingJobStore",
+            "endTime": "2022-02-10T04:04:29.697Z",
+            "startTime": "2022-02-10T04:04:29.676Z"
+          }
+        ],
+        "executionStatus": "Done",
+        "inputs": {
+          "bam": "gs://encode-processing/caper_out_v04_05/rna/ce5f9715-4b2f-455a-ab56-872d1f550994/call-align/shard-1/rep2ENCSR967IKT_anno.bam",
+          "disks": "local-disk 200 HDD",
+          "ncpus": 8,
+          "ramGB": 30,
+          "runtime_environment": {
+            "docker": "encodedcc/rna-seq-pipeline:1.2.4",
+            "singularity": "docker://encodedcc/rna-seq-pipeline:1.2.4"
+          }
+        },
+        "jes": {
+          "endpointUrl": "https://lifesciences.googleapis.com/",
+          "executionBucket": "gs://encode-processing/caper_out_v04_05",
+          "googleProject": "encode-processing",
+          "instanceName": "google-pipelines-worker-6dc9aff2e1d96a9361dcee404ec4a39c",
+          "machineType": "custom-8-30720",
+          "monitoringScript": "gs://caper-data/scripts/resource_monitor/resource_monitor.sh",
+          "zone": "us-central1-b"
+        },
+        "jobId": "projects/118693909002/locations/us-central1/operations/16166929076396811502",
+        "labels": {
+          "cromwell-workflow-id": "cromwell-ce5f9715-4b2f-455a-ab56-872d1f550994",
+          "wdl-call-alias": "check_anno",
+          "wdl-task-name": "samtools_quickcheck"
+        },
+        "monitoringLog": "gs://encode-processing/caper_out_v04_05/rna/ce5f9715-4b2f-455a-ab56-872d1f550994/call-check_anno/shard-1/monitoring.log",
+        "outputs": {},
+        "preemptible": false,
+        "returnCode": 0,
+        "runtimeAttributes": {
+          "bootDiskSizeGb": "10",
+          "continueOnReturnCode": "0",
+          "cpu": "8",
+          "cpuMin": "1",
+          "disks": "local-disk 200 HDD",
+          "docker": "encodedcc/rna-seq-pipeline:1.2.4",
+          "failOnStderr": "false",
+          "maxRetries": "1",
+          "memory": "30 GB",
+          "memoryMin": "2 GB",
+          "noAddress": "false",
+          "preemptible": "0",
+          "zones": "us-central1-b"
+        },
+        "shardIndex": 1,
+        "start": "2022-02-10T04:01:10.634Z",
+        "stderr": "gs://encode-processing/caper_out_v04_05/rna/ce5f9715-4b2f-455a-ab56-872d1f550994/call-check_anno/shard-1/stderr",
+        "stdout": "gs://encode-processing/caper_out_v04_05/rna/ce5f9715-4b2f-455a-ab56-872d1f550994/call-check_anno/shard-1/stdout"
+      }
+    ],
+    "rna.check_genome": [
+      {
+        "attempt": 1,
+        "backend": "gcp",
+        "backendLabels": {
+          "cromwell-workflow-id": "cromwell-ce5f9715-4b2f-455a-ab56-872d1f550994",
+          "wdl-call-alias": "check-genome",
+          "wdl-task-name": "samtools-quickcheck"
+        },
+        "backendLogs": {
+          "log": "gs://encode-processing/caper_out_v04_05/rna/ce5f9715-4b2f-455a-ab56-872d1f550994/call-check_genome/shard-0/check_genome-0.log"
+        },
+        "backendStatus": "Success",
+        "callCaching": {
+          "allowResultReuse": true,
+          "effectiveCallCachingMode": "ReadAndWriteCache",
+          "hashes": {
+            "backend name": "50F66ECBC45488EE5826941BFBC50411",
+            "command template": "CE9E896E68A3661D44DF0EBBBEB7B49B",
+            "input": {
+              "File bam": "Ia5eTA==",
+              "Int ncpus": "C9F0F895FB98AB9159F51FD0297E236D",
+              "Int ramGB": "34173CB38F07F89DDBEBC2AC9128303F",
+              "String disks": "0904BC8E2CCF38A5A358509F10313397",
+              "String runtime_environment": {
+                "docker": "95E42DD9B3F87F770395AB70D66058AB",
+                "singularity": "CFF5D03D15A6A6A29CBF82531C176D5E"
+              }
+            },
+            "input count": "1679091C5A880FAF6FB5E6087EB1B2DC",
+            "output count": "CFCD208495D565EF66E7DFF9F98764DA",
+            "runtime attribute": {
+              "continueOnReturnCode": "CFCD208495D565EF66E7DFF9F98764DA",
+              "docker": "D6B20BC300EFB33CEEDC19C177FC2211",
+              "failOnStderr": "68934A3E9455FA72420237EB05902327"
+            }
+          },
+          "hit": false,
+          "result": "Cache Miss"
+        },
+        "callRoot": "gs://encode-processing/caper_out_v04_05/rna/ce5f9715-4b2f-455a-ab56-872d1f550994/call-check_genome/shard-0",
+        "commandLine": "samtools quickcheck /cromwell_root/encode-processing/caper_out_v04_05/rna/ce5f9715-4b2f-455a-ab56-872d1f550994/call-align/shard-0/rep1ENCSR967IKT_genome.bam",
+        "compressedDockerSize": 567470316,
+        "dockerImageUsed": "encodedcc/rna-seq-pipeline@sha256:d03fab15b42ca2cb6eb627c72885c0c818574cbaee5b1fdc82e5a12ca28b627c",
+        "end": "2022-02-10T05:36:20.704Z",
+        "executionEvents": [
+          {
+            "description": "CallCacheReading",
+            "endTime": "2022-02-10T05:33:08.333Z",
+            "startTime": "2022-02-10T05:33:03.858Z"
+          },
+          {
+            "description": "UpdatingCallCache",
+            "endTime": "2022-02-10T05:36:20.686Z",
+            "startTime": "2022-02-10T05:36:18.318Z"
+          },
+          {
+            "description": "PreparingJob",
+            "endTime": "2022-02-10T05:33:03.858Z",
+            "startTime": "2022-02-10T05:33:03.853Z"
+          },
+          {
+            "description": "ContainerSetup",
+            "endTime": "2022-02-10T05:34:56.588Z",
+            "startTime": "2022-02-10T05:34:53.591Z"
+          },
+          {
+            "description": "Localization",
+            "endTime": "2022-02-10T05:35:31.918Z",
+            "startTime": "2022-02-10T05:34:56.931Z"
+          },
+          {
+            "description": "Pulling \"gcr.io/google.com/cloudsdktool/cloud-sdk:276.0.0-slim\"",
+            "endTime": "2022-02-10T05:34:14.785Z",
+            "startTime": "2022-02-10T05:34:02.139Z"
+          },
+          {
+            "description": "UserAction",
+            "endTime": "2022-02-10T05:35:37.495Z",
+            "startTime": "2022-02-10T05:35:31.918Z"
+          },
+          {
+            "description": "Pulling \"encodedcc/rna-seq-pipeline@sha256:d03fab15b42ca2cb6eb627c72885c0c818574cbaee5b1fdc82e5a12ca28b627c\"",
+            "endTime": "2022-02-10T05:34:53.591Z",
+            "startTime": "2022-02-10T05:34:14.785Z"
+          },
+          {
+            "description": "Complete in GCE / Cromwell Poll Interval",
+            "endTime": "2022-02-10T05:36:18.318Z",
+            "startTime": "2022-02-10T05:35:58.552Z"
+          },
+          {
+            "description": "RequestingExecutionToken",
+            "endTime": "2022-02-10T05:33:03.853Z",
+            "startTime": "2022-02-10T05:33:02.504Z"
+          },
+          {
+            "description": "Delocalization",
+            "endTime": "2022-02-10T05:35:58.552Z",
+            "startTime": "2022-02-10T05:35:37.495Z"
+          },
+          {
+            "description": "Background",
+            "endTime": "2022-02-10T05:34:56.693Z",
+            "startTime": "2022-02-10T05:34:56.588Z"
+          },
+          {
+            "description": "Pending",
+            "endTime": "2022-02-10T05:33:02.504Z",
+            "startTime": "2022-02-10T05:33:02.504Z"
+          },
+          {
+            "description": "UpdatingJobStore",
+            "endTime": "2022-02-10T05:36:20.704Z",
+            "startTime": "2022-02-10T05:36:20.686Z"
+          },
+          {
+            "description": "Worker \"google-pipelines-worker-55692154590932c6dcb5d750e30e6675\" assigned in \"us-central1-b\" on a \"custom-8-30720\" machine",
+            "endTime": "2022-02-10T05:34:02.139Z",
+            "startTime": "2022-02-10T05:33:36.355Z"
+          },
+          {
+            "description": "RunningJob",
+            "endTime": "2022-02-10T05:33:28.757Z",
+            "startTime": "2022-02-10T05:33:08.333Z"
+          },
+          {
+            "description": "WaitingForValueStore",
+            "endTime": "2022-02-10T05:33:03.853Z",
+            "startTime": "2022-02-10T05:33:03.853Z"
+          },
+          {
+            "description": "waiting for quota",
+            "endTime": "2022-02-10T05:33:36.355Z",
+            "startTime": "2022-02-10T05:33:28.757Z"
+          },
+          {
+            "description": "Worker released",
+            "endTime": "2022-02-10T05:35:58.552Z",
+            "startTime": "2022-02-10T05:35:58.552Z"
+          }
+        ],
+        "executionStatus": "Done",
+        "inputs": {
+          "bam": "gs://encode-processing/caper_out_v04_05/rna/ce5f9715-4b2f-455a-ab56-872d1f550994/call-align/shard-0/rep1ENCSR967IKT_genome.bam",
+          "disks": "local-disk 200 HDD",
+          "ncpus": 8,
+          "ramGB": 30,
+          "runtime_environment": {
+            "docker": "encodedcc/rna-seq-pipeline:1.2.4",
+            "singularity": "docker://encodedcc/rna-seq-pipeline:1.2.4"
+          }
+        },
+        "jes": {
+          "endpointUrl": "https://lifesciences.googleapis.com/",
+          "executionBucket": "gs://encode-processing/caper_out_v04_05",
+          "googleProject": "encode-processing",
+          "instanceName": "google-pipelines-worker-55692154590932c6dcb5d750e30e6675",
+          "machineType": "custom-8-30720",
+          "monitoringScript": "gs://caper-data/scripts/resource_monitor/resource_monitor.sh",
+          "zone": "us-central1-b"
+        },
+        "jobId": "projects/118693909002/locations/us-central1/operations/18309580978332150450",
+        "labels": {
+          "cromwell-workflow-id": "cromwell-ce5f9715-4b2f-455a-ab56-872d1f550994",
+          "wdl-call-alias": "check_genome",
+          "wdl-task-name": "samtools_quickcheck"
+        },
+        "monitoringLog": "gs://encode-processing/caper_out_v04_05/rna/ce5f9715-4b2f-455a-ab56-872d1f550994/call-check_genome/shard-0/monitoring.log",
+        "outputs": {},
+        "preemptible": false,
+        "returnCode": 0,
+        "runtimeAttributes": {
+          "bootDiskSizeGb": "10",
+          "continueOnReturnCode": "0",
+          "cpu": "8",
+          "cpuMin": "1",
+          "disks": "local-disk 200 HDD",
+          "docker": "encodedcc/rna-seq-pipeline:1.2.4",
+          "failOnStderr": "false",
+          "maxRetries": "1",
+          "memory": "30 GB",
+          "memoryMin": "2 GB",
+          "noAddress": "false",
+          "preemptible": "0",
+          "zones": "us-central1-b"
+        },
+        "shardIndex": 0,
+        "start": "2022-02-10T05:33:02.504Z",
+        "stderr": "gs://encode-processing/caper_out_v04_05/rna/ce5f9715-4b2f-455a-ab56-872d1f550994/call-check_genome/shard-0/stderr",
+        "stdout": "gs://encode-processing/caper_out_v04_05/rna/ce5f9715-4b2f-455a-ab56-872d1f550994/call-check_genome/shard-0/stdout"
+      },
+      {
+        "attempt": 1,
+        "backend": "gcp",
+        "backendLabels": {
+          "cromwell-workflow-id": "cromwell-ce5f9715-4b2f-455a-ab56-872d1f550994",
+          "wdl-call-alias": "check-genome",
+          "wdl-task-name": "samtools-quickcheck"
+        },
+        "backendLogs": {
+          "log": "gs://encode-processing/caper_out_v04_05/rna/ce5f9715-4b2f-455a-ab56-872d1f550994/call-check_genome/shard-1/check_genome-1.log"
+        },
+        "backendStatus": "Success",
+        "callCaching": {
+          "allowResultReuse": true,
+          "effectiveCallCachingMode": "ReadAndWriteCache",
+          "hashes": {
+            "backend name": "50F66ECBC45488EE5826941BFBC50411",
+            "command template": "CE9E896E68A3661D44DF0EBBBEB7B49B",
+            "input": {
+              "File bam": "vv0W2w==",
+              "Int ncpus": "C9F0F895FB98AB9159F51FD0297E236D",
+              "Int ramGB": "34173CB38F07F89DDBEBC2AC9128303F",
+              "String disks": "0904BC8E2CCF38A5A358509F10313397",
+              "String runtime_environment": {
+                "docker": "95E42DD9B3F87F770395AB70D66058AB",
+                "singularity": "CFF5D03D15A6A6A29CBF82531C176D5E"
+              }
+            },
+            "input count": "1679091C5A880FAF6FB5E6087EB1B2DC",
+            "output count": "CFCD208495D565EF66E7DFF9F98764DA",
+            "runtime attribute": {
+              "continueOnReturnCode": "CFCD208495D565EF66E7DFF9F98764DA",
+              "docker": "D6B20BC300EFB33CEEDC19C177FC2211",
+              "failOnStderr": "68934A3E9455FA72420237EB05902327"
+            }
+          },
+          "hit": false,
+          "result": "Cache Miss"
+        },
+        "callRoot": "gs://encode-processing/caper_out_v04_05/rna/ce5f9715-4b2f-455a-ab56-872d1f550994/call-check_genome/shard-1",
+        "commandLine": "samtools quickcheck /cromwell_root/encode-processing/caper_out_v04_05/rna/ce5f9715-4b2f-455a-ab56-872d1f550994/call-align/shard-1/rep2ENCSR967IKT_genome.bam",
+        "compressedDockerSize": 567470316,
+        "dockerImageUsed": "encodedcc/rna-seq-pipeline@sha256:d03fab15b42ca2cb6eb627c72885c0c818574cbaee5b1fdc82e5a12ca28b627c",
+        "end": "2022-02-10T04:05:05.699Z",
+        "executionEvents": [
+          {
+            "description": "Localization",
+            "endTime": "2022-02-10T04:03:51.025Z",
+            "startTime": "2022-02-10T04:03:16.761Z"
+          },
+          {
+            "description": "RunningJob",
+            "endTime": "2022-02-10T04:01:40.767Z",
+            "startTime": "2022-02-10T04:01:18.318Z"
+          },
+          {
+            "description": "UpdatingCallCache",
+            "endTime": "2022-02-10T04:05:05.665Z",
+            "startTime": "2022-02-10T04:05:03.338Z"
+          },
+          {
+            "description": "Worker \"google-pipelines-worker-4608a41f17cc61320423284d7536080f\" assigned in \"us-central1-b\" on a \"custom-8-30720\" machine",
+            "endTime": "2022-02-10T04:02:18.862Z",
+            "startTime": "2022-02-10T04:01:48.324Z"
+          },
+          {
+            "description": "ContainerSetup",
+            "endTime": "2022-02-10T04:03:16.338Z",
+            "startTime": "2022-02-10T04:03:13.181Z"
+          },
+          {
+            "description": "waiting for quota",
+            "endTime": "2022-02-10T04:01:48.324Z",
+            "startTime": "2022-02-10T04:01:40.767Z"
+          },
+          {
+            "description": "CallCacheReading",
+            "endTime": "2022-02-10T04:01:18.318Z",
+            "startTime": "2022-02-10T04:01:15.858Z"
+          },
+          {
+            "description": "WaitingForValueStore",
+            "endTime": "2022-02-10T04:01:15.853Z",
+            "startTime": "2022-02-10T04:01:15.852Z"
+          },
+          {
+            "description": "PreparingJob",
+            "endTime": "2022-02-10T04:01:15.858Z",
+            "startTime": "2022-02-10T04:01:15.853Z"
+          },
+          {
+            "description": "Pending",
+            "endTime": "2022-02-10T04:01:10.634Z",
+            "startTime": "2022-02-10T04:01:10.634Z"
+          },
+          {
+            "description": "UpdatingJobStore",
+            "endTime": "2022-02-10T04:05:05.699Z",
+            "startTime": "2022-02-10T04:05:05.665Z"
+          },
+          {
+            "description": "Pulling \"encodedcc/rna-seq-pipeline@sha256:d03fab15b42ca2cb6eb627c72885c0c818574cbaee5b1fdc82e5a12ca28b627c\"",
+            "endTime": "2022-02-10T04:03:13.181Z",
+            "startTime": "2022-02-10T04:02:32.262Z"
+          },
+          {
+            "description": "Worker released",
+            "endTime": "2022-02-10T04:04:10.789Z",
+            "startTime": "2022-02-10T04:04:10.789Z"
+          },
+          {
+            "description": "Pulling \"gcr.io/google.com/cloudsdktool/cloud-sdk:276.0.0-slim\"",
+            "endTime": "2022-02-10T04:02:32.262Z",
+            "startTime": "2022-02-10T04:02:18.862Z"
+          },
+          {
+            "description": "Complete in GCE / Cromwell Poll Interval",
+            "endTime": "2022-02-10T04:05:03.338Z",
+            "startTime": "2022-02-10T04:04:10.789Z"
+          },
+          {
+            "description": "UserAction",
+            "endTime": "2022-02-10T04:03:55.489Z",
+            "startTime": "2022-02-10T04:03:51.025Z"
+          },
+          {
+            "description": "Delocalization",
+            "endTime": "2022-02-10T04:04:10.789Z",
+            "startTime": "2022-02-10T04:03:55.489Z"
+          },
+          {
+            "description": "RequestingExecutionToken",
+            "endTime": "2022-02-10T04:01:15.852Z",
+            "startTime": "2022-02-10T04:01:10.634Z"
+          },
+          {
+            "description": "Background",
+            "endTime": "2022-02-10T04:03:16.761Z",
+            "startTime": "2022-02-10T04:03:16.627Z"
+          }
+        ],
+        "executionStatus": "Done",
+        "inputs": {
+          "bam": "gs://encode-processing/caper_out_v04_05/rna/ce5f9715-4b2f-455a-ab56-872d1f550994/call-align/shard-1/rep2ENCSR967IKT_genome.bam",
+          "disks": "local-disk 200 HDD",
+          "ncpus": 8,
+          "ramGB": 30,
+          "runtime_environment": {
+            "docker": "encodedcc/rna-seq-pipeline:1.2.4",
+            "singularity": "docker://encodedcc/rna-seq-pipeline:1.2.4"
+          }
+        },
+        "jes": {
+          "endpointUrl": "https://lifesciences.googleapis.com/",
+          "executionBucket": "gs://encode-processing/caper_out_v04_05",
+          "googleProject": "encode-processing",
+          "instanceName": "google-pipelines-worker-4608a41f17cc61320423284d7536080f",
+          "machineType": "custom-8-30720",
+          "monitoringScript": "gs://caper-data/scripts/resource_monitor/resource_monitor.sh",
+          "zone": "us-central1-b"
+        },
+        "jobId": "projects/118693909002/locations/us-central1/operations/4132532548334652543",
+        "labels": {
+          "cromwell-workflow-id": "cromwell-ce5f9715-4b2f-455a-ab56-872d1f550994",
+          "wdl-call-alias": "check_genome",
+          "wdl-task-name": "samtools_quickcheck"
+        },
+        "monitoringLog": "gs://encode-processing/caper_out_v04_05/rna/ce5f9715-4b2f-455a-ab56-872d1f550994/call-check_genome/shard-1/monitoring.log",
+        "outputs": {},
+        "preemptible": false,
+        "returnCode": 0,
+        "runtimeAttributes": {
+          "bootDiskSizeGb": "10",
+          "continueOnReturnCode": "0",
+          "cpu": "8",
+          "cpuMin": "1",
+          "disks": "local-disk 200 HDD",
+          "docker": "encodedcc/rna-seq-pipeline:1.2.4",
+          "failOnStderr": "false",
+          "maxRetries": "1",
+          "memory": "30 GB",
+          "memoryMin": "2 GB",
+          "noAddress": "false",
+          "preemptible": "0",
+          "zones": "us-central1-b"
+        },
+        "shardIndex": 1,
+        "start": "2022-02-10T04:01:10.634Z",
+        "stderr": "gs://encode-processing/caper_out_v04_05/rna/ce5f9715-4b2f-455a-ab56-872d1f550994/call-check_genome/shard-1/stderr",
+        "stdout": "gs://encode-processing/caper_out_v04_05/rna/ce5f9715-4b2f-455a-ab56-872d1f550994/call-check_genome/shard-1/stdout"
+      }
+    ],
+    "rna.kallisto": [
+      {
+        "attempt": 1,
+        "backend": "gcp",
+        "backendLabels": {
+          "cromwell-workflow-id": "cromwell-ce5f9715-4b2f-455a-ab56-872d1f550994",
+          "wdl-task-name": "kallisto"
+        },
+        "backendLogs": {
+          "log": "gs://encode-processing/caper_out_v04_05/rna/ce5f9715-4b2f-455a-ab56-872d1f550994/call-kallisto/shard-0/kallisto-0.log"
+        },
+        "backendStatus": "Success",
+        "callCaching": {
+          "allowResultReuse": true,
+          "effectiveCallCachingMode": "ReadAndWriteCache",
+          "hashes": {
+            "backend name": "50F66ECBC45488EE5826941BFBC50411",
+            "command template": "AF1F16F925C098495180AE910F75EC64",
+            "input": {
+              "File fastqs_R1": [
+                "hXX8lQ=="
+              ],
+              "File fastqs_R2": [
+                "hXX8lQ=="
+              ],
+              "File kallisto_index": "ZLoNvQ==",
+              "Float sd_of_fragment_length": "2CD0D54349C2B527B745B10269A2FFAB",
+              "Int fragment_length": "C0E190D8267E36708F955D7AB048990D",
+              "Int number_of_threads": "C9F0F895FB98AB9159F51FD0297E236D",
+              "Int ramGB": "34173CB38F07F89DDBEBC2AC9128303F",
+              "String disks": "0904BC8E2CCF38A5A358509F10313397",
+              "String endedness": "94A63A451F1A2204A927F8EB05439D1B",
+              "String out_prefix": "176EAF83C4C8B3AB1F72FD5CC6C87B39",
+              "String runtime_environment": {
+                "docker": "95E42DD9B3F87F770395AB70D66058AB",
+                "singularity": "CFF5D03D15A6A6A29CBF82531C176D5E"
+              },
+              "String strandedness_direction": "ABA5C59CB533BE3C59F26B60FD829F7A"
+            },
+            "input count": "C51CE410C124A10E0DB5E4B97FC2AF39",
+            "output count": "C81E728D9D4C2F636F067F89CC14862C",
+            "output expression": {
+              "File python_log": "2E186F8197783885ABB8BC3AEC0083D6",
+              "File quants": "5C2D18ECA5F3D85AFC2E1BF4EC577C6A"
+            },
+            "runtime attribute": {
+              "continueOnReturnCode": "CFCD208495D565EF66E7DFF9F98764DA",
+              "docker": "D6B20BC300EFB33CEEDC19C177FC2211",
+              "failOnStderr": "68934A3E9455FA72420237EB05902327"
+            }
+          },
+          "hit": false,
+          "result": "Cache Miss"
+        },
+        "callRoot": "gs://encode-processing/caper_out_v04_05/rna/ce5f9715-4b2f-455a-ab56-872d1f550994/call-kallisto/shard-0",
+        "commandLine": "python3 $(which kallisto_quant.py) \\\n    --fastqs_R1 /cromwell_root/encode-processing/caper_out_v04_05/.caper_tmp/634ce00618cfb70541a5fe1deb90070c/ENCFF236TUH.fastq.gz \\\n    --fastqs_R2 /cromwell_root/encode-processing/caper_out_v04_05/.caper_tmp/634ce00618cfb70541a5fe1deb90070c/ENCFF236TUH.fastq.gz \\\n    --number_of_threads 8 \\\n    --strandedness reverse \\\n    --path_to_index /cromwell_root/encode-processing/caper_out_v04_05/.caper_tmp/63f14612d4f06ece9a3943cadae714e3/ENCFF383TUX.idx \\\n    --endedness single \\\n    --fragment_length 219 \\\n    --sd_of_fragment_length 61.32 \\\n    --out_prefix rep1ENCSR967IKT",
+        "compressedDockerSize": 567470316,
+        "dockerImageUsed": "encodedcc/rna-seq-pipeline@sha256:d03fab15b42ca2cb6eb627c72885c0c818574cbaee5b1fdc82e5a12ca28b627c",
+        "end": "2022-02-10T03:46:08.701Z",
+        "executionEvents": [
+          {
+            "description": "Pulling \"gcr.io/google.com/cloudsdktool/cloud-sdk:276.0.0-slim\"",
+            "endTime": "2022-02-10T03:39:31.130Z",
+            "startTime": "2022-02-10T03:39:18.519Z"
+          },
+          {
+            "description": "Pulling \"encodedcc/rna-seq-pipeline@sha256:d03fab15b42ca2cb6eb627c72885c0c818574cbaee5b1fdc82e5a12ca28b627c\"",
+            "endTime": "2022-02-10T03:40:11.037Z",
+            "startTime": "2022-02-10T03:39:31.130Z"
+          },
+          {
+            "description": "Worker released",
+            "endTime": "2022-02-10T03:44:34.089Z",
+            "startTime": "2022-02-10T03:44:34.089Z"
+          },
+          {
+            "description": "UserAction",
+            "endTime": "2022-02-10T03:44:16.556Z",
+            "startTime": "2022-02-10T03:40:59.725Z"
+          },
+          {
+            "description": "CallCacheReading",
+            "endTime": "2022-02-10T03:38:17.862Z",
+            "startTime": "2022-02-10T03:38:17.859Z"
+          },
+          {
+            "description": "ContainerSetup",
+            "endTime": "2022-02-10T03:40:14.099Z",
+            "startTime": "2022-02-10T03:40:11.037Z"
+          },
+          {
+            "description": "Complete in GCE / Cromwell Poll Interval",
+            "endTime": "2022-02-10T03:46:08.321Z",
+            "startTime": "2022-02-10T03:44:34.089Z"
+          },
+          {
+            "description": "Pending",
+            "endTime": "2022-02-10T03:38:16.713Z",
+            "startTime": "2022-02-10T03:38:16.713Z"
+          },
+          {
+            "description": "UpdatingCallCache",
+            "endTime": "2022-02-10T03:46:08.669Z",
+            "startTime": "2022-02-10T03:46:08.321Z"
+          },
+          {
+            "description": "UpdatingJobStore",
+            "endTime": "2022-02-10T03:46:08.701Z",
+            "startTime": "2022-02-10T03:46:08.669Z"
+          },
+          {
+            "description": "waiting for quota",
+            "endTime": "2022-02-10T03:38:51.700Z",
+            "startTime": "2022-02-10T03:38:51.460Z"
+          },
+          {
+            "description": "Delocalization",
+            "endTime": "2022-02-10T03:44:34.089Z",
+            "startTime": "2022-02-10T03:44:16.556Z"
+          },
+          {
+            "description": "Localization",
+            "endTime": "2022-02-10T03:40:59.725Z",
+            "startTime": "2022-02-10T03:40:14.445Z"
+          },
+          {
+            "description": "WaitingForValueStore",
+            "endTime": "2022-02-10T03:38:17.854Z",
+            "startTime": "2022-02-10T03:38:17.853Z"
+          },
+          {
+            "description": "PreparingJob",
+            "endTime": "2022-02-10T03:38:17.859Z",
+            "startTime": "2022-02-10T03:38:17.854Z"
+          },
+          {
+            "description": "RunningJob",
+            "endTime": "2022-02-10T03:38:51.460Z",
+            "startTime": "2022-02-10T03:38:17.862Z"
+          },
+          {
+            "description": "RequestingExecutionToken",
+            "endTime": "2022-02-10T03:38:17.853Z",
+            "startTime": "2022-02-10T03:38:16.713Z"
+          },
+          {
+            "description": "Background",
+            "endTime": "2022-02-10T03:40:14.204Z",
+            "startTime": "2022-02-10T03:40:14.099Z"
+          },
+          {
+            "description": "Worker \"google-pipelines-worker-b51113b2acabc1f5a332bcc9095fd907\" assigned in \"us-central1-b\" on a \"custom-8-30720\" machine",
+            "endTime": "2022-02-10T03:39:18.519Z",
+            "startTime": "2022-02-10T03:38:51.700Z"
+          }
+        ],
+        "executionStatus": "Done",
+        "inputs": {
+          "disks": "local-disk 200 HDD",
+          "endedness": "single",
+          "fastqs_R1": [
+            "gs://encode-processing/caper_out_v04_05/.caper_tmp/634ce00618cfb70541a5fe1deb90070c/ENCFF236TUH.fastq.gz"
+          ],
+          "fastqs_R2": [
+            "gs://encode-processing/caper_out_v04_05/.caper_tmp/634ce00618cfb70541a5fe1deb90070c/ENCFF236TUH.fastq.gz"
+          ],
+          "fragment_length": 219,
+          "kallisto_index": "gs://encode-processing/caper_out_v04_05/.caper_tmp/63f14612d4f06ece9a3943cadae714e3/ENCFF383TUX.idx",
+          "number_of_threads": 8,
+          "out_prefix": "rep1ENCSR967IKT",
+          "ramGB": 30,
+          "runtime_environment": {
+            "docker": "encodedcc/rna-seq-pipeline:1.2.4",
+            "singularity": "docker://encodedcc/rna-seq-pipeline:1.2.4"
+          },
+          "sd_of_fragment_length": 61.32,
+          "strandedness_direction": "reverse"
+        },
+        "jes": {
+          "endpointUrl": "https://lifesciences.googleapis.com/",
+          "executionBucket": "gs://encode-processing/caper_out_v04_05",
+          "googleProject": "encode-processing",
+          "instanceName": "google-pipelines-worker-b51113b2acabc1f5a332bcc9095fd907",
+          "machineType": "custom-8-30720",
+          "monitoringScript": "gs://caper-data/scripts/resource_monitor/resource_monitor.sh",
+          "zone": "us-central1-b"
+        },
+        "jobId": "projects/118693909002/locations/us-central1/operations/12063035246177888787",
+        "labels": {
+          "cromwell-workflow-id": "cromwell-ce5f9715-4b2f-455a-ab56-872d1f550994",
+          "wdl-task-name": "kallisto"
+        },
+        "monitoringLog": "gs://encode-processing/caper_out_v04_05/rna/ce5f9715-4b2f-455a-ab56-872d1f550994/call-kallisto/shard-0/monitoring.log",
+        "outputs": {
+          "python_log": "gs://encode-processing/caper_out_v04_05/rna/ce5f9715-4b2f-455a-ab56-872d1f550994/call-kallisto/shard-0/kallisto_quant.log",
+          "quants": "gs://encode-processing/caper_out_v04_05/rna/ce5f9715-4b2f-455a-ab56-872d1f550994/call-kallisto/shard-0/kallisto_out/rep1ENCSR967IKT_abundance.tsv"
+        },
+        "preemptible": false,
+        "returnCode": 0,
+        "runtimeAttributes": {
+          "bootDiskSizeGb": "10",
+          "continueOnReturnCode": "0",
+          "cpu": "8",
+          "cpuMin": "1",
+          "disks": "local-disk 200 HDD",
+          "docker": "encodedcc/rna-seq-pipeline:1.2.4",
+          "failOnStderr": "false",
+          "maxRetries": "1",
+          "memory": "30 GB",
+          "memoryMin": "2 GB",
+          "noAddress": "false",
+          "preemptible": "0",
+          "zones": "us-central1-b"
+        },
+        "shardIndex": 0,
+        "start": "2022-02-10T03:38:16.713Z",
+        "stderr": "gs://encode-processing/caper_out_v04_05/rna/ce5f9715-4b2f-455a-ab56-872d1f550994/call-kallisto/shard-0/stderr",
+        "stdout": "gs://encode-processing/caper_out_v04_05/rna/ce5f9715-4b2f-455a-ab56-872d1f550994/call-kallisto/shard-0/stdout"
+      },
+      {
+        "attempt": 1,
+        "backend": "gcp",
+        "backendLabels": {
+          "cromwell-workflow-id": "cromwell-ce5f9715-4b2f-455a-ab56-872d1f550994",
+          "wdl-task-name": "kallisto"
+        },
+        "backendLogs": {
+          "log": "gs://encode-processing/caper_out_v04_05/rna/ce5f9715-4b2f-455a-ab56-872d1f550994/call-kallisto/shard-1/kallisto-1.log"
+        },
+        "backendStatus": "Success",
+        "callCaching": {
+          "allowResultReuse": true,
+          "effectiveCallCachingMode": "ReadAndWriteCache",
+          "hashes": {
+            "backend name": "50F66ECBC45488EE5826941BFBC50411",
+            "command template": "AF1F16F925C098495180AE910F75EC64",
+            "input": {
+              "File fastqs_R1": [
+                "b4EKSw=="
+              ],
+              "File fastqs_R2": [
+                "b4EKSw=="
+              ],
+              "File kallisto_index": "ZLoNvQ==",
+              "Float sd_of_fragment_length": "F438331CE140105B4ECEF44796BEA0E6",
+              "Int fragment_length": "13FE9D84310E77F13A6D184DBF1232F3",
+              "Int number_of_threads": "C9F0F895FB98AB9159F51FD0297E236D",
+              "Int ramGB": "34173CB38F07F89DDBEBC2AC9128303F",
+              "String disks": "0904BC8E2CCF38A5A358509F10313397",
+              "String endedness": "94A63A451F1A2204A927F8EB05439D1B",
+              "String out_prefix": "B97AFDA205DD2BD28ECD5C69F66ACA90",
+              "String runtime_environment": {
+                "docker": "95E42DD9B3F87F770395AB70D66058AB",
+                "singularity": "CFF5D03D15A6A6A29CBF82531C176D5E"
+              },
+              "String strandedness_direction": "ABA5C59CB533BE3C59F26B60FD829F7A"
+            },
+            "input count": "C51CE410C124A10E0DB5E4B97FC2AF39",
+            "output count": "C81E728D9D4C2F636F067F89CC14862C",
+            "output expression": {
+              "File python_log": "2E186F8197783885ABB8BC3AEC0083D6",
+              "File quants": "5C2D18ECA5F3D85AFC2E1BF4EC577C6A"
+            },
+            "runtime attribute": {
+              "continueOnReturnCode": "CFCD208495D565EF66E7DFF9F98764DA",
+              "docker": "D6B20BC300EFB33CEEDC19C177FC2211",
+              "failOnStderr": "68934A3E9455FA72420237EB05902327"
+            }
+          },
+          "hit": false,
+          "result": "Cache Miss"
+        },
+        "callRoot": "gs://encode-processing/caper_out_v04_05/rna/ce5f9715-4b2f-455a-ab56-872d1f550994/call-kallisto/shard-1",
+        "commandLine": "python3 $(which kallisto_quant.py) \\\n    --fastqs_R1 /cromwell_root/encode-processing/caper_out_v04_05/.caper_tmp/9b8383db1e5b623d057250932ebfd0c7/ENCFF804UQS.fastq.gz \\\n    --fastqs_R2 /cromwell_root/encode-processing/caper_out_v04_05/.caper_tmp/9b8383db1e5b623d057250932ebfd0c7/ENCFF804UQS.fastq.gz \\\n    --number_of_threads 8 \\\n    --strandedness reverse \\\n    --path_to_index /cromwell_root/encode-processing/caper_out_v04_05/.caper_tmp/63f14612d4f06ece9a3943cadae714e3/ENCFF383TUX.idx \\\n    --endedness single \\\n    --fragment_length 224 \\\n    --sd_of_fragment_length 67.2 \\\n    --out_prefix rep2ENCSR967IKT",
+        "compressedDockerSize": 567470316,
+        "dockerImageUsed": "encodedcc/rna-seq-pipeline@sha256:d03fab15b42ca2cb6eb627c72885c0c818574cbaee5b1fdc82e5a12ca28b627c",
+        "end": "2022-02-10T03:45:05.700Z",
+        "executionEvents": [
+          {
+            "description": "Pulling \"encodedcc/rna-seq-pipeline@sha256:d03fab15b42ca2cb6eb627c72885c0c818574cbaee5b1fdc82e5a12ca28b627c\"",
+            "endTime": "2022-02-10T03:40:14.323Z",
+            "startTime": "2022-02-10T03:39:34.091Z"
+          },
+          {
+            "description": "Delocalization",
+            "endTime": "2022-02-10T03:44:37.600Z",
+            "startTime": "2022-02-10T03:44:16.414Z"
+          },
+          {
+            "description": "UserAction",
+            "endTime": "2022-02-10T03:44:16.414Z",
+            "startTime": "2022-02-10T03:41:01.146Z"
+          },
+          {
+            "description": "Pending",
+            "endTime": "2022-02-10T03:38:16.713Z",
+            "startTime": "2022-02-10T03:38:16.713Z"
+          },
+          {
+            "description": "Worker \"google-pipelines-worker-4f196508ad1c5d854929393241710323\" assigned in \"us-central1-b\" on a \"custom-8-30720\" machine",
+            "endTime": "2022-02-10T03:39:18.683Z",
+            "startTime": "2022-02-10T03:38:51.697Z"
+          },
+          {
+            "description": "WaitingForValueStore",
+            "endTime": "2022-02-10T03:38:19.853Z",
+            "startTime": "2022-02-10T03:38:19.852Z"
+          },
+          {
+            "description": "PreparingJob",
+            "endTime": "2022-02-10T03:38:19.858Z",
+            "startTime": "2022-02-10T03:38:19.853Z"
+          },
+          {
+            "description": "Background",
+            "endTime": "2022-02-10T03:40:18.273Z",
+            "startTime": "2022-02-10T03:40:17.851Z"
+          },
+          {
+            "description": "Pulling \"gcr.io/google.com/cloudsdktool/cloud-sdk:276.0.0-slim\"",
+            "endTime": "2022-02-10T03:39:34.091Z",
+            "startTime": "2022-02-10T03:39:18.683Z"
+          },
+          {
+            "description": "RunningJob",
+            "endTime": "2022-02-10T03:38:51.446Z",
+            "startTime": "2022-02-10T03:38:19.860Z"
+          },
+          {
+            "description": "Complete in GCE / Cromwell Poll Interval",
+            "endTime": "2022-02-10T03:45:03.350Z",
+            "startTime": "2022-02-10T03:44:37.600Z"
+          },
+          {
+            "description": "RequestingExecutionToken",
+            "endTime": "2022-02-10T03:38:19.852Z",
+            "startTime": "2022-02-10T03:38:16.713Z"
+          },
+          {
+            "description": "waiting for quota",
+            "endTime": "2022-02-10T03:38:51.697Z",
+            "startTime": "2022-02-10T03:38:51.446Z"
+          },
+          {
+            "description": "Worker released",
+            "endTime": "2022-02-10T03:44:37.600Z",
+            "startTime": "2022-02-10T03:44:37.600Z"
+          },
+          {
+            "description": "CallCacheReading",
+            "endTime": "2022-02-10T03:38:19.860Z",
+            "startTime": "2022-02-10T03:38:19.858Z"
+          },
+          {
+            "description": "Localization",
+            "endTime": "2022-02-10T03:41:01.146Z",
+            "startTime": "2022-02-10T03:40:18.273Z"
+          },
+          {
+            "description": "ContainerSetup",
+            "endTime": "2022-02-10T03:40:17.851Z",
+            "startTime": "2022-02-10T03:40:14.323Z"
+          },
+          {
+            "description": "UpdatingJobStore",
+            "endTime": "2022-02-10T03:45:05.700Z",
+            "startTime": "2022-02-10T03:45:05.693Z"
+          },
+          {
+            "description": "UpdatingCallCache",
+            "endTime": "2022-02-10T03:45:05.693Z",
+            "startTime": "2022-02-10T03:45:03.350Z"
+          }
+        ],
+        "executionStatus": "Done",
+        "inputs": {
+          "disks": "local-disk 200 HDD",
+          "endedness": "single",
+          "fastqs_R1": [
+            "gs://encode-processing/caper_out_v04_05/.caper_tmp/9b8383db1e5b623d057250932ebfd0c7/ENCFF804UQS.fastq.gz"
+          ],
+          "fastqs_R2": [
+            "gs://encode-processing/caper_out_v04_05/.caper_tmp/9b8383db1e5b623d057250932ebfd0c7/ENCFF804UQS.fastq.gz"
+          ],
+          "fragment_length": 224,
+          "kallisto_index": "gs://encode-processing/caper_out_v04_05/.caper_tmp/63f14612d4f06ece9a3943cadae714e3/ENCFF383TUX.idx",
+          "number_of_threads": 8,
+          "out_prefix": "rep2ENCSR967IKT",
+          "ramGB": 30,
+          "runtime_environment": {
+            "docker": "encodedcc/rna-seq-pipeline:1.2.4",
+            "singularity": "docker://encodedcc/rna-seq-pipeline:1.2.4"
+          },
+          "sd_of_fragment_length": 67.2,
+          "strandedness_direction": "reverse"
+        },
+        "jes": {
+          "endpointUrl": "https://lifesciences.googleapis.com/",
+          "executionBucket": "gs://encode-processing/caper_out_v04_05",
+          "googleProject": "encode-processing",
+          "instanceName": "google-pipelines-worker-4f196508ad1c5d854929393241710323",
+          "machineType": "custom-8-30720",
+          "monitoringScript": "gs://caper-data/scripts/resource_monitor/resource_monitor.sh",
+          "zone": "us-central1-b"
+        },
+        "jobId": "projects/118693909002/locations/us-central1/operations/7761042558028224911",
+        "labels": {
+          "cromwell-workflow-id": "cromwell-ce5f9715-4b2f-455a-ab56-872d1f550994",
+          "wdl-task-name": "kallisto"
+        },
+        "monitoringLog": "gs://encode-processing/caper_out_v04_05/rna/ce5f9715-4b2f-455a-ab56-872d1f550994/call-kallisto/shard-1/monitoring.log",
+        "outputs": {
+          "python_log": "gs://encode-processing/caper_out_v04_05/rna/ce5f9715-4b2f-455a-ab56-872d1f550994/call-kallisto/shard-1/kallisto_quant.log",
+          "quants": "gs://encode-processing/caper_out_v04_05/rna/ce5f9715-4b2f-455a-ab56-872d1f550994/call-kallisto/shard-1/kallisto_out/rep2ENCSR967IKT_abundance.tsv"
+        },
+        "preemptible": false,
+        "returnCode": 0,
+        "runtimeAttributes": {
+          "bootDiskSizeGb": "10",
+          "continueOnReturnCode": "0",
+          "cpu": "8",
+          "cpuMin": "1",
+          "disks": "local-disk 200 HDD",
+          "docker": "encodedcc/rna-seq-pipeline:1.2.4",
+          "failOnStderr": "false",
+          "maxRetries": "1",
+          "memory": "30 GB",
+          "memoryMin": "2 GB",
+          "noAddress": "false",
+          "preemptible": "0",
+          "zones": "us-central1-b"
+        },
+        "shardIndex": 1,
+        "start": "2022-02-10T03:38:16.713Z",
+        "stderr": "gs://encode-processing/caper_out_v04_05/rna/ce5f9715-4b2f-455a-ab56-872d1f550994/call-kallisto/shard-1/stderr",
+        "stdout": "gs://encode-processing/caper_out_v04_05/rna/ce5f9715-4b2f-455a-ab56-872d1f550994/call-kallisto/shard-1/stdout"
+      }
+    ],
+    "rna.mad_qc": [
+      {
+        "attempt": 1,
+        "backend": "gcp",
+        "backendLabels": {
+          "cromwell-workflow-id": "cromwell-ce5f9715-4b2f-455a-ab56-872d1f550994",
+          "wdl-task-name": "mad-qc"
+        },
+        "backendLogs": {
+          "log": "gs://encode-processing/caper_out_v04_05/rna/ce5f9715-4b2f-455a-ab56-872d1f550994/call-mad_qc/mad_qc.log"
+        },
+        "backendStatus": "Success",
+        "callCaching": {
+          "allowResultReuse": true,
+          "effectiveCallCachingMode": "ReadAndWriteCache",
+          "hashes": {
+            "backend name": "50F66ECBC45488EE5826941BFBC50411",
+            "command template": "031D84CAE1CB9BF1AC614820A41AD875",
+            "input": {
+              "File quants1": "wVbe1Q==",
+              "File quants2": "Hfy8oA==",
+              "String disks": "0904BC8E2CCF38A5A358509F10313397",
+              "String runtime_environment": {
+                "docker": "95E42DD9B3F87F770395AB70D66058AB",
+                "singularity": "CFF5D03D15A6A6A29CBF82531C176D5E"
+              }
+            },
+            "input count": "E4DA3B7FBBCE2345D7772B0674A318D5",
+            "output count": "ECCBC87E4B5CE2FE28308FD9F2A7BAF3",
+            "output expression": {
+              "File madQCmetrics": "1BA92900F0C032055DB9DCEF24B04614",
+              "File madQCplot": "431B375D206338F9553F03DF1A9F5080",
+              "File python_log": "0AB2794B2E4AA0592D9D79BA38C33609"
+            },
+            "runtime attribute": {
+              "continueOnReturnCode": "CFCD208495D565EF66E7DFF9F98764DA",
+              "docker": "D6B20BC300EFB33CEEDC19C177FC2211",
+              "failOnStderr": "68934A3E9455FA72420237EB05902327"
+            }
+          },
+          "hit": false,
+          "result": "Cache Miss"
+        },
+        "callRoot": "gs://encode-processing/caper_out_v04_05/rna/ce5f9715-4b2f-455a-ab56-872d1f550994/call-mad_qc",
+        "commandLine": "python3 $(which mad_qc.py) \\\n    --quants1 /cromwell_root/encode-processing/caper_out_v04_05/rna/ce5f9715-4b2f-455a-ab56-872d1f550994/call-rsem_quant/shard-0/glob-543e009ab55ea9db54875227504e1747/rep1ENCSR967IKT_anno_rsem.genes.results \\\n    --quants2 /cromwell_root/encode-processing/caper_out_v04_05/rna/ce5f9715-4b2f-455a-ab56-872d1f550994/call-rsem_quant/shard-1/glob-543e009ab55ea9db54875227504e1747/rep2ENCSR967IKT_anno_rsem.genes.results \\\n    --MAD_R_path $(which MAD.R)",
+        "compressedDockerSize": 567470316,
+        "dockerImageUsed": "encodedcc/rna-seq-pipeline@sha256:d03fab15b42ca2cb6eb627c72885c0c818574cbaee5b1fdc82e5a12ca28b627c",
+        "end": "2022-02-10T07:42:35.701Z",
+        "executionEvents": [
+          {
+            "description": "Localization",
+            "endTime": "2022-02-10T07:41:09.877Z",
+            "startTime": "2022-02-10T07:40:49.035Z"
+          },
+          {
+            "description": "Complete in GCE / Cromwell Poll Interval",
+            "endTime": "2022-02-10T07:42:33.411Z",
+            "startTime": "2022-02-10T07:41:41.663Z"
+          },
+          {
+            "description": "RequestingExecutionToken",
+            "endTime": "2022-02-10T07:38:47.853Z",
+            "startTime": "2022-02-10T07:38:47.294Z"
+          },
+          {
+            "description": "UpdatingJobStore",
+            "endTime": "2022-02-10T07:42:35.701Z",
+            "startTime": "2022-02-10T07:42:35.668Z"
+          },
+          {
+            "description": "waiting for quota",
+            "endTime": "2022-02-10T07:39:20.723Z",
+            "startTime": "2022-02-10T07:39:12.783Z"
+          },
+          {
+            "description": "Worker \"google-pipelines-worker-e4cdbe74e9a04d69821765a776b63b1b\" assigned in \"us-central1-b\" on a \"custom-2-3584\" machine",
+            "endTime": "2022-02-10T07:39:47.945Z",
+            "startTime": "2022-02-10T07:39:20.723Z"
+          },
+          {
+            "description": "Worker released",
+            "endTime": "2022-02-10T07:41:41.663Z",
+            "startTime": "2022-02-10T07:41:41.663Z"
+          },
+          {
+            "description": "Delocalization",
+            "endTime": "2022-02-10T07:41:41.663Z",
+            "startTime": "2022-02-10T07:41:16.781Z"
+          },
+          {
+            "description": "UserAction",
+            "endTime": "2022-02-10T07:41:16.781Z",
+            "startTime": "2022-02-10T07:41:09.877Z"
+          },
+          {
+            "description": "PreparingJob",
+            "endTime": "2022-02-10T07:38:47.858Z",
+            "startTime": "2022-02-10T07:38:47.853Z"
+          },
+          {
+            "description": "Pulling \"encodedcc/rna-seq-pipeline@sha256:d03fab15b42ca2cb6eb627c72885c0c818574cbaee5b1fdc82e5a12ca28b627c\"",
+            "endTime": "2022-02-10T07:40:44.467Z",
+            "startTime": "2022-02-10T07:40:09.938Z"
+          },
+          {
+            "description": "RunningJob",
+            "endTime": "2022-02-10T07:39:12.783Z",
+            "startTime": "2022-02-10T07:38:48.348Z"
+          },
+          {
+            "description": "WaitingForValueStore",
+            "endTime": "2022-02-10T07:38:47.853Z",
+            "startTime": "2022-02-10T07:38:47.853Z"
+          },
+          {
+            "description": "Pulling \"gcr.io/google.com/cloudsdktool/cloud-sdk:276.0.0-slim\"",
+            "endTime": "2022-02-10T07:40:09.938Z",
+            "startTime": "2022-02-10T07:39:47.945Z"
+          },
+          {
+            "description": "ContainerSetup",
+            "endTime": "2022-02-10T07:40:48.238Z",
+            "startTime": "2022-02-10T07:40:44.467Z"
+          },
+          {
+            "description": "Pending",
+            "endTime": "2022-02-10T07:38:47.294Z",
+            "startTime": "2022-02-10T07:38:47.293Z"
+          },
+          {
+            "description": "CallCacheReading",
+            "endTime": "2022-02-10T07:38:48.348Z",
+            "startTime": "2022-02-10T07:38:47.858Z"
+          },
+          {
+            "description": "Background",
+            "endTime": "2022-02-10T07:40:49.035Z",
+            "startTime": "2022-02-10T07:40:48.612Z"
+          },
+          {
+            "description": "UpdatingCallCache",
+            "endTime": "2022-02-10T07:42:35.668Z",
+            "startTime": "2022-02-10T07:42:33.411Z"
+          }
+        ],
+        "executionStatus": "Done",
+        "inputs": {
+          "disks": "local-disk 200 HDD",
+          "quants1": "gs://encode-processing/caper_out_v04_05/rna/ce5f9715-4b2f-455a-ab56-872d1f550994/call-rsem_quant/shard-0/glob-543e009ab55ea9db54875227504e1747/rep1ENCSR967IKT_anno_rsem.genes.results",
+          "quants2": "gs://encode-processing/caper_out_v04_05/rna/ce5f9715-4b2f-455a-ab56-872d1f550994/call-rsem_quant/shard-1/glob-543e009ab55ea9db54875227504e1747/rep2ENCSR967IKT_anno_rsem.genes.results",
+          "runtime_environment": {
+            "docker": "encodedcc/rna-seq-pipeline:1.2.4",
+            "singularity": "docker://encodedcc/rna-seq-pipeline:1.2.4"
+          }
+        },
+        "jes": {
+          "endpointUrl": "https://lifesciences.googleapis.com/",
+          "executionBucket": "gs://encode-processing/caper_out_v04_05",
+          "googleProject": "encode-processing",
+          "instanceName": "google-pipelines-worker-e4cdbe74e9a04d69821765a776b63b1b",
+          "machineType": "custom-2-3584",
+          "monitoringScript": "gs://caper-data/scripts/resource_monitor/resource_monitor.sh",
+          "zone": "us-central1-b"
+        },
+        "jobId": "projects/118693909002/locations/us-central1/operations/11755848297009631469",
+        "labels": {
+          "cromwell-workflow-id": "cromwell-ce5f9715-4b2f-455a-ab56-872d1f550994",
+          "wdl-task-name": "mad_qc"
+        },
+        "monitoringLog": "gs://encode-processing/caper_out_v04_05/rna/ce5f9715-4b2f-455a-ab56-872d1f550994/call-mad_qc/monitoring.log",
+        "outputs": {
+          "madQCmetrics": "gs://encode-processing/caper_out_v04_05/rna/ce5f9715-4b2f-455a-ab56-872d1f550994/call-mad_qc/glob-196368870fbaaecf98b381cba2f56e97/rep1ENCSR967IKT_anno_rsem-rep2ENCSR967IKT_anno_rsem_mad_qc_metrics.json",
+          "madQCplot": "gs://encode-processing/caper_out_v04_05/rna/ce5f9715-4b2f-455a-ab56-872d1f550994/call-mad_qc/glob-d58d85dd0e55e36d4d0c376d5f0c524e/rep1ENCSR967IKT_anno_rsem-rep2ENCSR967IKT_anno_rsem_mad_plot.png",
+          "python_log": "gs://encode-processing/caper_out_v04_05/rna/ce5f9715-4b2f-455a-ab56-872d1f550994/call-mad_qc/mad_qc.log"
+        },
+        "preemptible": false,
+        "returnCode": 0,
+        "runtimeAttributes": {
+          "bootDiskSizeGb": "10",
+          "continueOnReturnCode": "0",
+          "cpu": "2",
+          "cpuMin": "1",
+          "disks": "local-disk 200 HDD",
+          "docker": "encodedcc/rna-seq-pipeline:1.2.4",
+          "failOnStderr": "false",
+          "maxRetries": "1",
+          "memory": "3.3203125 GB",
+          "memoryMin": "2 GB",
+          "noAddress": "false",
+          "preemptible": "0",
+          "zones": "us-central1-b"
+        },
+        "shardIndex": -1,
+        "start": "2022-02-10T07:38:47.293Z",
+        "stderr": "gs://encode-processing/caper_out_v04_05/rna/ce5f9715-4b2f-455a-ab56-872d1f550994/call-mad_qc/stderr",
+        "stdout": "gs://encode-processing/caper_out_v04_05/rna/ce5f9715-4b2f-455a-ab56-872d1f550994/call-mad_qc/stdout"
+      }
+    ],
+    "rna.rna_qc": [
+      {
+        "attempt": 1,
+        "backend": "gcp",
+        "backendLabels": {
+          "cromwell-workflow-id": "cromwell-ce5f9715-4b2f-455a-ab56-872d1f550994",
+          "wdl-task-name": "rna-qc"
+        },
+        "backendLogs": {
+          "log": "gs://encode-processing/caper_out_v04_05/rna/ce5f9715-4b2f-455a-ab56-872d1f550994/call-rna_qc/shard-0/rna_qc-0.log"
+        },
+        "backendStatus": "Success",
+        "callCaching": {
+          "allowResultReuse": true,
+          "effectiveCallCachingMode": "ReadAndWriteCache",
+          "hashes": {
+            "backend name": "50F66ECBC45488EE5826941BFBC50411",
+            "command template": "E8A073B2817EB3929F76680705A0E597",
+            "input": {
+              "File input_bam": "4URcuw==",
+              "File tr_id_to_gene_type_tsv": "sv2pFw==",
+              "String disks": "0904BC8E2CCF38A5A358509F10313397",
+              "String output_filename": "9423307F3BF230D5847E4DCBCC265ACF",
+              "String runtime_environment": {
+                "docker": "95E42DD9B3F87F770395AB70D66058AB",
+                "singularity": "CFF5D03D15A6A6A29CBF82531C176D5E"
+              }
+            },
+            "input count": "1679091C5A880FAF6FB5E6087EB1B2DC",
+            "output count": "C81E728D9D4C2F636F067F89CC14862C",
+            "output expression": {
+              "File python_log": "0205452E23C106CC41A7FC0B469E2794",
+              "File rnaQC": "9C39E63596D53EB17161A43FCE627940"
+            },
+            "runtime attribute": {
+              "continueOnReturnCode": "CFCD208495D565EF66E7DFF9F98764DA",
+              "docker": "D6B20BC300EFB33CEEDC19C177FC2211",
+              "failOnStderr": "68934A3E9455FA72420237EB05902327"
+            }
+          },
+          "hit": false,
+          "result": "Cache Miss"
+        },
+        "callRoot": "gs://encode-processing/caper_out_v04_05/rna/ce5f9715-4b2f-455a-ab56-872d1f550994/call-rna_qc/shard-0",
+        "commandLine": "python3 $(which rna_qc.py) \\\n    --input_bam /cromwell_root/encode-processing/caper_out_v04_05/rna/ce5f9715-4b2f-455a-ab56-872d1f550994/call-align/shard-0/rep1ENCSR967IKT_anno.bam \\\n    --tr_id_to_gene_type_tsv /cromwell_root/encode-processing/caper_out_v04_05/.caper_tmp/5ac96235dfe7d00f7b1e24fda16e8ed9/ENCFF449TPD.tsv \\\n    --output_filename rep1ENCSR967IKT_qc.json",
+        "compressedDockerSize": 567470316,
+        "dockerImageUsed": "encodedcc/rna-seq-pipeline@sha256:d03fab15b42ca2cb6eb627c72885c0c818574cbaee5b1fdc82e5a12ca28b627c",
+        "end": "2022-02-10T05:42:24.815Z",
+        "executionEvents": [
+          {
+            "description": "Delocalization",
+            "endTime": "2022-02-10T05:41:55.742Z",
+            "startTime": "2022-02-10T05:41:31.366Z"
+          },
+          {
+            "description": "RunningJob",
+            "endTime": "2022-02-10T05:33:28.755Z",
+            "startTime": "2022-02-10T05:33:13.860Z"
+          },
+          {
+            "description": "Pulling \"encodedcc/rna-seq-pipeline@sha256:d03fab15b42ca2cb6eb627c72885c0c818574cbaee5b1fdc82e5a12ca28b627c\"",
+            "endTime": "2022-02-10T05:34:58.838Z",
+            "startTime": "2022-02-10T05:34:25.549Z"
+          },
+          {
+            "description": "UserAction",
+            "endTime": "2022-02-10T05:41:31.366Z",
+            "startTime": "2022-02-10T05:36:05.727Z"
+          },
+          {
+            "description": "Pulling \"gcr.io/google.com/cloudsdktool/cloud-sdk:276.0.0-slim\"",
+            "endTime": "2022-02-10T05:34:25.549Z",
+            "startTime": "2022-02-10T05:34:03.068Z"
+          },
+          {
+            "description": "Localization",
+            "endTime": "2022-02-10T05:36:05.727Z",
+            "startTime": "2022-02-10T05:35:03.213Z"
+          },
+          {
+            "description": "waiting for quota",
+            "endTime": "2022-02-10T05:33:36.355Z",
+            "startTime": "2022-02-10T05:33:28.755Z"
+          },
+          {
+            "description": "CallCacheReading",
+            "endTime": "2022-02-10T05:33:13.860Z",
+            "startTime": "2022-02-10T05:33:13.858Z"
+          },
+          {
+            "description": "WaitingForValueStore",
+            "endTime": "2022-02-10T05:33:13.853Z",
+            "startTime": "2022-02-10T05:33:13.853Z"
+          },
+          {
+            "description": "Worker \"google-pipelines-worker-da21ad868bbc7950c8640edc8038afc9\" assigned in \"us-central1-b\" on a \"custom-2-2048\" machine",
+            "endTime": "2022-02-10T05:34:03.068Z",
+            "startTime": "2022-02-10T05:33:36.355Z"
+          },
+          {
+            "description": "Worker released",
+            "endTime": "2022-02-10T05:41:55.742Z",
+            "startTime": "2022-02-10T05:41:55.742Z"
+          },
+          {
+            "description": "RequestingExecutionToken",
+            "endTime": "2022-02-10T05:33:13.853Z",
+            "startTime": "2022-02-10T05:33:06.584Z"
+          },
+          {
+            "description": "PreparingJob",
+            "endTime": "2022-02-10T05:33:13.858Z",
+            "startTime": "2022-02-10T05:33:13.853Z"
+          },
+          {
+            "description": "Background",
+            "endTime": "2022-02-10T05:35:02.711Z",
+            "startTime": "2022-02-10T05:35:02.571Z"
+          },
+          {
+            "description": "UpdatingJobStore",
+            "endTime": "2022-02-10T05:42:24.815Z",
+            "startTime": "2022-02-10T05:42:23.806Z"
+          },
+          {
+            "description": "ContainerSetup",
+            "endTime": "2022-02-10T05:35:02.571Z",
+            "startTime": "2022-02-10T05:34:58.838Z"
+          },
+          {
+            "description": "Pending",
+            "endTime": "2022-02-10T05:33:06.584Z",
+            "startTime": "2022-02-10T05:33:06.584Z"
+          },
+          {
+            "description": "UpdatingCallCache",
+            "endTime": "2022-02-10T05:42:23.806Z",
+            "startTime": "2022-02-10T05:42:23.320Z"
+          },
+          {
+            "description": "Complete in GCE / Cromwell Poll Interval",
+            "endTime": "2022-02-10T05:42:23.320Z",
+            "startTime": "2022-02-10T05:41:55.742Z"
+          }
+        ],
+        "executionStatus": "Done",
+        "inputs": {
+          "disks": "local-disk 200 HDD",
+          "input_bam": "gs://encode-processing/caper_out_v04_05/rna/ce5f9715-4b2f-455a-ab56-872d1f550994/call-align/shard-0/rep1ENCSR967IKT_anno.bam",
+          "output_filename": "rep1ENCSR967IKT_qc.json",
+          "runtime_environment": {
+            "docker": "encodedcc/rna-seq-pipeline:1.2.4",
+            "singularity": "docker://encodedcc/rna-seq-pipeline:1.2.4"
+          },
+          "tr_id_to_gene_type_tsv": "gs://encode-processing/caper_out_v04_05/.caper_tmp/5ac96235dfe7d00f7b1e24fda16e8ed9/ENCFF449TPD.tsv"
+        },
+        "jes": {
+          "endpointUrl": "https://lifesciences.googleapis.com/",
+          "executionBucket": "gs://encode-processing/caper_out_v04_05",
+          "googleProject": "encode-processing",
+          "instanceName": "google-pipelines-worker-da21ad868bbc7950c8640edc8038afc9",
+          "machineType": "custom-2-2048",
+          "monitoringScript": "gs://caper-data/scripts/resource_monitor/resource_monitor.sh",
+          "zone": "us-central1-b"
+        },
+        "jobId": "projects/118693909002/locations/us-central1/operations/9842399307452029381",
+        "labels": {
+          "cromwell-workflow-id": "cromwell-ce5f9715-4b2f-455a-ab56-872d1f550994",
+          "wdl-task-name": "rna_qc"
+        },
+        "monitoringLog": "gs://encode-processing/caper_out_v04_05/rna/ce5f9715-4b2f-455a-ab56-872d1f550994/call-rna_qc/shard-0/monitoring.log",
+        "outputs": {
+          "python_log": "gs://encode-processing/caper_out_v04_05/rna/ce5f9715-4b2f-455a-ab56-872d1f550994/call-rna_qc/shard-0/rna_qc.log",
+          "rnaQC": "gs://encode-processing/caper_out_v04_05/rna/ce5f9715-4b2f-455a-ab56-872d1f550994/call-rna_qc/shard-0/rep1ENCSR967IKT_qc.json"
+        },
+        "preemptible": false,
+        "returnCode": 0,
+        "runtimeAttributes": {
+          "bootDiskSizeGb": "10",
+          "continueOnReturnCode": "0",
+          "cpu": "2",
+          "cpuMin": "1",
+          "disks": "local-disk 200 HDD",
+          "docker": "encodedcc/rna-seq-pipeline:1.2.4",
+          "failOnStderr": "false",
+          "maxRetries": "1",
+          "memory": "1 GB",
+          "memoryMin": "2 GB",
+          "noAddress": "false",
+          "preemptible": "0",
+          "zones": "us-central1-b"
+        },
+        "shardIndex": 0,
+        "start": "2022-02-10T05:33:06.584Z",
+        "stderr": "gs://encode-processing/caper_out_v04_05/rna/ce5f9715-4b2f-455a-ab56-872d1f550994/call-rna_qc/shard-0/stderr",
+        "stdout": "gs://encode-processing/caper_out_v04_05/rna/ce5f9715-4b2f-455a-ab56-872d1f550994/call-rna_qc/shard-0/stdout"
+      },
+      {
+        "attempt": 1,
+        "backend": "gcp",
+        "backendLabels": {
+          "cromwell-workflow-id": "cromwell-ce5f9715-4b2f-455a-ab56-872d1f550994",
+          "wdl-task-name": "rna-qc"
+        },
+        "backendLogs": {
+          "log": "gs://encode-processing/caper_out_v04_05/rna/ce5f9715-4b2f-455a-ab56-872d1f550994/call-rna_qc/shard-1/rna_qc-1.log"
+        },
+        "backendStatus": "Success",
+        "callCaching": {
+          "allowResultReuse": true,
+          "effectiveCallCachingMode": "ReadAndWriteCache",
+          "hashes": {
+            "backend name": "50F66ECBC45488EE5826941BFBC50411",
+            "command template": "E8A073B2817EB3929F76680705A0E597",
+            "input": {
+              "File input_bam": "OUR0dg==",
+              "File tr_id_to_gene_type_tsv": "sv2pFw==",
+              "String disks": "0904BC8E2CCF38A5A358509F10313397",
+              "String output_filename": "0926517C01F092FABF0C8CB2EA1D1607",
+              "String runtime_environment": {
+                "docker": "95E42DD9B3F87F770395AB70D66058AB",
+                "singularity": "CFF5D03D15A6A6A29CBF82531C176D5E"
+              }
+            },
+            "input count": "1679091C5A880FAF6FB5E6087EB1B2DC",
+            "output count": "C81E728D9D4C2F636F067F89CC14862C",
+            "output expression": {
+              "File python_log": "0205452E23C106CC41A7FC0B469E2794",
+              "File rnaQC": "9C39E63596D53EB17161A43FCE627940"
+            },
+            "runtime attribute": {
+              "continueOnReturnCode": "CFCD208495D565EF66E7DFF9F98764DA",
+              "docker": "D6B20BC300EFB33CEEDC19C177FC2211",
+              "failOnStderr": "68934A3E9455FA72420237EB05902327"
+            }
+          },
+          "hit": false,
+          "result": "Cache Miss"
+        },
+        "callRoot": "gs://encode-processing/caper_out_v04_05/rna/ce5f9715-4b2f-455a-ab56-872d1f550994/call-rna_qc/shard-1",
+        "commandLine": "python3 $(which rna_qc.py) \\\n    --input_bam /cromwell_root/encode-processing/caper_out_v04_05/rna/ce5f9715-4b2f-455a-ab56-872d1f550994/call-align/shard-1/rep2ENCSR967IKT_anno.bam \\\n    --tr_id_to_gene_type_tsv /cromwell_root/encode-processing/caper_out_v04_05/.caper_tmp/5ac96235dfe7d00f7b1e24fda16e8ed9/ENCFF449TPD.tsv \\\n    --output_filename rep2ENCSR967IKT_qc.json",
+        "compressedDockerSize": 567470316,
+        "dockerImageUsed": "encodedcc/rna-seq-pipeline@sha256:d03fab15b42ca2cb6eb627c72885c0c818574cbaee5b1fdc82e5a12ca28b627c",
+        "end": "2022-02-10T05:57:59.701Z",
+        "executionEvents": [
+          {
+            "description": "RequestingExecutionToken",
+            "endTime": "2022-02-10T05:33:11.853Z",
+            "startTime": "2022-02-10T05:33:06.584Z"
+          },
+          {
+            "description": "Worker \"google-pipelines-worker-82dfe9f595e8884e61b9f2aa88270331\" assigned in \"us-central1-b\" on a \"custom-2-2048\" machine",
+            "endTime": "2022-02-10T05:49:10.091Z",
+            "startTime": "2022-02-10T05:48:43.464Z"
+          },
+          {
+            "description": "RunningJob",
+            "endTime": "2022-02-10T05:33:28.762Z",
+            "startTime": "2022-02-10T05:33:11.860Z"
+          },
+          {
+            "description": "Pending",
+            "endTime": "2022-02-10T05:33:06.584Z",
+            "startTime": "2022-02-10T05:33:06.584Z"
+          },
+          {
+            "description": "CallCacheReading",
+            "endTime": "2022-02-10T05:33:11.860Z",
+            "startTime": "2022-02-10T05:33:11.858Z"
+          },
+          {
+            "description": "UpdatingCallCache",
+            "endTime": "2022-02-10T05:57:59.666Z",
+            "startTime": "2022-02-10T05:57:58.335Z"
+          },
+          {
+            "description": "A resource limit has delayed the operation: generic::resource_exhausted: allocating: selecting resources: selecting region and zone: no available zones: us-central1: 213 DISKS_TOTAL_GB (142/204800 available) usage too high",
+            "endTime": "2022-02-10T05:48:43.464Z",
+            "startTime": "2022-02-10T05:33:36.353Z"
+          },
+          {
+            "description": "ContainerSetup",
+            "endTime": "2022-02-10T05:50:09.980Z",
+            "startTime": "2022-02-10T05:50:06.300Z"
+          },
+          {
+            "description": "Pulling \"encodedcc/rna-seq-pipeline@sha256:d03fab15b42ca2cb6eb627c72885c0c818574cbaee5b1fdc82e5a12ca28b627c\"",
+            "endTime": "2022-02-10T05:50:06.300Z",
+            "startTime": "2022-02-10T05:49:32.579Z"
+          },
+          {
+            "description": "PreparingJob",
+            "endTime": "2022-02-10T05:33:11.858Z",
+            "startTime": "2022-02-10T05:33:11.853Z"
+          },
+          {
+            "description": "Localization",
+            "endTime": "2022-02-10T05:51:10.586Z",
+            "startTime": "2022-02-10T05:50:10.689Z"
+          },
+          {
+            "description": "UserAction",
+            "endTime": "2022-02-10T05:55:56.399Z",
+            "startTime": "2022-02-10T05:51:10.586Z"
+          },
+          {
+            "description": "WaitingForValueStore",
+            "endTime": "2022-02-10T05:33:11.853Z",
+            "startTime": "2022-02-10T05:33:11.853Z"
+          },
+          {
+            "description": "UpdatingJobStore",
+            "endTime": "2022-02-10T05:57:59.701Z",
+            "startTime": "2022-02-10T05:57:59.666Z"
+          },
+          {
+            "description": "Complete in GCE / Cromwell Poll Interval",
+            "endTime": "2022-02-10T05:57:58.335Z",
+            "startTime": "2022-02-10T05:56:15.081Z"
+          },
+          {
+            "description": "Background",
+            "endTime": "2022-02-10T05:50:10.206Z",
+            "startTime": "2022-02-10T05:50:10.063Z"
+          },
+          {
+            "description": "Delocalization",
+            "endTime": "2022-02-10T05:56:15.081Z",
+            "startTime": "2022-02-10T05:55:56.399Z"
+          },
+          {
+            "description": "Worker released",
+            "endTime": "2022-02-10T05:56:15.081Z",
+            "startTime": "2022-02-10T05:56:15.081Z"
+          },
+          {
+            "description": "waiting for quota",
+            "endTime": "2022-02-10T05:33:36.353Z",
+            "startTime": "2022-02-10T05:33:28.762Z"
+          },
+          {
+            "description": "Pulling \"gcr.io/google.com/cloudsdktool/cloud-sdk:276.0.0-slim\"",
+            "endTime": "2022-02-10T05:49:32.579Z",
+            "startTime": "2022-02-10T05:49:10.091Z"
+          }
+        ],
+        "executionStatus": "Done",
+        "inputs": {
+          "disks": "local-disk 200 HDD",
+          "input_bam": "gs://encode-processing/caper_out_v04_05/rna/ce5f9715-4b2f-455a-ab56-872d1f550994/call-align/shard-1/rep2ENCSR967IKT_anno.bam",
+          "output_filename": "rep2ENCSR967IKT_qc.json",
+          "runtime_environment": {
+            "docker": "encodedcc/rna-seq-pipeline:1.2.4",
+            "singularity": "docker://encodedcc/rna-seq-pipeline:1.2.4"
+          },
+          "tr_id_to_gene_type_tsv": "gs://encode-processing/caper_out_v04_05/.caper_tmp/5ac96235dfe7d00f7b1e24fda16e8ed9/ENCFF449TPD.tsv"
+        },
+        "jes": {
+          "endpointUrl": "https://lifesciences.googleapis.com/",
+          "executionBucket": "gs://encode-processing/caper_out_v04_05",
+          "googleProject": "encode-processing",
+          "instanceName": "google-pipelines-worker-82dfe9f595e8884e61b9f2aa88270331",
+          "machineType": "custom-2-2048",
+          "monitoringScript": "gs://caper-data/scripts/resource_monitor/resource_monitor.sh",
+          "zone": "us-central1-b"
+        },
+        "jobId": "projects/118693909002/locations/us-central1/operations/1702624942077164403",
+        "labels": {
+          "cromwell-workflow-id": "cromwell-ce5f9715-4b2f-455a-ab56-872d1f550994",
+          "wdl-task-name": "rna_qc"
+        },
+        "monitoringLog": "gs://encode-processing/caper_out_v04_05/rna/ce5f9715-4b2f-455a-ab56-872d1f550994/call-rna_qc/shard-1/monitoring.log",
+        "outputs": {
+          "python_log": "gs://encode-processing/caper_out_v04_05/rna/ce5f9715-4b2f-455a-ab56-872d1f550994/call-rna_qc/shard-1/rna_qc.log",
+          "rnaQC": "gs://encode-processing/caper_out_v04_05/rna/ce5f9715-4b2f-455a-ab56-872d1f550994/call-rna_qc/shard-1/rep2ENCSR967IKT_qc.json"
+        },
+        "preemptible": false,
+        "returnCode": 0,
+        "runtimeAttributes": {
+          "bootDiskSizeGb": "10",
+          "continueOnReturnCode": "0",
+          "cpu": "2",
+          "cpuMin": "1",
+          "disks": "local-disk 200 HDD",
+          "docker": "encodedcc/rna-seq-pipeline:1.2.4",
+          "failOnStderr": "false",
+          "maxRetries": "1",
+          "memory": "1 GB",
+          "memoryMin": "2 GB",
+          "noAddress": "false",
+          "preemptible": "0",
+          "zones": "us-central1-b"
+        },
+        "shardIndex": 1,
+        "start": "2022-02-10T05:33:06.584Z",
+        "stderr": "gs://encode-processing/caper_out_v04_05/rna/ce5f9715-4b2f-455a-ab56-872d1f550994/call-rna_qc/shard-1/stderr",
+        "stdout": "gs://encode-processing/caper_out_v04_05/rna/ce5f9715-4b2f-455a-ab56-872d1f550994/call-rna_qc/shard-1/stdout"
+      }
+    ],
+    "rna.rsem_quant": [
+      {
+        "attempt": 1,
+        "backend": "gcp",
+        "backendLabels": {
+          "cromwell-workflow-id": "cromwell-ce5f9715-4b2f-455a-ab56-872d1f550994",
+          "wdl-task-name": "rsem-quant"
+        },
+        "backendLogs": {
+          "log": "gs://encode-processing/caper_out_v04_05/rna/ce5f9715-4b2f-455a-ab56-872d1f550994/call-rsem_quant/shard-0/rsem_quant-0.log"
+        },
+        "backendStatus": "Success",
+        "callCaching": {
+          "allowResultReuse": true,
+          "effectiveCallCachingMode": "ReadAndWriteCache",
+          "hashes": {
+            "backend name": "50F66ECBC45488EE5826941BFBC50411",
+            "command template": "928C7B19A8825F1CC49500638B6E2F5C",
+            "input": {
+              "File anno_bam": "4URcuw==",
+              "File rsem_index": "XCZxiw==",
+              "Int ncpus": "C74D97B01EAE257E44AA9D5BADE97BAF",
+              "Int ramGB": "072B030BA126B2F4B2374F342BE9ED44",
+              "Int rnd_seed": "827CCB0EEA8A706C4C34A16891F84E7B",
+              "String disks": "E0247C4B903832B99105AF09710172C9",
+              "String endedness": "94A63A451F1A2204A927F8EB05439D1B",
+              "String read_strand": "ABA5C59CB533BE3C59F26B60FD829F7A",
+              "String runtime_environment": {
+                "docker": "95E42DD9B3F87F770395AB70D66058AB",
+                "singularity": "CFF5D03D15A6A6A29CBF82531C176D5E"
+              }
+            },
+            "input count": "D3D9446802A44259755D38E6D163E820",
+            "output count": "A87FF679A2F3E71D9181A67B7542122C",
+            "output expression": {
+              "File genes_results": "979E0BC32BCBBEADEDF124BDFF75A302",
+              "File isoforms_results": "E83F837689EB23DAD3F017463458B17A",
+              "File number_of_genes": "B973D0E405FDB0D4E386C5BDB54D8E13",
+              "File python_log": "7F869C18FA6B0989504FD8014ADEED06"
+            },
+            "runtime attribute": {
+              "continueOnReturnCode": "CFCD208495D565EF66E7DFF9F98764DA",
+              "docker": "D6B20BC300EFB33CEEDC19C177FC2211",
+              "failOnStderr": "68934A3E9455FA72420237EB05902327"
+            }
+          },
+          "hit": false,
+          "result": "Cache Miss"
+        },
+        "callRoot": "gs://encode-processing/caper_out_v04_05/rna/ce5f9715-4b2f-455a-ab56-872d1f550994/call-rsem_quant/shard-0",
+        "commandLine": "python3 $(which rsem_quant.py) \\\n    --rsem_index /cromwell_root/encode-processing/caper_out_v04_05/.caper_tmp/5f4420e8518bf8e0dc795911501a8560/ENCFF363TFV.tar.gz \\\n    --anno_bam /cromwell_root/encode-processing/caper_out_v04_05/rna/ce5f9715-4b2f-455a-ab56-872d1f550994/call-align/shard-0/rep1ENCSR967IKT_anno.bam \\\n    --endedness single \\\n    --read_strand reverse \\\n    --rnd_seed 12345 \\\n    --ncpus 16 \\\n    --ramGB 60",
+        "compressedDockerSize": 567470316,
+        "dockerImageUsed": "encodedcc/rna-seq-pipeline@sha256:d03fab15b42ca2cb6eb627c72885c0c818574cbaee5b1fdc82e5a12ca28b627c",
+        "end": "2022-02-10T07:38:44.701Z",
+        "executionEvents": [
+          {
+            "description": "PreparingJob",
+            "endTime": "2022-02-10T05:33:07.858Z",
+            "startTime": "2022-02-10T05:33:07.854Z"
+          },
+          {
+            "description": "Worker \"google-pipelines-worker-b416d18a2b0b574ebbdf6c72bcd1c472\" assigned in \"us-central1-b\" on a \"custom-16-61440\" machine",
+            "endTime": "2022-02-10T05:43:37.487Z",
+            "startTime": "2022-02-10T05:33:36.355Z"
+          },
+          {
+            "description": "Localization",
+            "endTime": "2022-02-10T05:45:55.242Z",
+            "startTime": "2022-02-10T05:45:06.381Z"
+          },
+          {
+            "description": "Background",
+            "endTime": "2022-02-10T05:45:06.123Z",
+            "startTime": "2022-02-10T05:45:06.012Z"
+          },
+          {
+            "description": "Complete in GCE / Cromwell Poll Interval",
+            "endTime": "2022-02-10T07:38:43.486Z",
+            "startTime": "2022-02-10T07:34:38.708Z"
+          },
+          {
+            "description": "UserAction",
+            "endTime": "2022-02-10T07:34:10.209Z",
+            "startTime": "2022-02-10T05:45:55.242Z"
+          },
+          {
+            "description": "Worker released",
+            "endTime": "2022-02-10T07:34:38.708Z",
+            "startTime": "2022-02-10T07:34:38.708Z"
+          },
+          {
+            "description": "waiting for quota",
+            "endTime": "2022-02-10T05:33:36.355Z",
+            "startTime": "2022-02-10T05:33:28.756Z"
+          },
+          {
+            "description": "Delocalization",
+            "endTime": "2022-02-10T07:34:38.708Z",
+            "startTime": "2022-02-10T07:34:10.209Z"
+          },
+          {
+            "description": "RequestingExecutionToken",
+            "endTime": "2022-02-10T05:33:07.853Z",
+            "startTime": "2022-02-10T05:33:03.524Z"
+          },
+          {
+            "description": "Pulling \"encodedcc/rna-seq-pipeline@sha256:d03fab15b42ca2cb6eb627c72885c0c818574cbaee5b1fdc82e5a12ca28b627c\"",
+            "endTime": "2022-02-10T05:45:02.818Z",
+            "startTime": "2022-02-10T05:44:24.354Z"
+          },
+          {
+            "description": "UpdatingJobStore",
+            "endTime": "2022-02-10T07:38:44.701Z",
+            "startTime": "2022-02-10T07:38:44.668Z"
+          },
+          {
+            "description": "RunningJob",
+            "endTime": "2022-02-10T05:33:28.756Z",
+            "startTime": "2022-02-10T05:33:08.341Z"
+          },
+          {
+            "description": "Worker \"google-pipelines-worker-ee2703488ad533edc6ffd4bb1f7f515b\" assigned in \"us-central1-b\" on a \"custom-16-61440\" machine",
+            "endTime": "2022-02-10T05:44:11.458Z",
+            "startTime": "2022-02-10T05:43:45.310Z"
+          },
+          {
+            "description": "UpdatingCallCache",
+            "endTime": "2022-02-10T07:38:44.668Z",
+            "startTime": "2022-02-10T07:38:43.486Z"
+          },
+          {
+            "description": "CallCacheReading",
+            "endTime": "2022-02-10T05:33:08.341Z",
+            "startTime": "2022-02-10T05:33:07.858Z"
+          },
+          {
+            "description": "ContainerSetup",
+            "endTime": "2022-02-10T05:45:06.012Z",
+            "startTime": "2022-02-10T05:45:02.818Z"
+          },
+          {
+            "description": "Pending",
+            "endTime": "2022-02-10T05:33:03.524Z",
+            "startTime": "2022-02-10T05:33:03.524Z"
+          },
+          {
+            "description": "WaitingForValueStore",
+            "endTime": "2022-02-10T05:33:07.854Z",
+            "startTime": "2022-02-10T05:33:07.853Z"
+          },
+          {
+            "description": "Pulling \"gcr.io/google.com/cloudsdktool/cloud-sdk:276.0.0-slim\"",
+            "endTime": "2022-02-10T05:44:24.354Z",
+            "startTime": "2022-02-10T05:44:11.458Z"
+          },
+          {
+            "description": "Worker released",
+            "endTime": "2022-02-10T05:43:45.310Z",
+            "startTime": "2022-02-10T05:43:37.487Z"
+          }
+        ],
+        "executionStatus": "Done",
+        "inputs": {
+          "anno_bam": "gs://encode-processing/caper_out_v04_05/rna/ce5f9715-4b2f-455a-ab56-872d1f550994/call-align/shard-0/rep1ENCSR967IKT_anno.bam",
+          "disks": "local-disk 500 HDD",
+          "endedness": "single",
+          "ncpus": 16,
+          "ramGB": 60,
+          "read_strand": "reverse",
+          "rnd_seed": 12345,
+          "rsem_index": "gs://encode-processing/caper_out_v04_05/.caper_tmp/5f4420e8518bf8e0dc795911501a8560/ENCFF363TFV.tar.gz",
+          "runtime_environment": {
+            "docker": "encodedcc/rna-seq-pipeline:1.2.4",
+            "singularity": "docker://encodedcc/rna-seq-pipeline:1.2.4"
+          }
+        },
+        "jes": {
+          "endpointUrl": "https://lifesciences.googleapis.com/",
+          "executionBucket": "gs://encode-processing/caper_out_v04_05",
+          "googleProject": "encode-processing",
+          "instanceName": "google-pipelines-worker-ee2703488ad533edc6ffd4bb1f7f515b",
+          "machineType": "custom-16-61440",
+          "monitoringScript": "gs://caper-data/scripts/resource_monitor/resource_monitor.sh",
+          "zone": "us-central1-b"
+        },
+        "jobId": "projects/118693909002/locations/us-central1/operations/2184560139917237498",
+        "labels": {
+          "cromwell-workflow-id": "cromwell-ce5f9715-4b2f-455a-ab56-872d1f550994",
+          "wdl-task-name": "rsem_quant"
+        },
+        "monitoringLog": "gs://encode-processing/caper_out_v04_05/rna/ce5f9715-4b2f-455a-ab56-872d1f550994/call-rsem_quant/shard-0/monitoring.log",
+        "outputs": {
+          "genes_results": "gs://encode-processing/caper_out_v04_05/rna/ce5f9715-4b2f-455a-ab56-872d1f550994/call-rsem_quant/shard-0/glob-543e009ab55ea9db54875227504e1747/rep1ENCSR967IKT_anno_rsem.genes.results",
+          "isoforms_results": "gs://encode-processing/caper_out_v04_05/rna/ce5f9715-4b2f-455a-ab56-872d1f550994/call-rsem_quant/shard-0/glob-871dc9f979194daf5877594adc2ac4a1/rep1ENCSR967IKT_anno_rsem.isoforms.results",
+          "number_of_genes": "gs://encode-processing/caper_out_v04_05/rna/ce5f9715-4b2f-455a-ab56-872d1f550994/call-rsem_quant/shard-0/glob-1c98bdf08c259393713dc9e8229d3a3a/rep1ENCSR967IKT_anno_number_of_genes_detected.json",
+          "python_log": "gs://encode-processing/caper_out_v04_05/rna/ce5f9715-4b2f-455a-ab56-872d1f550994/call-rsem_quant/shard-0/rsem_quant.log"
+        },
+        "preemptible": false,
+        "returnCode": 0,
+        "runtimeAttributes": {
+          "bootDiskSizeGb": "10",
+          "continueOnReturnCode": "0",
+          "cpu": "16",
+          "cpuMin": "1",
+          "disks": "local-disk 500 HDD",
+          "docker": "encodedcc/rna-seq-pipeline:1.2.4",
+          "failOnStderr": "false",
+          "maxRetries": "1",
+          "memory": "60 GB",
+          "memoryMin": "2 GB",
+          "noAddress": "false",
+          "preemptible": "0",
+          "zones": "us-central1-b"
+        },
+        "shardIndex": 0,
+        "start": "2022-02-10T05:33:03.524Z",
+        "stderr": "gs://encode-processing/caper_out_v04_05/rna/ce5f9715-4b2f-455a-ab56-872d1f550994/call-rsem_quant/shard-0/stderr",
+        "stdout": "gs://encode-processing/caper_out_v04_05/rna/ce5f9715-4b2f-455a-ab56-872d1f550994/call-rsem_quant/shard-0/stdout"
+      },
+      {
+        "attempt": 1,
+        "backend": "gcp",
+        "backendLabels": {
+          "cromwell-workflow-id": "cromwell-ce5f9715-4b2f-455a-ab56-872d1f550994",
+          "wdl-task-name": "rsem-quant"
+        },
+        "backendLogs": {
+          "log": "gs://encode-processing/caper_out_v04_05/rna/ce5f9715-4b2f-455a-ab56-872d1f550994/call-rsem_quant/shard-1/rsem_quant-1.log"
+        },
+        "backendStatus": "Success",
+        "callCaching": {
+          "allowResultReuse": true,
+          "effectiveCallCachingMode": "ReadAndWriteCache",
+          "hashes": {
+            "backend name": "50F66ECBC45488EE5826941BFBC50411",
+            "command template": "928C7B19A8825F1CC49500638B6E2F5C",
+            "input": {
+              "File anno_bam": "OUR0dg==",
+              "File rsem_index": "XCZxiw==",
+              "Int ncpus": "C74D97B01EAE257E44AA9D5BADE97BAF",
+              "Int ramGB": "072B030BA126B2F4B2374F342BE9ED44",
+              "Int rnd_seed": "827CCB0EEA8A706C4C34A16891F84E7B",
+              "String disks": "E0247C4B903832B99105AF09710172C9",
+              "String endedness": "94A63A451F1A2204A927F8EB05439D1B",
+              "String read_strand": "ABA5C59CB533BE3C59F26B60FD829F7A",
+              "String runtime_environment": {
+                "docker": "95E42DD9B3F87F770395AB70D66058AB",
+                "singularity": "CFF5D03D15A6A6A29CBF82531C176D5E"
+              }
+            },
+            "input count": "D3D9446802A44259755D38E6D163E820",
+            "output count": "A87FF679A2F3E71D9181A67B7542122C",
+            "output expression": {
+              "File genes_results": "979E0BC32BCBBEADEDF124BDFF75A302",
+              "File isoforms_results": "E83F837689EB23DAD3F017463458B17A",
+              "File number_of_genes": "B973D0E405FDB0D4E386C5BDB54D8E13",
+              "File python_log": "7F869C18FA6B0989504FD8014ADEED06"
+            },
+            "runtime attribute": {
+              "continueOnReturnCode": "CFCD208495D565EF66E7DFF9F98764DA",
+              "docker": "D6B20BC300EFB33CEEDC19C177FC2211",
+              "failOnStderr": "68934A3E9455FA72420237EB05902327"
+            }
+          },
+          "hit": false,
+          "result": "Cache Miss"
+        },
+        "callRoot": "gs://encode-processing/caper_out_v04_05/rna/ce5f9715-4b2f-455a-ab56-872d1f550994/call-rsem_quant/shard-1",
+        "commandLine": "python3 $(which rsem_quant.py) \\\n    --rsem_index /cromwell_root/encode-processing/caper_out_v04_05/.caper_tmp/5f4420e8518bf8e0dc795911501a8560/ENCFF363TFV.tar.gz \\\n    --anno_bam /cromwell_root/encode-processing/caper_out_v04_05/rna/ce5f9715-4b2f-455a-ab56-872d1f550994/call-align/shard-1/rep2ENCSR967IKT_anno.bam \\\n    --endedness single \\\n    --read_strand reverse \\\n    --rnd_seed 12345 \\\n    --ncpus 16 \\\n    --ramGB 60",
+        "compressedDockerSize": 567470316,
+        "dockerImageUsed": "encodedcc/rna-seq-pipeline@sha256:d03fab15b42ca2cb6eb627c72885c0c818574cbaee5b1fdc82e5a12ca28b627c",
+        "end": "2022-02-10T05:27:59.701Z",
+        "executionEvents": [
+          {
+            "description": "Pulling \"gcr.io/google.com/cloudsdktool/cloud-sdk:276.0.0-slim\"",
+            "endTime": "2022-02-10T04:02:30.847Z",
+            "startTime": "2022-02-10T04:02:19.415Z"
+          },
+          {
+            "description": "waiting for quota",
+            "endTime": "2022-02-10T04:01:48.324Z",
+            "startTime": "2022-02-10T04:01:40.767Z"
+          },
+          {
+            "description": "PreparingJob",
+            "endTime": "2022-02-10T04:01:19.859Z",
+            "startTime": "2022-02-10T04:01:19.853Z"
+          },
+          {
+            "description": "Pulling \"encodedcc/rna-seq-pipeline@sha256:d03fab15b42ca2cb6eb627c72885c0c818574cbaee5b1fdc82e5a12ca28b627c\"",
+            "endTime": "2022-02-10T04:03:08.178Z",
+            "startTime": "2022-02-10T04:02:30.847Z"
+          },
+          {
+            "description": "UpdatingJobStore",
+            "endTime": "2022-02-10T05:27:59.701Z",
+            "startTime": "2022-02-10T05:27:59.665Z"
+          },
+          {
+            "description": "Background",
+            "endTime": "2022-02-10T04:03:11.440Z",
+            "startTime": "2022-02-10T04:03:11.333Z"
+          },
+          {
+            "description": "Pending",
+            "endTime": "2022-02-10T04:01:11.654Z",
+            "startTime": "2022-02-10T04:01:11.654Z"
+          },
+          {
+            "description": "Worker \"google-pipelines-worker-2d31f9a28279a77611ee7c730f3866cb\" assigned in \"us-central1-b\" on a \"custom-16-61440\" machine",
+            "endTime": "2022-02-10T04:02:19.415Z",
+            "startTime": "2022-02-10T04:01:48.324Z"
+          },
+          {
+            "description": "RequestingExecutionToken",
+            "endTime": "2022-02-10T04:01:19.853Z",
+            "startTime": "2022-02-10T04:01:11.654Z"
+          },
+          {
+            "description": "UpdatingCallCache",
+            "endTime": "2022-02-10T05:27:59.665Z",
+            "startTime": "2022-02-10T05:27:58.459Z"
+          },
+          {
+            "description": "RunningJob",
+            "endTime": "2022-02-10T04:01:40.767Z",
+            "startTime": "2022-02-10T04:01:19.863Z"
+          },
+          {
+            "description": "Worker released",
+            "endTime": "2022-02-10T05:23:32.176Z",
+            "startTime": "2022-02-10T05:23:32.176Z"
+          },
+          {
+            "description": "CallCacheReading",
+            "endTime": "2022-02-10T04:01:19.863Z",
+            "startTime": "2022-02-10T04:01:19.859Z"
+          },
+          {
+            "description": "Complete in GCE / Cromwell Poll Interval",
+            "endTime": "2022-02-10T05:27:58.459Z",
+            "startTime": "2022-02-10T05:23:32.176Z"
+          },
+          {
+            "description": "Localization",
+            "endTime": "2022-02-10T04:03:57.301Z",
+            "startTime": "2022-02-10T04:03:11.553Z"
+          },
+          {
+            "description": "UserAction",
+            "endTime": "2022-02-10T05:23:06.135Z",
+            "startTime": "2022-02-10T04:03:57.301Z"
+          },
+          {
+            "description": "WaitingForValueStore",
+            "endTime": "2022-02-10T04:01:19.853Z",
+            "startTime": "2022-02-10T04:01:19.853Z"
+          },
+          {
+            "description": "Delocalization",
+            "endTime": "2022-02-10T05:23:32.176Z",
+            "startTime": "2022-02-10T05:23:06.135Z"
+          },
+          {
+            "description": "ContainerSetup",
+            "endTime": "2022-02-10T04:03:11.179Z",
+            "startTime": "2022-02-10T04:03:08.178Z"
+          }
+        ],
+        "executionStatus": "Done",
+        "inputs": {
+          "anno_bam": "gs://encode-processing/caper_out_v04_05/rna/ce5f9715-4b2f-455a-ab56-872d1f550994/call-align/shard-1/rep2ENCSR967IKT_anno.bam",
+          "disks": "local-disk 500 HDD",
+          "endedness": "single",
+          "ncpus": 16,
+          "ramGB": 60,
+          "read_strand": "reverse",
+          "rnd_seed": 12345,
+          "rsem_index": "gs://encode-processing/caper_out_v04_05/.caper_tmp/5f4420e8518bf8e0dc795911501a8560/ENCFF363TFV.tar.gz",
+          "runtime_environment": {
+            "docker": "encodedcc/rna-seq-pipeline:1.2.4",
+            "singularity": "docker://encodedcc/rna-seq-pipeline:1.2.4"
+          }
+        },
+        "jes": {
+          "endpointUrl": "https://lifesciences.googleapis.com/",
+          "executionBucket": "gs://encode-processing/caper_out_v04_05",
+          "googleProject": "encode-processing",
+          "instanceName": "google-pipelines-worker-2d31f9a28279a77611ee7c730f3866cb",
+          "machineType": "custom-16-61440",
+          "monitoringScript": "gs://caper-data/scripts/resource_monitor/resource_monitor.sh",
+          "zone": "us-central1-b"
+        },
+        "jobId": "projects/118693909002/locations/us-central1/operations/5138746138480047560",
+        "labels": {
+          "cromwell-workflow-id": "cromwell-ce5f9715-4b2f-455a-ab56-872d1f550994",
+          "wdl-task-name": "rsem_quant"
+        },
+        "monitoringLog": "gs://encode-processing/caper_out_v04_05/rna/ce5f9715-4b2f-455a-ab56-872d1f550994/call-rsem_quant/shard-1/monitoring.log",
+        "outputs": {
+          "genes_results": "gs://encode-processing/caper_out_v04_05/rna/ce5f9715-4b2f-455a-ab56-872d1f550994/call-rsem_quant/shard-1/glob-543e009ab55ea9db54875227504e1747/rep2ENCSR967IKT_anno_rsem.genes.results",
+          "isoforms_results": "gs://encode-processing/caper_out_v04_05/rna/ce5f9715-4b2f-455a-ab56-872d1f550994/call-rsem_quant/shard-1/glob-871dc9f979194daf5877594adc2ac4a1/rep2ENCSR967IKT_anno_rsem.isoforms.results",
+          "number_of_genes": "gs://encode-processing/caper_out_v04_05/rna/ce5f9715-4b2f-455a-ab56-872d1f550994/call-rsem_quant/shard-1/glob-1c98bdf08c259393713dc9e8229d3a3a/rep2ENCSR967IKT_anno_number_of_genes_detected.json",
+          "python_log": "gs://encode-processing/caper_out_v04_05/rna/ce5f9715-4b2f-455a-ab56-872d1f550994/call-rsem_quant/shard-1/rsem_quant.log"
+        },
+        "preemptible": false,
+        "returnCode": 0,
+        "runtimeAttributes": {
+          "bootDiskSizeGb": "10",
+          "continueOnReturnCode": "0",
+          "cpu": "16",
+          "cpuMin": "1",
+          "disks": "local-disk 500 HDD",
+          "docker": "encodedcc/rna-seq-pipeline:1.2.4",
+          "failOnStderr": "false",
+          "maxRetries": "1",
+          "memory": "60 GB",
+          "memoryMin": "2 GB",
+          "noAddress": "false",
+          "preemptible": "0",
+          "zones": "us-central1-b"
+        },
+        "shardIndex": 1,
+        "start": "2022-02-10T04:01:11.654Z",
+        "stderr": "gs://encode-processing/caper_out_v04_05/rna/ce5f9715-4b2f-455a-ab56-872d1f550994/call-rsem_quant/shard-1/stderr",
+        "stdout": "gs://encode-processing/caper_out_v04_05/rna/ce5f9715-4b2f-455a-ab56-872d1f550994/call-rsem_quant/shard-1/stdout"
+      }
+    ]
+  },
+  "end": "2022-02-10T07:42:36.797Z",
+  "id": "ce5f9715-4b2f-455a-ab56-872d1f550994",
+  "inputs": {
+    "align_disk": "local-disk 500 HDD",
+    "align_index": "gs://encode-processing/caper_out_v04_05/.caper_tmp/e3931d8cf8de5001a1751b8f2f17a648/ENCFF795ZFF.tar.gz",
+    "align_ncpus": 32,
+    "align_ramGB": 120,
+    "bam_to_signals_disk": "local-disk 200 HDD",
+    "bam_to_signals_ncpus": 8,
+    "bam_to_signals_ramGB": 30,
+    "bamroot": "ENCSR967IKT",
+    "chrom_sizes": "gs://encode-processing/caper_out_v04_05/.caper_tmp/a4733a4e097a19c869b1cb1aae1b33c9/mm10_no_alt.chrom.sizes.tsv",
+    "docker": "encodedcc/rna-seq-pipeline:1.2.4",
+    "endedness": "single",
+    "fastqs_R1": [
+      [
+        "gs://encode-processing/caper_out_v04_05/.caper_tmp/634ce00618cfb70541a5fe1deb90070c/ENCFF236TUH.fastq.gz"
+      ],
+      [
+        "gs://encode-processing/caper_out_v04_05/.caper_tmp/9b8383db1e5b623d057250932ebfd0c7/ENCFF804UQS.fastq.gz"
+      ]
+    ],
+    "fastqs_R2": [],
+    "kallisto_disk": "local-disk 200 HDD",
+    "kallisto_fragment_length": [
+      219,
+      224
+    ],
+    "kallisto_fragment_length_undefined": null,
+    "kallisto_index": "gs://encode-processing/caper_out_v04_05/.caper_tmp/63f14612d4f06ece9a3943cadae714e3/ENCFF383TUX.idx",
+    "kallisto_number_of_threads": 8,
+    "kallisto_ramGB": 30,
+    "kallisto_sd_of_fragment_length": [
+      61.32,
+      67.2
+    ],
+    "kallisto_sd_undefined": null,
+    "mad_qc_disk": "local-disk 200 HDD",
+    "pbam_disks": "local-disk 200 SSD",
+    "pbam_ncpus": 2,
+    "pbam_ramGB": 6,
+    "produce_pbams": false,
+    "reference_annotations": [],
+    "reference_genome": null,
+    "reference_transcriptome": null,
+    "rna.bam_to_signals.null": null,
+    "rna.reference_genome_decompressed.output_filename": "out",
+    "rna.reference_transcriptome_decompressed.output_filename": "out",
+    "rna_qc_disk": "local-disk 200 HDD",
+    "rna_qc_tr_id_to_gene_type_tsv": "gs://encode-processing/caper_out_v04_05/.caper_tmp/5ac96235dfe7d00f7b1e24fda16e8ed9/ENCFF449TPD.tsv",
+    "rnd_seed": 12345,
+    "rsem_disk": "local-disk 500 HDD",
+    "rsem_index": "gs://encode-processing/caper_out_v04_05/.caper_tmp/5f4420e8518bf8e0dc795911501a8560/ENCFF363TFV.tar.gz",
+    "rsem_ncpus": 16,
+    "rsem_ramGB": 60,
+    "run_kallisto": true,
+    "singularity": "docker://encodedcc/rna-seq-pipeline:1.2.4",
+    "strandedness": "stranded",
+    "strandedness_direction": "reverse"
+  },
+  "labels": {
+    "caper-backend": "gcp",
+    "caper-str-label": "ENCSR967IKT_PRD-602",
+    "caper-user": "iay",
+    "cromwell-workflow-id": "cromwell-ce5f9715-4b2f-455a-ab56-872d1f550994"
+  },
+  "metadataSource": "Unarchived",
+  "outputs": {
+    "rna.align.anno_flagstat": [
+      "gs://encode-processing/caper_out_v04_05/rna/ce5f9715-4b2f-455a-ab56-872d1f550994/call-align/shard-0/rep1ENCSR967IKT_anno_flagstat.txt",
+      "gs://encode-processing/caper_out_v04_05/rna/ce5f9715-4b2f-455a-ab56-872d1f550994/call-align/shard-1/rep2ENCSR967IKT_anno_flagstat.txt"
+    ],
+    "rna.align.anno_flagstat_json": [
+      "gs://encode-processing/caper_out_v04_05/rna/ce5f9715-4b2f-455a-ab56-872d1f550994/call-align/shard-0/rep1ENCSR967IKT_anno_flagstat.json",
+      "gs://encode-processing/caper_out_v04_05/rna/ce5f9715-4b2f-455a-ab56-872d1f550994/call-align/shard-1/rep2ENCSR967IKT_anno_flagstat.json"
+    ],
+    "rna.align.annobam": [
+      "gs://encode-processing/caper_out_v04_05/rna/ce5f9715-4b2f-455a-ab56-872d1f550994/call-align/shard-0/rep1ENCSR967IKT_anno.bam",
+      "gs://encode-processing/caper_out_v04_05/rna/ce5f9715-4b2f-455a-ab56-872d1f550994/call-align/shard-1/rep2ENCSR967IKT_anno.bam"
+    ],
+    "rna.align.genome_flagstat": [
+      "gs://encode-processing/caper_out_v04_05/rna/ce5f9715-4b2f-455a-ab56-872d1f550994/call-align/shard-0/rep1ENCSR967IKT_genome_flagstat.txt",
+      "gs://encode-processing/caper_out_v04_05/rna/ce5f9715-4b2f-455a-ab56-872d1f550994/call-align/shard-1/rep2ENCSR967IKT_genome_flagstat.txt"
+    ],
+    "rna.align.genome_flagstat_json": [
+      "gs://encode-processing/caper_out_v04_05/rna/ce5f9715-4b2f-455a-ab56-872d1f550994/call-align/shard-0/rep1ENCSR967IKT_genome_flagstat.json",
+      "gs://encode-processing/caper_out_v04_05/rna/ce5f9715-4b2f-455a-ab56-872d1f550994/call-align/shard-1/rep2ENCSR967IKT_genome_flagstat.json"
+    ],
+    "rna.align.genomebam": [
+      "gs://encode-processing/caper_out_v04_05/rna/ce5f9715-4b2f-455a-ab56-872d1f550994/call-align/shard-0/rep1ENCSR967IKT_genome.bam",
+      "gs://encode-processing/caper_out_v04_05/rna/ce5f9715-4b2f-455a-ab56-872d1f550994/call-align/shard-1/rep2ENCSR967IKT_genome.bam"
+    ],
+    "rna.align.log": [
+      "gs://encode-processing/caper_out_v04_05/rna/ce5f9715-4b2f-455a-ab56-872d1f550994/call-align/shard-0/rep1ENCSR967IKT_Log.final.out",
+      "gs://encode-processing/caper_out_v04_05/rna/ce5f9715-4b2f-455a-ab56-872d1f550994/call-align/shard-1/rep2ENCSR967IKT_Log.final.out"
+    ],
+    "rna.align.log_json": [
+      "gs://encode-processing/caper_out_v04_05/rna/ce5f9715-4b2f-455a-ab56-872d1f550994/call-align/shard-0/rep1ENCSR967IKT_Log.final.json",
+      "gs://encode-processing/caper_out_v04_05/rna/ce5f9715-4b2f-455a-ab56-872d1f550994/call-align/shard-1/rep2ENCSR967IKT_Log.final.json"
+    ],
+    "rna.align.python_log": [
+      "gs://encode-processing/caper_out_v04_05/rna/ce5f9715-4b2f-455a-ab56-872d1f550994/call-align/shard-0/align.log",
+      "gs://encode-processing/caper_out_v04_05/rna/ce5f9715-4b2f-455a-ab56-872d1f550994/call-align/shard-1/align.log"
+    ],
+    "rna.anno_pbam.out": [
+      null,
+      null
+    ],
+    "rna.annobams": [
+      [
+        "gs://encode-processing/caper_out_v04_05/rna/ce5f9715-4b2f-455a-ab56-872d1f550994/call-align/shard-0/rep1ENCSR967IKT_anno.bam",
+        "gs://encode-processing/caper_out_v04_05/rna/ce5f9715-4b2f-455a-ab56-872d1f550994/call-align/shard-1/rep2ENCSR967IKT_anno.bam"
+      ],
+      [
+        "gs://encode-processing/caper_out_v04_05/rna/ce5f9715-4b2f-455a-ab56-872d1f550994/call-align/shard-0/rep1ENCSR967IKT_anno.bam",
+        "gs://encode-processing/caper_out_v04_05/rna/ce5f9715-4b2f-455a-ab56-872d1f550994/call-align/shard-1/rep2ENCSR967IKT_anno.bam"
+      ]
+    ],
+    "rna.bam_to_signals.all_minus": [
+      "gs://encode-processing/caper_out_v04_05/rna/ce5f9715-4b2f-455a-ab56-872d1f550994/call-bam_to_signals/shard-0/glob-0be8b00c6881ee205adffa940ec5045d/rep1ENCSR967IKT_genome_minusAll.bw",
+      "gs://encode-processing/caper_out_v04_05/rna/ce5f9715-4b2f-455a-ab56-872d1f550994/call-bam_to_signals/shard-1/glob-0be8b00c6881ee205adffa940ec5045d/rep2ENCSR967IKT_genome_minusAll.bw"
+    ],
+    "rna.bam_to_signals.all_plus": [
+      "gs://encode-processing/caper_out_v04_05/rna/ce5f9715-4b2f-455a-ab56-872d1f550994/call-bam_to_signals/shard-0/glob-30b04c06dd4a6aac247ff3b82eadec1b/rep1ENCSR967IKT_genome_plusAll.bw",
+      "gs://encode-processing/caper_out_v04_05/rna/ce5f9715-4b2f-455a-ab56-872d1f550994/call-bam_to_signals/shard-1/glob-30b04c06dd4a6aac247ff3b82eadec1b/rep2ENCSR967IKT_genome_plusAll.bw"
+    ],
+    "rna.bam_to_signals.all_unstranded": [
+      null,
+      null
+    ],
+    "rna.bam_to_signals.python_log": [
+      "gs://encode-processing/caper_out_v04_05/rna/ce5f9715-4b2f-455a-ab56-872d1f550994/call-bam_to_signals/shard-0/bam_to_signals.log",
+      "gs://encode-processing/caper_out_v04_05/rna/ce5f9715-4b2f-455a-ab56-872d1f550994/call-bam_to_signals/shard-1/bam_to_signals.log"
+    ],
+    "rna.bam_to_signals.unique_minus": [
+      "gs://encode-processing/caper_out_v04_05/rna/ce5f9715-4b2f-455a-ab56-872d1f550994/call-bam_to_signals/shard-0/glob-b1f717d7f19cd2629e443e4a3f43f8de/rep1ENCSR967IKT_genome_minusUniq.bw",
+      "gs://encode-processing/caper_out_v04_05/rna/ce5f9715-4b2f-455a-ab56-872d1f550994/call-bam_to_signals/shard-1/glob-b1f717d7f19cd2629e443e4a3f43f8de/rep2ENCSR967IKT_genome_minusUniq.bw"
+    ],
+    "rna.bam_to_signals.unique_plus": [
+      "gs://encode-processing/caper_out_v04_05/rna/ce5f9715-4b2f-455a-ab56-872d1f550994/call-bam_to_signals/shard-0/glob-43ccac0a8440af82e485a4b3b17d3d92/rep1ENCSR967IKT_genome_plusUniq.bw",
+      "gs://encode-processing/caper_out_v04_05/rna/ce5f9715-4b2f-455a-ab56-872d1f550994/call-bam_to_signals/shard-1/glob-43ccac0a8440af82e485a4b3b17d3d92/rep2ENCSR967IKT_genome_plusUniq.bw"
+    ],
+    "rna.bam_to_signals.unique_unstranded": [
+      null,
+      null
+    ],
+    "rna.combined_gtf.out": null,
+    "rna.combined_gtf_gz.concatenated": null,
+    "rna.genome_alignment": [
+      "gs://encode-processing/caper_out_v04_05/rna/ce5f9715-4b2f-455a-ab56-872d1f550994/call-align/shard-0/rep1ENCSR967IKT_genome.bam",
+      "gs://encode-processing/caper_out_v04_05/rna/ce5f9715-4b2f-455a-ab56-872d1f550994/call-align/shard-1/rep2ENCSR967IKT_genome.bam"
+    ],
+    "rna.genome_pbam.out": [
+      null,
+      null
+    ],
+    "rna.kallisto.python_log": [
+      "gs://encode-processing/caper_out_v04_05/rna/ce5f9715-4b2f-455a-ab56-872d1f550994/call-kallisto/shard-0/kallisto_quant.log",
+      "gs://encode-processing/caper_out_v04_05/rna/ce5f9715-4b2f-455a-ab56-872d1f550994/call-kallisto/shard-1/kallisto_quant.log"
+    ],
+    "rna.kallisto.quants": [
+      "gs://encode-processing/caper_out_v04_05/rna/ce5f9715-4b2f-455a-ab56-872d1f550994/call-kallisto/shard-0/kallisto_out/rep1ENCSR967IKT_abundance.tsv",
+      "gs://encode-processing/caper_out_v04_05/rna/ce5f9715-4b2f-455a-ab56-872d1f550994/call-kallisto/shard-1/kallisto_out/rep2ENCSR967IKT_abundance.tsv"
+    ],
+    "rna.kallisto_fl": [
+      219,
+      224
+    ],
+    "rna.kallisto_sd": [
+      61.32,
+      67.2
+    ],
+    "rna.mad_qc.madQCmetrics": "gs://encode-processing/caper_out_v04_05/rna/ce5f9715-4b2f-455a-ab56-872d1f550994/call-mad_qc/glob-196368870fbaaecf98b381cba2f56e97/rep1ENCSR967IKT_anno_rsem-rep2ENCSR967IKT_anno_rsem_mad_qc_metrics.json",
+    "rna.mad_qc.madQCplot": "gs://encode-processing/caper_out_v04_05/rna/ce5f9715-4b2f-455a-ab56-872d1f550994/call-mad_qc/glob-d58d85dd0e55e36d4d0c376d5f0c524e/rep1ENCSR967IKT_anno_rsem-rep2ENCSR967IKT_anno_rsem_mad_plot.png",
+    "rna.mad_qc.python_log": "gs://encode-processing/caper_out_v04_05/rna/ce5f9715-4b2f-455a-ab56-872d1f550994/call-mad_qc/mad_qc.log",
+    "rna.reference_genome_decompressed.out": [
+      null,
+      null
+    ],
+    "rna.reference_transcriptome_decompressed.out": [
+      null,
+      null
+    ],
+    "rna.rna_qc.python_log": [
+      "gs://encode-processing/caper_out_v04_05/rna/ce5f9715-4b2f-455a-ab56-872d1f550994/call-rna_qc/shard-0/rna_qc.log",
+      "gs://encode-processing/caper_out_v04_05/rna/ce5f9715-4b2f-455a-ab56-872d1f550994/call-rna_qc/shard-1/rna_qc.log"
+    ],
+    "rna.rna_qc.rnaQC": [
+      "gs://encode-processing/caper_out_v04_05/rna/ce5f9715-4b2f-455a-ab56-872d1f550994/call-rna_qc/shard-0/rep1ENCSR967IKT_qc.json",
+      "gs://encode-processing/caper_out_v04_05/rna/ce5f9715-4b2f-455a-ab56-872d1f550994/call-rna_qc/shard-1/rep2ENCSR967IKT_qc.json"
+    ],
+    "rna.rsem_quant.genes_results": [
+      "gs://encode-processing/caper_out_v04_05/rna/ce5f9715-4b2f-455a-ab56-872d1f550994/call-rsem_quant/shard-0/glob-543e009ab55ea9db54875227504e1747/rep1ENCSR967IKT_anno_rsem.genes.results",
+      "gs://encode-processing/caper_out_v04_05/rna/ce5f9715-4b2f-455a-ab56-872d1f550994/call-rsem_quant/shard-1/glob-543e009ab55ea9db54875227504e1747/rep2ENCSR967IKT_anno_rsem.genes.results"
+    ],
+    "rna.rsem_quant.isoforms_results": [
+      "gs://encode-processing/caper_out_v04_05/rna/ce5f9715-4b2f-455a-ab56-872d1f550994/call-rsem_quant/shard-0/glob-871dc9f979194daf5877594adc2ac4a1/rep1ENCSR967IKT_anno_rsem.isoforms.results",
+      "gs://encode-processing/caper_out_v04_05/rna/ce5f9715-4b2f-455a-ab56-872d1f550994/call-rsem_quant/shard-1/glob-871dc9f979194daf5877594adc2ac4a1/rep2ENCSR967IKT_anno_rsem.isoforms.results"
+    ],
+    "rna.rsem_quant.number_of_genes": [
+      "gs://encode-processing/caper_out_v04_05/rna/ce5f9715-4b2f-455a-ab56-872d1f550994/call-rsem_quant/shard-0/glob-1c98bdf08c259393713dc9e8229d3a3a/rep1ENCSR967IKT_anno_number_of_genes_detected.json",
+      "gs://encode-processing/caper_out_v04_05/rna/ce5f9715-4b2f-455a-ab56-872d1f550994/call-rsem_quant/shard-1/glob-1c98bdf08c259393713dc9e8229d3a3a/rep2ENCSR967IKT_anno_number_of_genes_detected.json"
+    ],
+    "rna.rsem_quant.python_log": [
+      "gs://encode-processing/caper_out_v04_05/rna/ce5f9715-4b2f-455a-ab56-872d1f550994/call-rsem_quant/shard-0/rsem_quant.log",
+      "gs://encode-processing/caper_out_v04_05/rna/ce5f9715-4b2f-455a-ab56-872d1f550994/call-rsem_quant/shard-1/rsem_quant.log"
+    ],
+    "rna.transcriptome_alignment": [
+      "gs://encode-processing/caper_out_v04_05/rna/ce5f9715-4b2f-455a-ab56-872d1f550994/call-align/shard-0/rep1ENCSR967IKT_anno.bam",
+      "gs://encode-processing/caper_out_v04_05/rna/ce5f9715-4b2f-455a-ab56-872d1f550994/call-align/shard-1/rep2ENCSR967IKT_anno.bam"
+    ]
+  },
+  "start": "2022-02-10T03:38:09.420Z",
+  "status": "Succeeded",
+  "submission": "2022-02-10T03:38:08.253Z",
+  "submittedFiles": {
+    "inputs": "{\"rna.align_disk\":\"local-disk 500 HDD\",\"rna.align_index\":\"gs://encode-processing/caper_out_v04_05/.caper_tmp/e3931d8cf8de5001a1751b8f2f17a648/ENCFF795ZFF.tar.gz\",\"rna.align_ncpus\":32,\"rna.align_ramGB\":120,\"rna.bam_to_signals_disk\":\"local-disk 200 HDD\",\"rna.bam_to_signals_ncpus\":8,\"rna.bam_to_signals_ramGB\":30,\"rna.bamroot\":\"ENCSR967IKT\",\"rna.chrom_sizes\":\"gs://encode-processing/caper_out_v04_05/.caper_tmp/a4733a4e097a19c869b1cb1aae1b33c9/mm10_no_alt.chrom.sizes.tsv\",\"rna.endedness\":\"single\",\"rna.fastqs_R1\":[[\"gs://encode-processing/caper_out_v04_05/.caper_tmp/634ce00618cfb70541a5fe1deb90070c/ENCFF236TUH.fastq.gz\"],[\"gs://encode-processing/caper_out_v04_05/.caper_tmp/9b8383db1e5b623d057250932ebfd0c7/ENCFF804UQS.fastq.gz\"]],\"rna.kallisto_disk\":\"local-disk 200 HDD\",\"rna.kallisto_fragment_length\":[219.0,224.0],\"rna.kallisto_index\":\"gs://encode-processing/caper_out_v04_05/.caper_tmp/63f14612d4f06ece9a3943cadae714e3/ENCFF383TUX.idx\",\"rna.kallisto_number_of_threads\":8,\"rna.kallisto_ramGB\":30,\"rna.kallisto_sd_of_fragment_length\":[61.32,67.2],\"rna.mad_qc_disk\":\"local-disk 200 HDD\",\"rna.rna_qc_disk\":\"local-disk 200 HDD\",\"rna.rna_qc_tr_id_to_gene_type_tsv\":\"gs://encode-processing/caper_out_v04_05/.caper_tmp/5ac96235dfe7d00f7b1e24fda16e8ed9/ENCFF449TPD.tsv\",\"rna.rsem_disk\":\"local-disk 500 HDD\",\"rna.rsem_index\":\"gs://encode-processing/caper_out_v04_05/.caper_tmp/5f4420e8518bf8e0dc795911501a8560/ENCFF363TFV.tar.gz\",\"rna.rsem_ncpus\":16,\"rna.rsem_ramGB\":60,\"rna.run_kallisto\":true,\"rna.strandedness\":\"stranded\",\"rna.strandedness_direction\":\"reverse\"}",
+    "labels": "{\n    \"caper-backend\": \"gcp\",\n    \"caper-str-label\": \"ENCSR967IKT_PRD-602\",\n    \"caper-user\": \"iay\"\n}",
+    "options": "{\n  \"backend\": \"gcp\",\n  \"default_runtime_attributes\": {\n    \"maxRetries\": 1\n  },\n  \"monitoring_script\": \"gs://caper-data/scripts/resource_monitor/resource_monitor.sh\"\n}",
+    "root": "",
+    "workflow": "version 1.0\n\n# ENCODE DCC RNA-seq pipeline\nimport \"wdl/tasks/cat.wdl\"\nimport \"wdl/tasks/gzip.wdl\"\nimport \"wdl/tasks/pbam.wdl\"\nimport \"wdl/structs/runtime.wdl\"\n\nworkflow rna {\n    meta {\n        author: \"Otto Jolanki\"\n        version: \"1.2.4\"\n        caper_docker: \"encodedcc/rna-seq-pipeline:1.2.4\"\n        caper_singularity: \"docker://encodedcc/rna-seq-pipeline:1.2.4\"\n        croo_out_def: \"https://storage.googleapis.com/encode-pipeline-output-definition/bulkrna.output_definition.json\"\n        description: \"ENCODE Bulk-RNA pipeline, see https://github.com/ENCODE-DCC/rna-seq-pipeline for details.\"\n    }\n\n    input {\n        # endedness: paired or single\n        String endedness\n        # fastqs_R1: fastq.gz files for Read1 (only these if single-ended)\n        Array[Array[File]] fastqs_R1\n        # fastqs_R2: fastq.gz files for Read2 (omit if single-ended) in order\n        # corresponding to fastqs_R1\n        Array[Array[File]] fastqs_R2 = []\n        # bamroot: root name for output bams. For example foo_bar will\n        # create foo_bar_genome.bam and foo_bar_anno.bam\n        String bamroot\n        # strandedness: is the library strand specific (stranded or unstranded)\n        String strandedness\n        # strandedness_direction (forward, reverse, unstranded)\n        String strandedness_direction\n        # chrom_sizes: chromosome sizes file\n        File chrom_sizes\n        # Switch to false to not run kallisto\n        Boolean run_kallisto = true\n        # index: aligner index archive (tar.gz)\n        File align_index\n        Int align_ncpus\n        Int align_ramGB\n        String? align_disk\n        Int? kallisto_number_of_threads\n        Int? kallisto_ramGB\n        File? kallisto_index\n        Array[Int] kallisto_fragment_length = []\n        Array[Float] kallisto_sd_of_fragment_length = []\n        String? kallisto_disk\n        Int bam_to_signals_ncpus\n        Int bam_to_signals_ramGB\n        String? bam_to_signals_disk\n        # rsem_index: RSEM index archive (tar.gz)\n        File rsem_index\n        # rnd_seed: random seed used for rsem\n        Int rnd_seed = 12345\n        Int rsem_ncpus\n        Int rsem_ramGB\n        String? rsem_disk\n        File rna_qc_tr_id_to_gene_type_tsv\n        String? mad_qc_disk\n        String? rna_qc_disk\n\n        # Following inputs should only be defined if you want to produce\n        # privacy preserving pBAM files, and use those for signal_track\n        # generation and quantification.\n        Boolean produce_pbams = false\n        File? reference_genome\n        File? reference_transcriptome\n        # Usually for ENCODE experiments this would be the usual annotation file + the tRNAs in gtf.gz format\n        Array[File] reference_annotations = []\n        Int pbam_ncpus = 2\n        Int pbam_ramGB = 6\n        String pbam_disks = \"local-disk 200 SSD\"\n        # These are for internal use, leave undefined\n        Int? kallisto_fragment_length_undefined\n        Float? kallisto_sd_undefined\n        String docker = \"encodedcc/rna-seq-pipeline:1.2.4\"\n        String singularity = \"docker://encodedcc/rna-seq-pipeline:1.2.4\"\n\n    }\n\n    RuntimeEnvironment runtime_environment = {\n      \"docker\": docker,\n      \"singularity\": singularity\n    }\n\n    # dummy variable value for the single-ended case\n    Array[Array[File]] fastqs_R2_ = if (endedness == \"single\") then fastqs_R1 else fastqs_R2\n\n    if (produce_pbams) {\n        call cat.cat as combined_gtf_gz { input:\n            files=reference_annotations,\n            output_filename=\"combined_annotation.gtf.gz\",\n            ncpus=2,\n            ramGB=4,\n            disks=\"local-disk 100 SSD\",\n            runtime_environment=runtime_environment,\n        }\n        call gzip.decompress as combined_gtf { input:\n            input_file=combined_gtf_gz.concatenated,\n            output_filename=\"combined_annotation.gtf\",\n            ncpus=2,\n            ramGB=4,\n            disks=\"local-disk 100 SSD\",\n            runtime_environment=runtime_environment,\n        }\n    }\n\n    scatter (i in range(length(fastqs_R1))) {\n        call align { input:\n            endedness=endedness,\n            fastqs_R1=fastqs_R1[i],\n            fastqs_R2=fastqs_R2_[i],\n            index=align_index,\n            bamroot=\"rep\"+(i+1)+bamroot,\n            ncpus=align_ncpus,\n            ramGB=align_ramGB,\n            disks=align_disk,\n            runtime_environment=runtime_environment,\n        }\n\n        call samtools_quickcheck as check_genome { input:\n            bam=align.genomebam,\n            ncpus=bam_to_signals_ncpus,\n            ramGB=bam_to_signals_ramGB,\n            disks=bam_to_signals_disk,\n            runtime_environment=runtime_environment,\n        }\n\n        call samtools_quickcheck as check_anno { input:\n            bam=align.annobam,\n            ncpus=bam_to_signals_ncpus,\n            ramGB=bam_to_signals_ramGB,\n            disks=bam_to_signals_disk,\n            runtime_environment=runtime_environment,\n        }\n\n        if (produce_pbams) {\n\n            call gzip.decompress as reference_genome_decompressed { input:\n                input_file = select_first([reference_genome]),\n                ncpus = 2,\n                ramGB = 4,\n                disks = \"local-disk 40 SSD\",\n                runtime_environment=runtime_environment,\n            }\n\n            call gzip.decompress as reference_transcriptome_decompressed { input:\n                input_file = select_first([reference_transcriptome]),\n                ncpus = 2,\n                ramGB = 4,\n                disks = \"local-disk 40 SSD\",\n                runtime_environment=runtime_environment,\n            }\n\n            call pbam.make_genome_pbam as genome_pbam { input:\n                bam=align.genomebam,\n                reference_genome=reference_genome_decompressed.out,\n                ncpus=pbam_ncpus,\n                ramGB=pbam_ramGB,\n                disks=pbam_disks,\n                runtime_environment=runtime_environment,\n            }\n\n            call pbam.make_transcriptome_pbam as anno_pbam { input:\n                bam = align.annobam,\n                reference_genome=reference_genome_decompressed.out,\n                reference_transcriptome=reference_transcriptome_decompressed.out,\n                reference_annotation=select_first([combined_gtf.out]),\n                ncpus=pbam_ncpus,\n                ramGB=pbam_ramGB,\n                disks=pbam_disks,\n                runtime_environment=runtime_environment,\n            }\n        }\n\n        File genome_alignment = select_first([genome_pbam.out, align.genomebam])\n        File transcriptome_alignment = select_first([anno_pbam.out, align.annobam])\n\n        call bam_to_signals { input:\n            input_bam=genome_alignment,\n            chrom_sizes=chrom_sizes,\n            strandedness=strandedness,\n            bamroot=\"rep\"+(i+1)+bamroot+\"_genome\",\n            ncpus=bam_to_signals_ncpus,\n            ramGB=bam_to_signals_ramGB,\n            disks=bam_to_signals_disk,\n            runtime_environment=runtime_environment,\n        }\n\n        call rsem_quant { input:\n            rsem_index=rsem_index,\n            rnd_seed=rnd_seed,\n            anno_bam=transcriptome_alignment,\n            endedness=endedness,\n            read_strand=strandedness_direction,\n            ncpus=rsem_ncpus,\n            ramGB=rsem_ramGB,\n            disks=rsem_disk,\n            runtime_environment=runtime_environment,\n        }\n    }\n\n    if (run_kallisto) {\n      scatter (i in range(length(fastqs_R1))) {\n          Float? kallisto_sd = if (length(kallisto_sd_of_fragment_length) > 0) then kallisto_sd_of_fragment_length[i] else kallisto_sd_undefined\n          Int? kallisto_fl = if (length(kallisto_fragment_length) > 0) then kallisto_fragment_length[i] else kallisto_fragment_length_undefined\n          call kallisto { input:\n              fastqs_R1=fastqs_R1[i],\n              fastqs_R2=fastqs_R2_[i],\n              endedness=endedness,\n              strandedness_direction=strandedness_direction,\n              kallisto_index=select_first([kallisto_index]),\n              number_of_threads=select_first([kallisto_number_of_threads]),\n              ramGB=select_first([kallisto_ramGB]),\n              fragment_length=kallisto_fl,\n              sd_of_fragment_length=kallisto_sd,\n              disks=kallisto_disk,\n              out_prefix=\"rep\"+(i+1)+bamroot,\n              runtime_environment=runtime_environment,\n          }\n      }\n    }\n\n\n\n# if there are exactly two replicates, calculate the madQC metrics and draw a plot\n    if (length(fastqs_R1) == 2) {\n        call mad_qc { input:\n            quants1=rsem_quant.genes_results[0],\n            quants2=rsem_quant.genes_results[1],\n            disks=mad_qc_disk,\n            runtime_environment=runtime_environment,\n        }\n    }\n\n    scatter (i in range(length(align.annobam))) {\n        # if pbams are present they will be in the beginning and thus used, and if not the bams directly from alignment are used\n        Array[File] annobams = select_all(flatten([anno_pbam.out, align.annobam]))\n\n        call rna_qc { input:\n            input_bam=select_first([annobams[i]]),\n            tr_id_to_gene_type_tsv=rna_qc_tr_id_to_gene_type_tsv,\n            output_filename=\"rep\"+(i+1)+bamroot+\"_qc.json\",\n            disks=rna_qc_disk,\n            runtime_environment=runtime_environment,\n        }\n    }\n}\n\n\ntask align {\n    input {\n        Array[File] fastqs_R1\n        Array[File] fastqs_R2\n        String endedness\n        File index\n        String bamroot\n        Int ncpus\n        Int ramGB\n        String? disks\n        RuntimeEnvironment runtime_environment\n    }\n\n    command {\n        python3 $(which align.py) \\\n            --fastqs_R1 ~{sep=' ' fastqs_R1} \\\n            --fastqs_R2 ~{sep=' ' fastqs_R2} \\\n            --endedness ~{endedness} \\\n            --index ~{index} \\\n            ~{\"--bamroot \" + bamroot} \\\n            ~{\"--ncpus \" + ncpus} \\\n            ~{\"--ramGB \" + ramGB}\n    }\n\n    output {\n        File genomebam = \"~{bamroot}_genome.bam\"\n        File annobam = \"~{bamroot}_anno.bam\"\n        File genome_flagstat = \"~{bamroot}_genome_flagstat.txt\"\n        File anno_flagstat = \"~{bamroot}_anno_flagstat.txt\"\n        File log = \"~{bamroot}_Log.final.out\"\n        File genome_flagstat_json = \"~{bamroot}_genome_flagstat.json\"\n        File anno_flagstat_json = \"~{bamroot}_anno_flagstat.json\"\n        File log_json = \"~{bamroot}_Log.final.json\"\n        File python_log = \"align.log\"\n    }\n\n    runtime {\n      cpu: ncpus\n      memory: \"~{ramGB} GB\"\n      disks : select_first([disks,\"local-disk 100 SSD\"])\n      docker: runtime_environment.docker\n      singularity: runtime_environment.singularity\n    }\n}\n\ntask samtools_quickcheck {\n    input {\n        File bam\n        Int ncpus\n        Int ramGB\n        String? disks\n        RuntimeEnvironment runtime_environment\n    }\n\n    command {\n        samtools quickcheck ~{bam}\n    }\n\n    runtime {\n      cpu: ncpus\n      memory: \"~{ramGB} GB\"\n      disks : select_first([disks,\"local-disk 100 SSD\"])\n      docker: runtime_environment.docker\n      singularity: runtime_environment.singularity\n    }\n}\n\ntask  bam_to_signals {\n    input {\n        File? null\n        File input_bam\n        File chrom_sizes\n        String strandedness\n        String bamroot\n        Int ncpus\n        Int ramGB\n        String? disks\n        RuntimeEnvironment runtime_environment\n    }\n\n    command {\n        python3 $(which bam_to_signals.py) \\\n            --bamfile ~{input_bam} \\\n            --chrom_sizes ~{chrom_sizes} \\\n            --strandedness ~{strandedness} \\\n            --bamroot ~{bamroot}\n    }\n\n    output {\n        File? unique_unstranded = if (strandedness == \"unstranded\") then glob(\"*_genome_uniq.bw\")[0] else null\n        File? all_unstranded = if (strandedness == \"unstranded\") then glob(\"*_genome_all.bw\")[0] else null\n        File? unique_plus = if (strandedness == \"stranded\") then glob(\"*_genome_plusUniq.bw\")[0] else null\n        File? unique_minus = if (strandedness == \"stranded\") then glob(\"*_genome_minusUniq.bw\")[0] else null\n        File? all_plus = if (strandedness == \"stranded\") then glob(\"*_genome_plusAll.bw\")[0] else null\n        File? all_minus = if (strandedness == \"stranded\") then glob(\"*_genome_minusAll.bw\")[0] else null\n        File python_log = \"bam_to_signals.log\"\n    }\n\n    runtime {\n        cpu: ncpus\n        memory: \"~{ramGB} GB\"\n        disks : select_first([disks,\"local-disk 100 SSD\"])\n        docker: runtime_environment.docker\n        singularity: runtime_environment.singularity\n    }\n}\n\ntask rsem_quant {\n    input {\n        File rsem_index\n        File anno_bam\n        String endedness\n        String read_strand\n        Int rnd_seed\n        Int ncpus\n        Int ramGB\n        String? disks\n        RuntimeEnvironment runtime_environment\n    }\n\n    command {\n        python3 $(which rsem_quant.py) \\\n            --rsem_index ~{rsem_index} \\\n            --anno_bam ~{anno_bam} \\\n            --endedness ~{endedness} \\\n            --read_strand ~{read_strand} \\\n            --rnd_seed ~{rnd_seed} \\\n            --ncpus ~{ncpus} \\\n            --ramGB ~{ramGB}\n    }\n\n    output {\n        File genes_results = glob(\"*.genes.results\")[0]\n        File isoforms_results = glob(\"*.isoforms.results\")[0]\n        File python_log = \"rsem_quant.log\"\n        File number_of_genes = glob(\"*_number_of_genes_detected.json\")[0]\n    }\n\n    runtime {\n        cpu: ncpus\n        memory: \"~{ramGB} GB\"\n        disks : select_first([disks,\"local-disk 100 SSD\"])\n        docker: runtime_environment.docker\n        singularity: runtime_environment.singularity\n    }\n}\n\ntask kallisto {\n    input {\n        Array[File] fastqs_R1\n        Array[File] fastqs_R2\n        File kallisto_index\n        String endedness\n        String strandedness_direction\n        Int number_of_threads\n        Int ramGB\n        String out_prefix\n        Int? fragment_length\n        Float? sd_of_fragment_length\n        String? disks\n        RuntimeEnvironment runtime_environment\n    }\n\n    command {\n        python3 $(which kallisto_quant.py) \\\n            --fastqs_R1 ~{sep=' ' fastqs_R1} \\\n            --fastqs_R2 ~{sep=' ' fastqs_R2} \\\n            --number_of_threads ~{number_of_threads} \\\n            --strandedness ~{strandedness_direction} \\\n            --path_to_index ~{kallisto_index} \\\n            --endedness ~{endedness} \\\n            ~{\"--fragment_length \" + fragment_length} \\\n            ~{\"--sd_of_fragment_length \" + sd_of_fragment_length} \\\n            ~{\"--out_prefix \" + out_prefix}\n    }\n\n    output {\n        File quants = \"kallisto_out/~{out_prefix}_abundance.tsv\"\n        File python_log = \"kallisto_quant.log\"\n    }\n\n    runtime {\n        cpu: number_of_threads\n        memory: \"~{ramGB} GB\"\n        disks: select_first([disks, \"local-disk 100 SSD\"])\n        docker: runtime_environment.docker\n        singularity: runtime_environment.singularity\n    }\n}\n\ntask mad_qc {\n    input {\n        File quants1\n        File quants2\n        String? disks\n        RuntimeEnvironment runtime_environment\n    }\n\n    command {\n        python3 $(which mad_qc.py) \\\n            --quants1 ~{quants1} \\\n            --quants2 ~{quants2} \\\n            --MAD_R_path $(which MAD.R)\n    }\n\n    output {\n        File madQCplot = glob(\"*_mad_plot.png\")[0]\n        File madQCmetrics = glob(\"*_mad_qc_metrics.json\")[0]\n        File python_log = \"mad_qc.log\"\n    }\n\n    runtime {\n        cpu: 2\n        memory: \"3400 MB\"\n        disks: select_first([disks,\"local-disk 100 SSD\"])\n        docker: runtime_environment.docker\n        singularity: runtime_environment.singularity\n    }\n}\n\ntask rna_qc {\n    input {\n        File input_bam\n        File tr_id_to_gene_type_tsv\n        String output_filename\n        String? disks\n        RuntimeEnvironment runtime_environment\n    }\n\n    command {\n        python3 $(which rna_qc.py) \\\n            --input_bam ~{input_bam} \\\n            --tr_id_to_gene_type_tsv ~{tr_id_to_gene_type_tsv} \\\n            --output_filename ~{output_filename}\n    }\n\n    output {\n        File rnaQC = output_filename\n        File python_log = \"rna_qc.log\"\n    }\n\n    runtime {\n        cpu: 2\n        memory: \"1024 MB\"\n        disks: select_first([disks, \"local-disk 100 SSD\"])\n        docker: runtime_environment.docker\n        singularity: runtime_environment.singularity\n    }\n}\n",
+    "workflowUrl": ""
+  },
+  "workflowName": "rna",
+  "workflowProcessingEvents": [
+    {
+      "cromwellId": "cromid-57714de",
+      "cromwellVersion": "59",
+      "description": "PickedUp",
+      "timestamp": "2022-02-10T03:38:09.419Z"
+    },
+    {
+      "cromwellId": "cromid-57714de",
+      "cromwellVersion": "59",
+      "description": "Finished",
+      "timestamp": "2022-02-10T07:42:36.797Z"
+    }
+  ],
+  "workflowRoot": "gs://encode-processing/caper_out_v04_05/rna/ce5f9715-4b2f-455a-ab56-872d1f550994/"
+}
