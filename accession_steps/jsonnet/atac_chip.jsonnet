@@ -149,8 +149,6 @@
     local shared_file_props_no_qc = {
       file_format_type: file_format_type,
       output_type: 'IDR thresholded peaks',
-      filter_type: 'IDR',
-      filter_value: 0.05,
     },
     local shared_file_props = shared_file_props_no_qc {
       quality_metrics: (if is_atac then ['atac_replication', 'atac_peak_enrichment'] else [
