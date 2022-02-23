@@ -95,5 +95,6 @@ def local_accessioner(
 
 @pytest.mark.docker
 @pytest.mark.filesystem
+@pytest.mark.skip(reason="Docker tests are flaky on CircleCI")
 def test_accession_local_workflow(local_accessioner):
     local_accessioner.accession_steps(force=True)

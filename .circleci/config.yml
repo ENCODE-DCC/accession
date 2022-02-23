@@ -3,31 +3,8 @@ version: 2.1
 
 py37: &py37
   docker:
-    - image: circleci/python:3.7.3-stretch
+    - image: cimg/python:3.7.4
   working_directory: ~/accession
-
-defaults: &defaults
-  docker:
-    - image: cimg/base:2020.01
-  working_directory: ~/accession
-
-machine_defaults: &machine_defaults
-  machine:
-    image: ubuntu-2004:202104-01
-  resource_class: 2xlarge
-  working_directory: ~/accession
-
-make_tag: &make_tag
-  name: make docker image tag
-  command: |
-    echo "export TAG=quay.io/encode-dcc/${CIRCLE_PROJECT_REPONAME}:${CIRCLE_BRANCH}_${CIRCLE_WORKFLOW_ID}" >> ${BASH_ENV}
-
-only_dev_and_master: &only_dev_and_master
-  filters:
-    branches:
-      only:
-        - dev
-        - master
 
 commands:
   install_shellcheck:
@@ -48,36 +25,15 @@ commands:
     description: Install and run tox with a given environment
     parameters:
       toxenv:
-        description: The name of the environment as per tox.ini, e.g. py36 or lint
+        description: The name of the environment as per tox.ini, e.g. py37 or lint
         type: string
-      docker:
-        description: Determines if the test needs to use --docker
-        type: boolean
-        default: false
       extra_args:
         description: Extra arguments that are consumed only when running pytest
         type: string
         default: ''
     steps:
-      - when:
-          condition: <<parameters.docker>>
-          steps:
-            - attach_workspace:
-                at: ~/accession
-            - run:
-                name: Run tests using docker image
-                command: |
-                  pyenv install 3.6.7
-                  pyenv global 3.6.7
-                  pip install tox
-                  echo "Sourcing env vars:" && cat vars.sh && source vars.sh
-                  docker pull "${TAG}"
-                  tox -e << parameters.toxenv >> -- --docker "${TAG}" << parameters.extra_args >>
-      - unless:
-          condition: <<parameters.docker>>
-          steps:
-            - run: sudo pip install tox
-            - run: tox -e << parameters.toxenv >> -- << parameters.extra_args >>
+      - run: pip install tox
+      - run: tox -e << parameters.toxenv >> -- << parameters.extra_args >>
 
 jobs:
   lint:
@@ -88,13 +44,12 @@ jobs:
       - install_jsonnet
       - run_tox:
           toxenv: lint
-  test_py36:
-    <<: *machine_defaults
+  test_py37:
+    <<: *py37
     steps:
       - checkout
       - run_tox:
-          toxenv: py36
-          docker: true
+          toxenv: py37
           extra_args: -vv
   docs:
     <<: *py37
@@ -114,12 +69,6 @@ jobs:
       - checkout
       - run_tox:
           toxenv: coverage-report
-  release_to_pypi:
-    <<: *py37
-    steps:
-      - checkout
-      - run: sudo pip install --upgrade setuptools wheel twine
-      - run: ./release_to_pypi.sh https://upload.pypi.org/legacy/
   conf:
     <<: *py37
     description: Generates the templated JSON, and exit with non-zero code if the new files are different than what was checked into the repo.
@@ -139,81 +88,6 @@ jobs:
               echo "Freshly generated config is different than what was checked in. Make sure to run `tox -e conf` and `tox -e lint` before pushing."
               exit 1
             fi
-  build:
-    <<: *defaults
-    steps:
-      - checkout
-      - setup_remote_docker
-      - install_jq
-      - run: *make_tag
-      - run:
-          name: build test docker image
-          command: |
-            source ${BASH_ENV}
-            docker login -u=${QUAY_ROBOT_USER} -p=${QUAY_ROBOT_USER_TOKEN} quay.io
-            # We use a regex to filter out RC tags like v90rc2 that don't end up on prod
-            # Parsing encodeproject.org metadata (GET /) is less robust than the Github API
-            LATEST_PORTAL_TAG=$(curl -s https://api.github.com/repos/ENCODE-DCC/encoded/tags | jq  -r '[.[] | select(.name | test("^v\\d{2,3}\\.\\d(-hotfix-\\d)?$"))][0].name')
-            echo "Found latest portal tag from Github: ${LATEST_PORTAL_TAG}"
-            # Get the latest accession git tag reachable from current commit
-            LATEST_ACCESSION_GIT_TAG=$(python3 -c "import accession;print(accession.__version__)")
-            echo "Found latest accession git tag: ${LATEST_ACCESSION_GIT_TAG}"
-            # Set the default tag to cache from
-            CACHE_TAG="template"
-            # See https://superuser.com/a/1176569, captures cURL return code
-            # We check if the portal tag is on quay, if not then we can't use it as build cache, and we use the accession tag instead
-            IMAGE_URL="https://quay.io/api/v1/repository/encode-dcc/accession/tag/${LATEST_PORTAL_TAG}/images"
-            TAG_STATUS=$(curl -LI ${IMAGE_URL} -o /dev/null -w '%{http_code}\n' -s)
-            echo "Attempted to find image tagged with current portal version at ${IMAGE_URL}, got ${TAG_STATUS}"
-            # If we found the portal tag, then use it as a cache
-            if [[ "${TAG_STATUS}" -eq "200" ]]; then CACHE_TAG="${LATEST_PORTAL_TAG}"; fi
-
-            # Check if the accession tag is on quay
-            IMAGE_URL="https://quay.io/api/v1/repository/encode-dcc/accession/tag/${LATEST_ACCESSION_GIT_TAG}/images"
-            TAG_STATUS=$(curl -LI ${IMAGE_URL} -o /dev/null -w '%{http_code}\n' -s)
-            echo "Attempted to find image tagged with current accession version at ${IMAGE_URL}, got ${TAG_STATUS}"
-            # If we found the accession tag, then use it as a cache
-            if [[ "${TAG_STATUS}" -eq "200" ]]; then CACHE_TAG="${LATEST_ACCESSION_GIT_TAG}"; fi
-
-            # Create tags for the image to build from the latest portal and accession tags
-            QUAY_NAMESPACED_REPO="quay.io/encode-dcc/${CIRCLE_PROJECT_REPONAME}"
-            CACHE_TAG="${QUAY_NAMESPACED_REPO}:${CACHE_TAG}"
-            echo "Will use ${CACHE_TAG} as docker build cache"
-            PORTAL_VERSION_DOCKER_TAG="${QUAY_NAMESPACED_REPO}:${LATEST_PORTAL_TAG}"
-            ACCESSION_VERSION_DOCKER_TAG="${QUAY_NAMESPACED_REPO}:${LATEST_ACCESSION_GIT_TAG}"
-            TEMPLATE_DOCKER_TAG="${QUAY_NAMESPACED_REPO}:template"
-            docker pull "${CACHE_TAG}"
-            docker build --cache-from "${CACHE_TAG}" -f docker/Dockerfile -t "${TAG}" --build-arg ENCODED_RELEASE_TAG="${LATEST_PORTAL_TAG}" .
-            docker push "${TAG}"
-            docker logout
-            ENV_FILE="vars.sh"
-            echo "export PORTAL_VERSION_DOCKER_TAG=${PORTAL_VERSION_DOCKER_TAG}" > "${ENV_FILE}"
-            echo "export ACCESSION_VERSION_DOCKER_TAG=${ACCESSION_VERSION_DOCKER_TAG}" >> "${ENV_FILE}"
-            echo "export TEMPLATE_DOCKER_TAG=${TEMPLATE_DOCKER_TAG}" >> "${ENV_FILE}"
-            echo "export TAG=${TAG}" >> "${ENV_FILE}"
-      - persist_to_workspace:
-          root: .
-          paths:
-            - vars.sh
-  push:
-    <<: *defaults
-    steps:
-      - setup_remote_docker
-      - attach_workspace:
-          at: ~/accession
-      - run:
-          name: push test docker image
-          command: |
-            echo "Sourcing env vars:" && cat vars.sh && source vars.sh
-            docker login -u=${QUAY_ROBOT_USER} -p=${QUAY_ROBOT_USER_TOKEN} quay.io
-            docker pull "${TAG}"
-            docker tag "${TAG}" "${ACCESSION_VERSION_DOCKER_TAG}"
-            docker tag "${TAG}" "${PORTAL_VERSION_DOCKER_TAG}"
-            docker tag "${TAG}" "${TEMPLATE_DOCKER_TAG}"
-            docker push "${ACCESSION_VERSION_DOCKER_TAG}"
-            docker push "${PORTAL_VERSION_DOCKER_TAG}"
-            docker push "${TEMPLATE_DOCKER_TAG}"
-            docker logout
 
 workflows:
   build_workflow:
@@ -221,13 +95,5 @@ workflows:
       - lint
       - pypi-description
       - docs
-      - build
       - conf
-      - test_py36:
-          requires:
-            - build
-      - push:
-          <<: *only_dev_and_master
-          requires:
-            - build
-            - test_py36
+      - test_py37

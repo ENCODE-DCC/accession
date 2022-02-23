@@ -123,6 +123,7 @@ def test_accession_experiment(mocker, mock_accession):
 
 @pytest.mark.docker
 @pytest.mark.filesystem
+@pytest.mark.skip(reason="Docker tests are flaky on CircleCI")
 def test_get_encode_file_matching_md5_of_blob(mirna_accessioner):
     fastq = mirna_accessioner.analysis.raw_fastqs[0]
     portal_file = mirna_accessioner.get_encode_file_matching_md5_of_blob(fastq)
@@ -303,18 +304,21 @@ def test_accession_post_analysis_log_on_alias_conflict(mocker, mock_accession):
 
 @pytest.mark.docker
 @pytest.mark.filesystem
+@pytest.mark.skip(reason="Docker tests are flaky on CircleCI")
 def test_raw_files_accessioned(mirna_accessioner):
     assert mirna_accessioner.raw_files_accessioned()
 
 
 @pytest.mark.docker
 @pytest.mark.filesystem
+@pytest.mark.skip(reason="Docker tests are flaky on CircleCI")
 def test_assembly(mirna_accessioner):
     assert mirna_accessioner.assembly == "mm10"
 
 
 @pytest.mark.docker
 @pytest.mark.filesystem
+@pytest.mark.skip(reason="Docker tests are flaky on CircleCI")
 def test_genome_annotation(mirna_accessioner):
     assert mirna_accessioner.genome_annotation == "M21"
 
@@ -419,6 +423,7 @@ def mock_post_step_run(payload, *args, **kwargs):
 
 @pytest.mark.docker
 @pytest.mark.filesystem
+@pytest.mark.skip(reason="Docker tests are flaky on CircleCI")
 def test_get_or_make_step_run(mocker, mirna_accessioner):
     mocker.patch.object(mirna_accessioner.conn, "post", mock_post_step_run)
     bowtie_step = mirna_accessioner.steps.content[0]
@@ -430,6 +435,7 @@ def test_get_or_make_step_run(mocker, mirna_accessioner):
 
 @pytest.mark.docker
 @pytest.mark.filesystem
+@pytest.mark.skip(reason="Docker tests are flaky on CircleCI")
 def test_accession_file(mirna_accessioner):
     bowtie_step = mirna_accessioner.steps.content[0]
     analysis = mirna_accessioner.analysis
@@ -446,6 +452,7 @@ def test_accession_file(mirna_accessioner):
 
 @pytest.mark.docker
 @pytest.mark.filesystem
+@pytest.mark.skip(reason="Docker tests are flaky on CircleCI")
 def test_make_file_obj(mirna_accessioner):
     bowtie_step = mirna_accessioner.steps.content[0]
     analysis = mirna_accessioner.analysis

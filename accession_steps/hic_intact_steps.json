@@ -329,7 +329,7 @@
           ],
           "file_format": "bigWig",
           "filekey": "bigwig",
-          "output_type": "raw signal",
+          "output_type": "DNA accessibility raw signal",
           "quality_metrics": []
         }
       ],
