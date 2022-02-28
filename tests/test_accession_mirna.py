@@ -53,6 +53,7 @@ def mock_replicated_mirna_accession(mocker, mirna_replicated_analysis, mock_acce
 
 @pytest.mark.docker
 @pytest.mark.filesystem
+@pytest.mark.skip(reason="Docker tests are flaky on CircleCI")
 def test_accession_mirna_replicated(
     accessioner_factory, mirna_replicated_metadata_path, validate_accessioning
 ):
@@ -68,6 +69,7 @@ def test_accession_mirna_replicated(
 
 @pytest.mark.docker
 @pytest.mark.filesystem
+@pytest.mark.skip(reason="Docker tests are flaky on CircleCI")
 def test_accession_mirna_unreplicated(accessioner_factory, validate_accessioning):
     current_dir = Path(__file__).resolve()
     metadata_json_path = (

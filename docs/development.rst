@@ -32,11 +32,11 @@ docs requirements:
     $ python -m venv venv && source venv/bin/activate  # or your favorite environment manager
     (venv) $ pip install -e '.[dev]'
 
-To run the fast tests, use this command:
+To run tests:
 
 .. code-block:: bash
 
-   $ tox -e py36 -- -m "not docker"
+   $ tox -e py37
 
 To autoformat and lint your code, run the following:
 
