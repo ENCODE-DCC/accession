@@ -143,13 +143,14 @@ def check_or_set_lab_award(lab: Optional[str], award: Optional[str]) -> Tuple[st
     return lab, award
 
 
-def _check_accession_only_allowed_for_segway(
-    accession: Optional[str], pipeline_type: str
-) -> None:
-    if accession is not None and pipeline_type != "segway":
-        raise ValueError("Can only specify accession for pipeline type segway")
-    if accession is None and pipeline_type == "segway":
-        raise ValueError("Must specify accession for segway pipeline type")
+def _check_accession_required(accession: Optional[str], pipeline_type: str) -> None:
+    accession_required_pipelines = ("segway", "genophase", "megamap")
+    if accession is not None and pipeline_type not in accession_required_pipelines:
+        raise ValueError(
+            f"Can only specify accession for pipeline type {pipeline_type}"
+        )
+    if accession is None and pipeline_type in accession_required_pipelines:
+        raise ValueError(f"Must specify accession for pipeline type {pipeline_type}")
 
 
 def get_metadatas_from_args(args: argparse.Namespace) -> List[str]:
@@ -170,9 +171,7 @@ def main() -> None:
     parser = get_parser()
     args = parser.parse_args()
     lab, award = check_or_set_lab_award(args.lab, args.award)
-    _check_accession_only_allowed_for_segway(
-        args.annotation_accession, args.pipeline_type
-    )
+    _check_accession_required(args.annotation_accession, args.pipeline_type)
     queue_info = QueueInfo.from_env()
     if args.accession_metadata is not None or args.metadata_list is not None:
         metadatas = get_metadatas_from_args(args)

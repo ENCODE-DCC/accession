@@ -1,0 +1,87 @@
+{
+  "accession.steps": [
+    {
+      "dcc_step_run": "hic-alignment-merging-filtering-step-v-1",
+      "dcc_step_version": "/analysis-step-versions/hic-alignment-merging-filtering-step-v-1-1/",
+      "wdl_files": [
+        {
+          "derived_from_files": [
+            {
+              "derived_from_filekey": "bams",
+              "derived_from_inputs": true,
+              "derived_from_task": "merged"
+            },
+            {
+              "derived_from_filekey": "reference_fasta",
+              "derived_from_inputs": true,
+              "derived_from_task": "gatk"
+            },
+            {
+              "derived_from_filekey": "bundle_tar",
+              "derived_from_inputs": true,
+              "derived_from_task": "gatk"
+            }
+          ],
+          "file_format": "vcf",
+          "filekey": "hic_vcf",
+          "output_type": "phased variant calls"
+        },
+        {
+          "derived_from_files": [
+            {
+              "derived_from_filekey": "bams",
+              "derived_from_inputs": true,
+              "derived_from_task": "merged"
+            },
+            {
+              "derived_from_filekey": "reference_fasta",
+              "derived_from_inputs": true,
+              "derived_from_task": "gatk"
+            },
+            {
+              "derived_from_filekey": "bundle_tar",
+              "derived_from_inputs": true,
+              "derived_from_task": "gatk"
+            }
+          ],
+          "file_format": "hic",
+          "filekey": "hic",
+          "output_type": "variants chromatin interactions"
+        }
+      ],
+      "wdl_task_name": "run_3d_dna"
+    },
+    {
+      "dcc_step_run": "hic-alignment-merging-filtering-step-v-1",
+      "dcc_step_version": "/analysis-step-versions/hic-alignment-merging-filtering-step-v-1-1/",
+      "wdl_files": [
+        {
+          "derived_from_files": [
+            {
+              "derived_from_filekey": "bams",
+              "derived_from_inputs": true,
+              "derived_from_task": "merged"
+            },
+            {
+              "derived_from_filekey": "reference_fasta",
+              "derived_from_inputs": true,
+              "derived_from_task": "gatk"
+            },
+            {
+              "derived_from_filekey": "bundle_tar",
+              "derived_from_inputs": true,
+              "derived_from_task": "gatk"
+            }
+          ],
+          "file_format": "tsv",
+          "filekey": "bedpe",
+          "output_type": "allele-specific variants"
+        }
+      ],
+      "wdl_task_name": "convert_psf_to_bedpe"
+    }
+  ],
+  "raw_fastqs_keys": [
+    "bams"
+  ]
+}
