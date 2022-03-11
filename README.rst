@@ -23,7 +23,7 @@ accession
 Installation
 =============
 
-Note: installation requires Python >= 3.6
+Note: installation requires Python >= 3.8
 
 .. code-block:: console
 

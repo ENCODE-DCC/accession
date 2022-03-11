@@ -1,9 +1,9 @@
 ---
 version: 2.1
 
-py37: &py37
+py38: &py38
   docker:
-    - image: cimg/python:3.7.4
+    - image: cimg/python:3.8.13
   working_directory: ~/accession
 
 commands:
@@ -25,7 +25,7 @@ commands:
     description: Install and run tox with a given environment
     parameters:
       toxenv:
-        description: The name of the environment as per tox.ini, e.g. py37 or lint
+        description: The name of the environment as per tox.ini, e.g. py38 or lint
         type: string
       extra_args:
         description: Extra arguments that are consumed only when running pytest
@@ -37,40 +37,40 @@ commands:
 
 jobs:
   lint:
-    <<: *py37
+    <<: *py38
     steps:
       - checkout
       - install_shellcheck
       - install_jsonnet
       - run_tox:
           toxenv: lint
-  test_py37:
-    <<: *py37
+  test_py38:
+    <<: *py38
     steps:
       - checkout
       - run_tox:
-          toxenv: py37
+          toxenv: py38
           extra_args: -vv
   docs:
-    <<: *py37
+    <<: *py38
     steps:
       - checkout
       - run_tox:
           toxenv: docs
   pypi-description:
-    <<: *py37
+    <<: *py38
     steps:
       - checkout
       - run_tox:
           toxenv: pypi-description
   coverage-report:
-    <<: *py37
+    <<: *py38
     steps:
       - checkout
       - run_tox:
           toxenv: coverage-report
   conf:
-    <<: *py37
+    <<: *py38
     description: Generates the templated JSON, and exit with non-zero code if the new files are different than what was checked into the repo.
     steps:
       - checkout
@@ -96,4 +96,4 @@ workflows:
       - pypi-description
       - docs
       - conf
-      - test_py37
+      - test_py38

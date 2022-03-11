@@ -36,7 +36,7 @@ To run tests:
 
 .. code-block:: bash
 
-   $ tox -e py37
+   $ tox -e py38
 
 To autoformat and lint your code, run the following:
 
