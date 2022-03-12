@@ -697,6 +697,7 @@ class Accession(ABC):
             file_params=file_params,
             file_size=file.size,
             file_md5sum=file.md5sum,
+            pseudo_haplotype=file_params.pseudo_haplotype,
             step_run_id=step_run.at_id,
             submitted_file_name=file.filename if not self.private_filenames else None,
             genome_annotation=self.genome_annotation,
@@ -2873,6 +2874,23 @@ class AccessionGenophase(Accession):
         return self._dataset
 
 
+class AccessionDiploidify(Accession):
+    QC_MAP: Dict[str, str] = {}
+
+    @property
+    def assembly(self) -> str:
+        filekey = "chrom_sizes"
+        return self.find_portal_property_from_filekey(filekey, EncodeFile.ASSEMBLY)
+
+    def get_preferred_default_qc_value(self, file: File) -> Union[int, float]:
+        return 0
+
+    def preferred_default_should_be_updated(
+        self, qc_value: Union[int, float], current_best_qc_value: Union[int, float]
+    ) -> bool:
+        return True
+
+
 class AccessionSegway(Accession):
     QC_MAP: Dict[str, str] = {"segway": "make_segway_qc"}
 
@@ -2964,6 +2982,7 @@ def accession_factory(
         "wgbs": AccessionWgbs,
         "hic": AccessionHic,
         "genophase": AccessionGenophase,
+        "diploidify": AccessionDiploidify,
         "segway": AccessionSegway,
     }
     selected_accession: Optional[Type[Accession]] = None

@@ -1,0 +1,135 @@
+{
+  "accession.steps": [
+    {
+      "dcc_step_run": "changeme",
+      "dcc_step_version": "/analysis-step-versions/changeme/",
+      "wdl_files": [
+        {
+          "derived_from_files": [
+            {
+              "derived_from_filekey": "merge",
+              "derived_from_inputs": true,
+              "derived_from_task": "bams"
+            },
+            {
+              "derived_from_filekey": "filter_chrom_sizes",
+              "derived_from_inputs": true,
+              "derived_from_task": "chrom_sizes"
+            }
+          ],
+          "file_format": "hic",
+          "filekey": "hic_r",
+          "output_type": "haplotype-specific chromatin interactions",
+          "pseudo_haplotype": "1",
+          "quality_metrics": []
+        },
+        {
+          "derived_from_files": [
+            {
+              "derived_from_filekey": "merge",
+              "derived_from_inputs": true,
+              "derived_from_task": "bams"
+            },
+            {
+              "derived_from_filekey": "filter_chrom_sizes",
+              "derived_from_inputs": true,
+              "derived_from_task": "chrom_sizes"
+            }
+          ],
+          "file_format": "hic",
+          "filekey": "hic_a",
+          "output_type": "haplotype-specific chromatin interactions",
+          "pseudo_haplotype": "2",
+          "quality_metrics": []
+        }
+      ],
+      "wdl_task_name": "create_diploid_hic"
+    },
+    {
+      "dcc_step_run": "changeme",
+      "dcc_step_version": "/analysis-step-versions/changeme/",
+      "wdl_files": [
+        {
+          "derived_from_files": [
+            {
+              "derived_from_filekey": "merge",
+              "derived_from_inputs": true,
+              "derived_from_task": "bams"
+            },
+            {
+              "derived_from_filekey": "filter_chrom_sizes",
+              "derived_from_inputs": true,
+              "derived_from_task": "chrom_sizes"
+            }
+          ],
+          "file_format": "bigWig",
+          "filekey": "bigwig_raw_r",
+          "output_type": "haplotype-specific DNA accessibility raw signal",
+          "pseudo_haplotype": "1",
+          "quality_metrics": []
+        },
+        {
+          "derived_from_files": [
+            {
+              "derived_from_filekey": "merge",
+              "derived_from_inputs": true,
+              "derived_from_task": "bams"
+            },
+            {
+              "derived_from_filekey": "filter_chrom_sizes",
+              "derived_from_inputs": true,
+              "derived_from_task": "chrom_sizes"
+            }
+          ],
+          "file_format": "hic",
+          "filekey": "bigwig_raw_a",
+          "output_type": "haplotype-specific DNA accessibility raw signal",
+          "pseudo_haplotype": "2",
+          "quality_metrics": []
+        },
+        {
+          "derived_from_files": [
+            {
+              "derived_from_filekey": "merge",
+              "derived_from_inputs": true,
+              "derived_from_task": "bams"
+            },
+            {
+              "derived_from_filekey": "filter_chrom_sizes",
+              "derived_from_inputs": true,
+              "derived_from_task": "chrom_sizes"
+            }
+          ],
+          "file_format": "bigWig",
+          "filekey": "bigwig_corrected_r",
+          "output_type": "haplotype-specific DNA accessibility corrected signal",
+          "pseudo_haplotype": "1",
+          "quality_metrics": []
+        },
+        {
+          "derived_from_files": [
+            {
+              "derived_from_filekey": "merge",
+              "derived_from_inputs": true,
+              "derived_from_task": "bams"
+            },
+            {
+              "derived_from_filekey": "filter_chrom_sizes",
+              "derived_from_inputs": true,
+              "derived_from_task": "chrom_sizes"
+            }
+          ],
+          "file_format": "hic",
+          "filekey": "bigwig_corrected_a",
+          "output_type": "haplotype-specific DNA accessibility corrected signal",
+          "pseudo_haplotype": "2",
+          "quality_metrics": []
+        }
+      ],
+      "wdl_task_name": "create_diploid_dhs"
+    }
+  ],
+  "raw_fastqs_keys": [
+    "bams"
+  ]
+}

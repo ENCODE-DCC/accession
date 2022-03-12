@@ -225,6 +225,7 @@ class EncodeFile:
         step_run_id: str,
         submitted_file_name: Optional[str] = None,
         genome_annotation: Optional[str] = None,
+        pseudo_haplotype: Optional[str] = None,
         extras: Optional[Dict[str, Any]] = None,
     ) -> Dict[str, Any]:
         """
@@ -253,6 +254,8 @@ class EncodeFile:
             obj["filter_type"] = file_params.filter_type
         if file_params.filter_value is not None:
             obj["filter_value"] = file_params.filter_value
+        if file_params.pseudo_haplotype is not None:
+            obj["pseudo_haplotype"] = file_params.pseudo_haplotype
         if extras is not None:
             obj.update(extras)
         obj[Connection.PROFILE_KEY] = "file"
