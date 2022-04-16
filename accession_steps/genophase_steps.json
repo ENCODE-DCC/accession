@@ -1,7 +1,7 @@
 {
   "accession.steps": [
     {
-      "dcc_step_run": "/analysis-step-runs/421cb15b-1a63-4494-813e-7104d042da46/",
+      "dcc_step_run": "/analysis-steps/hic-genophasing-step-v-1/",
       "dcc_step_version": "/analysis-step-versions/hic-genophasing-step-v-1-1/",
       "wdl_files": [
         {
@@ -52,7 +52,7 @@
       "wdl_task_name": "run_3d_dna"
     },
     {
-      "dcc_step_run": "/analysis-step-runs/421cb15b-1a63-4494-813e-7104d042da46/",
+      "dcc_step_run": "/analysis-steps/hic-genophasing-step-v-1/",
       "dcc_step_version": "/analysis-step-versions/hic-genophasing-step-v-1-1/",
       "wdl_files": [
         {
