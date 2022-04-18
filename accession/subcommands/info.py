@@ -184,7 +184,7 @@ def make_queries(
 
 
 def parse_ids(
-    ids: List[str]
+    ids: List[str],
 ) -> List[Union[WorkflowId, CromwellWorkflowLabel, ExperimentId]]:
     """
     Simple wrapper to parse each id in the list into the appropriate type
@@ -210,7 +210,7 @@ def parse_id(id: str) -> Union[WorkflowId, CromwellWorkflowLabel, ExperimentId]:
 
 
 def parse_date_range(
-    date_range: str
+    date_range: str,
 ) -> Tuple[Optional[datetime.date], Optional[datetime.date]]:
     """
     Returns a (start, end) tuple. If a bare date is specified, i.e. no dashes, then
