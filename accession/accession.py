@@ -2844,6 +2844,35 @@ class AccessionHic(Accession):
         return self.queue_qc(hic_qc, encode_file, "hic-quality-metric")
 
 
+class AccessionGenophase(Accession):
+    QC_MAP: Dict[str, str] = {}
+
+    @property
+    def assembly(self) -> str:
+        filekey = "reference_fasta"
+        return self.find_portal_property_from_filekey(filekey, EncodeFile.ASSEMBLY)
+
+    def get_preferred_default_qc_value(self, file: File) -> Union[int, float]:
+        raise NotImplementedError
+
+    def preferred_default_should_be_updated(
+        self, qc_value: Union[int, float], current_best_qc_value: Union[int, float]
+    ) -> bool:
+        raise NotImplementedError
+
+    @property
+    def dataset(self) -> EncodeDataset:
+        """
+        Override the base class implementation, we are accessioning files to an
+        Annotation, and the dataset property of the input bigwigs points to other
+        experiments. So instead we need to just use the passed-in Annotation accession.
+        """
+        if self._dataset is None:
+            experiment_obj = self.conn.get(self._annotation_accession, frame="embedded")
+            self._dataset = EncodeDataset(experiment_obj)
+        return self._dataset
+
+
 class AccessionSegway(Accession):
     QC_MAP: Dict[str, str] = {"segway": "make_segway_qc"}
 
@@ -2934,6 +2963,7 @@ def accession_factory(
         "dnase_starch_from_bam": AccessionDnaseStarchFromBam,
         "wgbs": AccessionWgbs,
         "hic": AccessionHic,
+        "genophase": AccessionGenophase,
         "segway": AccessionSegway,
     }
     selected_accession: Optional[Type[Accession]] = None

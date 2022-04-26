@@ -349,7 +349,7 @@ def test_encode_experiment_get_number_of_biological_replicates(encode_experiment
 
 
 def test_encode_experiment_get_number_of_biological_replicates_filters_by_status(
-    encode_experiment_ignored_replicates
+    encode_experiment_ignored_replicates,
 ):
     assert (
         encode_experiment_ignored_replicates.get_number_of_biological_replicates() == 1
@@ -361,7 +361,7 @@ def test_encode_experiment_get_number_of_technical_replicates(encode_experiment)
 
 
 def test_encode_experiment_get_number_of_technical_replicates_filters_by_status(
-    encode_experiment_ignored_replicates
+    encode_experiment_ignored_replicates,
 ):
     assert (
         encode_experiment_ignored_replicates.get_number_of_technical_replicates() == 1

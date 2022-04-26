@@ -1,7 +1,7 @@
 ---
 repos:
   - repo: https://github.com/psf/black
-    rev: 19.3b0
+    rev: 22.3.0
     hooks:
       - id: black
         language_version: python3.7
@@ -25,7 +25,7 @@ repos:
           - boto3-stubs[s3]==1.17.90
           - sqlalchemy-stubs==0.3
 
-  - repo: git://github.com/detailyang/pre-commit-shell
+  - repo: https://github.com/detailyang/pre-commit-shell
     rev: v1.0.6
     hooks:
       - id: shell-lint
@@ -54,11 +54,6 @@ repos:
           - --autofix
       - id: check-yaml
 
-  - repo: https://github.com/jumanjihouse/pre-commit-hook-yamlfmt
-    rev: 0.0.11
-    hooks:
-      - id: yamlfmt
-        args: [--mapping, '2', --sequence, '4', --offset, '2']
 
   - repo: https://github.com/macisamuele/language-formatters-pre-commit-hooks
     rev: v2.2.0
