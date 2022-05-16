@@ -1,8 +1,8 @@
 {
   "accession.steps": [
     {
-      "dcc_step_run": "changeme",
-      "dcc_step_version": "/analysis-step-versions/changeme/",
+      "dcc_step_run": "/analysis-steps/hic-diploidification-step-v-1/",
+      "dcc_step_version": "/analysis-step-versions/hic-diploidification-step-v-1-1/",
       "wdl_files": [
         {
           "derived_from_files": [
@@ -46,8 +46,8 @@
       "wdl_task_name": "create_diploid_hic"
     },
     {
-      "dcc_step_run": "changeme",
-      "dcc_step_version": "/analysis-step-versions/changeme/",
+      "dcc_step_run": "/analysis-steps/hic-diploidification-step-v-1/",
+      "dcc_step_version": "/analysis-step-versions/hic-diploidification-step-v-1-1/",
       "wdl_files": [
         {
           "derived_from_files": [
