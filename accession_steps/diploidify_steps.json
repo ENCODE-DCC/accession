@@ -7,14 +7,14 @@
         {
           "derived_from_files": [
             {
-              "derived_from_filekey": "merge",
+              "derived_from_filekey": "bams",
               "derived_from_inputs": true,
-              "derived_from_task": "bams"
+              "derived_from_task": "merge"
             },
             {
-              "derived_from_filekey": "filter_chrom_sizes",
+              "derived_from_filekey": "chrom_sizes",
               "derived_from_inputs": true,
-              "derived_from_task": "chrom_sizes"
+              "derived_from_task": "filter_chrom_sizes"
             }
           ],
           "file_format": "hic",
@@ -26,14 +26,14 @@
         {
           "derived_from_files": [
             {
-              "derived_from_filekey": "merge",
+              "derived_from_filekey": "bams",
               "derived_from_inputs": true,
-              "derived_from_task": "bams"
+              "derived_from_task": "merge"
             },
             {
-              "derived_from_filekey": "filter_chrom_sizes",
+              "derived_from_filekey": "chrom_sizes",
               "derived_from_inputs": true,
-              "derived_from_task": "chrom_sizes"
+              "derived_from_task": "filter_chrom_sizes"
             }
           ],
           "file_format": "hic",
@@ -52,14 +52,14 @@
         {
           "derived_from_files": [
             {
-              "derived_from_filekey": "merge",
+              "derived_from_filekey": "bams",
               "derived_from_inputs": true,
-              "derived_from_task": "bams"
+              "derived_from_task": "merge"
             },
             {
-              "derived_from_filekey": "filter_chrom_sizes",
+              "derived_from_filekey": "chrom_sizes",
               "derived_from_inputs": true,
-              "derived_from_task": "chrom_sizes"
+              "derived_from_task": "filter_chrom_sizes"
             }
           ],
           "file_format": "bigWig",
@@ -71,14 +71,14 @@
         {
           "derived_from_files": [
             {
-              "derived_from_filekey": "merge",
+              "derived_from_filekey": "bams",
               "derived_from_inputs": true,
-              "derived_from_task": "bams"
+              "derived_from_task": "merge"
             },
             {
-              "derived_from_filekey": "filter_chrom_sizes",
+              "derived_from_filekey": "chrom_sizes",
               "derived_from_inputs": true,
-              "derived_from_task": "chrom_sizes"
+              "derived_from_task": "filter_chrom_sizes"
             }
           ],
           "file_format": "hic",
@@ -90,14 +90,14 @@
         {
           "derived_from_files": [
             {
-              "derived_from_filekey": "merge",
+              "derived_from_filekey": "bams",
               "derived_from_inputs": true,
-              "derived_from_task": "bams"
+              "derived_from_task": "merge"
             },
             {
-              "derived_from_filekey": "filter_chrom_sizes",
+              "derived_from_filekey": "chrom_sizes",
               "derived_from_inputs": true,
-              "derived_from_task": "chrom_sizes"
+              "derived_from_task": "filter_chrom_sizes"
             }
           ],
           "file_format": "bigWig",
@@ -109,14 +109,14 @@
         {
           "derived_from_files": [
             {
-              "derived_from_filekey": "merge",
+              "derived_from_filekey": "bams",
               "derived_from_inputs": true,
-              "derived_from_task": "bams"
+              "derived_from_task": "merge"
             },
             {
-              "derived_from_filekey": "filter_chrom_sizes",
+              "derived_from_filekey": "chrom_sizes",
               "derived_from_inputs": true,
-              "derived_from_task": "chrom_sizes"
+              "derived_from_task": "filter_chrom_sizes"
             }
           ],
           "file_format": "hic",
