@@ -81,7 +81,7 @@
               "derived_from_task": "filter_chrom_sizes"
             }
           ],
-          "file_format": "hic",
+          "file_format": "bigWig",
           "filekey": "bigwig_raw_a",
           "output_type": "haplotype-specific DNA accessibility raw signal",
           "pseudo_haplotype": "2",
@@ -119,7 +119,7 @@
               "derived_from_task": "filter_chrom_sizes"
             }
           ],
-          "file_format": "hic",
+          "file_format": "bigWig",
           "filekey": "bigwig_corrected_a",
           "output_type": "haplotype-specific DNA accessibility corrected signal",
           "pseudo_haplotype": "2",
