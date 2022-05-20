@@ -3045,13 +3045,15 @@ def _get_long_read_rna_steps_json_name_prefix_from_metadata(metadata: Metadata) 
 def _get_hic_steps_json_name_prefix_from_metadata(metadata: Metadata) -> str:
     """
     The JSON template to use for HiC depends on if it is intact or in situ, and if tasks
-    hiccups, arrowhead, and delta were called during the workflow. This function 
+    hiccups, arrowhead, and delta were called during the workflow. This function
     determines the appropriate one to use from the metadata.
     """
     intact = metadata.content["inputs"].get("intact")
-    low_contact = (metadata.content["inputs"].get("no_call_loops") 
-        and metadata.content["inputs"].get("no_call_tads") 
-        and metadata.content["inputs"].get("no_delta"))
+    low_contact = (
+        metadata.content["inputs"].get("no_call_loops")
+        and metadata.content["inputs"].get("no_call_tads")
+        and metadata.content["inputs"].get("no_delta")
+    )
     if intact:
         if low_contact:
             return "hic_intact_low_contact"
