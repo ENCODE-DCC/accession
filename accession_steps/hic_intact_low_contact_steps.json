@@ -1,0 +1,232 @@
+{
+  "accession.steps": [
+    {
+      "dcc_step_run": "hic-alignment-merging-filtering-step-v-1",
+      "dcc_step_version": "/analysis-step-versions/hic-alignment-merging-filtering-step-v-1-1/",
+      "wdl_files": [
+        {
+          "derived_from_files": [
+            {
+              "derived_from_filekey": "replicate",
+              "derived_from_inputs": true,
+              "derived_from_task": "align"
+            },
+            {
+              "derived_from_filekey": "reference_index",
+              "derived_from_inputs": true,
+              "derived_from_task": "align"
+            },
+            {
+              "allow_empty": true,
+              "derived_from_filekey": "restriction_sites",
+              "derived_from_inputs": true,
+              "derived_from_task": "chimeric_sam"
+            }
+          ],
+          "file_format": "bam",
+          "filekey": "deduped_bam",
+          "output_type": "alignments",
+          "quality_metrics": [
+            "hic"
+          ]
+        }
+      ],
+      "wdl_task_name": "dedup"
+    },
+    {
+      "dcc_step_run": "hic-pairs-generation-step-v-1",
+      "dcc_step_version": "/analysis-step-versions/hic-pairs-generation-step-v-1-0/",
+      "wdl_files": [
+        {
+          "derived_from_files": [
+            {
+              "derived_from_filekey": "deduped_bam",
+              "derived_from_task": "dedup"
+            },
+            {
+              "derived_from_filekey": "chrom_sizes",
+              "derived_from_inputs": true,
+              "derived_from_task": "pre_to_pairs"
+            }
+          ],
+          "file_format": "pairs",
+          "filekey": "out_file",
+          "output_type": "pairs",
+          "quality_metrics": []
+        }
+      ],
+      "wdl_task_name": "pre_to_pairs"
+    },
+    {
+      "dcc_step_run": "hic-merging-quantification-interaction-calling-step-v-1",
+      "dcc_step_version": "/analysis-step-versions/hic-merging-quantification-interaction-calling-step-v-1-1/",
+      "wdl_files": [
+        {
+          "callbacks": [
+            "maybe_update_output_type",
+            "maybe_preferred_default",
+            "add_filter_value"
+          ],
+          "derived_from_files": [
+            {
+              "derived_from_filekey": "deduped_bam",
+              "derived_from_task": "dedup"
+            },
+            {
+              "allow_empty": true,
+              "derived_from_filekey": "restriction_sites",
+              "derived_from_inputs": true,
+              "derived_from_task": "create_hic"
+            }
+          ],
+          "file_format": "hic",
+          "filekey": "output_hic",
+          "filter_type": "mapping quality",
+          "output_type": "chromatin interactions",
+          "quality_metrics": [
+            "hic"
+          ]
+        }
+      ],
+      "wdl_task_name": "add_norm"
+    },
+    {
+      "dcc_step_run": "hic-eigenvector-creation-step-v-1",
+      "dcc_step_version": "/analysis-step-versions/hic-eigenvector-creation-step-v-1-0/",
+      "wdl_files": [
+        {
+          "callbacks": [
+            "maybe_preferred_default"
+          ],
+          "derived_from_files": [
+            {
+              "derived_from_filekey": "output_hic",
+              "derived_from_task": "add_norm"
+            }
+          ],
+          "file_format": "bigWig",
+          "filekey": "eigenvector_bigwig",
+          "filter_type": "bin size (kb)",
+          "filter_value": 5,
+          "output_type": "genome compartments",
+          "quality_metrics": []
+        }
+      ],
+      "wdl_task_name": "create_eigenvector"
+    },
+    {
+      "dcc_step_run": "hic-eigenvector-creation-step-v-1",
+      "dcc_step_version": "/analysis-step-versions/hic-eigenvector-creation-step-v-1-0/",
+      "wdl_files": [
+        {
+          "derived_from_files": [
+            {
+              "derived_from_filekey": "output_hic",
+              "derived_from_task": "add_norm"
+            }
+          ],
+          "file_format": "bigWig",
+          "filekey": "eigenvector_bigwig",
+          "filter_type": "bin size (kb)",
+          "filter_value": 10,
+          "output_type": "genome compartments",
+          "quality_metrics": []
+        }
+      ],
+      "wdl_task_name": "create_eigenvector_10kb"
+    },
+    {
+      "dcc_step_run": "hic-genome-compartments-identification-step-v-1",
+      "dcc_step_version": "/analysis-step-versions/hic-genome-compartments-identification-step-v-1-0/",
+      "wdl_files": [
+        {
+          "derived_from_files": [
+            {
+              "derived_from_filekey": "output_hic",
+              "derived_from_task": "add_norm"
+            }
+          ],
+          "file_format": "bed",
+          "file_format_type": "bed9+",
+          "filekey": "subcompartments",
+          "filter_type": "bin size (kb)",
+          "filter_value": 100,
+          "output_type": "genome subcompartments",
+          "quality_metrics": []
+        }
+      ],
+      "wdl_task_name": "slice_100kb"
+    },
+    {
+      "dcc_step_run": "hic-genome-compartments-identification-step-v-1",
+      "dcc_step_version": "/analysis-step-versions/hic-genome-compartments-identification-step-v-1-0/",
+      "wdl_files": [
+        {
+          "derived_from_files": [
+            {
+              "derived_from_filekey": "output_hic",
+              "derived_from_task": "add_norm"
+            }
+          ],
+          "file_format": "bed",
+          "file_format_type": "bed9+",
+          "filekey": "subcompartments",
+          "filter_type": "bin size (kb)",
+          "filter_value": 50,
+          "output_type": "genome subcompartments",
+          "quality_metrics": []
+        }
+      ],
+      "wdl_task_name": "slice_50kb"
+    },
+    {
+      "dcc_step_run": "hic-genome-compartments-identification-step-v-1",
+      "dcc_step_version": "/analysis-step-versions/hic-genome-compartments-identification-step-v-1-0/",
+      "wdl_files": [
+        {
+          "derived_from_files": [
+            {
+              "derived_from_filekey": "output_hic",
+              "derived_from_task": "add_norm"
+            }
+          ],
+          "file_format": "bed",
+          "file_format_type": "bed9+",
+          "filekey": "subcompartments",
+          "filter_type": "bin size (kb)",
+          "filter_value": 25,
+          "output_type": "genome subcompartments",
+          "quality_metrics": []
+        }
+      ],
+      "wdl_task_name": "slice_25kb"
+    },
+    {
+      "dcc_step_run": "hic-dhs-accessibility-step-v-1",
+      "dcc_step_version": "/analysis-step-versions/hic-dhs-accessibility-step-v-1-0/",
+      "wdl_files": [
+        {
+          "derived_from_files": [
+            {
+              "derived_from_filekey": "deduped_bam",
+              "derived_from_task": "dedup"
+            },
+            {
+              "derived_from_filekey": "chrom_sizes",
+              "derived_from_inputs": true,
+              "derived_from_task": "create_accessibility_track"
+            }
+          ],
+          "file_format": "bigWig",
+          "filekey": "bigwig",
+          "output_type": "DNA accessibility raw signal",
+          "quality_metrics": []
+        }
+      ],
+      "wdl_task_name": "create_accessibility_track"
+    }
+  ],
+  "raw_fastqs_keys": [
+    "replicate"
+  ]
+}
