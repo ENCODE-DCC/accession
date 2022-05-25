@@ -3056,7 +3056,7 @@ def _get_hic_steps_json_name_prefix_from_metadata(metadata: Metadata) -> str:
     )
     if (metadata.content["inputs"].get("no_call_loops") != metadata.content["inputs"].get("no_call_tads")
         or metadata.content["inputs"].get("no_delta") != metadata.content["inputs"].get("no_call_tads")):
-            raise ValueError("Low contact HiC should be submitted with no_call_loops, no_call_tads, no_delta ALL set to the same value.")
+            raise ValueError("HiC should be submitted with no_call_loops, no_call_tads, no_delta ALL set to the same value.")
 
     if intact:
         if low_contact:
