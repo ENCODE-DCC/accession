@@ -112,3 +112,4 @@ class FileParams:
         )
         self.filter_type: Optional[str] = file_params.get("filter_type")
         self.filter_value: Optional[Union[float, int]] = file_params.get("filter_value")
+        self.pseudo_haplotype: Optional[str] = file_params.get("pseudo_haplotype")
