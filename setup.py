@@ -25,7 +25,7 @@ CLASSIFIERS = [
 INSTALL_REQUIRES = [
     "SQLAlchemy==1.3.17",
     "attrs",
-    "protobuf==3.20.1"
+    "protobuf==3.20.1",
     "boto3==1.17.108",
     "caper==1.5.1",
     "encode_utils==2.10.0",
