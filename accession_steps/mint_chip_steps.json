@@ -2,7 +2,7 @@
   "accession.steps": [
     {
       "dcc_step_run": "chip-seq-alignment-step-v-2",
-      "dcc_step_version": "/analysis-step-versions/chip-seq-alignment-step-v-2-2/",
+      "dcc_step_version": "/analysis-step-versions/chip-seq-alignment-step-v-2-0/",
       "wdl_files": [
         {
           "callbacks": [
@@ -41,7 +41,7 @@
     },
     {
       "dcc_step_run": "chip-seq-alignment-step-v-2",
-      "dcc_step_version": "/analysis-step-versions/chip-seq-alignment-step-v-2-2/",
+      "dcc_step_version": "/analysis-step-versions/chip-seq-alignment-step-v-2-0/",
       "wdl_files": [
         {
           "callbacks": [
