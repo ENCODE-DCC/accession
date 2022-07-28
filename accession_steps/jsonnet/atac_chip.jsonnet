@@ -421,9 +421,6 @@
   'histone_chip_pbam_steps.json': histone_common_properties {
     'accession.steps': chip_pbam_map_only_steps['accession.steps'] + $['histone_chip_peak_call_only_steps.json']['accession.steps'],
   },
-  'mint_chip_steps.json': histone_common_properties {
-    'accession.steps': $['chip_map_only_steps.json']['accession.steps'] + $['mint_chip_peak_call_only_steps.json']['accession.steps'],
-  },
   'atac_steps.json': {
     'accession.steps': atac_map_only_steps['accession.steps'] + atac_idr_peak_call_steps['accession.steps'] + atac_overlap_peak_call_steps['accession.steps'],
     quality_standard: '/quality-standards/encode4-atac-seq/',
