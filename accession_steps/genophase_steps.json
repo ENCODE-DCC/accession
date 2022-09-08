@@ -9,7 +9,7 @@
             {
               "derived_from_filekey": "bams",
               "derived_from_inputs": true,
-              "derived_from_task": "merged"
+              "derived_from_task": "gatk"
             },
             {
               "derived_from_filekey": "reference_fasta",
@@ -31,7 +31,7 @@
             {
               "derived_from_filekey": "bams",
               "derived_from_inputs": true,
-              "derived_from_task": "merged"
+              "derived_from_task": "gatk"
             },
             {
               "derived_from_filekey": "reference_fasta",
@@ -60,7 +60,7 @@
             {
               "derived_from_filekey": "bams",
               "derived_from_inputs": true,
-              "derived_from_task": "merged"
+              "derived_from_task": "gatk"
             },
             {
               "derived_from_filekey": "reference_fasta",
