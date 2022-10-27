@@ -10,11 +10,6 @@
           ],
           "derived_from_files": [
             {
-              "derived_from_filekey": "bams",
-              "derived_from_inputs": true,
-              "derived_from_task": "merge"
-            },
-            {
               "derived_from_filekey": "hic_files",
               "derived_from_inputs": true,
               "derived_from_task": "merge_stats_from_hic_files"
@@ -254,24 +249,19 @@
       "wdl_task_name": "localizer_delta"
     },
     {
-      "dcc_step_run": "hic-dhs-accessibility-step-v-1",
-      "dcc_step_version": "/analysis-step-versions/hic-dhs-accessibility-step-v-1-0/",
+      "dcc_step_run": "hic-dhs-merging-step-v-1",
+      "dcc_step_version": "/analysis-step-versions/hic-dhs-merging-step-v-1-0/",
       "wdl_files": [
         {
           "derived_from_files": [
             {
-              "derived_from_filekey": "bams",
+              "derived_from_filekey": "bigwig_files",
               "derived_from_inputs": true,
-              "derived_from_task": "merge"
-            },
-            {
-              "derived_from_filekey": "chrom_sizes",
-              "derived_from_inputs": true,
-              "derived_from_task": "create_accessibility_track"
+              "derived_from_task": "accessibility"
             }
           ],
           "file_format": "bigWig",
-          "filekey": "bigwig",
+          "filekey": "merged_bigwig",
           "output_type": "DNA accessibility raw signal",
           "quality_metrics": []
         }
@@ -280,6 +270,6 @@
     }
   ],
   "raw_fastqs_keys": [
-    "bams"
+    "hic_files"
   ]
 }
