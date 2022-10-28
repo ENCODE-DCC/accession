@@ -38,6 +38,7 @@
           "file_format": "bedpe",
           "filekey": "out_file",
           "filter_type": "mapping quality",
+          "filter_value": 30,
           "output_type": "topologically associated domains",
           "quality_metrics": []
         }
@@ -59,6 +60,7 @@
           "file_format": "bedpe",
           "filekey": "localized_loops",
           "filter_type": "mapping quality",
+          "filter_value": 30,
           "output_type": "long range chromatin interactions",
           "quality_metrics": []
         }
