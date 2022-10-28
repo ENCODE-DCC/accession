@@ -334,6 +334,7 @@ class EncodeAnalysis:
 class DatasetType(Enum):
     Annotation = "Annotation"
     Experiment = "Experiment"
+    AggregateSeries = "AggregateSeries"
 
 
 class EncodeDataset:
