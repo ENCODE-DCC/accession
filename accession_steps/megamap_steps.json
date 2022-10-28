@@ -12,7 +12,7 @@
             {
               "derived_from_filekey": "hic_files",
               "derived_from_inputs": true,
-              "derived_from_task": "merge_stats_from_hic_files"
+              "derived_from_task": "sum_hic_files"
             }
           ],
           "file_format": "hic",
