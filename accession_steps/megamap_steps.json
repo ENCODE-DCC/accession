@@ -256,7 +256,7 @@
           "quality_metrics": []
         }
       ],
-      "wdl_task_name": "create_accessibility_track"
+      "wdl_task_name": "accessibility"
     }
   ],
   "raw_fastqs_keys": [
