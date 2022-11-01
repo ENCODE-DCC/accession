@@ -18,7 +18,9 @@
           "filter_type": "mapping quality",
           "filter_value": 30,
           "output_type": "mapping quality thresholded chromatin interactions",
-          "quality_metrics": ["hic"]
+          "quality_metrics": [
+            "hic"
+          ]
         }
       ],
       "wdl_task_name": "add_norm"
