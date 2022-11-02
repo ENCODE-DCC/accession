@@ -2,7 +2,7 @@
   "accession.steps": [
     {
       "dcc_step_run": "hic-merging-quantification-interaction-calling-step-v-1",
-      "dcc_step_version": "/analysis-step-versions/hic-merging-quantification-interaction-calling-step-v-1-1/",
+      "dcc_step_version": "/analysis-step-versions/hic-merging-quantification-interaction-calling-step-v-1-2/",
       "wdl_files": [
         {
           "callbacks": [],
