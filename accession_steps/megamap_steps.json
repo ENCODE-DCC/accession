@@ -2,22 +2,15 @@
   "accession.steps": [
     {
       "dcc_step_run": "hic-merging-quantification-interaction-calling-step-v-1",
-      "dcc_step_version": "/analysis-step-versions/hic-merging-quantification-interaction-calling-step-v-1-1/",
+      "dcc_step_version": "/analysis-step-versions/hic-merging-quantification-interaction-calling-step-v-1-2/",
       "wdl_files": [
         {
-          "callbacks": [
-            "maybe_preferred_default"
-          ],
+          "callbacks": [],
           "derived_from_files": [
-            {
-              "derived_from_filekey": "bams",
-              "derived_from_inputs": true,
-              "derived_from_task": "merge"
-            },
             {
               "derived_from_filekey": "hic_files",
               "derived_from_inputs": true,
-              "derived_from_task": "merge_stats_from_hic_files"
+              "derived_from_task": "sum_hic_files"
             }
           ],
           "file_format": "hic",
@@ -37,10 +30,7 @@
       "dcc_step_version": "/analysis-step-versions/hic-tads-calling-step-v-1-1/",
       "wdl_files": [
         {
-          "callbacks": [
-            "maybe_preferred_default",
-            "add_filter_value"
-          ],
+          "callbacks": [],
           "derived_from_files": [
             {
               "derived_from_filekey": "output_hic",
@@ -50,6 +40,7 @@
           "file_format": "bedpe",
           "filekey": "out_file",
           "filter_type": "mapping quality",
+          "filter_value": 30,
           "output_type": "topologically associated domains",
           "quality_metrics": []
         }
@@ -61,10 +52,7 @@
       "dcc_step_version": "/analysis-step-versions/hic-loop-calling-step-v-1-2/",
       "wdl_files": [
         {
-          "callbacks": [
-            "maybe_preferred_default",
-            "add_filter_value"
-          ],
+          "callbacks": [],
           "derived_from_files": [
             {
               "derived_from_filekey": "output_hic",
@@ -74,6 +62,7 @@
           "file_format": "bedpe",
           "filekey": "localized_loops",
           "filter_type": "mapping quality",
+          "filter_value": 30,
           "output_type": "long range chromatin interactions",
           "quality_metrics": []
         }
@@ -85,9 +74,7 @@
       "dcc_step_version": "/analysis-step-versions/hic-eigenvector-creation-step-v-1-0/",
       "wdl_files": [
         {
-          "callbacks": [
-            "maybe_preferred_default"
-          ],
+          "callbacks": [],
           "derived_from_files": [
             {
               "derived_from_filekey": "output_hic",
@@ -254,32 +241,27 @@
       "wdl_task_name": "localizer_delta"
     },
     {
-      "dcc_step_run": "hic-dhs-accessibility-step-v-1",
-      "dcc_step_version": "/analysis-step-versions/hic-dhs-accessibility-step-v-1-0/",
+      "dcc_step_run": "hic-dhs-merging-step-v-1",
+      "dcc_step_version": "/analysis-step-versions/hic-dhs-merging-step-v-1-0/",
       "wdl_files": [
         {
           "derived_from_files": [
             {
-              "derived_from_filekey": "bams",
+              "derived_from_filekey": "bigwig_files",
               "derived_from_inputs": true,
-              "derived_from_task": "merge"
-            },
-            {
-              "derived_from_filekey": "chrom_sizes",
-              "derived_from_inputs": true,
-              "derived_from_task": "create_accessibility_track"
+              "derived_from_task": "accessibility"
             }
           ],
           "file_format": "bigWig",
-          "filekey": "bigwig",
+          "filekey": "merged_bigwig",
           "output_type": "DNA accessibility raw signal",
           "quality_metrics": []
         }
       ],
-      "wdl_task_name": "create_accessibility_track"
+      "wdl_task_name": "accessibility"
     }
   ],
   "raw_fastqs_keys": [
-    "bams"
+    "hic_files"
   ]
 }

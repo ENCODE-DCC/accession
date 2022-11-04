@@ -334,6 +334,7 @@ class EncodeAnalysis:
 class DatasetType(Enum):
     Annotation = "Annotation"
     Experiment = "Experiment"
+    AggregateSeries = "AggregateSeries"
 
 
 class EncodeDataset:
@@ -347,6 +348,10 @@ class EncodeDataset:
 
     @property
     def assay_term_name(self) -> str:
+        assay_term_name = self.portal_properties["assay_term_name"]
+        # could happen when posting QC to AggregateSeries where assay_term_name is an array
+        if type(assay_term_name) == list:
+            return assay_term_name[0]
         return self.portal_properties["assay_term_name"]
 
     @property

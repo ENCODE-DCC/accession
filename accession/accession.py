@@ -2845,7 +2845,7 @@ class AccessionMegamap(Accession):
 
     @property
     def assembly(self) -> str:
-        filekey = "bams"
+        filekey = "chrom_sizes"
         return self.find_portal_property_from_filekey(filekey, EncodeFile.ASSEMBLY)
 
     def get_preferred_default_qc_value(self, file: File) -> Union[int, float]:
@@ -2874,13 +2874,8 @@ class AccessionMegamap(Accession):
     def make_hic_qc(self, encode_file: EncodeFile, file: File) -> None:
         if encode_file.has_qc("HicQualityMetric"):
             return
-        task = file.get_task()
-        hic_qc_file = self.analysis.search_up(
-            task, "merge_stats_from_hic_files", "stats_json"
-        )[0]
-        hic_qc_text = self.analysis.search_up(
-            task, "merge_stats_from_hic_files", "merged_stats"
-        )[0]
+        hic_qc_file = self.analysis.get_files(filekey="stats_json")[0]
+        hic_qc_text = self.analysis.get_files(filekey="merged_stats")[0]
         hic_qc = hic_qc_file.read_json()
         modeled_attachment = EncodeAttachment(
             hic_qc_text.read_bytes(), hic_qc_text.filename, mime_type="text/plain"
