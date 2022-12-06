@@ -82,7 +82,7 @@
           "file_format": "hic",
           "filekey": "output_hic",
           "filter_type": "mapping quality",
-          "output_type": "chromatin interactions",
+          "output_type": "contact matrix",
           "quality_metrics": [
             "hic"
           ]
@@ -108,7 +108,7 @@
           "file_format": "bedpe",
           "filekey": "out_file",
           "filter_type": "mapping quality",
-          "output_type": "topologically associated domains",
+          "output_type": "contact domains",
           "quality_metrics": []
         }
       ],
@@ -132,7 +132,7 @@
           "file_format": "bedpe",
           "filekey": "localized_loops",
           "filter_type": "mapping quality",
-          "output_type": "long range chromatin interactions",
+          "output_type": "loops",
           "quality_metrics": []
         }
       ],
@@ -262,7 +262,7 @@
           ],
           "file_format": "bedpe",
           "filekey": "domains",
-          "output_type": "topologically associated domains",
+          "output_type": "contact domains",
           "quality_metrics": []
         },
         {
@@ -286,7 +286,7 @@
           ],
           "file_format": "bedpe",
           "filekey": "loop_domains",
-          "output_type": "long range chromatin interactions",
+          "output_type": "loops",
           "quality_metrics": []
         }
       ],
@@ -305,7 +305,7 @@
           ],
           "file_format": "bedpe",
           "filekey": "localized_loops",
-          "output_type": "long range chromatin interactions",
+          "output_type": "loops",
           "quality_metrics": []
         }
       ],
@@ -329,7 +329,7 @@
           ],
           "file_format": "bigWig",
           "filekey": "bigwig",
-          "output_type": "DNA accessibility raw signal",
+          "output_type": "nuclease cleavage frequency",
           "quality_metrics": []
         }
       ],
