@@ -82,7 +82,7 @@
           "file_format": "hic",
           "filekey": "output_hic",
           "filter_type": "mapping quality",
-          "output_type": "chromatin interactions",
+          "output_type": "contact matrix",
           "quality_metrics": [
             "hic"
           ]

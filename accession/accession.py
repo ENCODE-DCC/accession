@@ -2809,7 +2809,7 @@ class AccessionHic(Accession):
     def maybe_update_output_type(self, file: File) -> Dict[str, str]:
         quality = file.get_task().inputs["quality"]
         if quality == 30:
-            return {"output_type": "mapping quality thresholded chromatin interactions"}
+            return {"output_type": "mapping quality thresholded contact matrix"}
         return {}
 
     def add_filter_value(self, file: File) -> Dict[str, str]:
