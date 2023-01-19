@@ -45,9 +45,3 @@ repos:
       - id: check-json
       - id: check-toml
       - id: check-yaml
-
-  - repo: https://github.com/macisamuele/language-formatters-pre-commit-hooks
-    rev: v2.2.0
-    hooks:
-      - id: pretty-format-toml
-        args: [--autofix]

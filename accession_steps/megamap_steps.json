@@ -179,68 +179,6 @@
       "wdl_task_name": "slice_25kb"
     },
     {
-      "dcc_step_run": "hic-delta-step-v-1",
-      "dcc_step_version": "/analysis-step-versions/hic-delta-step-v-1-0/",
-      "wdl_files": [
-        {
-          "derived_from_files": [
-            {
-              "derived_from_filekey": "output_hic",
-              "derived_from_task": "add_norm"
-            }
-          ],
-          "file_format": "bedpe",
-          "filekey": "domains",
-          "output_type": "topologically associated domains",
-          "quality_metrics": []
-        },
-        {
-          "derived_from_files": [
-            {
-              "derived_from_filekey": "output_hic",
-              "derived_from_task": "add_norm"
-            }
-          ],
-          "file_format": "bedpe",
-          "filekey": "stripes",
-          "output_type": "chromatin stripes",
-          "quality_metrics": []
-        },
-        {
-          "derived_from_files": [
-            {
-              "derived_from_filekey": "output_hic",
-              "derived_from_task": "add_norm"
-            }
-          ],
-          "file_format": "bedpe",
-          "filekey": "loop_domains",
-          "output_type": "long range chromatin interactions",
-          "quality_metrics": []
-        }
-      ],
-      "wdl_task_name": "delta"
-    },
-    {
-      "dcc_step_run": "hic-delta-step-v-1",
-      "dcc_step_version": "/analysis-step-versions/hic-delta-step-v-1-0/",
-      "wdl_files": [
-        {
-          "derived_from_files": [
-            {
-              "derived_from_filekey": "output_hic",
-              "derived_from_task": "add_norm"
-            }
-          ],
-          "file_format": "bedpe",
-          "filekey": "localized_loops",
-          "output_type": "long range chromatin interactions",
-          "quality_metrics": []
-        }
-      ],
-      "wdl_task_name": "localizer_delta"
-    },
-    {
       "dcc_step_run": "hic-dhs-merging-step-v-1",
       "dcc_step_version": "/analysis-step-versions/hic-dhs-merging-step-v-1-0/",
       "wdl_files": [
