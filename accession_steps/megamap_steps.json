@@ -17,7 +17,7 @@
           "filekey": "output_hic",
           "filter_type": "mapping quality",
           "filter_value": 30,
-          "output_type": "mapping quality thresholded chromatin interactions",
+          "output_type": "mapping quality thresholded contact matrix",
           "quality_metrics": [
             "hic"
           ]
@@ -41,7 +41,7 @@
           "filekey": "out_file",
           "filter_type": "mapping quality",
           "filter_value": 30,
-          "output_type": "topologically associated domains",
+          "output_type": "contact domains",
           "quality_metrics": []
         }
       ],
@@ -63,7 +63,7 @@
           "filekey": "localized_loops",
           "filter_type": "mapping quality",
           "filter_value": 30,
-          "output_type": "long range chromatin interactions",
+          "output_type": "loops",
           "quality_metrics": []
         }
       ],
@@ -192,7 +192,7 @@
           ],
           "file_format": "bigWig",
           "filekey": "merged_bigwig",
-          "output_type": "DNA accessibility raw signal",
+          "output_type": "nuclease cleavage frequency",
           "quality_metrics": []
         }
       ],
