@@ -46,7 +46,7 @@
           ],
           "file_format": "hic",
           "filekey": "hic",
-          "output_type": "variants chromatin interactions"
+          "output_type": "variants contact matrix"
         }
       ],
       "wdl_task_name": "run_3d_dna"
