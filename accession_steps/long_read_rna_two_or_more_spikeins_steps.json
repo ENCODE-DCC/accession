@@ -135,5 +135,6 @@
          "wdl_task_name": "create_gtf_from_talon_db"
       }
    ],
+   "raw_fastq_keys": ["fastqs"],
    "quality_standard": "/quality-standards/encode4-long-read-rna/"
 }
