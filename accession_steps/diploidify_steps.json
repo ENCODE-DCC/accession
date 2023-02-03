@@ -24,7 +24,7 @@
           ],
           "file_format": "hic",
           "filekey": "hic_r",
-          "output_type": "haplotype-specific chromatin interactions",
+          "output_type": "haplotype-specific contact matrix",
           "pseudo_haplotype": "1",
           "quality_metrics": []
         },
@@ -48,7 +48,7 @@
           ],
           "file_format": "hic",
           "filekey": "hic_a",
-          "output_type": "haplotype-specific chromatin interactions",
+          "output_type": "haplotype-specific contact matrix",
           "pseudo_haplotype": "2",
           "quality_metrics": []
         }
@@ -79,7 +79,7 @@
           ],
           "file_format": "bigWig",
           "filekey": "bigwig_raw_r",
-          "output_type": "haplotype-specific DNA accessibility raw signal",
+          "output_type": "haplotype-specific nuclease cleavage frequency",
           "pseudo_haplotype": "1",
           "quality_metrics": []
         },
@@ -103,7 +103,7 @@
           ],
           "file_format": "bigWig",
           "filekey": "bigwig_raw_a",
-          "output_type": "haplotype-specific DNA accessibility raw signal",
+          "output_type": "haplotype-specific nuclease cleavage frequency",
           "pseudo_haplotype": "2",
           "quality_metrics": []
         },
@@ -127,7 +127,7 @@
           ],
           "file_format": "bigWig",
           "filekey": "bigwig_corrected_r",
-          "output_type": "haplotype-specific DNA accessibility corrected signal",
+          "output_type": "haplotype-specific nuclease cleavage corrected frequency",
           "pseudo_haplotype": "1",
           "quality_metrics": []
         },
@@ -151,7 +151,7 @@
           ],
           "file_format": "bigWig",
           "filekey": "bigwig_corrected_a",
-          "output_type": "haplotype-specific DNA accessibility corrected signal",
+          "output_type": "haplotype-specific nuclease cleavage corrected frequency",
           "pseudo_haplotype": "2",
           "quality_metrics": []
         }
